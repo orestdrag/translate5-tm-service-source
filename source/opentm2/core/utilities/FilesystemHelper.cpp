@@ -739,8 +739,9 @@ std::vector<std::string> FilesystemHelper::GetFilesList(std::string&& directory)
 return files;
 }
 
-std::vector<std::string> FilesystemHelper::FindFiles(const std::string& name){
+std::vector<std::string> FilesystemHelper::FindFiles(const std::string& name, int* errcode){
     std::vector<std::string> selFiles;
+    int rc = 0;
     //if(selFiles.size())
     //    selFiles.clear();
     std::string fixedPath = name;
@@ -761,21 +762,26 @@ std::vector<std::string> FilesystemHelper::FindFiles(const std::string& name){
     if ((dir = opendir(dirPath.c_str())) != nullptr) {
         while ((diread = readdir(dir)) != nullptr) {
             std::string file = diread->d_name;
-            if(exactMatch){
+            if(exactMatch) {
                 if(file.compare(fileName) == 0){
                         selFiles.push_back(file);
                     }
-            }else{
-                if( file.find(fileName) != std::string::npos ){
+            } else {
+                if( file.find(fileName) != std::string::npos ) {
                     selFiles.push_back(file);
                 }
             }
         }
-        __last_error_code = FILEHELPER_NO_ERROR;
+        rc = FILEHELPER_NO_ERROR;
         closedir (dir);
     } else {      
         T5LOG(T5ERROR) << "FilesystemHelper::FindFiles:: dir = " << dirPath << "; can't open directory";
-        __last_error_code = FILEHELPER_ERROR_CANT_OPEN_DIR;
+        rc = FILEHELPER_ERROR_CANT_OPEN_DIR;
+    }
+
+    if(errcode)
+    {
+        *errcode = rc;
     }
 
     return selFiles;
@@ -1176,6 +1182,7 @@ std::string FilesystemHelper::GetHomeDir(){
     return _homeDir;
 }
 
+DECLARE_string(log_dir);
 
 #define HOME_ENV "HOME"
 int FilesystemHelper::init(){
@@ -1198,6 +1205,30 @@ int FilesystemHelper::init(){
     _memDir = _otmDir +"MEM/";
     _tableDir = _otmDir +"TABLE/";
     _tempDir = _otmDir +"TEMP/";
+
+    std::string tmFiles = _memDir + DEFAULT_PATTERN_NAME + EXT_OF_MEM ;
+
+    int errcode = 0;
+    auto files = FilesystemHelper::FindFiles(tmFiles, &errcode);
+    if(errcode == FilesystemHelper::FILEHELPER_ERROR_CANT_OPEN_DIR){
+        errcode = FilesystemHelper::CreateDir(_memDir);
+        if( errcode != FilesystemHelper::FILEHELPER_NO_ERROR ){
+            T5LOG(T5FATAL) << ":: error with filesystem helper, creating memDir, errcode = " << errcode << "; memDir = " << _memDir;
+            throw;
+        }
+    }  
+
+    if(FLAGS_log_dir.empty() || FilesystemHelper::CreateDir(FLAGS_log_dir)){
+        std::string defaultLogPath = _otmDir + "LOG/";
+        T5LOG(T5WARNING) << "FLAGS_log_dir is empty or failed to create log dir under specified location(path = \"" 
+            << FLAGS_log_dir <<"\"), setting up default log path and checking/creating default log dir (defaultPath = \"" <<
+            defaultLogPath <<"\").";
+        FLAGS_log_dir = defaultLogPath;
+        if( FilesystemHelper::CreateDir(FLAGS_log_dir) != FilesystemHelper::FILEHELPER_NO_ERROR ){
+            T5LOG(T5ERROR) << ":: error with filesystem helper, when creating logDir, errcode = " << errcode << "; logDir = " << FLAGS_log_dir;
+        }
+    }   
+
     return -1;
 }
 
@@ -1247,8 +1278,14 @@ int FilesystemHelper::CreateDir(const std::string& dir, int rights) {
     T5LOG( T5DEVELOP) <<  "FilesystemHelper::CreateDir(" << dir << "; rights = " << rights << ")::stat():: ret = " << ret;
     if (ret){
         ret = mkdir(dir.c_str(), rights);
-        T5LOG( T5INFO) << "FilesystemHelper::CreateDir(" << dir << "; rights = " << rights << ") was created, ret = " << ret;
+        if (ret)
+        {
+            T5LOG( T5ERROR) << "FilesystemHelper::CreateDir(" << dir << "; rights = " << rights << ") wasn't created, ret = " << ret;
+        } else {
+            T5LOG( T5INFO) << "FilesystemHelper::CreateDir(" << dir << "; rights = " << rights << ") was created, ret = " << ret;
+        }
     }
+    
     return ret;
 }
 

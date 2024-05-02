@@ -991,6 +991,13 @@ USHORT CTMXExportImport::WriteSegment
     } /* endif */
   }
 
+  //author 
+  {
+    m_xw.WriteStartAttribute( "creationid" );
+    m_xw.WriteString(  pSegment->szAuthor );  
+    m_xw.WriteEndAttribute();
+  }
+
   // add segment number as property
   m_xw.WriteStartElement( "prop" );
   m_xw.WriteAttributeString( "type", SEGNUM_PROP );
@@ -1016,10 +1023,10 @@ USHORT CTMXExportImport::WriteSegment
   m_xw.WriteEndElement(); // prop
 
   // add document name property
-  m_xw.WriteStartElement( "prop" );
-  m_xw.WriteAttributeString( "type", AUTHOR_PROP );
-  m_xw.WriteString( pSegment->szAuthor ); 
-  m_xw.WriteEndElement(); // prop
+  //m_xw.WriteStartElement( "prop" );
+  //m_xw.WriteAttributeString( "type", AUTHOR_PROP );
+  //m_xw.WriteString( pSegment->szAuthor ); 
+  //m_xw.WriteEndElement(); // prop
 
   // add translation flag as property
   if ( pSegment->usTranslationFlag == TRANSLFLAG_MACHINE )
@@ -1165,6 +1172,9 @@ USHORT CTMXExportImport::WriteTUV
 
   // start TUV
   m_xw.WriteStartElement( "tuv" );
+  if(!strcmp(szTMXLang, "??")){
+    strcpy(szTMXLang, pszLanguage);
+  }
   m_xw.WriteAttributeString( "xml:lang", szTMXLang ); 
 
   // add original Tmgr language as property
@@ -1381,7 +1391,7 @@ USHORT CTMXExportImport::ImportNext
     this->m_pTokBuf, TMXTOKBUFSIZE ); 
     try
     {
-      while (fContinue && (m_parser->getErrorCount() <= m_handler->getInvalidCharacterErrorCount()) && iIteration )
+      while (fContinue && (m_parser->getErrorCount() <= m_handler->getInvalidCharacterErrorCount()) && iIteration)
       {
         fContinue = m_parser->parseNext(m_SaxToken);
         iIteration--;
@@ -1392,6 +1402,7 @@ USHORT CTMXExportImport::ImportNext
       if(pImportData != nullptr){
         pImportData->invalidSymbolErrors = m_handler->getInvalidCharacterErrorCount();
 
+        if(pImportData->importRc) errorCount++;        
         // compute current progress
         if ( !errorCount && fContinue )
         {
@@ -1413,6 +1424,10 @@ USHORT CTMXExportImport::ImportNext
         //m_handler->GetErrorText( m_pMemInfo->szError, sizeof(m_pMemInfo->szError) );
         m_pMemInfo->fError = TRUE;
         pImportData->importMsg << buff <<";;; ";
+      }else if(pImportData->importRc){
+        //std::string errormsg = "Error occured with rc = " + std::to_string(m_handler->iStopImportWRc);
+        m_pMemInfo->fError = TRUE;
+        //pImportData->importMsg << errormsg;
       } /* endif */
 
       if ( errorCount || !fContinue )
@@ -2137,6 +2152,11 @@ void TMXParseHandler::startElement(const XMLCh* const name, AttributeList& attri
         pBuf->szNoteStyle[0] = 0;
         pBuf->szMTMetrics[0] = 0;
         pBuf->szMatchSegID[0] = 0;
+
+        pBuf->szAuthor[0] = 0;
+        pBuf->szChangeId[0] = 0;
+        pBuf->szCreationId[0] = 0;
+        
         pBuf->ulWords = 0;
         lTime = 0;
         
@@ -2165,12 +2185,24 @@ void TMXParseHandler::startElement(const XMLCh* const name, AttributeList& attri
             char *pszValue = XMLString::transcode(attributes.getValue( i ));
             if ( pszValue != NULL ) strcpy( CurElement.szDataType, pszValue );
             XMLString::release( &pszValue );
+          } if ( strcasecmp( pszName, "creationid" ) == 0 )
+          {
+            char *pszValue = XMLString::transcode(attributes.getValue( i ));
+            if ( pszValue != NULL ) strcpy( pBuf->szCreationId, pszValue );
+            XMLString::release( &pszValue );
+          } else if ( strcasecmp( pszName, "changeid" ) == 0 )
+          {
+            char *pszValue = XMLString::transcode(attributes.getValue( i ));
+            if ( pszValue != NULL ) strcpy( pBuf->szChangeId, pszValue );
+            XMLString::release( &pszValue );
           } 
-          else if ( strcasecmp( pszName, "creationdate" ) == 0 )
+          else if ( strcasecmp( pszName, "creationdate" ) == 0  
+                ||  strcasecmp( pszName, "changedate" ) == 0  )
           {
             char *pszDate = XMLString::transcode(attributes.getValue( i ));
+            bool fOverwritePriority = strcasecmp( pszName, "changedate" ) == 0;// if creationdate and changedate both exist, changedate should be used
             // we currently support only dates in the form YYYYMMDDThhmmssZ
-            if ( (pszDate != NULL) && (strlen(pszDate) == 16) )
+            if ( (pszDate != NULL) && (strlen(pszDate) == 16) && (fOverwritePriority || !lTime))
             {
               int iYear = 0, iMonth = 0, iDay = 0, iHour = 0, iMin = 0, iSec = 0, iDaysSince1970 = 0;
 
@@ -2411,6 +2443,7 @@ void TMXParseHandler::fillSegmentInfo
 {
   // fill-in header data
   memset( pSegment, 0, sizeof(MEMEXPIMPSEG) );
+  pSegment->lSegNo = (LONG) ulSegNo;
   if ( CurElement.lSegNum != -1 )
   {
     pSegment->lSegNum = CurElement.lSegNum; 
@@ -2451,7 +2484,15 @@ void TMXParseHandler::fillSegmentInfo
   {
     strcpy( pSegment->szAuthor, pBuf->szAuthor );
   }
-  else
+  else if(pBuf->szChangeId[0])
+  {
+    strcpy( pSegment->szAuthor, pBuf->szChangeId );
+  }
+  else if(pBuf->szCreationId[0])
+  {
+    strcpy( pSegment->szAuthor, pBuf->szCreationId );
+  }
+  else 
   {
     pSegment->szAuthor[0] = '\0';
   }
@@ -2681,7 +2722,7 @@ void TMXParseHandler::endElement(const XMLCh* const name )
                   if ( pBuf->SegmentData.szFormat[0] != EOS ) 
                   {
                     // markup table information is already available
-                    insertSegUsRC = MEMINSERTSEGMENT( lMemHandle, &(pBuf->SegmentData) );
+                    insertSegUsRC = MEMINSERTSEGMENT( lMemHandle, &(pBuf->SegmentData) );                    
                   }
                   else if ( m_pMemInfo->pszMarkupList != NULL )
                   {
@@ -2725,6 +2766,11 @@ void TMXParseHandler::endElement(const XMLCh* const name )
                 } /* endif */
               } /* endif */
             } /* endif */
+
+            if(insertSegUsRC == BTREE_LOOKUPTABLE_CORRUPTED || insertSegUsRC == BTREE_LOOKUPTABLE_CORRUPTED)
+            {//stop import
+              this->iStopImportWRc = insertSegUsRC;
+            }
 
             // continue with next tuv
             pCurrentTuv++;

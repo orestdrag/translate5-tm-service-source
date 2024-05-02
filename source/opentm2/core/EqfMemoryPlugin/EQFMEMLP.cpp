@@ -1047,12 +1047,14 @@ USHORT MemFuncImportProcess
         USHORT usRc = MemLoadProcess( pLoadData, pData->mem->importDetails );
         switch ( usRc )
         {
-          case MEM_PROCESS_OK:            
+          case MEM_PROCESS_OK:     
             usPhase = MEM_IMPORT_TASK;
             break;
           case MEM_PROCESS_END:
-             //pData->pImportData->usProgress = 100;
             pDialogIDA = (PMEM_LOAD_DLG_IDA)pData->pvMemLoadIda;
+            if(!pData->mem->importDetails->importRc){
+              pData->mem->importDetails->usProgress = 100;
+            }
             if ( pDialogIDA->hFile ) CloseFile( &(pLoadData->hFile));
             if ( pLoadData->mem )
             {
@@ -1136,7 +1138,9 @@ USHORT MemFuncImportProcess
          UtlAlloc( (PVOID *) &pLoadData,                 0L, 0L, NOMSG );
        } /* endif */
        usPhase = 0;;
-       pData->mem->importDetails->usProgress = 100;
+       if(!pData->mem->importDetails->importRc){
+          pData->mem->importDetails->usProgress = 100;
+        }
        break;
  } /* endswitch */
 
@@ -1580,8 +1584,22 @@ USHORT /*APIENTRY*/ MEMINSERTSEGMENT
       pLIDA->mem->importDetails->invalidSegmentsRCs[usRC] ++;
       pLIDA->mem->importDetails->invalidSegments++;      // increase invalid segment counter 
       //if( pLIDA->mem->importDetails->invalidSegments < 100){
-         pLIDA->mem->importDetails->firstInvalidSegmentsSegNums.push_back(std::make_tuple(pSegment->lSegNum, usRC) );
+         pLIDA->mem->importDetails->firstInvalidSegmentsSegNums.push_back(std::make_tuple(pSegment->lSegNo, usRC) );
       //}
+      if(usRC == BTREE_LOOKUPTABLE_CORRUPTED || usRC == BTREE_LOOKUPTABLE_TOO_SMALL)
+      {    
+        pLIDA->mem->importDetails->importRc = usRC;
+        std::string msg = "TM is reached it's size limit, please create another one and import segments there, rc = " 
+          + toStr(usRC) + "; aciveSegment = " + toStr(pSegment->lSegNo) + "\n\nSegment " + toStr(pSegment->lSegNo) + " not imported\r\n" 
+          +"\nReason         = " +  pSegment->szReason 
+          +"\nDocument       = " +  pSegment->szDocument 
+          +"\nSourceLanguage = " +  pSegment->szSourceLang 
+          +"\nTargetLanguage = " +  pSegment->szTargetLang 
+          +"\nMarkup         = " +  pSegment->szFormat 
+          +"\nSource         = " +  EncodingHelper::convertToUTF8(pSegment->szSource) 
+          +"\nTarget         = " +  EncodingHelper::convertToUTF8(pSegment->szTarget) ;
+        throw xercesc::SAXException(msg.c_str());        
+      }
     } /* endif */
   }
   else
@@ -1594,7 +1612,7 @@ USHORT /*APIENTRY*/ MEMINSERTSEGMENT
     // write segment to log file
     if ( T5Logger::GetInstance()->CheckLogLevel(T5INFO) )
     {
-      T5LOG(T5DEBUG) <<"Segment "<<pSegment->lSegNum <<" not imported\n";
+      T5LOG(T5DEBUG) <<"Segment "<<pSegment->lSegNo <<" not imported\n";
       T5LOG(T5DEBUG) <<"Reason         = \n" <<  pSegment->szReason ;
       T5LOG(T5DEBUG) <<"Document       = \n" <<  pSegment->szDocument ;
       T5LOG(T5DEBUG) <<"SourceLanguage = \n" <<  pSegment->szSourceLang ;

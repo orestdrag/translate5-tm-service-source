@@ -106,7 +106,7 @@ public:
 #ifdef _USING_FILESYSTEM_
     static  std::vector<fs::directory_entry> FindFiles(const std::string& name);
 #endif
-    static  std::vector<std::string> FindFiles(const std::string& name);
+    static  std::vector<std::string> FindFiles(const std::string& name, int* rc = nullptr);
 
     static int GetLastError();
     static int ResetLastError();

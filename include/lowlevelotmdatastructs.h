@@ -1331,13 +1331,14 @@ typedef struct _MEMEXPIMPSEG
 {
   BOOL             fValid;                       // FALSE = segment data is invalid, count as invalid segment
   LONG             lSegNum;                      // segment number
+  LONG             lSegNo;
   CHAR             szFormat[EQF_FORMATLEN];      // format / markup table name
   CHAR             szSourceLang[EQF_LANGLEN];    // segment source language
   CHAR             szTargetLang[EQF_LANGLEN];    // segment target language
   CHAR             szDocument[EQF_DOCNAMELEN];   // document  
   unsigned short   usTranslationFlag;            // numeric value indication the source of the translation
   LONG             lTime;                        // segment update time in C time format
-  CHAR             szAuthor[EQF_AUTHORLEN];      // author of segment
+  CHAR             szAuthor[EQF_DOCNAMELEN];      // author of segment
   unsigned short   usLength;                     // length of segment data (incl. string end delimiter)
   WCHAR            szSource[SEGDATABUFLEN+1];    // buffer for segment source
   WCHAR            szTarget[SEGDATABUFLEN+1 ];   // buffer for segment target

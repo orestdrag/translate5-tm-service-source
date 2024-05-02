@@ -302,17 +302,17 @@ static BOOL NTMCheckAndDeleteTagPairs
 // ----------------------------------------------------------------------------+
 USHORT EqfMemory::TmtXGet
 (
-  PTMX_GET_IN_W pTmGetIn,    //ptr to input struct
+  PTMX_GET_W pTmGetIn,    //ptr to input struct
   PTMX_GET_OUT_W pTmGetOut   //ptr to output struct
 )
 {
-  TMX_SENTENCE Sentence(pTmGetIn->stTmGet.szSource);      // ptr to sentence structure
+  TMX_SENTENCE Sentence(pTmGetIn->szSource);      // ptr to sentence structure
   USHORT usRc = NO_ERROR;              // return code
   USHORT usOverlaps = 0;               // compact area triple hits
   CHAR szString[MAX_EQF_PATH];         // character string
   szString[0] = '\0';
 
-  ULONG ulStrippedParm = pTmGetIn->stTmGet.ulParm &
+  ULONG ulStrippedParm = pTmGetIn->ulParm &
     ~(GET_RESPECTCRLF | GET_IGNORE_PATH | GET_NO_GENERICREPLACE | GET_ALWAYS_WITH_TAGS | GET_IGNORE_COMMENT);
 
 #ifdef MEASURETIME
@@ -323,9 +323,9 @@ USHORT EqfMemory::TmtXGet
 
 
   if(T5Logger::GetInstance()->CheckLogLevel(T5DEBUG)){    
-      auto str_source = EncodingHelper::convertToUTF8(pTmGetIn->stTmGet.szSource );
+      auto str_source = EncodingHelper::convertToUTF8(pTmGetIn->szSource );
       T5LOG(T5DEBUG) << "== Lookup in memory  ==" << stTmSign.szName <<" ==\nLookupSource = >>>" <<str_source << "<<<" ;
-      auto str = EncodingHelper::convertToUTF8(pTmGetIn->stTmGet.szSource);
+      auto str = EncodingHelper::convertToUTF8(pTmGetIn->szSource);
       T5LOG(T5INFO) << "-------------- Looking up:\n" <<  str << "\n" ;
   }
 
@@ -343,7 +343,7 @@ USHORT EqfMemory::TmtXGet
     //build tag table path
     Properties::GetInstance()->get_value(KEY_OTM_DIR, szString, sizeof(szString));
     strcat( szString, "/TABLE/");
-    strcat( szString, pTmGetIn->stTmGet.szTagTable ); 
+    strcat( szString, pTmGetIn->szTagTable ); 
     strcat( szString, EXT_OF_FORMAT );
 
     //remember start of norm string
@@ -352,12 +352,12 @@ USHORT EqfMemory::TmtXGet
    
     //tokenize source segment, resuting in normalized string and
     //tag table record
-    usRc = TokenizeSource( &Sentence, szString, pTmGetIn->stTmGet.szSourceLanguage);
+    usRc = TokenizeSource( &Sentence, szString, pTmGetIn->szSourceLanguage);
 
     // set the tag table ID in the tag record (this can't be done in TokenizeSource anymore)
     if ( usRc == NO_ERROR )
     {
-      //usRc = NTMGetIDFromName( pTmGetIn->stTmGet.szTagTable, NULL, (USHORT)TAGTABLE_KEY, &Sentence.pTagRecord->usTagTableId );
+      //usRc = NTMGetIDFromName( pTmGetIn->szTagTable, NULL, (USHORT)TAGTABLE_KEY, &Sentence.pTagRecord->usTagTableId );
       Sentence.pTagRecord->usTagTableId = 1;
     }
   } /* endif */
@@ -391,7 +391,7 @@ USHORT EqfMemory::TmtXGet
             {
               T5LOG( T5INFO) << "TmtXGet: Calling GetExactMatch" ;
               //get exact matches only
-              usRc = GetExactMatch( this, &Sentence, &pTmGetIn->stTmGet,
+              usRc = GetExactMatch( this, &Sentence, pTmGetIn,
                         pTmGetOut->stMatchTable, &pTmGetOut->usNumMatchesFound, pTmGetOut );
 
 #ifdef MEASURETIME
@@ -401,8 +401,7 @@ USHORT EqfMemory::TmtXGet
               if ( (pTmGetOut->usNumMatchesFound == 0) && (usRc == NO_ERROR) )
               {                
                 T5LOG( T5INFO) << "TmtXGet: No exact matches found, trying GetFuzzyMatch" ;
-                usRc = GetFuzzyMatch( this, &Sentence, &pTmGetIn->stTmGet,
-
+                usRc = GetFuzzyMatch( this, &Sentence, pTmGetIn,
                         pTmGetOut->stMatchTable, &pTmGetOut->usNumMatchesFound );
                 T5LOG( T5INFO) << "TmtXGet: GetFuzzyMatch returned " << pTmGetOut->usNumMatchesFound << " matches" ;
               } /* endif */
@@ -414,8 +413,7 @@ USHORT EqfMemory::TmtXGet
             {
                 T5LOG( T5INFO) << "TmtXGet: Calling GetFuzzyMatch" ;
                 
-                usRc = GetFuzzyMatch( this, &Sentence, &pTmGetIn->stTmGet,
-
+                usRc = GetFuzzyMatch( this, &Sentence, pTmGetIn,
                         pTmGetOut->stMatchTable, &pTmGetOut->usNumMatchesFound );
                 T5LOG( T5INFO) <<  "TmtXGet: GetFuzzyMatch returned " << pTmGetOut->usNumMatchesFound  << " matches" ;
 
@@ -434,10 +432,10 @@ USHORT EqfMemory::TmtXGet
             // GQ 2016/04/05: new approach: (tentative fix for P403177)
             //   sentences with up to 8 (and incl) votes: always check fuzzyness
             //   sentences from 9 up to 12 votes: check fuzziness when 20% of votes are matching
-            //   sentences with 12 or more votes: check fuzziness when pTmGetIn->stTmGet.usMatchThreshold (=33%) of votes are matching
+            //   sentences with 12 or more votes: check fuzziness when pTmGetIn->usMatchThreshold (=33%) of votes are matching
 
             // old code:
-            //  if (( usOverlaps * 100 >= pSentence->usActVote * pTmGetIn->stTmGet.usMatchThreshold ) || (pSentence->usActVote <= 8))
+            //  if (( usOverlaps * 100 >= pSentence->usActVote * pTmGetIn->usMatchThreshold ) || (pSentence->usActVote <= 8))
 
             // GQ 2016/05/12: disabled new approach as it causes a 12% decrease in the overall analysis performance 
             if ( Sentence.usActVote <= 8 )
@@ -450,20 +448,20 @@ USHORT EqfMemory::TmtXGet
             //}
             else 
             {
-              fCheckForFuzzyMatches = (usOverlaps * 100) >= (Sentence.usActVote * pTmGetIn->stTmGet.usMatchThreshold);
+              fCheckForFuzzyMatches = (usOverlaps * 100) >= (Sentence.usActVote * pTmGetIn->usMatchThreshold);
             } /* endif */
 
             if ( fCheckForFuzzyMatches )
             {
               T5LOG(T5INFO) << "TmtXGet: usOverlaps= "<<usOverlaps<<
-                  " ,usActVote=" << Sentence.usActVote << ", usMatchThreshold=" << pTmGetIn->stTmGet.usMatchThreshold;
+                  " ,usActVote=" << Sentence.usActVote << ", usMatchThreshold=" << pTmGetIn->usMatchThreshold;
 
               //not all triples on in compact area so fuzzy match
 #ifdef MEASURETIME
             GetElapsedTime( &(lOtherTime) );
 #endif
               T5LOG( T5INFO) << "TmtXGet: Calling GetFuzzyMatch" ;
-              usRc = GetFuzzyMatch( this, &Sentence, &pTmGetIn->stTmGet, pTmGetOut->stMatchTable, &pTmGetOut->usNumMatchesFound );
+              usRc = GetFuzzyMatch( this, &Sentence, pTmGetIn, pTmGetOut->stMatchTable, &pTmGetOut->usNumMatchesFound );
 
               T5LOG( T5INFO) << "TmtXGet: GetFuzzyMatch returned "<<pTmGetOut->usNumMatchesFound<<" matches" ;
               
@@ -494,7 +492,7 @@ USHORT EqfMemory::TmtXGet
      for ( i = 0; i < pTmGetOut->usNumMatchesFound; i++ )
      {
        PTMX_MATCH_TABLE_W pstActMatch = &(pTmGetOut->stMatchTable[i]);
-       if ( (wcscmp( pstActMatch->szSource, pTmGetIn->stTmGet.szSource ) == 0) && (pTmGetOut->stMatchTable[i].usTranslationFlag == TRANSLFLAG_NORMAL) )
+       if ( (wcscmp( pstActMatch->szSource, pTmGetIn->szSource ) == 0) && (pTmGetOut->stMatchTable[i].usTranslationFlag == TRANSLFLAG_NORMAL) )
        {
          iNumExactSourceMatches++;
          iIndexOfExactMatch = i;
@@ -557,8 +555,8 @@ USHORT EqfMemory::TmtXGet
   /* restrict number of matches found to the maximum number requested */
   /* by user                                                          */
   /********************************************************************/  
-  pTmGetOut->usNumMatchesFound =  pTmGetOut->usNumMatchesFound < pTmGetIn->stTmGet.usRequestedMatches ?
-               pTmGetOut->usNumMatchesFound : pTmGetIn->stTmGet.usRequestedMatches;
+  pTmGetOut->usNumMatchesFound =  pTmGetOut->usNumMatchesFound < pTmGetIn->usRequestedMatches ?
+               pTmGetOut->usNumMatchesFound : pTmGetIn->usRequestedMatches;
 
   { 
     int iTemp = sizeof( TMX_GET_OUT_W);
@@ -2507,6 +2505,10 @@ USHORT GetFuzzyMatch
                             &usMatchEntries, &usOverlaps,
                             &pMatchEntry->usMaxVotes, &pSentence->usActVote,
                             pSentence, pMatchEntry->ulKey );
+          if(usRc == SOURCE_LANG_DIFFERENT)
+          {
+            usRc = NO_ERROR;
+          }
           if ( !usRc )
           {
             //nr of matches found
@@ -2514,7 +2516,7 @@ USHORT GetFuzzyMatch
 
             //get next tm record
             pMatchEntry++;
-          } /* endif */
+          }/* endif */
 #ifdef MEASURETIME
   GetElapsedTime( &(pTmClb->lFuzzyTestTime) );
 #endif

@@ -442,8 +442,6 @@ public:
   /*! \brief list of replacement values */
   long pvReplacementList;
 
-  bool fSourceLangIsPrefered;
-
   
   //searchproposal
   TMX_SENTENCE* pInputSentence = nullptr;

@@ -542,7 +542,7 @@ unsigned short LanguageFactory::loadLanguageList( const char *pszLangList )
       std::qsort(&vLanguageList[0], vLanguageList.size(), sizeof(LANGUAGEINFO), compareLanguageInfo);    
       usRC = false == std::is_sorted(vLanguageList.begin(), vLanguageList.end(), 
           []( LANGUAGEINFO a, LANGUAGEINFO b) {//values should be unique
-            return  strcmp(a.szName, b.szName) < 0;
+            return  strcasecmp(a.szName, b.szName) < 0;
           } ) ;
     }
 

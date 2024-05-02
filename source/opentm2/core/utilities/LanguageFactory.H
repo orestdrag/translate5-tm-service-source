@@ -44,7 +44,7 @@ typedef struct _LANGUAGEINFO
   static int compareLanguageInfo(const void * p1, const void * p2 ) {
             LANGUAGEINFO* a = (LANGUAGEINFO*)p1;
             LANGUAGEINFO* b = (LANGUAGEINFO*)p2; 
-            return  strcmp(a->szName, b->szName);
+            return  strcasecmp(a->szName, b->szName);
   } 
   /*! \brief type of requested languages used by listLanguages method
   */

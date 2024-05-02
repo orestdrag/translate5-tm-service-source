@@ -228,7 +228,7 @@ int EqfMemory::putProposal
   }
 
   //if ( ( iRC == 0 ) &&
-       //( TmPutIn.stTmPut.fMarkupChanged ) ) {
+       //( TmPutIn.fMarkupChanged ) ) {
   //   iRC = SEG_RESET_BAD_MARKUP ;
   //}
 
@@ -734,39 +734,39 @@ BYTE ProposalTypeToFlag(OtmProposal::eProposalType t){
 }
 
 
-/*! \brief Fill TMX_GET_IN_W structure with OtmProposal data
+/*! \brief Fill TMX_GET_W structure with OtmProposal data
     \param Proposal reference to the OtmProposal containing the data
-    \param pGetIn pointer to the TMX_GET_IN_W structure
+    \param pGetIn pointer to the TMX_GET_W structure
   	\returns 0 or error code in case of errors
 */
 int EqfMemory::OtmProposalToGetIn
 (
   OtmProposal &Proposal,
-  PTMX_GET_IN_W pGetIn
+  PTMX_GET_W pGetIn
 )
 {
   int iRC = 0;
 
-  memset( &(pGetIn->stTmGet), 0, sizeof(pGetIn->stTmGet) );
-  Proposal.getSource( pGetIn->stTmGet.szSource, sizeof(pGetIn->stTmGet.szSource) );
-  Proposal.getAuthor( pGetIn->stTmGet.szAuthorName, sizeof(pGetIn->stTmGet.szAuthorName) );
-  Proposal.getMarkup( pGetIn->stTmGet.szTagTable, sizeof(pGetIn->stTmGet.szTagTable)  );
-  Proposal.getSourceLanguage( pGetIn->stTmGet.szSourceLanguage, sizeof(pGetIn->stTmGet.szSourceLanguage)  );
-  Proposal.getTargetLanguage( pGetIn->stTmGet.szTargetLanguage, sizeof(pGetIn->stTmGet.szTargetLanguage)  );
-  Proposal.getAddInfo( pGetIn->stTmGet.szAddInfo, sizeof(pGetIn->stTmGet.szAddInfo)  );
-  Proposal.getContext( pGetIn->stTmGet.szContext, sizeof(pGetIn->stTmGet.szContext)  );
-  Proposal.getDocName( pGetIn->stTmGet.szLongName, sizeof(pGetIn->stTmGet.szLongName)  );
-  Proposal.getDocName( pGetIn->stTmGet.szFileName, sizeof(pGetIn->stTmGet.szFileName)  );
-  //Proposal.getDocShortName( pGetIn->stTmGet.szFileName, sizeof(pGetIn->stTmGet.szFileName)  );
+  memset(  pGetIn, 0, sizeof(pGetIn) );
+  Proposal.getSource( pGetIn->szSource, sizeof(pGetIn->szSource) );
+  Proposal.getAuthor( pGetIn->szAuthorName, sizeof(pGetIn->szAuthorName) );
+  Proposal.getMarkup( pGetIn->szTagTable, sizeof(pGetIn->szTagTable)  );
+  Proposal.getSourceLanguage( pGetIn->szSourceLanguage, sizeof(pGetIn->szSourceLanguage)  );
+  Proposal.getTargetLanguage( pGetIn->szTargetLanguage, sizeof(pGetIn->szTargetLanguage)  );
+  Proposal.getAddInfo( pGetIn->szAddInfo, sizeof(pGetIn->szAddInfo)  );
+  Proposal.getContext( pGetIn->szContext, sizeof(pGetIn->szContext)  );
+  Proposal.getDocName( pGetIn->szLongName, sizeof(pGetIn->szLongName)  );
+  Proposal.getDocName( pGetIn->szFileName, sizeof(pGetIn->szFileName)  );
   
-  //pGetIn->stTmGet.usMatchThreshold = TM_DEFAULT_THRESHOLD;
+  //pGetIn->usMatchThreshold = TM_DEFAULT_THRESHOLD;
   int threshold = TM_DEFAULT_THRESHOLD;
   //Properties::GetInstance()->get_value_or_default(KEY_TRIPLES_THRESHOLD, threshold, threshold);
-  pGetIn->stTmGet.usMatchThreshold = threshold;
-  pGetIn->stTmGet.ulSegmentId = Proposal.getSegmentNum();
-  pGetIn->stTmGet.pvReplacementList = (PVOID)Proposal.getReplacementList();
-  pGetIn->stTmGet.fSourceLangIsPrefered= Proposal.isSourceLangIsPrefered();
-  pGetIn->stTmGet.fTargetLangIsPrefered = LanguageFactory::getInstance()->findIfPreferedLanguage( pGetIn->stTmGet.szTargetLanguage ) >= 0;
+  pGetIn->usMatchThreshold = threshold;
+  pGetIn->ulSegmentId = Proposal.getSegmentNum();
+  pGetIn->pvReplacementList = (PVOID)Proposal.getReplacementList();
+  //pGetIn->fSourceLangIsPrefered = Proposal.isSourceLangIsPrefered();
+  pGetIn->fSourceLangIsPrefered = (LanguageFactory::getInstance()->findIfPreferedLanguage( pGetIn->szSourceLanguage ) != -1);
+  pGetIn->fTargetLangIsPrefered = (LanguageFactory::getInstance()->findIfPreferedLanguage( pGetIn->szTargetLanguage ) != -1);
   return( iRC );
 }
 

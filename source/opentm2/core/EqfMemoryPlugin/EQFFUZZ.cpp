@@ -2106,10 +2106,14 @@ LCS
       //TODO - verify , because this is changed from original algorhythm 
       while ( (sI <= MidSnake.sU) && (sJ <= MidSnake.sV)  )
       {
-        if((LCSStringA.pTokenList[sI].ulHash == LCSStringB.pTokenList[sJ].ulHash)//new part of algorhythm - should be tested)
+        auto& a = LCSStringA.pTokenList[sI];
+        auto& b = LCSStringB.pTokenList[sJ];
+        if( (a.ulHash == b.ulHash)//new part of algorhythm - should be tested)
+          && 
+            (wcsncasecmp(a.pData,b.pData, std::max(a.usStop-a.usStart+1, b.usStop-b.usStart+1)) == 0)
         ){
-          LCSStringA.pTokenList[sI].sType = MARK_EQUAL;
-          LCSStringB.pTokenList[sJ].sType = MARK_EQUAL;
+          a.sType = MARK_EQUAL;
+          b.sType = MARK_EQUAL;
         }
         sJ++;
         sI++;

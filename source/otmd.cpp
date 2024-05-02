@@ -133,8 +133,16 @@ namespace
 void signal_handler(int signal)
 {
   gSignalStatus = signal;
-  T5LOG(T5TRANSACTION) << " Received signal "<< signal<< "; Shutting down :";
-  //OtmMemoryServiceWorker::getInstance()->shutdownService(signal);
+  T5LOG(T5TRANSACTION) << " Received signal "<< signal<< "; Saving TM's and Shutting down :";
+  ShutdownRequestData::CheckImportFlushTmsAndShutdown(signal);
+
+  //ShutdownRequestData srd;
+  //srd.sig = SHUTDOWN_CALLED_FROM_MAIN;
+  //srd.sig = signal;
+  //srd.run();
+  //while( TMManager::GetInstance()->fServiceIsRunning == true);
+  T5LOG(T5TRANSACTION) <<"signal handler finished work";
+  sleep(1);
 }
 
 /*
@@ -168,6 +176,8 @@ int main(int argc, char* argv[]) {
    std::signal(SIGINT, signal_handler);
    std::signal(SIGABRT, signal_handler);
    std::signal(SIGKILL, signal_handler);
+   std::signal(SIGTERM, signal_handler);
+   
    //#ifdef GLOGGING_ENABLED
    if(FLAGS_log_dir.empty()){
        FLAGS_log_dir = "/root/.t5memory/LOG/";
@@ -199,13 +209,9 @@ int main(int argc, char* argv[]) {
    std::thread worker(proxygen_server_init);
    worker.join();
    //TODO::REFACTOR HERE
-   //OtmMemoryServiceWorker::getInstance()->shutdownService(SHUTDOWN_CALLED_FROM_MAIN);
-   ShutdownRequestData srd;
-   SaveAllTMsToDiskRequestData saveTms;
-   saveTms.run();
-   srd.sig = SHUTDOWN_CALLED_FROM_MAIN;
-   srd.run();
-   while( TMManager::GetInstance()->fServiceIsRunning == true);
+   
+   //signal_handler(SHUTDOWN_CALLED_FROM_MAIN);
+   signal_handler(SIGINT);
    T5LOG(T5TRANSACTION) << "Worker thread finished";    
 }
 

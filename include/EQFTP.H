@@ -1134,22 +1134,7 @@ USHORT TAIteratedCreateProtectTableW( PTBDOCUMENT pDoc, PTBSEGMENT  pSeg, int iM
 
 // metadata (segment property) structures and functions
 
-// data area for a proposal extracted from the segment metadata
-typedef struct _MD_PROPOSAL
-{
-  CHAR_W           szSource[MAX_SEGMENT_SIZE+1]; // proposal source
-  CHAR_W           szTarget[MAX_SEGMENT_SIZE+1]; // proposal target
-  SHORT            sQuality;                     // proposal quality 1..100
-  CHAR             szDocName[MAX_LONGFILESPEC];  // document of proposal
-  CHAR             szAuthorName[MAX_USERID];     // author of target
-  ULONG            ulSegmentId;                  // seg. number of proposal source
-  LONG             lDate;                        // creation/update date of proposal
-  PVOID            pvNext;                       // internally used, do not modify
-  BYTE             bFutureUse[200];              // room for enhancements
-} MD_PROPOSAL, *PMD_PROPOSAL;
 
- BOOL MDGetFirstProposal( PVOID pvMetadata, PMD_PROPOSAL pProposal );
- BOOL MDGetNextProposal( PMD_PROPOSAL pProposal );
  void MDEndDialog( PTBDOCUMENT pDoc );
  BOOL MDStartDialog( PTBDOCUMENT pDoc );
  BOOL MDRefreshMetadata( PTBDOCUMENT pDoc, PTBSEGMENT pSeg, PSZ_W pszDisplayContext  );

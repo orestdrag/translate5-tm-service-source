@@ -1160,7 +1160,7 @@ USHORT MemExportWriteFile ( PMEM_EXPORT_IDA  pExportIDA ) // pointer to the
    {
       CHAR      szSourceLanguage[MAX_LANG_LENGTH]; //language name of source
       CHAR      szTargetLanguage[MAX_LANG_LENGTH]; //language name of target
-      CHAR      szAuthorName[MAX_USERID];          //author name of target
+      CHAR      szAuthorName[MAX_FILESPEC];          //author name of target
       CHAR      szFileName[MAX_FILESPEC];          //where source comes from name+ext
       LONG_FN   szLongName;                        // name of source file (long name or EOS)
       CHAR      szTagTable[MAX_FNAME];             //tag table name

@@ -18,7 +18,6 @@
 #include <atomic>
 #include "LogWrapper.h"
 
-std::atomic_bool fWriteRequestsAllowed;
 
 using namespace proxygen;
 
@@ -30,11 +29,40 @@ DEFINE_bool(request_number,
 namespace ProxygenService {
 
 ProxygenHandler::ProxygenHandler(ProxygenStats* stats) : stats_(stats) {
-  fWriteRequestsAllowed = true;
+  TMManager::GetInstance()->fWriteRequestsAllowed = true;
 }
 
+constexpr  std::initializer_list<std::pair<const COMMAND, const char*>> CommandToStringsMap {
+        { UNKNOWN_COMMAND, "UNKNOWN_COMMAND" },
+        { LIST_OF_MEMORIES, "LIST_OF_MEMORIES" },
+        { SAVE_ALL_TM_ON_DISK, "SAVE_ALL_TM_ON_DISK" },
+        { SHUTDOWN, "SHUTDOWN" },
+        { DELETE_MEM, "DELETE_MEM" },
+        { EXPORT_MEM, "EXPORT_MEM" },
+        { EXPORT_MEM_INTERNAL_FORMAT, "EXPORT_MEM_INTERNAL_FORMAT" },
+        { STATUS_MEM, "STATUS_MEM" },
+        { RESOURCE_INFO, "RESOURCE_INFO" },
+        { CREATE_MEM, "CREATE_MEM" },
+        { FUZZY, "FUZZY" },
+        { CONCORDANCE, "CONCORDANCE" },
+        { DELETE_ENTRY, "DELETE_ENTRY" },
+        { DELETE_ENTRIES_REORGANIZE, "DELETE_ENTRIES_REORGANIZE" },
+        { UPDATE_ENTRY, "UPDATE_ENTRY" },
+        { TAGREPLACEMENTTEST, "TAGREPLACEMENTTEST" } ,
+        { IMPORT_MEM, "IMPORT_MEM" },
+        { IMPORT_LOCAL_MEM, "IMPORT_LOCAL_MEM" },
+        { REORGANIZE_MEM, "REORGANIZE_MEM" },
+        { CLONE_TM_LOCALY, "CLONE_MEM"}
+    };
 
-
+const char* searchInCommandToStringsMap(const COMMAND& key) {
+    for (auto&& pair : CommandToStringsMap) {
+        if (pair.first == key) {
+            return pair.second ; // Found the key, no need to continue searching
+        }
+    }
+    return "UNKNOWN";
+}
 
 void ProxygenHandler::onRequest(std::unique_ptr<HTTPMessage> req) noexcept {
 #ifdef TIME_MEASURES 
@@ -53,8 +81,9 @@ void ProxygenHandler::onRequest(std::unique_ptr<HTTPMessage> req) noexcept {
   auto queryString   = req->getQueryString () ;
   auto headers = req->getHeaders();
   pMemService = OtmMemoryServiceWorker::getInstance();
+  auto command = pRequest->command;
 
-  T5LOG(T5DEBUG) << "received request url:\"" << pRequest->strUrl <<"\"; type " << CommandToStringsMap.find(pRequest->command)->second ;  
+  T5LOG(T5DEBUG) << "received request url:\"" << pRequest->strUrl <<"\"; type " << searchInCommandToStringsMap(pRequest->command);  
  
   std::string requestAcceptHeader = headers.getSingleOrEmpty("Accept");
   if(pRequest->command == COMMAND::EXPORT_MEM){
@@ -66,8 +95,6 @@ void ProxygenHandler::onRequest(std::unique_ptr<HTTPMessage> req) noexcept {
       errorStr = "export format not specified in Accept header";
       pRequest->command = COMMAND::UNKNOWN_COMMAND;
     }
-  }else if( pRequest->command == COMMAND::SHUTDOWN){
-    ((ShutdownRequestData*)pRequest)->pfWriteRequestsAllowed = & fWriteRequestsAllowed;
   }
 
   pRequest->requestAcceptHeader = requestAcceptHeader;
@@ -75,11 +102,8 @@ void ProxygenHandler::onRequest(std::unique_ptr<HTTPMessage> req) noexcept {
   pRequest->_id_ = stats_->recordRequest(pRequest->command);
   
   T5Logger::GetInstance()->SetLogInfo(pRequest->command);
-  if(CommandToStringsMap.find(pRequest->command) == CommandToStringsMap.end()){
-    T5Logger::GetInstance()->SetLogBuffer(std::string("Error during ") + toStr(pRequest->command) + " request, id = " + toStr(pRequest->_id_));
-  }else{
-    T5Logger::GetInstance()->SetLogBuffer(std::string("Error during ") + CommandToStringsMap.find(pRequest->command)->second + " request, id = " + toStr(pRequest->_id_));
-  }
+  T5Logger::GetInstance()->SetLogBuffer(std::string("Error during ") + searchInCommandToStringsMap(pRequest->command) + " request, id = " + toStr(pRequest->_id_));
+
   if(pRequest->strMemName.empty() == false){
     T5Logger::GetInstance()->AddToLogBuffer(std::string(", for memory \"") + pRequest->strMemName + "\"");
   }
@@ -107,7 +131,7 @@ void ProxygenHandler::onEOM() noexcept {
      //fix garbage in json 
     if(pRequest->strBody.empty()){
       pRequest->_rest_rc_ = 404;
-    }else if(fWriteRequestsAllowed == false){
+    }else if(TMManager::GetInstance()->fWriteRequestsAllowed == false){
       pRequest->_rest_rc_ = 423;  
     }else{
       size_t json_end = pRequest->strBody.find("\n}") ;
@@ -130,6 +154,7 @@ void ProxygenHandler::onUpgrade(UpgradeProtocol /*protocol*/) noexcept {
 void ProxygenHandler::requestComplete() noexcept {
   //ResetLogBuffer();
   if(pRequest){
+    //while(pRequest->fRunning){};
     delete pRequest;
     pRequest = nullptr;
   }
@@ -216,7 +241,7 @@ void ProxygenHandler::sendResponse()noexcept{
     //builder->send();
     //delete pRequest;
     //pRequest = nullptr;
-
+    pRequest->fRunning = false;
     T5Logger::GetInstance()->ResetLogBuffer();
     builder->sendWithEOM();
 

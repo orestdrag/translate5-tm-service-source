@@ -727,16 +727,19 @@ int ListTMRequestData::execute(){
   jsonSS << "{\n\t\"Open\":[";
   int elementCount = 0;
   std::set<std::string> printedTMNames;
-  for(auto& tmem: TMManager::GetInstance()->tms)
-  {
-    if(elementCount)//skip delim for first elem
-      jsonSS << ',';
-    
-    // add name to response area
-    jsonSS << "{ " << "\"name\": \"" << tmem.first << "\" }";
-    printedTMNames.emplace(tmem.first);
-    elementCount++;
-  } /* endwhile */
+  
+  {// lock tms
+    for (auto& tmem : TMManager::GetInstance()->tms)
+    {
+      if(elementCount)//skip delim for first elem
+        jsonSS << ',';
+      
+      // add name to response area
+      jsonSS << "{ " << "\"name\": \"" << tmem.first << "\" }";
+      printedTMNames.emplace(tmem.first);
+      elementCount++;
+    } /* endwhile */
+  }// unlock tms
 
   jsonSS << "],\n\t\"Available on disk\": [";
 
@@ -798,12 +801,18 @@ int SaveAllTMsToDiskRequestData::execute(){
   std::string tms; 
   
   int count = 0;
-  for(const auto& tm: TMManager::GetInstance()->tms){
-    if(count++)
-      tms += ", ";
-    tm.second->FlushFilebuffers();
-    tms += tm.first;
-  }
+  
+  //std::lock_guard<std::mutex> l{TMManager::GetInstance()->mutex_requestTM};
+  {// lock tms
+    std::lock_guard<std::mutex> l{TMManager::GetInstance()->mutex_access_tms};// lock tms list
+    for(const auto& tm: TMManager::GetInstance()->tms){
+      if(count++)
+        tms += ", ";
+      tm.second->FlushFilebuffers();
+      tms += tm.first;
+    }
+  }// unlock tms
+
   outputMessage = "{\n   \'saved " + std::to_string(count) +" tms\': \'" + tms + "\' \n}";
   return OK;
 }
@@ -1692,6 +1701,7 @@ int StatusMemRequestData::execute() {
       json_factory.addParmToJSON( outputMessage, mem->importDetails->fReorganize? "segmentsReorganized":"segmentsImported", mem->importDetails->segmentsImported );
       if(mem->importDetails->fReorganize) json_factory.addParmToJSON( outputMessage, "segmentsFilteredOut", mem->importDetails->filteredSegments );
       json_factory.addParmToJSON( outputMessage, "invalidSegments", mem->importDetails->invalidSegments );
+      json_factory.addParmToJSON( outputMessage, "tmxSegmentCount", mem->importDetails->segmentsCount );
       std::string invalidSegmRCs;
       for(auto [errCode, errCount]: mem->importDetails->invalidSegmentsRCs){
         invalidSegmRCs += std::to_string(errCode) + ":" + std::to_string(errCount) +"; ";
@@ -1706,7 +1716,8 @@ int StatusMemRequestData::execute() {
       json_factory.addParmToJSON( outputMessage, "invalidSegmentsRCs", invalidSegmRCs);
       json_factory.addParmToJSON( outputMessage, "firstInvalidSegments", firstInvalidSegments);
       json_factory.addParmToJSON( outputMessage, "invalidSymbolErrors", mem->importDetails->invalidSymbolErrors );
-      json_factory.addParmToJSON( outputMessage, mem->importDetails->fReorganize? "reorganizeErrorMsg":"importErrorMsg", mem->importDetails->importMsg.str() );
+      json_factory.addParmToJSON( outputMessage, "errorMsg", mem->importDetails->importMsg.str() );
+      json_factory.addParmToJSON( outputMessage, "rc", mem->importDetails->importRc);
     }
     json_factory.addParmToJSON( outputMessage, "lastAccessTime", printTime(mem->tLastAccessTime) );
     json_factory.addParmToJSON( outputMessage, "creationTime", printTime(mem->stTmSign.creationTime) );
@@ -1739,39 +1750,42 @@ int StatusMemRequestData::execute() {
   return( OK );
 };
 
-int ShutdownRequestData::execute(){
-    if(pfWriteRequestsAllowed) *pfWriteRequestsAllowed = false;
-    //pMemService->closeAll();
-    T5Logger::GetInstance()->LogStop();  
-    TMManager::GetInstance()->fServiceIsRunning = true;
-    
-    std::thread([this]() 
-    {
-      sleep(3);
-      int j= 3;
-      while(int i = TMManager::GetInstance()->GetMemImportInProcess() != -1){
-        if( ++j % 15 == 0){
-          T5LOG(T5WARNING) << "SHUTDOWN:: memory still in import..waiting 15 sec more...  shutdown request was = "<< j* 15;
-        }
-        T5LOG(T5DEBUG) << "SHUTDOWN:: memory still in import..waiting 1 sec more...  i = "<< i; 
-      
-        sleep(1);
-      }
-
-      TMManager::GetInstance()->fServiceIsRunning = false;
-      auto saveTmRD = SaveAllTMsToDiskRequestData();
-      saveTmRD.run();
-      //check tms is in import status
-      //close log file
-      if(saveTmRD._rest_rc_ == 200){
-        T5Logger::GetInstance()->LogStop();
-      }
-      if(sig != SHUTDOWN_CALLED_FROM_MAIN){
-        exit(sig);
-      }
-    }).detach();
-    return 200;
+void ShutdownRequestData::CheckImportFlushTmsAndShutdown(int signal)
+{
+  TMManager::GetInstance()->fWriteRequestsAllowed = false;
+  TMManager::GetInstance()->fServiceIsRunning = true;
+  //pMemService->closeAll();
+  T5Logger::GetInstance()->LogStop();  
+  int j= 3;
+  while(int i = TMManager::GetInstance()->GetMemImportInProcessCount()){
+    if( ++j % 15 == 0){
+      T5LOG(T5WARNING) << "SHUTDOWN:: memory still in import..waiting 15 sec more...  shutdown request was = "<< j* 15;
+    }
+    T5LOG(T5DEBUG) << "SHUTDOWN:: memory still in import..waiting 1 sec more...  mem in import = "<< i; 
   
+    sleep(1);
+  }
+
+  auto saveTmRD = SaveAllTMsToDiskRequestData();
+  saveTmRD.run();
+  //check tms is in import status
+  //close log file
+  if(saveTmRD._rest_rc_ == 200){
+    T5Logger::GetInstance()->LogStop();
+  }else{
+    T5LOG(T5ERROR) << "saveTm returned rest code not 200, but " << saveTmRD._rest_rc_ << "; rc = " << saveTmRD._rc_;
+  }
+  if(signal != SHUTDOWN_CALLED_FROM_MAIN){
+    TMManager::GetInstance()->fServiceIsRunning = false;
+    sleep(1);
+    exit(signal);
+  }
+}
+
+int ShutdownRequestData::execute()
+{
+  std::thread(& ShutdownRequestData::CheckImportFlushTmsAndShutdown, this->sig).detach();
+  return 200;
 }
 
 int addProposalToJSONString
@@ -1884,22 +1898,25 @@ int ResourceInfoRequestData::execute(){
   size_t total = 0, fSize = 0, count = 0;
   std::string fName;
   ssOutput << "\"tms\": [\n";
-  for ( auto tm : TMManager::GetInstance()->tms)
-  {
-    if(count){
-      ssOutput << ",";
-    }
-    fSize = tm.second->GetRAMSize();
-    fName = tm.first;
+  {// lock tms
+    std::lock_guard<std::mutex> l{TMManager::GetInstance()->mutex_access_tms};// lock tms list
+    for ( auto& tm : TMManager::GetInstance()->tms)
+    {
+      if(count){
+        ssOutput << ",";
+      }
+      fSize = tm.second->GetRAMSize();
+      fName = tm.first;
 
-    ssOutput << "\n{ ";
-    AddToJson(ssOutput, "name", tm.first, true );
-    AddToJson(ssOutput, "size", fSize, false );
-    ssOutput << " }";
+      ssOutput << "\n{ ";
+      AddToJson(ssOutput, "name", tm.first, true );
+      AddToJson(ssOutput, "size", fSize, false );
+      ssOutput << " }";
 
-    total += fSize;
-    count++;
-  }   
+      total += fSize;
+      count++;
+    }   
+  }
 
   ssOutput << "\n ],\n"; 
   AddToJson(ssOutput, "totalOccupiedByTMsInRAM", total, true );
@@ -2620,19 +2637,19 @@ int FuzzySearchRequestData::execute(){
   std::vector<OtmProposal> vProposals(Data.iNumOfProposals);
   if ( _rc_ == NO_ERROR )
   {
-    TMX_GET_IN_W GetIn;
+    TMX_GET_W GetIn;
     TMX_GET_OUT_W GetOut;
-    memset( &GetIn, 0, sizeof(TMX_GET_IN_W) );
+    memset( &GetIn, 0, sizeof(TMX_GET_W) );
     memset( &GetOut, 0, sizeof(TMX_GET_OUT_W) );
 
     mem->OtmProposalToGetIn( Data, &GetIn );
-    GetIn.stTmGet.usConvert = MEM_OUTPUT_ASIS;
-    GetIn.stTmGet.usRequestedMatches = (USHORT)vProposals.size();
-    GetIn.stTmGet.ulParm = GET_EXACT;
-    GetIn.stTmGet.pvGMOptList = mem->pvGlobalMemoryOptions;
+    GetIn.usConvert = MEM_OUTPUT_ASIS;
+    GetIn.usRequestedMatches = (USHORT)vProposals.size();
+    GetIn.ulParm = GET_EXACT;
+    GetIn.pvGMOptList = mem->pvGlobalMemoryOptions;
 
     if(T5Logger::GetInstance()->CheckLogLevel(T5DEBUG)){
-      auto str = EncodingHelper::convertToUTF8(GetIn.stTmGet.szSource);
+      auto str = EncodingHelper::convertToUTF8(GetIn.szSource);
       T5LOG( T5DEBUG) <<"EqfMemory::OtmProposal::*** method: OtmProposal, looking for " <<  str;
     } 
 
@@ -2677,7 +2694,7 @@ int FuzzySearchRequestData::execute(){
       T5LOG( T5DEBUG) <<"EqfMemory::SearchProposal::  lookup failed, rc=" << _rc_;
     } /* end */     
 
-    //if ( _rc_ != 0 ) mem->handleError( _rc_, mem->szName, GetIn.stTmGet.szTagTable );
+    //if ( _rc_ != 0 ) mem->handleError( _rc_, mem->szName, GetIn.szTagTable );
 
     Data.iNumOfProposals = OtmProposal::getNumOfProposals( vProposals );
   } /* endif */

@@ -442,7 +442,7 @@ VOID EQFMemOrganizeEnd
             
     pRIDA->pMem->importDetails->importTimestamp = buff;
   }
-  pRIDA->pMem->importDetails->usProgress = 100;
+  //pRIDA->pMem->importDetails->usProgress = 100;
 } /* end of function EQFMemOrganizeEnd */
 
 
