@@ -69,7 +69,7 @@ size_t TMManager::CleanupMemoryList(size_t memoryRequested)
 {  
   int AllowedMBMemory = 500;
   Properties::GetInstance()->get_value(KEY_ALLOWED_RAM, AllowedMBMemory);
-  size_t AllowedMemory = AllowedMBMemory * 1000000;    
+  size_t AllowedMemory = (size_t)AllowedMBMemory * 1000000;    
   size_t memoryNeed = memoryRequested + CalculateOccupiedRAM();
   T5LOG(T5DEBUG) << "CleanupMemoryList was called, memory need = "<< memoryNeed <<"; Memory requested = " << memoryRequested<<"; memoryAllowed = " << AllowedMemory;
   
@@ -138,11 +138,12 @@ size_t TMManager::CleanupMemoryList(size_t memoryRequested)
 void EqfMemory::importDone(int iRC, char *pszError )
 {
   eStatus = OPEN_STATUS;
+  TmBtree.fb.Flush();
+  InBtree.fb.Flush();
+
   if ( iRC == 0 )
   {
     eImportStatus = OPEN_STATUS;
-    TmBtree.fb.Flush();
-    InBtree.fb.Flush();
     T5LOG( T5INFO) <<"OtmMemoryServiceWorker::importDone:: success, memName = " << szName;
   }
   else

@@ -804,12 +804,12 @@ int SaveAllTMsToDiskRequestData::execute(){
 int ImportRequestData::execute(){
   if ( mem == nullptr )
   {
-    return 404;
+    return  buildErrorReturn( 404, "mem not found or can't be opened" );
   }
   // close the memory - when open
   if ( mem->eStatus != OPEN_STATUS )
   {
-    return 500;
+    return buildErrorReturn( 500, "mem status in not open" );
   }
   lastStatus =       mem->eStatus;
   lastImportStatus = mem->eImportStatus;
