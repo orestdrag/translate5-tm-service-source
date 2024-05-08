@@ -220,6 +220,24 @@ int LanguageFactory::getISOName
   return( 0 );
 }
 
+bool LanguageFactory::isPreferedLang(const char* lang){
+  return (LanguageFactory::getInstance()->findIfPreferedLanguage( lang ) != -1);
+}
+
+bool LanguageFactory::isMatchingLangs(
+  const char* strMemLang,//can be prefered
+  const char* strSegLang
+)
+{
+  if(0 == strcasecmp( strMemLang, strSegLang) ){
+    return true;
+  }
+  if(isPreferedLang(strMemLang)){
+    return 0 == compareISO(strMemLang, strSegLang);
+  }
+  return false;
+}
+
 int LanguageFactory::getISOName
 (
   std::string& strLanguage,

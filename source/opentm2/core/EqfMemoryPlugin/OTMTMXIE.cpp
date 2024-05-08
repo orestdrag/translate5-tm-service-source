@@ -2270,7 +2270,9 @@ void TMXParseHandler::startElement(const XMLCh* const name, AttributeList& attri
 
             if(fOkLang){
               T5LOG( T5DEBUG) <<  ":: _szLang = " << _szLang << "; pBuf->szMemSourceLang = " << pBuf->szMemSourceLang;
-              if( strcasecmp( _szLang, pBuf->szMemSourceLang ) ) {
+              if(false == LanguageFactory::getInstance()->isMatchingLangs(pBuf->szMemSourceLang, _szLang))
+              //if( strcasecmp( _szLang, pBuf->szMemSourceLang ) ) 
+              {
                 tagReplacer.activeSegment = TARGET_SEGMENT;
               }
             }else{
@@ -2875,9 +2877,9 @@ void TMXParseHandler::endElement(const XMLCh* const name )
           //<bpt i='1'/>Here is <ph/> <bpt i='2'/>some<ept i='2'/> sentence<ept i='1'/> 
           //to
           //Here is <ph/> <bpt i='2'/>some<ept i='2'/> sentence           
-          size_t unhandledTagCounter = tagReplacer.sourceTagList.size();
-          size_t firstTagPos = 0;
-          size_t lastTagPos = tagReplacer.sourceTagList.size()-1;
+          int unhandledTagCounter = tagReplacer.sourceTagList.size();
+          int firstTagPos = 0;
+          int lastTagPos = tagReplacer.sourceTagList.size()-1;
           bool fTagDeleted = true;
 
           while(firstTagPos <= lastTagPos && fTagDeleted){
@@ -2947,8 +2949,8 @@ void TMXParseHandler::endElement(const XMLCh* const name )
           //Here is <ph/> <bpt i='2'/>some<ept i='2'/> sentence 
           int len = wcslen(pBuf->szData);
           
-          size_t firstTagPos = 0;
-          size_t lastTagPos = tagReplacer.sourceTagList.size()-1;
+          int firstTagPos = 0;
+          int lastTagPos = tagReplacer.sourceTagList.size()-1;
           bool fInclosingTags = true;
 
           while(firstTagPos<lastTagPos && fInclosingTags){
