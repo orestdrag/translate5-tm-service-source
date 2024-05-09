@@ -327,6 +327,8 @@ USHORT EqfMemory::OpenX()
     InBtree.QDAMDictClose();
 
     NTMDestroyLongNameTable( );
+  }else{
+    eStatus = OPEN_STATUS;
   } /* endif */
 
   return( usRc );

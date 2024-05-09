@@ -809,7 +809,10 @@ int ImportRequestData::execute(){
   // close the memory - when open
   if ( mem->eStatus != OPEN_STATUS )
   {
-    return buildErrorReturn( 500, "mem status in not open" );
+    std::string msg = "mem status in not open, status " + toStr(mem->eStatus);
+    msg += mem->eStatus == REORGANIZE_RUNNING_STATUS? std::string(" REORGANIZE_RUNNING_STATUS") : 
+        mem->eStatus == IMPORT_RUNNING_STATUS? std::string(" IMPORT_RUNNING_STATUS") : std::string(" unknows");
+    return buildErrorReturn( 500, msg.c_str() );
   }
   lastStatus =       mem->eStatus;
   lastImportStatus = mem->eImportStatus;
@@ -920,10 +923,11 @@ int ImportLocalRequestData::execute(){
     // close the memory - when open
   if ( mem->eStatus != OPEN_STATUS )
   {
-    return 500;
+    std::string msg = "mem status in not open, status " + toStr(mem->eStatus);
+    msg += mem->eStatus == REORGANIZE_RUNNING_STATUS? std::string(" REORGANIZE_RUNNING_STATUS") : 
+        mem->eStatus == IMPORT_RUNNING_STATUS? std::string(" IMPORT_RUNNING_STATUS") : std::string(" unknows");
+    return buildErrorReturn( 500, msg.c_str() );
   }
-  lastStatus =       mem->eStatus;
-  lastImportStatus = mem->eImportStatus;
 
   mem->eStatus = IMPORT_RUNNING_STATUS;
   mem->eImportStatus = IMPORT_RUNNING_STATUS;
@@ -977,8 +981,12 @@ int ReorganizeRequestData::execute(){
     // close the memory - when open
   if ( mem->eStatus != OPEN_STATUS )
   {
-    return 500;
+    std::string msg = "mem status in not open, status " + toStr(mem->eStatus);
+    msg += mem->eStatus == REORGANIZE_RUNNING_STATUS? std::string(" REORGANIZE_RUNNING_STATUS") : 
+        mem->eStatus == IMPORT_RUNNING_STATUS? std::string(" IMPORT_RUNNING_STATUS") : std::string(" unknows");
+    return buildErrorReturn( 500, msg.c_str() );
   }
+  
 
   mem->eStatus = REORGANIZE_RUNNING_STATUS;
   mem->eImportStatus = REORGANIZE_RUNNING_STATUS;
@@ -1103,7 +1111,10 @@ int DeleteEntriesReorganizeRequestData::execute(){
     // close the memory - when open
   if ( mem->eStatus != OPEN_STATUS )
   {
-    return 500;
+    std::string msg = "mem status in not open, status " + toStr(mem->eStatus);
+    msg += mem->eStatus == REORGANIZE_RUNNING_STATUS? std::string(" REORGANIZE_RUNNING_STATUS") : 
+        mem->eStatus == IMPORT_RUNNING_STATUS? std::string(" IMPORT_RUNNING_STATUS") : std::string(" unknows");
+    return buildErrorReturn( 500, msg.c_str() );
   }
 
   mem->eStatus = REORGANIZE_RUNNING_STATUS;
