@@ -132,8 +132,8 @@ protected:
     int execute() override   ;
 
     BOOL fClose = false;
-    MEMORY_STATUS lastImportStatus = AVAILABLE_STATUS; // to restore in case we would break import before calling closemem
-    MEMORY_STATUS lastStatus = AVAILABLE_STATUS;
+    //MEMORY_STATUS lastImportStatus = AVAILABLE_STATUS; // to restore in case we would break import before calling closemem
+    //MEMORY_STATUS lastStatus = AVAILABLE_STATUS;
     InclosingTagsBehaviour inclosingTagsBehaviour;
     IMPORTMEMORYDATA* pData = nullptr;
     std::string strTempFile;
@@ -150,8 +150,6 @@ protected:
     int execute() override   ;
 
     BOOL fClose = false;
-    MEMORY_STATUS lastImportStatus = AVAILABLE_STATUS; // to restore in case we would break import before calling closemem
-    MEMORY_STATUS lastStatus = AVAILABLE_STATUS;
     IMPORTMEMORYDATA* pData = nullptr;
     std::string strInputFile;
 };

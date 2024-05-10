@@ -239,6 +239,68 @@ int RequestData::buildErrorReturn
 }
 
 
+bool memIsAvailableToOperate(EqfMemory* mem){
+  //return eStatus == OPEN_STATUS;
+  if(nullptr == mem){
+    T5LOG(T5ERROR) << "mem is nullptr";
+    return false;
+  }
+  const int eStatus = mem->eStatus;
+  if(eStatus != OPEN_STATUS 
+    && eStatus != IMPORT_RUNNING_STATUS 
+    && eStatus != REORGANIZE_RUNNING_STATUS 
+    && eStatus != AVAILABLE_STATUS 
+    && eStatus != FAILED_TO_OPEN_STATUS){
+      T5LOG(T5ERROR) << "Memory "<< mem->szName << " status is set to not allowed value: " << eStatus<<"; you can ignore this message but please report about it;"; 
+    }
+
+  if(eStatus == IMPORT_RUNNING_STATUS || eStatus == REORGANIZE_RUNNING_STATUS || eStatus == FAILED_TO_OPEN_STATUS){
+    return false;
+  }
+  return true;
+}
+
+std::string StatusToString(int eStatus)
+{
+  switch(eStatus){
+    case OPEN_STATUS:
+    {
+      return "OPEN_STATUS";
+      break;
+    }
+    case IMPORT_FAILED_STATUS:{
+      return "IMPORT_FAILED_STATUS";
+      break;
+    }
+    case IMPORT_RUNNING_STATUS:{
+      return "IMPORT_RUNNING_STATUS";
+      break;
+
+    }
+    case REORGANIZE_FAILED_STATUS:{
+      return "REORGANIZE_FAILED_STATUS";
+      break;
+
+    }
+    case REORGANIZE_RUNNING_STATUS:{
+      return "REORGANIZE_RUNNING_STATUS";
+      break;
+    }
+    case FAILED_TO_OPEN_STATUS:{
+      return "FAILED_TO_OPEN_STATUS";
+      break;
+    }
+    case AVAILABLE_STATUS:{
+      return "AVAILABLE_STATUS";
+      break;
+    }
+    default:{
+      return "UNKNOWN" + toStr(eStatus);
+      break;
+    }
+  }
+}
+
 int RequestData::requestTM(){
   //check if memory is loaded to tmmanager
   if(isReadOnlyRequest())
@@ -807,15 +869,13 @@ int ImportRequestData::execute(){
     return  buildErrorReturn( 404, "mem not found or can't be opened" );
   }
   // close the memory - when open
-  if ( mem->eStatus != OPEN_STATUS )
+  if ( false == memIsAvailableToOperate(mem.get()) )
   {
-    std::string msg = "mem status in not open, status " + toStr(mem->eStatus);
-    msg += mem->eStatus == REORGANIZE_RUNNING_STATUS? std::string(" REORGANIZE_RUNNING_STATUS") : 
-        mem->eStatus == IMPORT_RUNNING_STATUS? std::string(" IMPORT_RUNNING_STATUS") : std::string(" unknows");
+    std::string msg = "mem is not available to operate, status= " + StatusToString(mem->eStatus);
     return buildErrorReturn( 500, msg.c_str() );
   }
-  lastStatus =       mem->eStatus;
-  lastImportStatus = mem->eImportStatus;
+  //lastStatus =       mem->eStatus;
+  //lastImportStatus = mem->eImportStatus;
 
   mem->eStatus = IMPORT_RUNNING_STATUS;
   mem->eImportStatus = IMPORT_RUNNING_STATUS;
@@ -918,14 +978,12 @@ int ImportLocalRequestData::checkData(){
 int ImportLocalRequestData::execute(){
   if ( mem == nullptr )
   {
-    return 404;
+    return  buildErrorReturn( 404, "mem not found or can't be opened" );
   }
-    // close the memory - when open
-  if ( mem->eStatus != OPEN_STATUS )
+
+  if ( false == memIsAvailableToOperate(mem.get()) )
   {
-    std::string msg = "mem status in not open, status " + toStr(mem->eStatus);
-    msg += mem->eStatus == REORGANIZE_RUNNING_STATUS? std::string(" REORGANIZE_RUNNING_STATUS") : 
-        mem->eStatus == IMPORT_RUNNING_STATUS? std::string(" IMPORT_RUNNING_STATUS") : std::string(" unknows");
+    std::string msg = "mem is not available to operate, status= " + StatusToString(mem->eStatus);
     return buildErrorReturn( 500, msg.c_str() );
   }
 
@@ -976,14 +1034,13 @@ USHORT MemFuncOrganizeProcess
 int ReorganizeRequestData::execute(){
   if ( mem == nullptr )
   {
-    return 404;
+    return  buildErrorReturn( 404, "mem not found or can't be opened" );
   }
+  
     // close the memory - when open
-  if ( mem->eStatus != OPEN_STATUS )
+  if ( false == memIsAvailableToOperate(mem.get()) )
   {
-    std::string msg = "mem status in not open, status " + toStr(mem->eStatus);
-    msg += mem->eStatus == REORGANIZE_RUNNING_STATUS? std::string(" REORGANIZE_RUNNING_STATUS") : 
-        mem->eStatus == IMPORT_RUNNING_STATUS? std::string(" IMPORT_RUNNING_STATUS") : std::string(" unknows");
+    std::string msg = "mem is not available to operate, status= " + StatusToString(mem->eStatus);
     return buildErrorReturn( 500, msg.c_str() );
   }
   
@@ -1106,14 +1163,12 @@ int DeleteEntriesReorganizeRequestData::checkData(){
 int DeleteEntriesReorganizeRequestData::execute(){
   if ( mem == nullptr )
   {
-    return 404;
+    return  buildErrorReturn( 404, "mem not found or can't be opened" );
   }
-    // close the memory - when open
-  if ( mem->eStatus != OPEN_STATUS )
+  
+  if ( false == memIsAvailableToOperate(mem.get()) )
   {
-    std::string msg = "mem status in not open, status " + toStr(mem->eStatus);
-    msg += mem->eStatus == REORGANIZE_RUNNING_STATUS? std::string(" REORGANIZE_RUNNING_STATUS") : 
-        mem->eStatus == IMPORT_RUNNING_STATUS? std::string(" IMPORT_RUNNING_STATUS") : std::string(" unknows");
+    std::string msg = "mem is not available to operate, status= " + StatusToString(mem->eStatus);
     return buildErrorReturn( 500, msg.c_str() );
   }
 
@@ -1355,7 +1410,11 @@ int CloneTMRequestData::checkData(){
     }else{
       // close the memory - if open
       if(mem->eImportStatus == IMPORT_RUNNING_STATUS){
-           std::string msg = "src tm \'" + strMemName +"\' is in import status. Repeat request later; for request for mem " 
+           std::string msg = "src tm \'" + strMemName +"\' is in import running status. Repeat request later; for request for mem " 
+            + strMemName + "; with body = " + strBody ;
+          return buildErrorReturn(-1, msg.c_str());
+      }else if(mem->eImportStatus == REORGANIZE_RUNNING_STATUS){
+           std::string msg = "src tm \'" + strMemName +"\' is in reorganize running status. Repeat request later; for request for mem " 
             + strMemName + "; with body = " + strBody ;
           return buildErrorReturn(-1, msg.c_str());
       }else if ( mem->eStatus == OPEN_STATUS )

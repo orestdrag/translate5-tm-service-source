@@ -137,7 +137,7 @@ size_t TMManager::CleanupMemoryList(size_t memoryRequested)
 // update memory status
 void EqfMemory::importDone(int iRC, char *pszError )
 {
-  eStatus = OPEN_STATUS;
+  eStatus = OPEN_STATUS;  
   TmBtree.fb.Flush();
   InBtree.fb.Flush();
 
@@ -344,8 +344,10 @@ std::shared_ptr<EqfMemory> TMManager::CreateNewEmptyTM(const std::string& strMem
 
   if(_rc_ == NO_ERROR){   
     NewMem->TmBtree.fb.Flush();
-    NewMem->InBtree.fb.Flush();     
+    NewMem->InBtree.fb.Flush();   
+    NewMem->eStatus = OPEN_STATUS;  
   }else {
+    NewMem->eStatus = FAILED_TO_OPEN_STATUS;
     //something went wrong during create or insert so delete data file
     UtlDelete( (PSZ)NewMem->InBtree.fb.fileName.c_str(), 0L, FALSE );
     UtlDelete((PSZ) NewMem->TmBtree.fb.fileName.c_str(), 0L, FALSE);
@@ -1339,10 +1341,10 @@ std::shared_ptr<EqfMemory> TMManager::requestReadOnlyTMPointer(const std::string
   //
   
   if(mem){
-    refBack = mem->readOnlyCnt;
-    T5LOG(T5DEBUG) <<"readOnlyCnt = " << mem->readOnlyCnt.use_count();
+      refBack = mem->readOnlyCnt;
+      T5LOG(T5DEBUG) <<"readOnlyCnt = " << mem->readOnlyCnt.use_count();
   }
-  return mem;
+      return mem;
 }
 
 std::shared_ptr<EqfMemory> TMManager::requestWriteTMPointer(const std::string& strMemName, std::shared_ptr<int>& refBack){
@@ -1377,8 +1379,8 @@ std::shared_ptr<EqfMemory> TMManager::requestWriteTMPointer(const std::string& s
   }
 
   if(rc){ // we have some Read process
-    mem.reset();
-    refBack.reset();
+  mem.reset();
+  refBack.reset();
   }
   //else{}
   //refBack = mem->readOnlyCnt;
