@@ -408,6 +408,8 @@ int RequestData::run(){
 
   //reset pointers
   if(mem != nullptr){
+    mem->tmMutex.unlock();
+    //T5LOG(T5TRANSACTION) << "Unclocking mem \'" << mem->szName << "\' returned ";
     mem.reset();
   }
   if(memRef != nullptr){
@@ -1037,7 +1039,7 @@ int ReorganizeRequestData::execute(){
     return  buildErrorReturn( 404, "mem not found or can't be opened" );
   }
   
-    // close the memory - when open
+  // close the memory - when open
   if ( false == memIsAvailableToOperate(mem.get()) )
   {
     std::string msg = "mem is not available to operate, status= " + StatusToString(mem->eStatus);
@@ -2243,7 +2245,7 @@ int DeleteEntryRequestData::parseJSON(){
   { L"",               JSONFactory::ASCII_STRING_PARM_TYPE, NULL, 0 } };
 
   _rc_ = json_factory.parseJSON( strInputParmsW, parseControl );  
-
+ 
   if(loggingThreshold >=0) T5Logger::GetInstance()->SetLogLevel(loggingThreshold);  
 
   if ( _rc_ )

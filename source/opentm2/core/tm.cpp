@@ -1322,6 +1322,7 @@ std::shared_ptr<EqfMemory> TMManager::requestReadOnlyTMPointer(const std::string
   }
   std::shared_ptr<EqfMemory>  mem;
   
+  if(!rc)
   {//lock tms list
     std::lock_guard<std::mutex> l{mutex_access_tms}; 
     if(IsMemoryLoadedUnsafe(strMemName)){    
@@ -1331,20 +1332,20 @@ std::shared_ptr<EqfMemory> TMManager::requestReadOnlyTMPointer(const std::string
 
   if(mem){
     //check if there are any Write pointers
-    rc = mem->writeCnt.use_count()>1;
+    rc = rc || (mem->writeCnt.use_count()>1);
 
     T5LOG(T5DEBUG) <<"writeCnt = " << mem->writeCnt.use_count();
     if(rc){
       mem.reset();
-    }
-  }
-  //
-  
-  if(mem){
+    }else{
+      //T5LOG(T5TRANSACTION) << "locking mutex for \'" << mem->szName ;
+      mem->tmMutex.lock();
       refBack = mem->readOnlyCnt;
       T5LOG(T5DEBUG) <<"readOnlyCnt = " << mem->readOnlyCnt.use_count();
-  }
       return mem;
+    }
+  }
+  return nullptr;
 }
 
 std::shared_ptr<EqfMemory> TMManager::requestWriteTMPointer(const std::string& strMemName, std::shared_ptr<int>& refBack){
@@ -1356,33 +1357,36 @@ std::shared_ptr<EqfMemory> TMManager::requestWriteTMPointer(const std::string& s
 
   std::shared_ptr<EqfMemory>  mem; 
   
+  if(!rc)
   {// lock tms list
     std::lock_guard<std::mutex> l{mutex_access_tms};
   
-    if(rc){ //Memory failed to open
-      //return;
-    }else if(IsMemoryLoadedUnsafe(strMemName)){
+    if(IsMemoryLoadedUnsafe(strMemName)){
       mem = tms[strMemName];
+      //rc = mem->tmMutex.try_lock();
+      //T5LOG(T5TRANSACTION) << "locking mutex for \'" << mem->szName <<"\' returned rc = " << rc;
       //check if there are any Write pointers
-      rc = mem->writeCnt.use_count() > 1;
+      rc = rc? rc : (mem->writeCnt.use_count() > 1);
       refBack = mem->writeCnt;
     }else{
-      rc = 2;
+      rc = rc? rc : 2;// if rc is set- keep rc, 
     }
   }// unlock tms
   
 
   if(!rc){ // we have some Write process;
     //mem.reset();
-    rc = mem->readOnlyCnt.use_count() > 1;
-  }else{
+    rc = mem->readOnlyCnt.use_count() > 1? 3 : 0;
   }
 
-  if(rc){ // we have some Read process
+  if(!rc){
+    //T5LOG(T5TRANSACTION) << "locking mutex for \'" << mem->szName ;
+    mem->tmMutex.lock();
+    return mem;
+  }
+
+  // we have some Read process
   mem.reset();
   refBack.reset();
-  }
-  //else{}
-  //refBack = mem->readOnlyCnt;
-  return mem;
+  return nullptr;
 }
