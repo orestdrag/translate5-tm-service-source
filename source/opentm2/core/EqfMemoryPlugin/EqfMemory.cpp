@@ -765,8 +765,8 @@ int EqfMemory::OtmProposalToGetIn
   pGetIn->ulSegmentId = Proposal.getSegmentNum();
   pGetIn->pvReplacementList = (PVOID)Proposal.getReplacementList();
   //pGetIn->fSourceLangIsPrefered = Proposal.isSourceLangIsPrefered();
-  pGetIn->fSourceLangIsPrefered = (LanguageFactory::getInstance()->findIfPreferedLanguage( pGetIn->szSourceLanguage ) != -1);
-  pGetIn->fTargetLangIsPrefered = (LanguageFactory::getInstance()->findIfPreferedLanguage( pGetIn->szTargetLanguage ) != -1);
+  pGetIn->fSourceLangIsPrefered = LanguageFactory::getInstance()->isPreferedLang( (pGetIn->szSourceLanguage) );
+  pGetIn->fTargetLangIsPrefered = LanguageFactory::getInstance()->isPreferedLang( (pGetIn->szTargetLanguage) );
   return( iRC );
 }
 

@@ -1730,7 +1730,7 @@ class EqfMemoryPlugin;
 class Dummy{};
 
 
-
+#include <mutex>
 class EqfMemory //: public TMX_CLB
 /*! \brief This class implements the standard translation memory (EQF) for OpenTM2.
 */
@@ -1738,6 +1738,7 @@ class EqfMemory //: public TMX_CLB
 {
   
 public:
+  std::mutex tmMutex;
   bool fOpen = false;
   BTREE TmBtree;
   BTREE InBtree;

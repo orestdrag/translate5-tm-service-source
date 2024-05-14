@@ -90,6 +90,13 @@ int getISOName
   std::string& strISO
 );
 
+bool isPreferedLang(const char* lang);
+
+bool isMatchingLangs(
+  const char* strMemLang,//can be prefered
+  const char* strSegLang
+);
+
 
 std::vector<std::string> getListOfLanguagesFromTheSameFamily(PSZ lang);
 

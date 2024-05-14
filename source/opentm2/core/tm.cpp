@@ -69,7 +69,7 @@ size_t TMManager::CleanupMemoryList(size_t memoryRequested)
 {  
   int AllowedMBMemory = 500;
   Properties::GetInstance()->get_value(KEY_ALLOWED_RAM, AllowedMBMemory);
-  size_t AllowedMemory = AllowedMBMemory * 1000000;    
+  size_t AllowedMemory = (size_t)AllowedMBMemory * 1000000;    
   size_t memoryNeed = memoryRequested + CalculateOccupiedRAM();
   T5LOG(T5DEBUG) << "CleanupMemoryList was called, memory need = "<< memoryNeed <<"; Memory requested = " << memoryRequested<<"; memoryAllowed = " << AllowedMemory;
   
@@ -137,12 +137,13 @@ size_t TMManager::CleanupMemoryList(size_t memoryRequested)
 // update memory status
 void EqfMemory::importDone(int iRC, char *pszError )
 {
-  eStatus = OPEN_STATUS;
+  eStatus = OPEN_STATUS;  
+  TmBtree.fb.Flush();
+  InBtree.fb.Flush();
+
   if ( iRC == 0 )
   {
     eImportStatus = OPEN_STATUS;
-    TmBtree.fb.Flush();
-    InBtree.fb.Flush();
     T5LOG( T5INFO) <<"OtmMemoryServiceWorker::importDone:: success, memName = " << szName;
   }
   else
@@ -343,8 +344,10 @@ std::shared_ptr<EqfMemory> TMManager::CreateNewEmptyTM(const std::string& strMem
 
   if(_rc_ == NO_ERROR){   
     NewMem->TmBtree.fb.Flush();
-    NewMem->InBtree.fb.Flush();     
+    NewMem->InBtree.fb.Flush();   
+    NewMem->eStatus = OPEN_STATUS;  
   }else {
+    NewMem->eStatus = FAILED_TO_OPEN_STATUS;
     //something went wrong during create or insert so delete data file
     UtlDelete( (PSZ)NewMem->InBtree.fb.fileName.c_str(), 0L, FALSE );
     UtlDelete((PSZ) NewMem->TmBtree.fb.fileName.c_str(), 0L, FALSE);
@@ -1362,6 +1365,7 @@ std::shared_ptr<EqfMemory> TMManager::requestReadOnlyTMPointer(const std::string
   }
   std::shared_ptr<EqfMemory>  mem;
   
+  if(!rc)
   {//lock tms list
     std::lock_guard<std::mutex> l{mutex_access_tms}; 
     if(IsMemoryLoadedUnsafe(strMemName)){    
@@ -1371,20 +1375,20 @@ std::shared_ptr<EqfMemory> TMManager::requestReadOnlyTMPointer(const std::string
 
   if(mem){
     //check if there are any Write pointers
-    rc = mem->writeCnt.use_count()>1;
+    rc = rc || (mem->writeCnt.use_count()>1);
 
     T5LOG(T5DEBUG) <<"writeCnt = " << mem->writeCnt.use_count();
     if(rc){
       mem.reset();
+    }else{
+      //T5LOG(T5TRANSACTION) << "locking mutex for \'" << mem->szName ;
+      mem->tmMutex.lock();
+      refBack = mem->readOnlyCnt;
+      T5LOG(T5DEBUG) <<"readOnlyCnt = " << mem->readOnlyCnt.use_count();
+      return mem;
     }
   }
-  //
-  
-  if(mem){
-    refBack = mem->readOnlyCnt;
-    T5LOG(T5DEBUG) <<"readOnlyCnt = " << mem->readOnlyCnt.use_count();
-  }
-  return mem;
+  return nullptr;
 }
 
 std::shared_ptr<EqfMemory> TMManager::requestWriteTMPointer(const std::string& strMemName, std::shared_ptr<int>& refBack){
@@ -1396,33 +1400,36 @@ std::shared_ptr<EqfMemory> TMManager::requestWriteTMPointer(const std::string& s
 
   std::shared_ptr<EqfMemory>  mem; 
   
+  if(!rc)
   {// lock tms list
     std::lock_guard<std::mutex> l{mutex_access_tms};
   
-    if(rc){ //Memory failed to open
-      //return;
-    }else if(IsMemoryLoadedUnsafe(strMemName)){
+    if(IsMemoryLoadedUnsafe(strMemName)){
       mem = tms[strMemName];
+      //rc = mem->tmMutex.try_lock();
+      //T5LOG(T5TRANSACTION) << "locking mutex for \'" << mem->szName <<"\' returned rc = " << rc;
       //check if there are any Write pointers
-      rc = mem->writeCnt.use_count() > 1;
+      rc = rc? rc : (mem->writeCnt.use_count() > 1);
       refBack = mem->writeCnt;
     }else{
-      rc = 2;
+      rc = rc? rc : 2;// if rc is set- keep rc, 
     }
   }// unlock tms
   
 
   if(!rc){ // we have some Write process;
     //mem.reset();
-    rc = mem->readOnlyCnt.use_count() > 1;
-  }else{
+    rc = mem->readOnlyCnt.use_count() > 1? 3 : 0;
   }
 
-  if(rc){ // we have some Read process
-    mem.reset();
-    refBack.reset();
+  if(!rc){
+    //T5LOG(T5TRANSACTION) << "locking mutex for \'" << mem->szName ;
+    mem->tmMutex.lock();
+    return mem;
   }
-  //else{}
-  //refBack = mem->readOnlyCnt;
-  return mem;
+
+  // we have some Read process
+  mem.reset();
+  refBack.reset();
+  return nullptr;
 }

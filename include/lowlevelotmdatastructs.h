@@ -97,7 +97,8 @@ enum InclosingTagsBehaviour{
     IMPORT_RUNNING_STATUS,  // memory import is running
     IMPORT_FAILED_STATUS,   // memory import failed
     REORGANIZE_RUNNING_STATUS, // memory organize is running
-    REORGANIZE_FAILED_STATUS   // memory organize is failed
+    REORGANIZE_FAILED_STATUS,   // memory organize is failed
+    FAILED_TO_OPEN_STATUS
   } MEMORY_STATUS;
 
 /**********************************************************************/

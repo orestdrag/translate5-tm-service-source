@@ -74,9 +74,9 @@ DEFINE_validator(servicethreads, &ValidateThreads);
 
 
 static bool ValidateRAM(const char* flagname, int32_t value) {
-   if (value >= 1 && value <= 10000)   // value is ok
+   if (value >= 1 && value <= 100000)   // value is ok
      return true;
-   printf("Invalid value for --%s: %d, should be [1...10000]\n", flagname, (int)value);
+   printf("Invalid value for --%s: %d, should be [1...100000]\n", flagname, (int)value);
    return false;
 }
 

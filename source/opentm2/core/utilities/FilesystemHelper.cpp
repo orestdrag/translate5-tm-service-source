@@ -35,6 +35,8 @@ PFileBufferMap FilesystemHelper::getFileBufferInstance(){
     return &map;
 }
 
+std::mutex FilesystemHelper::fsLock;
+
 std::string FilesystemHelper::parseDirectory(const std::string path){
     std::size_t found = path.rfind('/');
     if (found!=std::string::npos)
@@ -213,6 +215,7 @@ int FilesystemHelper::CloneFile(std::string srcPath, std::string dstPath){
 }
 
 int FilesystemHelper::MoveFile(std::string oldPath, std::string newPath){
+    std::lock_guard<std::mutex> l{fsLock};// lock fs
     std::string fixedOldPath = FixPath(oldPath);
     std::string fixedNewPath = FixPath(newPath);
     errno = 0;
@@ -327,6 +330,7 @@ std::string FilesystemHelper::GetFileName(HFILE ptr){
 
 DECLARE_bool(forbiddeletefiles);
 int FilesystemHelper::DeleteFile(const std::string& path){
+    //std::lock_guard<std::mutex> l{FilesystemHelper::fsLock};// lock fs
     if(FLAGS_forbiddeletefiles){
         T5LOG( T5WARNING) << ":: file deletion is forbidden, service tried to delete this file: "<<path;
         return FILEHELPER_NO_ERROR;
@@ -382,6 +386,7 @@ int FilesystemHelper::ReadFileToFileBufferAndKeepInRam(const std::string& path){
 }
 
 int FilesystemHelper::RemoveDirWithFiles(const std::string& path){
+    std::lock_guard<std::mutex> l{FilesystemHelper::fsLock};// lock fs
     std::string fixedPath = path;
     fixedPath = FixPath(fixedPath);
     //if(int errCode = remove(path.c_str())){
@@ -1248,31 +1253,41 @@ std::string FilesystemHelper::BuildTempFileName(){
     int iRC = 0;
     std::string sTempPath = GetTempDir();
     // setup temp file name for TMX file 
-    
+        
     if(!DirExists(sTempPath) && CreateDir(sTempPath)){
         T5LOG(T5FATAL) << "Cant create dir for temporary files under path = " << sTempPath;
         throw;
     }
-
-    int i = 0;
-    sTempPath += "OTM";
-    std::string checkName = sTempPath;
-    while( i < 10000 ){
-        checkName = sTempPath + std::to_string(i/100) + std::to_string(i%100/10) + std::to_string(i%10);
-        auto files = FindFiles( checkName );
-        
-        if(files.size() == 0){// we can use this name
-            T5LOG( T5INFO) << "::Temp file's Name found :" << checkName ;
-            return checkName;
+    {
+        std::lock_guard<std::mutex> l{FilesystemHelper::fsLock};// lock fs
+        int i = 0;
+        sTempPath += "OTM";
+        std::string checkName = sTempPath;
+        while( i < 10000 ){
+            checkName = sTempPath + std::to_string(i/100) + std::to_string(i%100/10) + std::to_string(i%10);
+            auto files = FindFiles( checkName );
+            
+            if(files.size() == 0){// we can use this name
+                T5LOG( T5INFO) << "::Temp file's Name found :" << checkName ;
+                auto file = fopen(checkName.c_str(), "w");
+                if(file){
+                    fclose(file);
+                    return checkName;
+                }else{
+                    T5LOG(T5ERROR) << "::can't create/open file " << checkName;
+                    return ("");   
+                }
+            }
+            i++;
         }
-        i++;
-    }
 
-    T5LOG(T5ERROR) << "::TO_DO::All temp names is already used - delete some of them";
+        T5LOG(T5ERROR) << "::TO_DO::All temp names is already used - delete some of them";
+    }
     return( "" );
 }
     
 int FilesystemHelper::CreateDir(const std::string& dir, int rights) {
+    std::lock_guard<std::mutex> l{FilesystemHelper::fsLock};// lock fs
     struct stat st;
     int ret = stat(dir.c_str(), &st);
     T5LOG( T5DEVELOP) <<  "FilesystemHelper::CreateDir(" << dir << "; rights = " << rights << ")::stat():: ret = " << ret;

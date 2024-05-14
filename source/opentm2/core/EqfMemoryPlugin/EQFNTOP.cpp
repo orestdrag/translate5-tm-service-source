@@ -338,6 +338,10 @@ USHORT EqfMemory::OpenX()
     InBtree.QDAMDictClose();
 
     NTMDestroyLongNameTable( );
+    T5LOG(T5ERROR) << "Failed to open tm \""<< this->szName << "\" with rc = " << usRc;
+    eStatus = FAILED_TO_OPEN_STATUS;
+  }else{
+    eStatus = OPEN_STATUS;
   } /* endif */
 
   return( usRc );
