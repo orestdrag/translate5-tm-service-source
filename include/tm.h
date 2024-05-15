@@ -4119,6 +4119,7 @@ class TMManager{
   int AddMem(const std::shared_ptr<EqfMemory> NewMem);
   int OpenTM(const std::string& strMemName);
   int CloseTM(const std::string& strMemName);
+  int CloseTMUnsafe(const std::string& strMemName);
   int DeleteTM(const std::string& strMemName, std::string& outputMsg);
 
   int RenameTM(const std::string& oldMemName, const std::string& newMemName, std::string& outputMsg);

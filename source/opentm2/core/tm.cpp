@@ -457,7 +457,7 @@ int TMManager::RenameTM(
   }
 
 
-  TMManager::GetInstance()->CloseTM(oldMemoryName);
+  TMManager::GetInstance()->CloseTMUnsafe(oldMemoryName);
 
   // move/rename the memory
   if( !_rc_){
@@ -1335,11 +1335,16 @@ int TMManager::AddMem(const std::shared_ptr<EqfMemory> NewMem){
 }
 
 int TMManager::CloseTM(const std::string& strMemName){
-  if(!IsMemoryLoaded(strMemName)){
+  std::lock_guard<std::mutex> l{mutex_access_tms};
+  return CloseTMUnsafe(strMemName);
+}
+
+int TMManager::CloseTMUnsafe(const std::string& strMemName){
+  //std::lock_guard<std::mutex> l{mutex_access_tms};
+  if(!IsMemoryLoadedUnsafe(strMemName)){
     return 404;
   }
   {
-    std::lock_guard<std::mutex> l{mutex_access_tms};
     tms.erase(strMemName);
   }
   return 0;
