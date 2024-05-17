@@ -32,6 +32,22 @@ std::wstring EncodingHelper::EscapeXML( std::wstring input ){
 }
 
 
+bool EncodingHelper::endsWith(const std::string& str, const std::string& suffix) {
+    return str.size() >= suffix.size() && str.rfind(suffix) == str.size() - suffix.size();
+}
+
+std::string EncodingHelper::toLowerCase(const std::string& str) {
+    std::string result = str;
+    std::transform(result.begin(), result.end(), result.begin(), ::tolower);
+    return result;
+}
+
+bool EncodingHelper::endsWithIgnoreCase(const std::string& str, const std::string& suffix) {
+    std::string lowerStr = toLowerCase(str);
+    std::string lowerSuffix = toLowerCase(suffix);
+    return lowerStr.size() >= lowerSuffix.size() && lowerStr.rfind(lowerSuffix) == lowerStr.size() - lowerSuffix.size();
+}
+
 std::string to_utf8(const std::u16string &s)
 {
     std::wstring_convert<std::codecvt_utf8<char16_t>, char16_t> conv;

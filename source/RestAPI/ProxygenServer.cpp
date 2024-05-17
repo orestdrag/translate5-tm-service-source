@@ -40,7 +40,7 @@ DECLARE_bool(localhostonly);
 DECLARE_int32(triplesthreshold);
 DECLARE_int32(timeout);
 DECLARE_int32(servicethreads);
-DECLARE_int32(allowedram);
+DECLARE_int64(allowedram);
 DECLARE_int32(t5loglevel);
 DECLARE_bool(log_every_request_start);
 DECLARE_bool(log_every_request_end);

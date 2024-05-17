@@ -1587,6 +1587,7 @@ typedef enum _PROCWINSTYLE
 #define SERVER_DRIVE_ACTIVE                TMERR_BASE + 41 // for Open, /*@89A*/
 #define TM_PROPERTIES_EQUAL                TMERR_BASE + 42 // for Open,/*@1170A*/
 #define TM_PROPERTIES_NOT_OPENED           TMERR_BASE + 43 // for Open,/*@1170A*/
+#define TMD_SIZE_IS_BIGGER_THAN_ALLOWED           TMERR_BASE + 44 
 
 #define BLOCK_SIZE_TOO_SMALL     TMERR_BASE + 48 /* for Create         */
 #define FILE_ALREADY_EXISTS      TMERR_BASE + 49 /* for Create         */

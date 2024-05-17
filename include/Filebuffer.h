@@ -10,12 +10,19 @@ enum  FileBufferStatus{
         MODIFIED = 4,        
     };
 
+enum FilebufferType{
+    OTHER = 0,
+    TMD_FILEBUFFER,
+    TMI_FILEBUFFER,
+};
+
 struct FileBuffer{
     int status ;//FILEBUFFERSTATUS
     std::vector<unsigned char> data;
     size_t offset = 0;
     FILE* file = nullptr;
     std::string fileName;   
+    FilebufferType filebufferType;
     long long originalFileSize = 0;
 
     int ReadFromFile();
@@ -28,6 +35,7 @@ struct FileBuffer{
     int Read(void* buff, size_t buffSize, size_t startingPosition);
     int Read(void* buff, size_t buffSize);
 
+    bool isTMDFilebuffer();
 
 } ;
 

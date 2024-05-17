@@ -49,6 +49,11 @@ class EncodingHelper{
     void static Base64Decode (const std::string& input, unsigned char *& output, int& output_size);
 
     static std::wstring EscapeXML( std::wstring input );
+
+    static bool endsWithIgnoreCase(const std::string& str, const std::string& suffix);
+    static bool endsWith(const std::string& str, const std::string& suffix);
+    static std::string toLowerCase(const std::string& str);
+
 };
 
 #endif

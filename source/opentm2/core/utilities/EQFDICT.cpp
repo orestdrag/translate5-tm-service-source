@@ -981,7 +981,8 @@ SHORT BTREE::QDAMWRecordToDisk_V3
 
  SHORT sRc = fb.Write((PVOID) &pBuffer->contents, BTREE_REC_SIZE_V3,lOffset) ;
 
-  if ( sRc )
+  if ( sRc  //&& sRc != FilesystemHelper::FILEHELPER_ERROR_DATA_SIZE_BIGGER_THAN_ALLOWED_FILEBUFFER_SIZE)
+  && sRc != TMD_SIZE_IS_BIGGER_THAN_ALLOWED)
   {
     sRc = (sRc == ERROR_DISK_FULL) ? BTREE_DISK_FULL : BTREE_WRITE_ERROR;
     fCorrupted = TRUE;                     // indicate corruption
@@ -1175,6 +1176,7 @@ SHORT BTREE::QDAMReadRecordFromDisk_V3
       UtlAlloc( (PVOID *)&(pLEntry->pBuffer), 0L, 0L, NOMSG );
       (usNumberOfAllocatedBuffers)--;
     } /* endif */
+    *ppReadBuffer = nullptr;
   } /* endif */
 
   if ( sRc )

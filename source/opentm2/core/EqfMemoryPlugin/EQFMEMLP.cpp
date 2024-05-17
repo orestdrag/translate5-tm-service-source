@@ -1586,7 +1586,7 @@ USHORT /*APIENTRY*/ MEMINSERTSEGMENT
       //if( pLIDA->mem->importDetails->invalidSegments < 100){
          pLIDA->mem->importDetails->firstInvalidSegmentsSegNums.push_back(std::make_tuple(pSegment->lSegNo, usRC) );
       //}
-      if(usRC == BTREE_LOOKUPTABLE_CORRUPTED || usRC == BTREE_LOOKUPTABLE_TOO_SMALL)
+      if(usRC == BTREE_LOOKUPTABLE_CORRUPTED || usRC == BTREE_LOOKUPTABLE_TOO_SMALL || usRC == TMD_SIZE_IS_BIGGER_THAN_ALLOWED)
       {    
         pLIDA->mem->importDetails->importRc = usRC;
         std::string msg = "TM is reached it's size limit, please create another one and import segments there, rc = " 

@@ -20,6 +20,7 @@
 
 #include <filesystem>
 #include <folly/portability/GFlags.h>
+#include "EncodingHelper.h"
 //#define LOG_FILE_WRITE 1
 
 int __last_error_code = 0;
@@ -272,6 +273,7 @@ FILE* FilesystemHelper::OpenFile(const std::string& path, const std::string& mod
             pFb = &(*getFileBufferInstance())[fixedPath];
             if( fileSize > 0 ){
                 pFb->data.resize(fileSize);
+                //memset(&pFb->data[0], 0, pFb->data.size());
                 
                 if(VLOG_IS_ON(1)){
                     T5LOG( T5INFO) << "OpenFile:: file size >0  -> Filebuffer resized to filesize(" << fileSize << "), fname = " << fixedPath;
@@ -286,6 +288,7 @@ FILE* FilesystemHelper::OpenFile(const std::string& path, const std::string& mod
                     T5LOG( T5INFO) << "OpenFile:: file size <=0  -> Filebuffer resized to default value, fname = " << fixedPath ;
                 }
                 pFb->data.resize(16384);
+                //memset(&pFb->data[0], 0, pFb->data.size());
             }
             if(VLOG_IS_ON(1)){
                 T5LOG( T5INFO) << "OpenFile::Filebuffer created for file " << fixedPath << " with size = " << pFb->data.size();
@@ -421,6 +424,7 @@ int FileBuffer::ReadFromFile(){
     int readed = 0;
     if( originalFileSize > 0  && originalFileSize != -1){
         data.resize(originalFileSize);
+        //memset(&data[0], 0, data.size());
         
         if(VLOG_IS_ON(1)){
             T5LOG( T5INFO) << "OpenFile:: file size >0  -> Filebuffer resized to filesize(" << originalFileSize << "), fname = " << fileName;
@@ -442,7 +446,8 @@ int FileBuffer::ReadFromFile(){
         if(VLOG_IS_ON(1)){
             T5LOG( T5INFO) << "OpenFile:: file size <=0  -> Filebuffer resized to default value, fname = " << fileName ;
         }
-        data.resize(16384);
+        data.resize(16384);        
+        //memset(&data[0], 0, data.size());
     }
     return 0;
 }
@@ -545,6 +550,14 @@ int FileBuffer::Read(void* buff, size_t buffSize, size_t startingPos){
 }
 
 
+
+bool FileBuffer::isTMDFilebuffer(){
+    //if(filebufferType == FilebufferType::TMD_FILEBUFFER){
+    return EncodingHelper::endsWithIgnoreCase(fileName, ".tmd" );
+}
+
+DECLARE_int64(allowedtmdsize);
+
 int FileBuffer::Write(const void* buff, size_t buffSize, size_t startingPosition){
     status |= MODIFIED;
     if(startingPosition + buffSize > data.size()){
@@ -552,6 +565,17 @@ int FileBuffer::Write(const void* buff, size_t buffSize, size_t startingPosition
             T5LOG( T5DEBUG) << "::Resizing filebuffer "<<fileName<<" from "<<data.size()<<
                 " to " <<offset+buffSize;
         }
+        
+        if(isTMDFilebuffer()){
+            size_t allowedSize = (size_t)FLAGS_allowedtmdsize*1000000;
+            if(offset + buffSize > allowedSize){
+                T5LOG(T5INFO) << "filebuffer vector for " << fileName
+                    << " resizing in unsuccessfull, because it's bigger than allowed size " << allowedSize <<" bytes" ;
+                //return FilesystemHelper::FILEHELPER_ERROR_DATA_SIZE_BIGGER_THAN_ALLOWED_FILEBUFFER_SIZE;
+                return TMD_SIZE_IS_BIGGER_THAN_ALLOWED;
+            }
+        }
+        
         data.resize(offset + buffSize);
         if( offset + buffSize > data.size() ){
             T5LOG(T5ERROR) << "filebuffer vector resizing in unsuccessfull for " << fileName ;

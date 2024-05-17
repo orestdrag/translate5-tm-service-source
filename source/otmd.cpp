@@ -73,15 +73,26 @@ DEFINE_int32(servicethreads, 1, "Sets amought of worker threads for service");
 DEFINE_validator(servicethreads, &ValidateThreads);
 
 
-static bool ValidateRAM(const char* flagname, int32_t value) {
+static bool ValidateRAM(const char* flagname, int64_t value) {
    if (value >= 1 && value <= 100000)   // value is ok
      return true;
    printf("Invalid value for --%s: %d, should be [1...100000]\n", flagname, (int)value);
    return false;
 }
 
-DEFINE_int32(allowedram, 4096, "Sets amought RAM(in MB) allowed for service to use");
+DEFINE_int64(allowedram, 4096, "Sets amought RAM(in MB) allowed for service to use");
 DEFINE_validator(allowedram, &ValidateRAM);
+
+
+static bool ValidateTMDSize(const char* flagname, int64_t value) {
+   if (value >= 1 && value <= 10000)   // value is ok
+     return true;
+   printf("Invalid value for --%s: %d, should be [1...10000]\n", flagname, (int)value);
+   return false;
+}
+
+DEFINE_int64(allowedtmdsize, 500, "Sets max size of tmd file(in MB) after which t5m would not allow to add new data to the tm");
+DEFINE_validator(allowedtmdsize, &ValidateTMDSize);
 
 static bool ValidateLOGlevel(const char* flagname, int32_t value) {
    if (value >= 0 && value <= 6)   // value is ok
