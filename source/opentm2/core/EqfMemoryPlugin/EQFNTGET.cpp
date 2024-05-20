@@ -1027,10 +1027,9 @@ USHORT ExactTest
 
 
       //get id of target language in the getin structure
-      if (pTmClb->NTMGetIDFromNameEx( pGetIn->szTargetLanguage,
+      if (pTmClb->NTMGetIDFromName( pGetIn->szTargetLanguage,
                               NULL,
-                              (USHORT)LANG_KEY, &usGetLang,
-                              0, NULL ))
+                              (USHORT)LANG_KEY, &usGetLang))
       {
         usGetLang = 1;
       } /* endif */
@@ -1039,7 +1038,6 @@ USHORT ExactTest
       if ( pTmClb->NTMGetIDFromNameEx( pGetIn->szFileName,
                                pGetIn->szLongName,
                                (USHORT)FILE_KEY, &usGetFile,
-                               0,
                                &usAlternateGetFile ))
       {
         usGetFile = 1;
@@ -2755,7 +2753,7 @@ USHORT FuzzyTest ( EqfMemory* pTmClb,           //ptr to control block
 
       // we have to update the memory language table to keep the language group table up-to-date...
 //      if ( NTMGetIDFromNameEx( pTmClb, pGetIn->szTargetLanguage, NULL, (USHORT)LANG_KEY, &usTargetId, NTMGETID_NOUPDATE_OPT, NULL ))
-      if ( pTmClb->NTMGetIDFromNameEx( pGetIn->szTargetLanguage, NULL, (USHORT)LANG_KEY, &usTargetId, 0, NULL ))
+      if ( pTmClb->NTMGetIDFromName( pGetIn->szTargetLanguage, NULL, (USHORT)LANG_KEY, &usTargetId))
       {
         usTargetId = 1;  // set default..
       } /* endif */

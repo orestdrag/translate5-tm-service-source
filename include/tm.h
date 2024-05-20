@@ -1909,7 +1909,6 @@ USHORT NTMGetIDFromNameEx
   PSZ         pszLongName,             // input, long name (only for FILE_KEY)
   USHORT      usTableType,             // input, type of table to use
   PUSHORT     pusID,                   // output, ID for name being looked up
-  LONG        lOptions,                // input, additional options
   PUSHORT     pusAlternativeID         // output, alternative ID
 );
 USHORT NTMGetNameFromID( PUSHORT, USHORT, PSZ, PSZ );

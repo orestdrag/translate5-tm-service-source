@@ -1564,32 +1564,17 @@ BTREE::EQFNTMUpdate
 {
   SHORT  sRc = 0;           // success indicator
 
-  DEBUGEVENT( EQFNTMUPDATE_LOC, FUNCENTRY_EVENT, 0 );
-
-  //if ( this )
+  SHORT  RetryCount = MAX_RETRY_COUNT;    // retry counter for in-use condition
+  do
   {
-    SHORT  RetryCount;                  // retry counter for in-use condition
-    RetryCount = MAX_RETRY_COUNT;
-    do
+    sRc = QDAMDictUpdateLocal( (PSZ_W) &ulKey, pData, ulLen );
+    if ( sRc == BTREE_IN_USE )
     {
-      sRc = QDAMDictUpdateLocal( (PSZ_W) &ulKey, pData, ulLen );
-      if ( sRc == BTREE_IN_USE )
-      {
-        RetryCount--;
-        UtlWait( MAX_WAIT_TIME );
-      } /* endif */
-    } while ( ((sRc == BTREE_IN_USE) || (sRc == BTREE_INVALIDATED)) &&
-              (RetryCount > 0) ); /* enddo */
-  }
-  //else
-  //{
-  //  sRc = BTREE_INVALID;
-  //} /* endif */
-
-  if ( sRc )
-  {
-    ERREVENT( EQFNTMUPDATE_LOC, INTFUNCFAILED_EVENT, sRc );
-  } /* endif */
+      RetryCount--;
+      UtlWait( MAX_WAIT_TIME );
+    } /* endif */
+  } while ( ((sRc == BTREE_IN_USE) || (sRc == BTREE_INVALIDATED)) &&
+            (RetryCount > 0) ); /* enddo */
 
 
   return sRc;
