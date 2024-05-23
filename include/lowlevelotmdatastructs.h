@@ -475,96 +475,113 @@ typedef enum _SEARCHTYPE
 } SEARCHTYPE;
 
 
-struct BTREE
+struct BTREEDATA{
+  BTREEDATA() {
+    memset(this, 0, sizeof(*this));
+  }
+
+  USHORT       usFirstNode=0;                    // file pointer of record
+  USHORT       usFirstLeaf=0;                    // file pointer of record
+
+  PBTREEINDEX_V3  pIndexBuffer_V3 = nullptr;     // Pointer to index records
+  USHORT       usIndexBuffer=0;                  // number of index buffers
+  PFN_QDAMCOMPARE compare = nullptr;             // Comparison function
+  USHORT       usNextFreeRecord;                 // Next record to expand to
+  //CHAR         chFileName[144];                // Name of B-tree file
+  RECPARAM     DataRecList[ MAX_LIST ];          // last used data records
+  BOOL         fGuard=0;                         // write every record
+  BOOL         fOpen=0;                          // open flag
+  BOOL         fCorrupted=0;                     // mark as corrupted
+  WCHAR        TempKey[HEADTERM_SIZE];           // pointer to temp. key
+  //ULONG        ulTempRecSize = MAXDATASIZE;      // size of temp record area
+  BOOL         fTerse=0;                         // tersing requested
+  BYTE         chEntryEncode[ ENTRYENCODE_LEN];  // significant characters
+  BYTE         bEncodeLen[COLLATE_SIZE];         // encoding table length
+  CHAR         chEncodeVal[COLLATE_SIZE];        // encoding table
+  BYTE         chDecode[ENTRYDECODE_LEN];        // decoding table
+  //BYTE         chCollate[COLLATE_SIZE];          // collating sequence to use
+  NTMVITALINFO chCollate;
+  BYTE         chCaseMap[COLLATE_SIZE];          // case mapping to be used
+  USHORT       usFreeKeyBuffer=0;                // index of buffer to use
+  USHORT       usFreeDataBuffer=0;               // first data buffer chain
+  USHORT       usFirstDataBuffer=0;              // first data buffer
+  BTREEBUFFER_V3  BTreeTempBuffer_V3;            // temporary V3 buffer
+  LONG         lTime=0;                          // time of last update/open
+  USHORT       usVersion=0;                      // version identification...
+  CHAR         chEQF[7];                         // The type of file
+  BYTE         bVersion=0;                       // version flag
+  USHORT       usOpenFlags=0;                    // settings used for open
+  LONG         alUpdCtr[MAX_UPD_CTR];            // list of update counters
+  HFILE        fpDummy=nullptr;                  // dummy/lock semaphore file handle
+  USHORT       usNumberOfLookupEntries=0;        // Number of allocated lookup-table-entries
+  USHORT       usNumberOfAllocatedBuffers=0;     // Number of allocated buffers
+  ULONG        ulReadRecCalls=0;                 // Number of calls to QDAMReadRecord
+  PLOOKUPENTRY_V3 LookupTable_V3=nullptr;        // Pointer to lookup-table
+  PACCESSCTRTABLEENTRY AccessCtrTable=nullptr;   // Pointer to access-counter-table
+  BYTE         bRecSizeVersion=0;                  // record size version flag
+  //} //end of PBTREEGLOB
+
+
+  // the following define moved from eqfqdami.h since it must be known in
+  // eqfdorg.c
+  /**********************************************************************/
+  /* To check that we are opening a valid B-tree file, there is a       */
+  /* magic cookie stored at the beginning.  This is as follows          */
+  /* This value might be changed to include version identifications...  */
+  /**********************************************************************/
+  #define BTREE_VERSION3      3
+
+
+
+  HTM          htm=nullptr;                      // handle in remote case
+  SHORT        sCurrentIndex=0;                  // current sequence array
+  USHORT       usCurrentRecord=0;                // current sequence record
+  USHORT       usDictNum=0;                      // index in global structure
+  wchar_t      chHeadTerm[HEADTERM_SIZE];        // last active head term
+  BOOL         fLock=0;                          // head term is locked
+  wchar_t      chLockedTerm[HEADTERM_SIZE];      // locked term if any
+  //QDAM part
+  //PBTREEGLOB   pBTree;                           // pointer to global struct
+  ULONG        ulNum=0;
+  //CHAR         chDictName[ MAX_EQF_PATH ];
+  BOOL         fDictLock=0;                        // is dictionary locked
+  //std::atomic<int> usOpenCount;                  // number of accesses...
+  //PBTREE       pIdaList[ MAX_NUM_DICTS ];        // number of instances ...
+  //End of qdam part
+};
+
+struct BTREE: public BTREEDATA
 {   
+  //new fields 
+  FileBuffer fb;
+  std::vector<BYTE>         TempRecord;
+
   BTREE(){
     AllocateMem();
+    /*
     memset(&DataRecList[0], 0, sizeof(DataRecList));
+    memset(&TempKey, 0, sizeof(TempKey));
+    memset(&chEntryEncode, 0, sizeof(chEntryEncode));
+    memset(&bEncodeLen, 0, sizeof(bEncodeLen));
+
+    memset(&chEncodeVal[0], 0, sizeof(chEncodeVal));
+    memset(&chDecode, 0, sizeof(chDecode));
+    memset(&chCaseMap, 0, sizeof(chCaseMap));
+    memset(&chEQF, 0, sizeof(chEQF));
+
+    memset(&alUpdCtr[0], 0, sizeof(alUpdCtr));
+    memset(&chHeadTerm, 0, sizeof(chHeadTerm));
+    memset(&chLockedTerm, 0, sizeof(chLockedTerm));
+
+    memset(&chCollate, 0, sizeof(chCollate));
+    memset(&BTreeTempBuffer_V3, 0, sizeof(BTreeTempBuffer_V3));
+    //*/
   }
   int AllocateMem(){
     int rc = 0;
     TempRecord = std::vector<BYTE>(MAXDATASIZE, 0);
-    //ulTempRecSize = MAXDATASIZE;
-    //if(!pTempRecord) rc = UtlAlloc( (PVOID*)&pTempRecord, 0L, ulTempRecSize, -1); 
     return rc;
   }
-
-  ~BTREE(){
-    //if(pTempRecord) UtlAlloc( (PVOID*)&pTempRecord, ulTempRecSize, 0L, -1); 
-  }
-    FileBuffer fb;
-    //{From BTREE
-
-    USHORT       usFirstNode=0;                    // file pointer of record
-    USHORT       usFirstLeaf=0;                    // file pointer of record
-
-    PBTREEINDEX_V3  pIndexBuffer_V3 = nullptr;     // Pointer to index records
-    USHORT       usIndexBuffer=0;                  // number of index buffers
-    PFN_QDAMCOMPARE compare = nullptr;             // Comparison function
-    USHORT       usNextFreeRecord;                 // Next record to expand to
-    //CHAR         chFileName[144];                // Name of B-tree file
-    RECPARAM     DataRecList[ MAX_LIST ];          // last used data records
-    BOOL         fGuard=0;                         // write every record
-    BOOL         fOpen=0;                          // open flag
-    BOOL         fCorrupted=0;                     // mark as corrupted
-    WCHAR        TempKey[HEADTERM_SIZE];           // pointer to temp. key
-    std::vector<BYTE>         TempRecord;          // pointer to temp record
-    //ULONG        ulTempRecSize = MAXDATASIZE;      // size of temp record area
-    BOOL         fTerse=0;                         // tersing requested
-    BYTE         chEntryEncode[ ENTRYENCODE_LEN];  // significant characters
-    BYTE         bEncodeLen[COLLATE_SIZE];         // encoding table length
-    CHAR         chEncodeVal[COLLATE_SIZE];        // encoding table
-    BYTE         chDecode[ENTRYDECODE_LEN];        // decoding table
-    //BYTE         chCollate[COLLATE_SIZE];          // collating sequence to use
-    NTMVITALINFO chCollate;
-    BYTE         chCaseMap[COLLATE_SIZE];          // case mapping to be used
-    USHORT       usFreeKeyBuffer=0;                // index of buffer to use
-    USHORT       usFreeDataBuffer=0;               // first data buffer chain
-    USHORT       usFirstDataBuffer=0;              // first data buffer
-    BTREEBUFFER_V3  BTreeTempBuffer_V3;            // temporary V3 buffer
-    LONG         lTime=0;                          // time of last update/open
-    USHORT       usVersion=0;                      // version identification...
-    CHAR         chEQF[7];                         // The type of file
-    BYTE         bVersion=0;                       // version flag
-    USHORT       usOpenFlags=0;                    // settings used for open
-    LONG         alUpdCtr[MAX_UPD_CTR];            // list of update counters
-    HFILE        fpDummy=nullptr;                  // dummy/lock semaphore file handle
-    USHORT       usNumberOfLookupEntries=0;        // Number of allocated lookup-table-entries
-    USHORT       usNumberOfAllocatedBuffers=0;     // Number of allocated buffers
-    ULONG        ulReadRecCalls=0;                 // Number of calls to QDAMReadRecord
-    PLOOKUPENTRY_V3 LookupTable_V3=nullptr;        // Pointer to lookup-table
-    PACCESSCTRTABLEENTRY AccessCtrTable=nullptr;   // Pointer to access-counter-table
-    BYTE         bRecSizeVersion=0;                  // record size version flag
-    //} //end of PBTREEGLOB
-
-
-    // the following define moved from eqfqdami.h since it must be known in
-    // eqfdorg.c
-    /**********************************************************************/
-    /* To check that we are opening a valid B-tree file, there is a       */
-    /* magic cookie stored at the beginning.  This is as follows          */
-    /* This value might be changed to include version identifications...  */
-    /**********************************************************************/
-    #define BTREE_VERSION3      3
-
-
-
-    HTM          htm=nullptr;                      // handle in remote case
-    SHORT        sCurrentIndex=0;                  // current sequence array
-    USHORT       usCurrentRecord=0;                // current sequence record
-    USHORT       usDictNum=0;                      // index in global structure
-    wchar_t      chHeadTerm[HEADTERM_SIZE];        // last active head term
-    BOOL         fLock=0;                          // head term is locked
-    wchar_t      chLockedTerm[HEADTERM_SIZE];      // locked term if any
-    //QDAM part
-    //PBTREEGLOB   pBTree;                           // pointer to global struct
-    ULONG        ulNum;
-    //CHAR         chDictName[ MAX_EQF_PATH ];
-    BOOL         fDictLock;                        // is dictionary locked
-    //std::atomic<int> usOpenCount;                  // number of accesses...
-    //PBTREE       pIdaList[ MAX_NUM_DICTS ];        // number of instances ...
-    //End of qdam part
-
     //+----------------------------------------------------------------------------+
     // Internal function
     //+----------------------------------------------------------------------------+
