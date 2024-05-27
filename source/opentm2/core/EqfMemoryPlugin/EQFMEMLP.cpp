@@ -612,9 +612,9 @@ static USHORT  MemLoadStart( PVOID *ppIda,
          //EqfRemoveObject( TWBFORCE, hWnd );
       } /* endif */
    }else{
-    time( &pLIDA->mem->importDetails->lReorganizeStartTime );
+    time( &pLIDA->mem->importDetails->lImportStartTime );
     T5LOG(T5DEBUG)  << "************ Memory Import Log *********************\n Memory import started at   : "<<
-          asctime( localtime( &pLIDA->mem->importDetails->lReorganizeStartTime ) )<< "\nMemory name                : "  << pLIDA->szMemName ;
+          asctime( localtime( &pLIDA->mem->importDetails->lImportStartTime ) )<< "\nMemory name                : "  << pLIDA->szMemName ;
    } /* endif */   
 
    return ((USHORT)fOK);
@@ -1113,9 +1113,9 @@ USHORT MemFuncImportProcess
           LONG lCurTime = 0;  
           time( &lCurTime );
                   
-          if ( pData->mem->importDetails->lReorganizeStartTime )
+          if ( pData->mem->importDetails->lImportStartTime )
           {
-            LONG lDiff = lCurTime - pData->mem->importDetails->lReorganizeStartTime;
+            LONG lDiff = lCurTime - pData->mem->importDetails->lImportStartTime;
             char buff[256];
             sprintf( buff, "Overall import time is      : %ld:%2.2ld:%2.2ld\n", lDiff / 3600, 
                     (lDiff - (lDiff / 3600 * 3600)) / 60,
@@ -1571,7 +1571,7 @@ USHORT /*APIENTRY*/ MEMINSERTSEGMENT
 
     pLIDA->pProposal->pInputSentence = new TMX_SENTENCE(pSegment->szSource, pSegment->szTarget);
 
-    pLIDA->ulActiveSegment++;
+    //pLIDA->ulActiveSegment++;
     // insert/replace segment in(to) memory
     usRC = (USHORT)pLIDA->mem->putProposal( *(pLIDA->pProposal) );
 

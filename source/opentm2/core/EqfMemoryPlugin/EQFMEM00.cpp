@@ -432,9 +432,9 @@ VOID EQFMemOrganizeEnd
   LONG lCurTime = 0;  
   time( &lCurTime );
                 
-  if ( pRIDA->pMem->importDetails->lReorganizeStartTime )
+  if ( pRIDA->pMem->importDetails->lImportStartTime )
   {
-    LONG lDiff = lCurTime - pRIDA->pMem->importDetails->lReorganizeStartTime;
+    LONG lDiff = lCurTime - pRIDA->pMem->importDetails->lImportStartTime;
     char buff[256];
     sprintf( buff, "Overall reorganize time is      : %ld:%2.2ld:%2.2ld\n", lDiff / 3600, 
             (lDiff - (lDiff / 3600 * 3600)) / 60,

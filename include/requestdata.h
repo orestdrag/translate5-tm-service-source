@@ -138,6 +138,7 @@ protected:
     IMPORTMEMORYDATA* pData = nullptr;
     std::string strTempFile;
     std::string strTmxData;
+    long timeout = 0;
 };
 
 

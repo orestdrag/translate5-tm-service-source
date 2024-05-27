@@ -101,13 +101,15 @@ struct ImportStatusDetails{
   std::atomic_int invalidSegments{0};
   std::atomic_int invalidSymbolErrors{0};
   std::atomic_int resSegments {0};
-  std::atomic_long lActiveSegment{0};
+  //std::atomic_long lActiveSegment{0};
   int importRc{0};
   long filteredSegments{0};
   std::map<int, int> invalidSegmentsRCs;
   std::string importTimestamp;
   std::vector<std::tuple<int,int>> firstInvalidSegmentsSegNums;
-  long lReorganizeStartTime;
+  long lImportStartTime;
+  long lImportTimeoutSec = 0;
+  std::atomic_long lImportRunTimeSec;
   std::stringstream importMsg;
   bool fReorganize{0}; // true for reorganize call, false for import
   size_t activeSegment{0};
@@ -118,7 +120,7 @@ struct ImportStatusDetails{
     firstInvalidSegmentsSegNums.reserve(100);
     importMsg.str("");
     usProgress = 0;
-    lActiveSegment = 0;
+    //lActiveSegment = 0;
     importRc = 0;
     segmentsCount = 0;
     segmentsImported = 0;
@@ -126,7 +128,9 @@ struct ImportStatusDetails{
     invalidSymbolErrors = 0;
     resSegments = 0;
     fReorganize = 0;
-    lReorganizeStartTime = 0;
+    lImportStartTime = 0;
+    lImportTimeoutSec = 0;
+    lImportRunTimeSec = 0;
     importTimestamp = "not finished";    
     invalidSegmentsRCs.clear();
     activeSegment = 0;

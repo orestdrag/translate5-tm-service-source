@@ -1402,7 +1402,28 @@ USHORT CTMXExportImport::ImportNext
       if(pImportData != nullptr){
         pImportData->invalidSymbolErrors = m_handler->getInvalidCharacterErrorCount();
 
-        if(pImportData->importRc) errorCount++;        
+        if(pImportData->importRc) errorCount++;
+
+        LONG lImportRunTime = 0;  
+        time( &lImportRunTime );          
+        pImportData->lImportRunTimeSec  = (lImportRunTime - pImportData->lImportStartTime);    
+        pImportData->lImportTimeoutSec=60;
+        if(!pImportData->importRc && pImportData->lImportTimeoutSec > 0){
+          if(pImportData->lImportRunTimeSec >= pImportData->lImportTimeoutSec){
+            errorCount++;
+            int iPos = (int)m_parser->getSrcOffset();
+
+            INT64 iComplete = (INT64)iPos;
+            INT64 iTotal = (INT64)m_iSourceSize;
+
+            pImportData->importMsg  << "Import stopped because of timeout("<<pImportData->lImportTimeoutSec <<" sec), import time " 
+              << pImportData->lImportRunTimeSec << " sec, progress " << (USHORT)(iComplete * 100.0 / iTotal)
+              << "%, segment count stopped at " << pImportData->segmentsCount << " position in tmx file";
+            
+            LOG_AND_SET_RC(pImportData->importRc, T5ERROR, IMPORT_TIMEOUT_REACHED);
+          }
+        }
+
         // compute current progress
         if ( !errorCount && fContinue )
         {

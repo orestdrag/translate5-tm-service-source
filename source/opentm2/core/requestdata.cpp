@@ -743,37 +743,45 @@ int ImportRequestData::parseJSON(){
 
   std::string name;
   std::string value;
+  try{
   while ( _rc_ == 0 )
   {
     _rc_ = json_factory.parseJSONGetNext( parseHandle, name, value );
-    if ( _rc_ == 0 )
-    {
-      if ( strcasecmp( name.c_str(), "tmxData" ) == 0 )
+      if ( _rc_ == 0 )
       {
-        strTmxData = value;
-        //break;
-      }else if(strcasecmp(name.c_str(), "loggingThreshold") == 0){
-        loggingThreshold = std::stoi(value);
-        T5LOG( T5WARNING) <<"OtmMemoryServiceWorker::import::set new threshold for logging" << loggingThreshold;
-        T5Logger::GetInstance()->SetLogLevel(loggingThreshold);        
-      }else if(strcasecmp(name.c_str(), "framingTags") == 0){
-        std::string strInclosingTagsBehaviour = value;
-        if(strcasecmp(value.c_str(), "saveAll") == 0){
-          inclosingTagsBehaviour = InclosingTagsBehaviour::saveAll;
-        }else if(strcasecmp(value.c_str(), "skipAll") == 0){
-          inclosingTagsBehaviour = InclosingTagsBehaviour::skipAll;
-        }else if(strcasecmp(value.c_str(), "skipPaired") == 0){
-          inclosingTagsBehaviour = InclosingTagsBehaviour::skipPaired;
+        if ( strcasecmp( name.c_str(), "tmxData" ) == 0 )
+        {
+          strTmxData = value;
+          //break;
+        }else if(strcasecmp(name.c_str(), "timeout") == 0){
+          timeout = std::stol(value);
+        }else if(strcasecmp(name.c_str(), "loggingThreshold") == 0){
+          loggingThreshold = std::stoi(value);
+          T5LOG( T5WARNING) <<"OtmMemoryServiceWorker::import::set new threshold for logging" << loggingThreshold;
+          T5Logger::GetInstance()->SetLogLevel(loggingThreshold);        
+        }else if(strcasecmp(name.c_str(), "framingTags") == 0){
+          std::string strInclosingTagsBehaviour = value;
+          if(strcasecmp(value.c_str(), "saveAll") == 0){
+            inclosingTagsBehaviour = InclosingTagsBehaviour::saveAll;
+          }else if(strcasecmp(value.c_str(), "skipAll") == 0){
+            inclosingTagsBehaviour = InclosingTagsBehaviour::skipAll;
+          }else if(strcasecmp(value.c_str(), "skipPaired") == 0){
+            inclosingTagsBehaviour = InclosingTagsBehaviour::skipPaired;
+          }
+        }else{
+          T5LOG( T5WARNING) << "JSON parsed unexpected name, " << name;
         }
-      }else{
-        T5LOG( T5WARNING) << "JSON parsed unexpected name, " << name;
+      }else if(_rc_ != 2002){// _rc_ != INFO_ENDOFPARAMETERLISTREACHED
+        std::string msg = "failed to parse JSON, _rc_ = " + std::to_string(_rc_);
+        return buildErrorReturn(_rc_, msg.c_str(), BAD_REQUEST);
       }
-    }else if(_rc_ != 2002){// _rc_ != INFO_ENDOFPARAMETERLISTREACHED
-      std::string msg = "failed to parse JSON, _rc_ = " + std::to_string(_rc_);
-      return buildErrorReturn(_rc_, msg.c_str(), BAD_REQUEST);
-    }
-  } /* endwhile */
-  json_factory.parseJSONStop( parseHandle );
+    } /* endwhile */
+    json_factory.parseJSONStop( parseHandle );
+  }
+  catch(...)
+  {
+    return buildErrorReturn(444, "Json parsing failed", 400);
+  }
   if(_rc_ == 2002) _rc_ = 0;
   return 0; 
 }
@@ -912,6 +920,11 @@ int ImportRequestData::execute(){
   }
   
   mem->importDetails->reset();
+
+  LONG lCurTime = 0;  
+  time( &lCurTime );                  
+  mem->importDetails->lImportStartTime = lCurTime;
+  mem->importDetails->lImportTimeoutSec = timeout;
   pData->mem = mem;
 
   //importMemoryProcess(pData);//to do in same thread
@@ -1020,6 +1033,9 @@ int ImportLocalRequestData::execute(){
   }
   
   mem->importDetails->reset();
+  LONG lCurTime = 0;  
+  time( &lCurTime );                  
+  mem->importDetails->lImportStartTime = lCurTime;
   pData->mem = mem;
 
   //importMemoryProcess(pData);//to do in same thread
@@ -1331,7 +1347,7 @@ int ReorganizeRequestData::execute(){
     LONG lCurTime = 0;  
     time( &lCurTime );
                   
-    pRIDA->pMem->importDetails->lReorganizeStartTime = lCurTime;
+    pRIDA->pMem->importDetails->lImportStartTime = lCurTime;
     mem->importDetails->fReorganize = true;
 
     mem.reset();
@@ -1428,7 +1444,7 @@ int DeleteEntriesReorganizeRequestData::execute(){
     LONG lCurTime = 0;  
     time( &lCurTime );
                   
-    pRIDA->pMem->importDetails->lReorganizeStartTime = lCurTime;
+    pRIDA->pMem->importDetails->lImportStartTime = lCurTime;
     mem->importDetails->fReorganize = true;
 
     mem.reset();
@@ -1774,6 +1790,8 @@ int StatusMemRequestData::execute() {
       if(mem->importDetails->fReorganize) json_factory.addParmToJSON( outputMessage, "segmentsFilteredOut", mem->importDetails->filteredSegments );
       json_factory.addParmToJSON( outputMessage, "invalidSegments", mem->importDetails->invalidSegments );
       json_factory.addParmToJSON( outputMessage, "tmxSegmentCount", mem->importDetails->segmentsCount );
+      json_factory.addParmToJSON( outputMessage, "importRuntimeSec", mem->importDetails->lImportRunTimeSec );
+      json_factory.addParmToJSON( outputMessage, "importTimeoutSec", mem->importDetails->lImportTimeoutSec );
       std::string invalidSegmRCs;
       for(auto [errCode, errCount]: mem->importDetails->invalidSegmentsRCs){
         invalidSegmRCs += std::to_string(errCode) + ":" + std::to_string(errCount) +"; ";
