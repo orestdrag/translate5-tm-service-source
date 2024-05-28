@@ -778,13 +778,13 @@ int JSONFactory::extractString
               }
 
               // convert to UTF8
-              int iUTF8Len;
-              iUTF8Len = WideCharToMultiByte( CP_UTF8, 0, (LPWSTR)strUTF16.c_str(), iLen, 0, 0, 0, 0 );
-              std::string strUTF8( iUTF8Len, '\0' );
-              WideCharToMultiByte( CP_UTF8, 0, (LPWSTR)strUTF16.c_str(), iLen, &strUTF8[0], iUTF8Len, 0, 0 );
-
+              //int iUTF8Len;
+              //iUTF8Len = WideCharToMultiByte( CP_UTF8, 0, (LPWSTR)strUTF16.c_str(), iLen, 0, 0, 0, 0 );
+              //std::string strUTF8( iUTF8Len, '\0' );
+              //WideCharToMultiByte( CP_UTF8, 0, (LPWSTR)strUTF16.c_str(), iLen, &strUTF8[0], iUTF8Len, 0, 0 );
+              std::string strUTF8 = EncodingHelper::convertToUTF8(strUTF16.c_str());
               // add UTF8 character to target string
-              for ( int i = 0; i < iUTF8Len; i++ ) string[iTargetPos++] = strUTF8[i];
+              for ( int i = 0; i < strUTF8.length(); i++ ) string[iTargetPos++] = strUTF8[i];
             }
             break;
           default:
