@@ -432,8 +432,7 @@ int TMManager::DeleteTM(
   return _rc_;
 }
 
-
-int TMManager::RenameTM(
+int TMManager::MoveTM(
   const std::string& oldMemoryName,
   const std::string& newMemoryName,
   std::string &strError
@@ -467,6 +466,46 @@ int TMManager::RenameTM(
 
     //check tmi file
     if(FilesystemHelper::MoveFile(FilesystemHelper::GetTmiPath(oldMemoryName),  FilesystemHelper::GetTmiPath(newMemoryName))){
+      _rc_ |= 8;
+    }    
+  }
+  return _rc_;
+}
+
+int TMManager::RenameTM(
+  const std::string& oldMemoryName,
+  const std::string& newMemoryName,
+  std::string &strError
+)
+{
+  int _rc_ = 0;
+  //close if open
+  //if files exists
+  if (_rc_ = TMManager::GetInstance()->TMExistsOnDisk(oldMemoryName) )
+  {
+    strError = "{\"" + oldMemoryName + "\": \"not found(error " + std::to_string(_rc_) + ")\" }";
+    return( _rc_ = NOT_FOUND );
+  }
+
+  if ( (_rc_ = TMManager::GetInstance()->TMExistsOnDisk(newMemoryName)) == 0 )
+  {
+    strError = "{\"" + newMemoryName + "\": \"already exists (error " + std::to_string(_rc_) + ")\" }";
+    return( _rc_ = NOT_FOUND );
+  }else{
+    _rc_ = 0;
+  }
+
+
+  TMManager::GetInstance()->CloseTMUnsafe(oldMemoryName);
+
+  // move/rename the memory
+  if( !_rc_){
+    if(FilesystemHelper::RenameFile(FilesystemHelper::GetTmdPath(oldMemoryName), FilesystemHelper::GetTmdPath(newMemoryName))){
+      _rc_ |= 16;
+    }
+
+    //check tmi file
+    if(FilesystemHelper::RenameFile(FilesystemHelper::GetTmiPath(oldMemoryName),  FilesystemHelper::GetTmiPath(newMemoryName))){
       _rc_ |= 8;
     }    
   }
@@ -886,19 +925,25 @@ int TMManager::ReplaceMemory
     std::lock_guard<std::mutex> l{TMManager::GetInstance()->mutex_access_tms};// lock tms list
     iRC = TMManager::GetInstance()->DeleteTM( strReplace, outputMsg );
     if(!iRC){
+      T5LOG(T5INFO)<<"Original files was deleted, renaming organize files...";
       iRC = TMManager::GetInstance()->RenameTM( strReplaceWith, strReplace, outputMsg );
     }
     if(!iRC){
+      T5LOG(T5INFO)<<"Reorganize files was renamed, checking if mem is loaded...";
       iRC = !TMManager::GetInstance()->IsMemoryLoadedUnsafe(strReplace);
     }
     if(!iRC){
+      T5LOG(T5INFO)<<"Mem is loaded, reloading filebuffers  from disk...";
       iRC = TMManager::GetInstance()->tms[strReplace]->ReloadFromDisk();
     }
   }
   // broadcast deleted memory name for replaceWith memory
   if ( iRC == EqfMemoryPlugin::eSuccess )
   {
+    T5LOG(T5INFO)<<"Mem "<< strReplaceWith <<" is reorganized successfully";
     strcat( this->szMemObjName, strReplaceWith.c_str() );
+  }else{
+    T5LOG(T5ERROR)<<"Mem "<< strReplaceWith <<" is not reorganized, rc = " << iRC;
   }
   return( iRC );
 }

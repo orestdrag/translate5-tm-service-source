@@ -215,6 +215,44 @@ int FilesystemHelper::CloneFile(std::string srcPath, std::string dstPath){
     return 0;
 }
 
+int FilesystemHelper::RenameFile(std::string oldPath, std::string newPath){
+    std::lock_guard<std::mutex> l{fsLock};// lock fs
+    std::string fixedOldPath = FixPath(oldPath);
+    std::string fixedNewPath = FixPath(newPath);
+    errno = 0;
+    bool fOk = true;
+    //fOk = rename(fixedOldPath.c_str(), fixedNewPath.c_str()) != -1;
+    //Copy file instead
+    if(FileExists(newPath.c_str())){
+        T5LOG(T5ERROR) <<  ":: trg file \'" << newPath << "\' already exists!";
+        return FILE_EXISTS;
+    }
+    if(FileExists(oldPath.c_str()) == false){
+        T5LOG(T5ERROR) << ":: src file \'" << oldPath << "\' is missing!";
+        return FILE_NOT_EXISTS;
+    }
+    // Attempt to rename the file
+    if (std::rename(oldPath.c_str(), newPath.c_str()) == 0) {
+        T5LOG(T5DEBUG) << "File \'"<<oldPath <<"\' renamed successfully to \'" << newPath<< "\'\n";
+    } else {
+    //    T5LOG(T5DEBUG) << "File \'"<<oldPath <<"\' can\'t be renamed to \'" << newPath<< "\'\n";
+    }
+    //RenameFile(oldPath, newPath);
+    //delete prev file
+    //DeleteFile(oldPath);
+    //remove(oldPath);
+    
+    if(!fOk){
+       T5LOG(T5ERROR) << "cannot rename "<< fixedOldPath << " to " << fixedNewPath <<  ", error = " <<  strerror(errno);
+       return errno;
+    }else{
+        if(VLOG_IS_ON(1)){
+            T5LOG( T5INFO) << "file renamed from " << fixedOldPath << " to " <<  fixedNewPath ;
+        }
+    }
+    return 0;
+}
+
 int FilesystemHelper::MoveFile(std::string oldPath, std::string newPath){
     std::lock_guard<std::mutex> l{fsLock};// lock fs
     std::string fixedOldPath = FixPath(oldPath);

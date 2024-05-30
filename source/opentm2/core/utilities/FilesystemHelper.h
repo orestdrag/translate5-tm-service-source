@@ -59,6 +59,7 @@ public:
 
     static bool FileExists(const std::string& fName);
     static int DeleteFile(const std::string& path);
+    static int RenameFile(std::string oldPath, std::string newPath);
     static int RemoveDirWithFiles(const std::string& path);
     static size_t GetFileSize(const std::string& path);
     static size_t GetFileSize(FILE*& ptr);
