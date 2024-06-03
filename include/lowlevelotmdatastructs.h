@@ -40,8 +40,10 @@ typedef char* PSZ;
         SAVE_ALL_TM_ON_DISK,
         SHUTDOWN,    
         DELETE_MEM,
-        EXPORT_MEM,
+        EXPORT_MEM_TMX,
         EXPORT_MEM_INTERNAL_FORMAT,
+        EXPORT_MEM_TMX_STREAM,
+        EXPORT_MEM_INTERNAL_FORMAT_STREAM,
         REORGANIZE_MEM,
         STATUS_MEM,
         RESOURCE_INFO,
@@ -66,8 +68,10 @@ const std::map<const COMMAND,const char*> CommandToStringsMap {
         { SAVE_ALL_TM_ON_DISK, "SAVE_ALL_TM_ON_DISK" },
         { SHUTDOWN, "SHUTDOWN" },
         { DELETE_MEM, "DELETE_MEM" },
-        { EXPORT_MEM, "EXPORT_MEM" },
+        { EXPORT_MEM_TMX, "EXPORT_MEM_TMX" },
+        { EXPORT_MEM_TMX_STREAM, "EXPORT_MEM_TMX_STREAM" },
         { EXPORT_MEM_INTERNAL_FORMAT, "EXPORT_MEM_INTERNAL_FORMAT" },
+        { EXPORT_MEM_INTERNAL_FORMAT_STREAM, "EXPORT_MEM_INTERNAL_FORMAT_STREAM" },
         { STATUS_MEM, "STATUS_MEM" },
         { RESOURCE_INFO, "RESOURCE_INFO" },
         { CREATE_MEM, "CREATE_MEM" },
@@ -1318,7 +1322,7 @@ typedef struct _DDEMEMEXP
 } DDEMEMEXP, *PDDEMEMEXP;
 
 
-
+#include <proxygen/httpserver/ResponseHandler.h>
 
 // structure to pass/receive general memory information
 typedef struct _MEMEXPIMPINFO
@@ -1337,6 +1341,7 @@ typedef struct _MEMEXPIMPINFO
   BOOL    fNoCRLF;                        // remove CRLFs in segment text
   PSZ     pszMarkupList;                   // pointer to a list of markup tables (zero terminated C strigns followed by another zero)
   BYTE    fUnused[20];                     // room for enhancements
+  proxygen::ResponseHandler* responseHandler = nullptr;
   //InclosingTagsBehaviour inclosingTagsBehaviour = InclosingTagsBehaviour::saveAll;
 } MEMEXPIMPINFO, *PMEMEXPIMPINFO;
 
@@ -1694,6 +1699,7 @@ enum statusCodes {
 
 };
 
+#include <proxygen/httpserver/ResponseHandler.h>
 
 /**********************************************************************/
 /* Structure for the communication between generic process window     */
@@ -1823,6 +1829,7 @@ typedef struct _PROCESSCOMMAREA
                                        // for the first listbox
   CHAR             szLB2Text[80];      // R/W: text to be displayed as label
                                        // for the second listbox
+  proxygen::ResponseHandler* responseHandler = nullptr;
 } PROCESSCOMMAREA, *PPROCESSCOMMAREA;
 
 
@@ -2001,6 +2008,8 @@ typedef struct _DDEMSGBUFFER
 } DDEMSGBUFFER, *PDDEMSGBUFFER;
 
 
+#include <proxygen/httpserver/ResponseHandler.h>
+
 class ImportStatusDetails;
 // internal session data area
 typedef struct _FCTDATA
@@ -2046,6 +2055,7 @@ typedef struct _FCTDATA
   std::shared_ptr<EqfMemory> _mem
 );
   std::shared_ptr<EqfMemory> mem;
+  proxygen::ResponseHandler* responseHandler = nullptr;
 } FCTDATA, *PFCTDATA;
 
 

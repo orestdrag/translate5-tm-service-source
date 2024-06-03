@@ -33,7 +33,7 @@ commands by requested tm handler{
 		DELETE_ENTRY, UPDATE_ETRY, IMPORT_MEM(tmx), REORGANIZE_MEM} - to access
 		write tm handler there should be no other active tm handlers(from other requests) and no readonly
 		requests 
-	readonly{FUZZY, CONCORDANCE, EXPORT_MEM, EXPORT_IN_INTERNAL_FORMAT} to access readonly handler, 
+	readonly{FUZZY, CONCORDANCE, EXPORT_MEM, EXPORT_MEM_STREAM, EXPORT_IN_INTERNAL_FORMAT} to access readonly handler, 
 		there should be no active write handlers
 	service(all other: LIST_MEM, SAVE_ALL_TM_ON_DISK, STATUS_MEM, SHUTDOWN, RESOURCE_INFO, CREATE_MEM, (CLONE_MEM), (DELETE_MEM}
 	

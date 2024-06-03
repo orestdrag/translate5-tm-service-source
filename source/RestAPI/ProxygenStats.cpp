@@ -16,8 +16,10 @@ int ProxygenStats::recordRequest(int command) {
       deleteMemReqCount_++;
       break;
     }
-    case COMMAND::EXPORT_MEM: 
+    case COMMAND::EXPORT_MEM_TMX: 
+    case COMMAND::EXPORT_MEM_TMX_STREAM:
     case COMMAND::EXPORT_MEM_INTERNAL_FORMAT:
+    case COMMAND::EXPORT_MEM_INTERNAL_FORMAT_STREAM:
     {
       exportMemReqCount_++;
       break;
@@ -108,8 +110,10 @@ int ProxygenStats::addRequestTime(int command,milliseconds time) {
       deleteMemSumTime_+= time;
       break;
     }
-    case COMMAND::EXPORT_MEM: 
+    case COMMAND::EXPORT_MEM_TMX: 
     case COMMAND::EXPORT_MEM_INTERNAL_FORMAT:
+    case COMMAND::EXPORT_MEM_TMX_STREAM:
+    case COMMAND::EXPORT_MEM_INTERNAL_FORMAT_STREAM:
     {
       exportMemSumTime_ += time;
       break;

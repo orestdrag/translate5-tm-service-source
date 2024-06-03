@@ -4,12 +4,14 @@
 #include <string>
 #include <memory>
 #include <atomic>
+#include <proxygen/httpserver/RequestHandler.h>
+#include <proxygen/httpserver/ExMessageHandler.h>
+
 #include "tm.h"
 
 #include "lowlevelotmdatastructs.h"
 #include "RestAPI/ProxygenStats.h"
     
-   
 
 class EqfMemory;
 class JSONFactory;
@@ -24,6 +26,9 @@ protected:
     //RequestData(); // json was parsed in sub class
 public:
     ProxygenStats* stats = nullptr;
+    proxygen::ResponseHandler* responseHandler = nullptr;
+    //proxygen::HTTPMessage response;
+
     int _id_ = 0;
     bool fValid = false;
     bool fRunning = true;
@@ -53,6 +58,10 @@ public:
     int buildRet(int ret);
 
     COMMAND command = UNKNOWN_COMMAND;
+    bool isStreamingRequest()const{
+        return command == EXPORT_MEM_TMX_STREAM 
+        || command == EXPORT_MEM_INTERNAL_FORMAT_STREAM;
+    }
     
     int run();
 protected:
@@ -438,8 +447,9 @@ class ExportRequestData: public RequestData{
     public:
 
     //std::string requestFormat;//application/xml or application/binary
-    ExportRequestData(const std::string& format, const std::string& memName): RequestData(EXPORT_MEM, "", memName){ requestAcceptHeader = format;};
-    ExportRequestData(): RequestData(EXPORT_MEM){};
+    ExportRequestData(const std::string& format, const std::string& memName): RequestData(EXPORT_MEM_TMX, "", memName){ requestAcceptHeader = format;};
+    ExportRequestData(): RequestData(EXPORT_MEM_TMX){};
+    ExportRequestData(COMMAND command): RequestData(command){};
 protected:
     int parseJSON() override {return 0;}
     int checkData() override ;

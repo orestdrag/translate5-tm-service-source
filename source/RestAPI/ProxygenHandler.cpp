@@ -38,8 +38,10 @@ constexpr  std::initializer_list<std::pair<const COMMAND, const char*>> CommandT
         { SAVE_ALL_TM_ON_DISK, "SAVE_ALL_TM_ON_DISK" },
         { SHUTDOWN, "SHUTDOWN" },
         { DELETE_MEM, "DELETE_MEM" },
-        { EXPORT_MEM, "EXPORT_MEM" },
+        { EXPORT_MEM_TMX, "EXPORT_MEM_TMX" },
         { EXPORT_MEM_INTERNAL_FORMAT, "EXPORT_MEM_INTERNAL_FORMAT" },
+        { EXPORT_MEM_TMX_STREAM, "EXPORT_MEM_TMX_STREAM" },
+        { EXPORT_MEM_INTERNAL_FORMAT_STREAM, "EXPORT_MEM_INTERNAL_FORMAT_STREAM" },
         { STATUS_MEM, "STATUS_MEM" },
         { RESOURCE_INFO, "RESOURCE_INFO" },
         { CREATE_MEM, "CREATE_MEM" },
@@ -64,6 +66,11 @@ const char* searchInCommandToStringsMap(const COMMAND& key) {
     return "UNKNOWN";
 }
 
+
+//#include <proxygen/httpserver/HTTPServer.h>
+//#include <proxygen/httpserver/RequestHandler.h>
+//#include <proxygen/httpserver/RequestHandlerFactory.h>
+
 void ProxygenHandler::onRequest(std::unique_ptr<HTTPMessage> req) noexcept {
 #ifdef TIME_MEASURES 
   start_ms = duration_cast< milliseconds >( system_clock::now().time_since_epoch() );
@@ -86,9 +93,11 @@ void ProxygenHandler::onRequest(std::unique_ptr<HTTPMessage> req) noexcept {
   T5LOG(T5DEBUG) << "received request url:\"" << pRequest->strUrl <<"\"; type " << searchInCommandToStringsMap(pRequest->command);  
  
   std::string requestAcceptHeader = headers.getSingleOrEmpty("Accept");
-  if(pRequest->command == COMMAND::EXPORT_MEM){
+  if(pRequest->isStreamingRequest()){
+    pRequest->responseHandler = downstream_;    
+  }else if(EXPORT_MEM_TMX == pRequest->command){
     if(requestAcceptHeader == "application/xml"){
-      pRequest->command = COMMAND::EXPORT_MEM;   
+      pRequest->command = COMMAND::EXPORT_MEM_TMX;   
     }else if(requestAcceptHeader == "application/zip"){
       pRequest->command = COMMAND::EXPORT_MEM_INTERNAL_FORMAT;
     }else{
@@ -161,7 +170,12 @@ void ProxygenHandler::requestComplete() noexcept {
   delete this;
 }
 
-void ProxygenHandler::onError(ProxygenError /*err*/) noexcept {
+void ProxygenHandler::onError(ProxygenError /*err*/) noexcept { 
+  if(pRequest){
+    //while(pRequest->fRunning){};
+    delete pRequest;
+    pRequest = nullptr;
+  }
   delete this;
 }
 
@@ -211,39 +225,45 @@ void ProxygenHandler::sendResponse()noexcept{
         break;
       }
     }
-    builder->status(pRequest->_rest_rc_, responseText);
-    if (FLAGS_request_number) {
-      builder->header("Request-Number",
-                    folly::to<std::string>(pRequest->_id_));
-    }
     
-    #ifdef TIME_MEASURES
-    builder->header("Execution-time",
-                    folly::to<std::string>( std::chrono::duration<double>(time).count()));
+    if(pRequest->isStreamingRequest()){
+      downstream_->sendEOM();
+    }else{
+      builder->status(pRequest->_rest_rc_, responseText);
+      if (FLAGS_request_number) {
+        builder->header("Request-Number",
+                      folly::to<std::string>(pRequest->_id_));
+      }
+      
+      #ifdef TIME_MEASURES
+      builder->header("Execution-time",
+                      folly::to<std::string>( std::chrono::duration<double>(time).count()));
 
-    #endif
-    //req->getHeaders().forEach([&](std::string& name, std::string& value) {
-    //  builder->header(folly::to<std::string>("x-proxygen-", name), value);
-    //});
+      #endif
+      //req->getHeaders().forEach([&](std::string& name, std::string& value) {
+      //  builder->header(folly::to<std::string>("x-proxygen-", name), value);
+      //});
 
-    std::string appVersion = std::to_string(T5GLOBVERSION) + ":" + std::to_string(T5MAJVERSION) + ":" + std::to_string(T5MINVERSION)  ;
-    builder->header("t5memory-version", appVersion);  
-    if(pRequest->command == COMMAND::EXPORT_MEM_INTERNAL_FORMAT){
-      builder->header("Content-Type", "application/zip");
-    } else{
-      builder->header("Content-Type", "application/json");
+      std::string appVersion = std::to_string(T5GLOBVERSION) + ":" + std::to_string(T5MAJVERSION) + ":" + std::to_string(T5MINVERSION)  ;
+      builder->header("t5memory-version", appVersion);  
+      if(pRequest->command == COMMAND::EXPORT_MEM_INTERNAL_FORMAT){
+        builder->header("Content-Type", "application/zip");
+      } else {
+        builder->header("Content-Type", "application/json");
+      }
+      
+      //T5LOG( T5DEBUG) <<  ":: command = ", 
+      //            CommandToStringsMap.find(this->command)->second, ", pRequest->strMemName = ", pRequest->strMemName.c_str());
+      if(pRequest->outputMessage.size())
+        builder->body(pRequest->outputMessage);
+      //builder->send();
+      //delete pRequest;
+      //pRequest = nullptr;
+      builder->sendWithEOM();
     }
-    
-    //T5LOG( T5DEBUG) <<  ":: command = ", 
-    //            CommandToStringsMap.find(this->command)->second, ", pRequest->strMemName = ", pRequest->strMemName.c_str());
-    if(pRequest->outputMessage.size())
-      builder->body(pRequest->outputMessage);
-    //builder->send();
-    //delete pRequest;
-    //pRequest = nullptr;
     pRequest->fRunning = false;
     T5Logger::GetInstance()->ResetLogBuffer();
-    builder->sendWithEOM();
+  
 
 }
 

@@ -267,6 +267,10 @@ class ProxygenHandlerFactory : public RequestHandlerFactory {
 
           }else if(urlCommand == "reorganize"){
             requestHandler->pRequest = new ReorganizeRequestData();
+          }else if(urlCommand == "download.tm"){
+            requestHandler->pRequest = new ExportRequestData(EXPORT_MEM_INTERNAL_FORMAT_STREAM);
+          }else if(urlCommand == "download.tmx"){
+            requestHandler->pRequest = new ExportRequestData(EXPORT_MEM_TMX_STREAM);
           }
         }
       }
@@ -346,7 +350,7 @@ class ProxygenHandlerFactory : public RequestHandlerFactory {
     Properties::GetInstance()->set_anyway(KEY_NUM_OF_THREADS, iWorkerThreads);
     Properties::GetInstance()->set_anyway(KEY_TIMEOUT_SETTINGS, uiTimeOut);
 
-   Properties::GetInstance()->add_key(KEY_MEM_DIR, FilesystemHelper::GetMemDir().c_str());
+    Properties::GetInstance()->add_key(KEY_MEM_DIR, FilesystemHelper::GetMemDir().c_str());
 
     //From here we have logging in file turned on
     T5Logger::GetInstance()->DesuppressLoggingInFile();

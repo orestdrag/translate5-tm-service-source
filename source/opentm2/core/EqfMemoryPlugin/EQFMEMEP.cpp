@@ -747,6 +747,7 @@ USHORT  MemExportStart( PPROCESSCOMMAREA  pCommArea,
       } /* end */            
 
       strcpy( pExportIDA->pstMemInfo->szName, pExportIDA->szMemName );
+      pExportIDA->pstMemInfo->responseHandler = pCommArea->responseHandler;
       pExportIDA->pMem->getDescription( pExportIDA->pstMemInfo->szDescription, sizeof(pExportIDA->pstMemInfo->szDescription) );
       pExportIDA->pMem->getSourceLanguage( pExportIDA->pstMemInfo->szSourceLang, sizeof(pExportIDA->pstMemInfo->szSourceLang) );
       pExportIDA->pstMemInfo->fUTF16 = (pExportIDA->usExpMode == MEM_FORMAT_TMX) || (pExportIDA->usExpMode == MEM_FORMAT_TMX_NOCRLF) ;
@@ -1634,41 +1635,48 @@ USHORT FCTDATA::MemFuncPrepExport
      
   } /* endif */
 
-  // check if output file has been specified
-  if ( fOK )
-  {
-    if ( (pszOutFile == NULL) || (*pszOutFile == EOS) )
+  
+  strcpy( pIDA->ControlsIda.szPathContent, pszOutFile );
+  
+  if(responseHandler){
+    pIDA->hFile = nullptr;
+  }
+  else{
+    // check if output file has been specified
+    if ( fOK )
     {
-      T5LOG(T5ERROR) << "::ERROR in MemFuncPrepExport::ERROR_NO_EXPORT_NAME";
-      fOK = FALSE;
+      if ( (pszOutFile == NULL) || (*pszOutFile == EOS))
+      {
+        T5LOG(T5ERROR) << "::ERROR in MemFuncPrepExport::ERROR_NO_EXPORT_NAME";
+        fOK = FALSE;
+      } /* endif */
     } /* endif */
-  } /* endif */
 
-  // check existence of output file
-  if ( fOK )
-  {
-    strcpy( pIDA->ControlsIda.szPathContent, pszOutFile );
-    if ( UtlFileExist( pIDA->ControlsIda.szPathContent ) &&
-         !(lOptions & OVERWRITE_OPT) )
+    // check existence of output file
+    if ( fOK )
     {
-      pszParm = pIDA->ControlsIda.szPathContent;
-      T5LOG(T5ERROR) << ";;ERROR in MemFuncPrepExport:: ERROR_FILE_EXISTS_ALREADY_BATCH, file exists, fName = " << pIDA->ControlsIda.szPathContent << "; pszParam = " << pszParm;
-      fOK = FALSE;
+      if ( ( UtlFileExist( pIDA->ControlsIda.szPathContent ) 
+          && !(lOptions & OVERWRITE_OPT) )
+        )
+      {
+        pszParm = pIDA->ControlsIda.szPathContent;
+        T5LOG(T5ERROR) << ";;ERROR in MemFuncPrepExport:: ERROR_FILE_EXISTS_ALREADY_BATCH, file exists, fName = " << pIDA->ControlsIda.szPathContent << "; pszParam = " << pszParm;
+        fOK = FALSE;
+      } /* endif */
     } /* endif */
-  } /* endif */
 
-  // open output file
-  if ( fOK )
-  {    
-    pIDA->hFile = FilesystemHelper::OpenFile(pIDA->ControlsIda.szPathContent, "w+", false);
-    if(pIDA->hFile){
-      T5LOG( T5DEBUG) << "MemFuncPrepExport:: opened output file, fName = " << pIDA->ControlsIda.szPathContent;
-    }else{
-      T5LOG(T5ERROR) << "Error in MemFuncPrepExport:: can't open output file, fName = ", pIDA->ControlsIda.szPathContent;
-      fOK = false;
-    }
-
-  } /* endif */
+    // open output file
+    if ( fOK )
+    {    
+      pIDA->hFile = FilesystemHelper::OpenFile(pIDA->ControlsIda.szPathContent, "w+", false);
+      if(pIDA->hFile){
+        T5LOG( T5DEBUG) << "MemFuncPrepExport:: opened output file, fName = " << pIDA->ControlsIda.szPathContent;
+      }else{
+        T5LOG(T5ERROR) << "Error in MemFuncPrepExport:: can't open output file, fName = ", pIDA->ControlsIda.szPathContent;
+        fOK = false;
+      }
+    } /* endif */
+  }
 
   // prepare memory Export
   if ( fOK )
@@ -1769,6 +1777,7 @@ USHORT FCTDATA::MemFuncExportProcess()
 {
   USHORT      usRC = NO_ERROR;         // function return code
   PPROCESSCOMMAREA pCommArea = (PPROCESSCOMMAREA)this->pvMemExportCommArea;  // ptr to commmunication area
+  pCommArea->responseHandler = responseHandler;
   PMEM_EXPORT_IDA  pIDA = (PMEM_EXPORT_IDA)pCommArea->pUserIDA;               // pointer to instance area
 
   switch ( pIDA->NextTask )

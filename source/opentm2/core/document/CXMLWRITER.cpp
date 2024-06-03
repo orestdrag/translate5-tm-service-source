@@ -143,12 +143,69 @@
 #include <wchar.h>
 #include <uchar.h>
 //#include <windows.h>
+#include <proxygen/httpserver/ResponseBuilder.h>
 
 #include "CXMLWRITER.H"
 #include "../utilities/LogWrapper.h"
 #include "../utilities/OSWrapper.h"
 #include "../utilities/FilesystemHelper.h"
 #include "../utilities/EncodingHelper.h"
+
+bool ChunkBuffer::canFit(long size){
+  T5LOG(T5DEVELOP) << "buffsize = " << m_buff.size() <<"; size = " << size;
+  return m_bytesCollecedInChunk + size + 1 < chunkSize_;
+}
+
+void ChunkBuffer::triggerChunkSend(){
+  if(m_bytesCollecedInChunk)
+  {
+    m_responseHandler->sendChunkHeader(m_bytesCollecedInChunk);    
+    m_responseHandler->sendBody(folly::IOBuf::copyBuffer(&m_buff[0], m_bytesCollecedInChunk));
+    T5LOG(T5DEVELOP)<< "Triggering sendChunkTerminator, because " << m_bytesCollecedInChunk <<" bytes is collected in chunk, limit is set to " << chunkSize_;
+    m_responseHandler->sendChunkTerminator();
+    m_bytesSend += m_bytesCollecedInChunk;
+    m_bytesCollecedInChunk = 0;
+  }
+}
+
+void ChunkBuffer::writeToBuff(const void* buff, long size)
+{
+  if(!isActive()) return;
+
+  if(!canFit(size))
+  {
+    triggerChunkSend();
+  }
+
+  if(!canFit(size))
+  {
+    T5LOG(T5ERROR)<<"Not enought space in buffer, required = " << size; 
+  }
+  T5LOG(T5DEBUG) << "writting data buff, m_bytesCollected = " << m_bytesCollecedInChunk <<"; bytesSend = " << m_bytesSend <<"; size = " << size;
+  memcpy(&m_buff[m_bytesCollecedInChunk], buff, size);
+  m_bytesCollecedInChunk += size;
+}
+
+int CXmlWriter::writeData(const void* buff, long size, long n){
+  int rc = 0;
+  if(m_hf){
+    fwrite(buff, size, n, m_hf);
+  }
+  if(chunkBuffer.isActive())
+  {
+    // Send buffer in chunks
+    size_t totalSize = size*n;
+    //m_responseHandler->sendBody(folly::IOBuf::copyBuffer(buff + bytesSent, totalSize));
+    //proxygen::ResponseBuilder(m_responseHandler)
+    //             .body(buff)//std::move(buff))
+    //             .send();
+    //m_responseHandler->sendBody(folly::IOBuf::copyBuffer(buff, totalSize));
+    chunkBuffer.writeToBuff(buff, totalSize);
+    
+    
+  }
+  return rc;
+}
 
 CXmlWriter::CXmlWriter( const char *strFileName )
 {
@@ -180,24 +237,33 @@ void CXmlWriter::SetFileName( const char *strFileName )
 }
 
 
+void CXmlWriter::SetResponseHandler(proxygen::ResponseHandler* rh){
+  //m_responseHandler = rh;
+  chunkBuffer.setResponseHandler(rh);
+}
+
 BOOL CXmlWriter::WriteStartDocument()
 {
   BOOL fOK = TRUE;
 
-  m_hf = FilesystemHelper::OpenFile(m_strFileName, "w", false);
+  if(!chunkBuffer.isActive()){
+    m_hf = FilesystemHelper::OpenFile(m_strFileName, "w", false);
+  }else{
+    m_hf = nullptr;
+  }
 
-  if ( m_hf )
+  if ( m_hf || chunkBuffer.isActive() )
   {
     // write BOM 
     if ( Encoding == UTF16 )
     {
       //@@HEADER
-      fwrite( "\xff\xfe", 1, 2, m_hf );
+      writeData( "\xff\xfe", 1, 2 );
     }
     else
     {
       //@@HEADER
-      fwrite( "\xEF\xBB\xBF", 1, 3, m_hf );
+      writeData( "\xEF\xBB\xBF", 1, 3 );
     } /* endif */
 
     WriteRaw( L"<?xml version=\"1.0\" encoding=\"" );
@@ -444,19 +510,15 @@ void CXmlWriter::WriteRaw( const WCHAR * text, int iLen )
     {
       if ( Encoding == UTF16 )
       {
-        if ( m_hf )
-        {
-          ret = fwrite( text, sizeof(WCHAR), iLFPos, m_hf );
-        } /* endif */
+        ret = writeData( text, sizeof(WCHAR), iLFPos );
       }
       else
       {
         std::string str = EncodingHelper::convertToUTF8( std::wstring((LPWSTR)text).substr(0,iLFPos) );
         int iBytes = str.size();
 
-        if(m_hf){
-          ret = fwrite( str.c_str(), 1, iBytes, m_hf );
-        }
+        ret = writeData( str.c_str(), 1, iBytes );
+        
       } /* endif */
       m_iColumn += iLFPos;
     } /* endif */
@@ -466,12 +528,12 @@ void CXmlWriter::WriteRaw( const WCHAR * text, int iLen )
     {      
       if ( Encoding == UTF16 )
       {
-        //fwrite( L"\r\n", sizeof(WCHAR), 2, m_hf );
-        fwrite( L"\n", sizeof(WCHAR), 1, m_hf );
+        //writeData( L"\r\n", sizeof(WCHAR), 2 );
+        writeData( L"\n", sizeof(WCHAR), 1 );
       }
       else
       {
-        fwrite( "\n", sizeof(char), 1, m_hf );
+        writeData( "\n", sizeof(char), 1 );
       } /* endif */
       iLFPos++;
       if ( iLen ) iLen--;

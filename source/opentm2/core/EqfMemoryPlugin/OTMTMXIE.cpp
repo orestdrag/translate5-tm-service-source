@@ -874,6 +874,7 @@ USHORT CTMXExportImport::WriteHeader
 
   // write TMX header
   m_xw.SetFileName( pszOutFile );
+  m_xw.SetResponseHandler(pMemInfo->responseHandler);
   m_xw.Formatting = CXmlWriter::Indented;
   m_xw.Indention = 2;
   if ( pMemInfo->fUTF16 )
