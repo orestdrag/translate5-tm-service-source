@@ -2185,7 +2185,7 @@ int ExportRequestData::checkData(){
 }
 
 int ExportRequestData::execute(){
-  if(false == isStreamingRequest()){
+  if(command != EXPORT_MEM_TMX_STREAM){
     // get a temporary file name for the memory package file or TMX file
     strTempFile = FilesystemHelper::BuildTempFileName();
     if ( _rc_ != 0 )
@@ -2195,7 +2195,7 @@ int ExportRequestData::execute(){
   }
   // export the memory in internal format
   if (// requestAcceptHeader.compare( "application/xml" ) == 0  || 
-    command == EXPORT_MEM_TMX_STREAM)
+     EXPORT_MEM_TMX_STREAM == command)
   {
     T5LOG( T5INFO) <<"::getMem:: mem = " <<  strMemName << "; supported type found application/xml, tempFile = " << strTempFile;
     ExportTmx();
@@ -2207,9 +2207,21 @@ int ExportRequestData::execute(){
       return buildErrorReturn(_rc_, strErrMsg.c_str(), INTERNAL_SERVER_ERROR);
     }
   }
+  else if( EXPORT_MEM_INTERNAL_FORMAT_STREAM == command)
+  {
+    T5LOG( T5INFO) <<"::getMem:: mem = "<< strMemName << "; supported type found application/zip stream = " << strTempFile;
+    ExportZipStream();
+    if ( _rc_ != 0 )
+    {
+      //unsigned short usRC = 0;
+      //EqfGetLastErrorW( OtmMemoryServiceWorker::getInstance()->hSession, &usRC, this->szLastError, sizeof( this->szLastError ) / sizeof( this->szLastError[0] ) );
+      std::string strErrMsg = "::getMem:: Error: EqfExportMemInInternalFormat failed with rc=" + std::to_string(_rc_) + ", error message is " ;//  EncodingHelper::convertToUTF8( this->szLastError);
+      return buildErrorReturn(_rc_, strErrMsg.c_str(), INTERNAL_SERVER_ERROR);
+    }
+  }
   else if ( requestAcceptHeader.compare( "application/zip" ) == 0 )
   {
-    T5LOG( T5INFO) <<"::getMem:: mem = "<< strMemName << "; supported type found application/zip(NOT TESTED YET), tempFile = " << strTempFile;
+    T5LOG( T5INFO) <<"::getMem:: mem = "<< strMemName << "; supported type found application/zip, tempFile = " << strTempFile;
     ExportZip();
     if ( _rc_ != 0 )
     {
@@ -2247,6 +2259,20 @@ int ExportRequestData::execute(){
 }
 
 int ExportRequestData::ExportZip(){
+  
+  _rc_ = PrepareTMZip();
+  if(!_rc_){
+    //send data.
+    std::vector<unsigned char> vMemData;
+     // fill the vMemData vector with the content of zTempFile
+    _rc_ = FilesystemHelper::LoadFileIntoByteVector( strTempFile, vMemData );
+    outputMessage = std::string(vMemData.begin(), vMemData.end());  
+  }
+  return _rc_;
+}
+
+int ExportRequestData::PrepareTMZip()
+{
   // check if memory exists
   if(_rc_ = TMManager::GetInstance()->TMExistsOnDisk(strMemName) != NO_ERROR){
     return buildErrorReturn(_rc_, "Can't file tm files", NOT_FOUND);
@@ -2256,6 +2282,31 @@ int ExportRequestData::ExportZip(){
   FilesystemHelper::ZipAdd( pZip, FilesystemHelper::GetTmdPath(strMemName) );
   FilesystemHelper::ZipAdd( pZip, FilesystemHelper::GetTmiPath(strMemName) );  
   FilesystemHelper::ZipClose( pZip );
+}
+
+int ExportRequestData::ExportZipStream(){
+  _rc_ = PrepareTMZip();
+  if(!_rc_){
+    //send data.
+    proxygen::HTTPMessage response;
+    response.setHTTPVersion(1, 1);
+    response.setStatusCode(200);
+    response.setStatusMessage("OK");
+    response.setIsChunked(true);
+    
+    // Add headers to the response
+    std::stringstream contDisposition;
+    contDisposition << "attachment; filename=\"" << mem->szName  << ".tm\"";
+    response.getHeaders().add("Content-Type", "application/octet-stream");
+    response.getHeaders().add("Content-Disposition", contDisposition.str());
+    // Send response headers
+    responseHandler->sendHeaders(response);
+    std::vector<unsigned char> vMemData;
+    
+    _rc_ = FilesystemHelper::LoadFileIntoByteVector( strTempFile, vMemData );
+  
+    responseHandler->sendBody(folly::IOBuf::copyBuffer(&vMemData[0], vMemData.size()));
+  }
 
   return _rc_;
 }

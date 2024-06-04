@@ -434,8 +434,11 @@ protected:
 
 class ExportRequestData: public RequestData{
     private:
+    int PrepareTMZip();
     int ExportZip();
+    int ExportZipStream();
     int ExportTmx();
+    
     
     FCTDATA fctdata;
     MEM_EXPORT_IDA IDA;         // Pointer to the export IDA
