@@ -1408,7 +1408,6 @@ USHORT CTMXExportImport::ImportNext
         LONG lImportRunTime = 0;  
         time( &lImportRunTime );          
         pImportData->lImportRunTimeSec  = (lImportRunTime - pImportData->lImportStartTime);    
-        pImportData->lImportTimeoutSec=60;
         if(!pImportData->importRc && pImportData->lImportTimeoutSec > 0){
           if(pImportData->lImportRunTimeSec >= pImportData->lImportTimeoutSec){
             errorCount++;
