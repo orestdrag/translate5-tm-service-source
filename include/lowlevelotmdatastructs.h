@@ -42,7 +42,6 @@ typedef char* PSZ;
         DELETE_MEM,
         EXPORT_MEM_TMX,
         EXPORT_MEM_INTERNAL_FORMAT,
-        EXPORT_MEM_TMX_STREAM,
         EXPORT_MEM_INTERNAL_FORMAT_STREAM,
         REORGANIZE_MEM,
         STATUS_MEM,
@@ -50,6 +49,7 @@ typedef char* PSZ;
 
         START_COMMANDS_WITH_BODY,
         CREATE_MEM = START_COMMANDS_WITH_BODY, 
+        EXPORT_MEM_TMX_STREAM,
         FUZZY,
         CONCORDANCE,
         DELETE_ENTRY,
@@ -1427,6 +1427,8 @@ typedef struct _MEM_EXPORT_IDA
  CHAR         szPlugin[MAX_LONGFILESPEC]; // name of memory plugin handling the current memory database
 
  int invalidXmlSegments=0;
+ long numOfRequestedSegmentsForExport = 0;
+ long segmentsExported = 0;
 }
 MEM_EXPORT_IDA, * PMEM_EXPORT_IDA;
 
@@ -1830,6 +1832,9 @@ typedef struct _PROCESSCOMMAREA
   CHAR             szLB2Text[80];      // R/W: text to be displayed as label
                                        // for the second listbox
   proxygen::ResponseHandler* responseHandler = nullptr;
+  ulong startingRecordKey = 0;
+  ushort startingTargetKey = 0;
+  ulong numOfProposalsRequested = 0;
 } PROCESSCOMMAREA, *PPROCESSCOMMAREA;
 
 
@@ -2056,6 +2061,9 @@ typedef struct _FCTDATA
 );
   std::shared_ptr<EqfMemory> mem;
   proxygen::ResponseHandler* responseHandler = nullptr;
+  ulong recordKey = 0;
+  ushort targetKey = 0;
+  ulong numOfProposalsRequested = 0;
 } FCTDATA, *PFCTDATA;
 
 

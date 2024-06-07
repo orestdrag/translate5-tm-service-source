@@ -2154,6 +2154,27 @@ int ResourceInfoRequestData::execute(){
   return _rest_rc_;
 }
 
+
+int ExportRequestData::parseJSON(){
+  numberOfRequestedProposals = 0;
+  
+  memset( szKey , sizeof(szKey) / sizeof(szKey[0]), 0 ); 
+  if(strBody.empty()){
+    return 0;
+  }
+  
+  JSONFactory::JSONPARSECONTROL parseControl[] = { 
+    { L"startFromInternalKey",         JSONFactory::ASCII_STRING_PARM_TYPE, &( szKey ), sizeof( szKey ) / sizeof( szKey[0] ) },
+    { L"limit",          JSONFactory::INT_PARM_TYPE, &(numberOfRequestedProposals), 0},
+    //{ L"loggingThreshold",JSONFactory::INT_PARM_TYPE        , &(loggingThreshold), 0}, 
+    { L"",               JSONFactory::ASCII_STRING_PARM_TYPE, NULL, 0 } 
+  };
+
+  std::wstring strInputParmsW = EncodingHelper::convertToWChar( strBody.c_str() );
+  _rc_ = json_factory.parseJSON( strInputParmsW, parseControl );
+  return 0;
+}
+
 int ExportRequestData::checkData(){
   T5LOG( T5INFO) <<"::getMem::=== getMem request, memory = " << strMemName << "; format = " << requestAcceptHeader;
   _rc_ = OtmMemoryServiceWorker::getInstance()->verifyAPISession();
@@ -2323,6 +2344,7 @@ int ExportRequestData::ExportTmx(){
     if(isStreamingRequest()){
       fctdata.responseHandler = responseHandler;
     }
+    mem->SplitProposalKeyIntoRecordAndTarget(szKey, &fctdata.recordKey, &fctdata.targetKey);
 
     _rc_ = fctdata.MemFuncPrepExport( (PSZ)strMemName.c_str(), (PSZ)strTempFile.c_str(), TMX_UTF8_OPT | OVERWRITE_OPT | COMPLETE_IN_ONE_CALL_OPT, mem );
   } 

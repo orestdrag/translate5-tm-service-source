@@ -440,6 +440,9 @@ class ExportRequestData: public RequestData{
     int ExportTmx();
     
     
+    char szKey[20];
+    int numberOfRequestedProposals = 0;
+    int loggingThreshold = 0;
     FCTDATA fctdata;
     MEM_EXPORT_IDA IDA;         // Pointer to the export IDA
     PROCESSCOMMAREA CommArea;   // ptr to commmunication area
@@ -454,7 +457,7 @@ class ExportRequestData: public RequestData{
     ExportRequestData(): RequestData(EXPORT_MEM_TMX){};
     ExportRequestData(COMMAND command): RequestData(command){};
 protected:
-    int parseJSON() override {return 0;}
+    int parseJSON() override ;
     int checkData() override ;
     int execute() override ;
 

@@ -709,9 +709,17 @@ USHORT  MemExportStart( PPROCESSCOMMAREA  pCommArea,
   //--- Get pointer to export IDA
   pExportIDA = (PMEM_EXPORT_IDA)pCommArea->pUserIDA;
 
-  // set first extract flag                                          
-  pExportIDA->fFirstExtract = TRUE;
-
+  if(pCommArea->numOfProposalsRequested){
+    pExportIDA->numOfRequestedSegmentsForExport = pCommArea->numOfProposalsRequested;
+  }
+  // set first extract flag        
+  if(pCommArea->startingRecordKey != 0 ){
+    pExportIDA->pProposal->recordKey = pCommArea->startingRecordKey;
+    pExportIDA->pProposal->targetKey = pCommArea->startingTargetKey;    
+    pExportIDA->fFirstExtract = FALSE;
+  }else{                                 
+    pExportIDA->fFirstExtract = TRUE;
+  }
   if ( (pExportIDA->usExpMode == MEM_FORMAT_TMX) || (pExportIDA->usExpMode == MEM_FORMAT_TMX_UTF8) ||
        (pExportIDA->usExpMode == MEM_FORMAT_TMX_NOCRLF) || (pExportIDA->usExpMode == MEM_FORMAT_TMX_UTF8_NOCRLF) )
   {
@@ -861,7 +869,7 @@ USHORT MemExportProcess ( PMEM_EXPORT_IDA  pExportIDA ) // pointer to the export
 
    if ( (iTmRC == NO_ERROR) || iTmRC == EqfMemory::INFO_ENDREACHED )
    {
-     if ( iTmRC == EqfMemory::INFO_ENDREACHED )
+     if ( iTmRC == EqfMemory::INFO_ENDREACHED  )
      {
        //--- Stop Address has been reached before END_OF_TM
        pExportIDA->fEOF = TRUE;
@@ -921,6 +929,13 @@ USHORT MemExportProcess ( PMEM_EXPORT_IDA  pExportIDA ) // pointer to the export
           T5Logger::GetInstance()->desuppressLogging(ll);
           if(fValidXml){
             usRc = EXTMEMEXPORTPROCESS( pExportIDA->lExternalExportHandle , pExportIDA->pstSegment );
+            if(!usRc){
+              pExportIDA->segmentsExported++;
+              if(pExportIDA->segmentsExported >= pExportIDA->numOfRequestedSegmentsForExport){
+                pExportIDA->fEOF = TRUE;
+                LOG_AND_SET_RC(usRc, T5INFO, MEM_PROCESS_END);
+              }
+            }
           }else{
             T5LOG(T5ERROR) << "skipping tu with invalid target segment: "<< *pExportIDA->pProposal;
           } 
@@ -1777,12 +1792,16 @@ USHORT FCTDATA::MemFuncExportProcess()
 {
   USHORT      usRC = NO_ERROR;         // function return code
   PPROCESSCOMMAREA pCommArea = (PPROCESSCOMMAREA)this->pvMemExportCommArea;  // ptr to commmunication area
-  pCommArea->responseHandler = responseHandler;
   PMEM_EXPORT_IDA  pIDA = (PMEM_EXPORT_IDA)pCommArea->pUserIDA;               // pointer to instance area
 
   switch ( pIDA->NextTask )
   {
     case MEM_START_EXPORT:
+      pCommArea->startingRecordKey = recordKey;
+      pCommArea->startingTargetKey = targetKey;
+      pCommArea->numOfProposalsRequested = numOfProposalsRequested;
+      pCommArea->responseHandler = responseHandler;
+
       usRC = EQFMemExportStart( pCommArea, HWND_FUNCIF );
       if ( usRC != NO_ERROR )
       {
