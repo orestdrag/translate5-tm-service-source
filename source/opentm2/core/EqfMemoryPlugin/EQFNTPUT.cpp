@@ -46,7 +46,7 @@ PBYTE NTRecPos(PBYTE pStart, int iType);
 USHORT NTMAdjustAddDataInTgtCLB
 	(
 		PTMX_RECORD		   *ppTmRecordStart,
-		PULONG     		   pulRecBufSize,
+		PLONG     		   plRecBufSize,
 	  OtmProposal& 		   TmProposal,
 		PTMX_TARGET_CLB    *ppClb,
 		PTMX_RECORD        *ppCurTmRecord,
@@ -189,7 +189,7 @@ USHORT EqfMemory::TmtXReplace
   PTMX_EXT_OUT_W pTmPutOut //ptr to output struct
 )
 {
-  ULONG      ulNewKey = 0;             // sid of newly added tm record
+  LONG       lNewKey = 0;             // sid of newly added tm record
   BOOL       fOK = TRUE;               // success indicator
   USHORT     usRc = NO_ERROR;          // return code
   USHORT     usMatchesFound;           // compact area hits
@@ -241,16 +241,16 @@ USHORT EqfMemory::TmtXReplace
 
       if(usRc == NO_ERROR)
       {
-        ulNewKey = TmProposal.recordKey;
+        lNewKey = TmProposal.recordKey;
       }
       //if no tm record fitted for update assume new and add to tm
       else if ( usRc == ERROR_ADD_TO_TM )
       {
-        usRc = AddToTm(TmProposal, &ulNewKey );
+        usRc = AddToTm(TmProposal, &lNewKey );
         //update index
         if ( !usRc )
         {
-          usRc = UpdateTmIndex( TmProposal.pInputSentence, ulNewKey );
+          usRc = UpdateTmIndex( TmProposal.pInputSentence, lNewKey );
 
           if ( usRc ) fUpdateOfIndexFailed = TRUE;
         } /* endif */
@@ -259,12 +259,12 @@ USHORT EqfMemory::TmtXReplace
     else
     {
       //add new tm record to tm database
-      usRc = AddToTm(TmProposal, &ulNewKey );
+      usRc = AddToTm(TmProposal, &lNewKey );
 
       //update index
       if ( !usRc )
       {
-        usRc = UpdateTmIndex( TmProposal.pInputSentence, ulNewKey );
+        usRc = UpdateTmIndex( TmProposal.pInputSentence, lNewKey );
 
         if ( usRc ) fUpdateOfIndexFailed = TRUE;
       } /* endif */
@@ -272,7 +272,7 @@ USHORT EqfMemory::TmtXReplace
   } /* endif */
 
   if(!usRc){
-    pTmPutOut->ulTmKey = TmProposal.recordKey = ulNewKey;
+    pTmPutOut->ulTmKey = TmProposal.recordKey = lNewKey;
     pTmPutOut->usTargetKey = TmProposal.targetKey;
     RewriteCompactTable();
   }
@@ -936,7 +936,7 @@ USHORT TokenizeTarget
 USHORT EqfMemory::AddToTm
 (
   OtmProposal& TmProposal,         // ptr to sentence structure
-  PULONG pulNewKey                    // sid of newly added tm record
+  PLONG plNewKey                    // sid of newly added tm record
 )
 {
   PTMX_RECORD pTmRecord = NULL;           // ptr to tm record
@@ -996,14 +996,14 @@ USHORT EqfMemory::AddToTm
                        pTargetClb, usSrcLang );
         
         //add new tm record to database
-        *pulNewKey = NTMREQUESTNEWKEY;
+        *plNewKey = NTMREQUESTNEWKEY;
         
         usRc = TmBtree.EQFNTMInsert(//ptr to tm structure
-                             pulNewKey,          //to be allocated in funct
+                             plNewKey,          //to be allocated in funct
                              (PBYTE)pTmRecord,   //pointer to tm record
                              pTmRecord->lRecordLen);     //length
         if(!usRc){
-          TmProposal.recordKey = *pulNewKey;
+          TmProposal.recordKey = *plNewKey;
           TmProposal.targetKey = 1;
         }
       } /* endif */
@@ -1290,11 +1290,11 @@ USHORT EqfMemory::UpdateTmIndex
 )
 {
   USHORT   usRc = 0;                   // return code
-  ULONG    ulLen;                      // length paramter
+  LONG     lLen;                       // length paramter
   USHORT   usIndexEntries;             // nr of entries in index record
   PULONG   pulVotes = NULL;            // pointer to votes
   USHORT   i;                          // index in for loop
-  ULONG    ulKey;                      // index key
+  LONG     lKey;                       // index key
   PTMX_INDEX_RECORD pIndexRecord = NULL;  // pointer to index structure
   BOOL     fOK = FALSE;                // success indicator
   PBYTE    pIndex;                     // position pointer
@@ -1315,12 +1315,12 @@ USHORT EqfMemory::UpdateTmIndex
     {
       if ( usRc == NO_ERROR )
       {
-        ulKey = (*pulVotes) & START_KEY;
-        ulLen = TMX_REC_SIZE;
+        lKey = (*pulVotes) & START_KEY;
+        lLen = TMX_REC_SIZE;
         memset( pIndexRecord, 0, TMX_REC_SIZE );
-        usRc = InBtree.EQFNTMGet( ulKey,  //index key
+        usRc = InBtree.EQFNTMGet( lKey,  //index key
                           (PCHAR)pIndexRecord,   //pointer to index record
-                          &ulLen );  //length
+                          &lLen );  //length
 
         if ( usRc == BTREE_NOT_FOUND )
         {
@@ -1329,7 +1329,7 @@ USHORT EqfMemory::UpdateTmIndex
 
           pIndexRecord->stIndexEntry = NTMINDEX(pSentence->usActVote,ulSidKey);
 
-          usRc = InBtree.EQFNTMInsert( &ulKey,
+          usRc = InBtree.EQFNTMInsert( &lKey,
                                (PBYTE)pIndexRecord,  //pointer to index
                                pIndexRecord->usRecordLen );  //length
 
@@ -1340,16 +1340,16 @@ USHORT EqfMemory::UpdateTmIndex
 
              if ( usRc == NO_ERROR )
              {
-               usRc = InBtree.EQFNTMInsert(&ulKey, (PBYTE)pIndexRecord, pIndexRecord->usRecordLen );
+               usRc = InBtree.EQFNTMInsert(&lKey, (PBYTE)pIndexRecord, pIndexRecord->usRecordLen );
              } /* endif */
           } /* endif */
 
           if ( !usRc )
           {
             //add the match(tuple) to compact area
-            ulKey = *pulVotes % ((LONG)(MAX_COMPACT_SIZE-1) * 8);
-            *((PBYTE)bCompact + (ulKey >> 3)) |=
-                                  1 << ((BYTE)ulKey & 0x07);
+            lKey = *pulVotes % ((LONG)(MAX_COMPACT_SIZE-1) * 8);
+            *((PBYTE)bCompact + (lKey >> 3)) |=
+                                  1 << ((BYTE)lKey & 0x07);
 //                                  1 << (USHORT)(ulKey & 0x07);       @01M
             bCompactChanged = TRUE;
           } /* endif */
@@ -1361,10 +1361,10 @@ USHORT EqfMemory::UpdateTmIndex
             BOOL fFound = FALSE;
 
             //key is in index file; update index entry with new sid
-            ulLen = pIndexRecord->usRecordLen;
+            lLen = pIndexRecord->usRecordLen;
 
             //calculate number of entries in index record
-            usIndexEntries = (USHORT)((ulLen - sizeof(USHORT)) / sizeof(TMX_INDEX_ENTRY));
+            usIndexEntries = (USHORT)((lLen - sizeof(USHORT)) / sizeof(TMX_INDEX_ENTRY));
   
             //// check if SID is already contained in list..
             //{
@@ -1388,29 +1388,29 @@ USHORT EqfMemory::UpdateTmIndex
               {
                 //position pointer at beginning of index record
                 pIndex = (PBYTE)pIndexRecord;
-                memmove( pIndex, pIndex + sizeof(ULONG), ulLen - sizeof(ULONG) );
-                ulLen -= sizeof(ULONG);
+                memmove( pIndex, pIndex + sizeof(ULONG), lLen - sizeof(ULONG) );
+                lLen -= sizeof(ULONG);
                 usIndexEntries--;
               }
               //only update index file if index record is not too large
               if ( (usIndexEntries < (MAX_INDEX_LEN - 1)) 
-                    && ((ulLen + sizeof( TMX_INDEX_ENTRY )) <= TMX_REC_SIZE) )
+                    && ((lLen + sizeof( TMX_INDEX_ENTRY )) <= TMX_REC_SIZE) )
               {
                 //position pointer at beginning of index record
                 pIndex = (PBYTE)pIndexRecord;
 
                 //move pointer to end of index record
-                pIndex += ulLen;
+                pIndex += lLen;
 
                 // fill in new index entry
                 *((PTMX_INDEX_ENTRY) pIndex ) =
                                     NTMINDEX(pSentence->usActVote,ulSidKey);
 
                 //update index record size
-                pIndexRecord->usRecordLen = (USHORT)(ulLen + sizeof( TMX_INDEX_ENTRY ));
+                pIndexRecord->usRecordLen = (USHORT)(lLen + sizeof( TMX_INDEX_ENTRY ));
 
                 usRc = InBtree.EQFNTMUpdate( 
-                                    ulKey,
+                                    lKey,
                                     (PBYTE)pIndexRecord,  //pointer to index
                                     pIndexRecord->usRecordLen );  //length
                 // if index DB is full and memory is in exclusive access we try to compact the index file
@@ -1420,15 +1420,15 @@ USHORT EqfMemory::UpdateTmIndex
 
                   if ( usRc == NO_ERROR )
                   {
-                    usRc = InBtree.EQFNTMUpdate(ulKey, (PBYTE)pIndexRecord, pIndexRecord->usRecordLen ); 
+                    usRc = InBtree.EQFNTMUpdate(lKey, (PBYTE)pIndexRecord, pIndexRecord->usRecordLen ); 
                   } /* endif */
                 } /* endif */
                 if ( !usRc )
                 {
                   //add the match(tuple) to compact area
-                  ulKey = *pulVotes % ((LONG)(MAX_COMPACT_SIZE-1) * 8);
-                  *((PBYTE)bCompact + (ulKey >> 3)) |=
-                                        1 << ((BYTE)ulKey & 0x07);
+                  lKey = *pulVotes % ((LONG)(MAX_COMPACT_SIZE-1) * 8);
+                  *((PBYTE)bCompact + (lKey >> 3)) |=
+                                        1 << ((BYTE)lKey & 0x07);
                   bCompactChanged = TRUE;
                 } /* endif */
               }
@@ -1497,14 +1497,14 @@ USHORT DetermineTmRecord
 )
 {
   USHORT usRc = NO_ERROR;            // return code
-  ULONG  ulLen;                      // length paramter
+  LONG   lLen = 0;                   // length paramter
   USHORT usSid = 0;                  // number of sentence ids found
   USHORT usPos;                      // position in pulSids
   PULONG pulVotes;                   // pointer to votes
   PULONG pulSidStart;                // po ter to votes
   USHORT i, j;                       // index in for loop
   USHORT usMaxEntries = 0;           // nr of index entries in index record
-  ULONG ulKey;                       // index key
+  LONG lKey = 0;                     // index key
   PTMX_INDEX_RECORD pIndexRecord = NULL; // pointer to index structure
   BOOL fOK;                          // success indicator
   PTMX_INDEX_ENTRY pIndexEntry;      // pointer to index entry structure
@@ -1523,19 +1523,19 @@ USHORT DetermineTmRecord
   }
   else
   {
-    ulKey = (*pulVotes) & START_KEY;
-    ulLen = TMX_REC_SIZE;
+    lKey = (*pulVotes) & START_KEY;
+    lLen = TMX_REC_SIZE;
     memset( pIndexRecord, 0, TMX_REC_SIZE );
     usRc = pTmClb->InBtree.EQFNTMGet( 
-                      ulKey,  //index key
+                      lKey,  //index key
                       (PCHAR)pIndexRecord,   //pointer to index record
-                      &ulLen );  //length
+                      &lLen );  //length
 
     if ( usRc == NO_ERROR )
     {
       //calculate number of index entries in index record
-      ulLen = pIndexRecord->usRecordLen;
-      usMaxEntries = (USHORT)((ulLen - sizeof(USHORT)) / sizeof(TMX_INDEX_ENTRY));
+      lLen = pIndexRecord->usRecordLen;
+      usMaxEntries = (USHORT)((lLen - sizeof(USHORT)) / sizeof(TMX_INDEX_ENTRY));
 
       if(T5Logger::GetInstance()->CheckLogLevel(T5DEBUG)){
         std::string msg = __func__ + std::string(":: Number Entries:  ") + toStr(usMaxEntries).c_str() +"; Entries:";
@@ -1573,19 +1573,19 @@ USHORT DetermineTmRecord
         {
           if ( usRc == NO_ERROR )
           {
-            ulKey = (*pulVotes) & START_KEY;
-            ulLen = TMX_REC_SIZE;
+            lKey = (*pulVotes) & START_KEY;
+            lLen = TMX_REC_SIZE;
             memset( pIndexRecord, 0, TMX_REC_SIZE );
             usRc = pTmClb->InBtree.EQFNTMGet( 
-                              ulKey,  //index key
+                              lKey,  //index key
                               (PCHAR)pIndexRecord,   //pointer to index record
-                              &ulLen );  //length
+                              &lLen );  //length
 
             if ( usRc == NO_ERROR )
             {
               //calculate number of index entries in index record
-              ulLen = pIndexRecord->usRecordLen;
-              usMaxEntries = (USHORT)((ulLen - sizeof(USHORT)) / sizeof(TMX_INDEX_ENTRY));
+              lLen = pIndexRecord->usRecordLen;
+              usMaxEntries = (USHORT)((lLen - sizeof(USHORT)) / sizeof(TMX_INDEX_ENTRY));
 
               pIndexEntry = &pIndexRecord->stIndexEntry;
               pulSids = pulSidStart;
@@ -1605,13 +1605,13 @@ USHORT DetermineTmRecord
                     //remove sid from pulSids and decrease sid counter
                     if ( usSid > usPos )
                     {
-                      ulLen = (usSid - usPos) * sizeof(ULONG);
+                      lLen = (usSid - usPos) * sizeof(ULONG);
                     }
                     else
                     {
-                      ulLen = sizeof(ULONG);
+                      lLen = sizeof(ULONG);
                     } /* endif */
-                    memmove( (PBYTE) pulSids, (PBYTE)(pulSids+1), ulLen );
+                    memmove( (PBYTE) pulSids, (PBYTE)(pulSids+1), lLen );
                     usSid--;
                   } /* endwhile */
 
@@ -1713,16 +1713,16 @@ USHORT EqfMemory::UpdateTmRecord
   PULONG pulSids = NULL;               //ptr to sentence ids
   PULONG pulSidStart = NULL;           //ptr to sentence ids
   USHORT usRc = NO_ERROR;              //return code
-  ULONG  ulLen;                        //length indicator
-  ULONG ulKey;                         //tm record key
+  LONG  lLen;                          //length indicator
+  LONG  lKey;                          //tm record key
   PTMX_RECORD pTmRecord = NULL;        //pointer to tm record
-  ULONG       ulRecBufSize = 0L;       // current size of record buffer
+  LONG       lRecBufSize = 0L;         // current size of record buffer
 
   //allocate 32K for tm record
   fOK = UtlAlloc( (PVOID *) &(pTmRecord), 0L, (LONG) TMX_REC_SIZE, NOMSG );
   if ( fOK )
   {
-    ulRecBufSize = TMX_REC_SIZE;
+    lRecBufSize = TMX_REC_SIZE;
   } /* endif */
 
   //allocate for sentence ids
@@ -1746,25 +1746,25 @@ USHORT EqfMemory::UpdateTmRecord
       //get tm record(s)
       while ( (*pulSids) && (usRc == NO_ERROR) && !fStop )
       {
-        ulKey = *pulSids;
-        ulLen = TMX_REC_SIZE;
-        memset( pTmRecord, 0, ulLen );
+        lKey = *pulSids;
+        lLen = TMX_REC_SIZE;
+        memset( pTmRecord, 0, lLen );
         usRc =  TmBtree.EQFNTMGet(
-                          ulKey,  //tm record key
+                          lKey,  //tm record key
                           (PCHAR)pTmRecord,   //pointer to tm record data
-                          &ulLen );    //length
+                          &lLen );    //length
         if ( usRc == BTREE_BUFFER_SMALL)
         {
-          fOK = UtlAlloc( (PVOID *)&pTmRecord, ulRecBufSize, ulLen, NOMSG );
+          fOK = UtlAlloc( (PVOID *)&pTmRecord, lRecBufSize, lLen, NOMSG );
           if ( fOK )
           {
-            ulRecBufSize = ulLen;
-            memset( pTmRecord, 0, ulLen );
+            lRecBufSize = lLen;
+            memset( pTmRecord, 0, lLen );
 
             usRc =  TmBtree.EQFNTMGet(
-                              ulKey,  //tm record key
+                              lKey,  //tm record key
                               (PCHAR)pTmRecord,   //pointer to tm record data
-                              &ulLen );    //length
+                              &lLen );    //length
           }
           else
           {
@@ -1775,8 +1775,8 @@ USHORT EqfMemory::UpdateTmRecord
         if ( usRc == NO_ERROR )
         {
           //compare tm record data with data passed in the get in structure
-          usRc = ComparePutData( &pTmRecord, &ulRecBufSize,
-                                 TmProposal, &ulKey );
+          usRc = ComparePutData( &pTmRecord, &lRecBufSize,
+                                 TmProposal, &lKey );
 
           if ( usRc == SOURCE_STRING_ERROR )
           {
@@ -1786,7 +1786,7 @@ USHORT EqfMemory::UpdateTmRecord
           }
           else if ( usRc == NO_ERROR )
           {
-            TmProposal.recordKey = ulKey;
+            TmProposal.recordKey = lKey;
             //new target record was added or an existing one was successfully
             //replaced so don't try other sids
             fStop = TRUE;
@@ -1853,16 +1853,16 @@ USHORT EqfMemory::UpdateTmRecordByInternalKey
   PULONG pulSids = NULL;               //ptr to sentence ids
   PULONG pulSidStart = NULL;           //ptr to sentence ids
   USHORT usRc = NO_ERROR;              //return code
-  ULONG  ulLen;                        //length indicator
-  ULONG ulKey;                         //tm record key
+  LONG  lLen;                          //length indicator
+  LONG   lKey;                         //tm record key
   PTMX_RECORD pTmRecord = NULL;        //pointer to tm record
-  ULONG       ulRecBufSize = 0L;       // current size of record buffer
+  LONG         lRecBufSize = 0L;       // current size of record buffer
 
   //allocate 32K for tm record
   fOK = UtlAlloc( (PVOID *) &(pTmRecord), 0L, (LONG) TMX_REC_SIZE, NOMSG );
   if ( fOK )
   {
-    ulRecBufSize = TMX_REC_SIZE;
+    lRecBufSize = TMX_REC_SIZE;
   } /* endif */
 
   //allocate for sentence ids
@@ -1886,25 +1886,25 @@ USHORT EqfMemory::UpdateTmRecordByInternalKey
       //get tm record(s)
       while ( (*pulSids) && (usRc == NO_ERROR) && !fStop )
       {
-        ulKey = *pulSids;
-        ulLen = TMX_REC_SIZE;
-        memset( pTmRecord, 0, ulLen );
+        lKey = *pulSids;
+        lLen = TMX_REC_SIZE;
+        memset( pTmRecord, 0, lLen );
         usRc =  TmBtree.EQFNTMGet(
-                          ulKey,  //tm record key
+                          lKey,  //tm record key
                           (PCHAR)pTmRecord,   //pointer to tm record data
-                          &ulLen );    //length
+                          &lLen );    //length
         if ( usRc == BTREE_BUFFER_SMALL)
         {
-          fOK = UtlAlloc( (PVOID *)&pTmRecord, ulRecBufSize, ulLen, NOMSG );
+          fOK = UtlAlloc( (PVOID *)&pTmRecord, lRecBufSize, lLen, NOMSG );
           if ( fOK )
           {
-            ulRecBufSize = ulLen;
-            memset( pTmRecord, 0, ulLen );
+            lRecBufSize = lLen;
+            memset( pTmRecord, 0, lLen );
 
             usRc =  TmBtree.EQFNTMGet(
-                              ulKey,  //tm record key
+                              lKey,  //tm record key
                               (PCHAR)pTmRecord,   //pointer to tm record data
-                              &ulLen );    //length
+                              &lLen );    //length
           }
           else
           {
@@ -1915,8 +1915,8 @@ USHORT EqfMemory::UpdateTmRecordByInternalKey
         if ( usRc == NO_ERROR )
         {
           //compare tm record data with data passed in the get in structure
-          usRc = ComparePutData( &pTmRecord, &ulRecBufSize,
-                                 TmProposal, &ulKey );
+          usRc = ComparePutData( &pTmRecord, &lRecBufSize,
+                                 TmProposal, &lKey );
 
           if ( usRc == SOURCE_STRING_ERROR )
           {
@@ -2001,9 +2001,9 @@ USHORT EqfMemory::UpdateTmRecordByInternalKey
 USHORT EqfMemory::ComparePutData
 (
   PTMX_RECORD *ppTmRecord,             // ptr to ptr of tm record data buffer
-  PULONG      pulRecBufSize,           // current size of record buffer
-  OtmProposal&  TmProposal,                  // pointer to get in data
-  PULONG      pulKey                   // tm key
+  PLONG      plRecBufSize,             // current size of record buffer
+  OtmProposal&  TmProposal,            // pointer to get in data
+  PLONG      plKey                     // tm key
 )
 {
   BOOL fOK;                            //success indicator
@@ -2171,7 +2171,8 @@ USHORT EqfMemory::ComparePutData
                     } /* endif */
 
                     // adjust context part of target control block if necessary
-                    NTMAdjustAddDataInTgtCLB( ppTmRecord, pulRecBufSize, TmProposal, &pClb, &pTmRecord, &pTMXTargetRecord, &lLeftClbLen, &fUpdate );
+                    NTMAdjustAddDataInTgtCLB( ppTmRecord, plRecBufSize, TmProposal, &pClb, &pTmRecord, &pTMXTargetRecord, 
+                          &lLeftClbLen, &fUpdate );
                   } /* endif */
 
                   // continue with next target CLB
@@ -2188,13 +2189,13 @@ USHORT EqfMemory::ComparePutData
                   targetKey++;
                   // re-alloc record buffer if too small
                   USHORT usAddDataLen = NTMComputeAddDataSize( TmProposal.szContext, TmProposal.szAddInfo );
-                  ULONG ulNewSize = RECLEN(pTmRecord) + sizeof(TMX_TARGET_CLB) + usAddDataLen;
-                  if ( ulNewSize > *pulRecBufSize)
+                  LONG lNewSize = RECLEN(pTmRecord) + sizeof(TMX_TARGET_CLB) + usAddDataLen;
+                  if ( lNewSize > *plRecBufSize)
                   {
-                    fOK = UtlAlloc( (PVOID *)ppTmRecord, *pulRecBufSize, ulNewSize, NOMSG );
+                    fOK = UtlAlloc( (PVOID *)ppTmRecord, *plRecBufSize, lNewSize, NOMSG );
                     if ( fOK )
                     {
-                      *pulRecBufSize = ulNewSize;
+                      *plRecBufSize = lNewSize;
                       pClb = (PTMX_TARGET_CLB) ADJUSTPTR( *ppTmRecord, pTmRecord, pClb );
                       pTMXTargetRecord = (PTMX_TARGET_RECORD) ADJUSTPTR( *ppTmRecord, pTmRecord, pTMXTargetRecord );
                       pTmRecord = *ppTmRecord;
@@ -2271,22 +2272,22 @@ USHORT EqfMemory::ComparePutData
         // update TM record if required
         if ( fUpdate )
         {
-          usRc = TmBtree.EQFNTMUpdate( *pulKey, (PBYTE)pTmRecord, RECLEN(pTmRecord) );
+          usRc = TmBtree.EQFNTMUpdate( *plKey, (PBYTE)pTmRecord, RECLEN(pTmRecord) );
         } /* endif */
 
         if ( fStop )
         {
-          TmProposal.recordKey = *pulKey;
+          TmProposal.recordKey = *plKey;
           TmProposal.targetKey = targetKey;          
         }else{
           //all target records have been checked but nothing overlapped
           //so add new target record to end of tm record
-          usRc = AddTmTarget( TmProposal, ppTmRecord, pulRecBufSize, pulKey );
+          usRc = AddTmTarget( TmProposal, ppTmRecord, plRecBufSize, plKey );
           pTmRecord = *ppTmRecord;
           
           if(!usRc)
           {
-            TmProposal.recordKey = *pulKey;
+            TmProposal.recordKey = *plKey;
             TmProposal.targetKey = 1;
           }
         } /* endif */
@@ -2346,10 +2347,10 @@ USHORT EqfMemory::ComparePutData
 //   insert tm record in tm data fill                                           
 //------------------------------------------------------------------------------
 USHORT EqfMemory::AddTmTarget(
-  OtmProposal& TmProposal,       //pointer to get in data
+  OtmProposal& TmProposal,          //pointer to get in data
   PTMX_RECORD *ppTmRecord,          //pointer to tm record data pointer
-  PULONG pulRecBufSize,             //ptr to current size of TM record buffer
-  PULONG pulKey )                   //tm key
+  PLONG plRecBufSize,               //ptr to current size of TM record buffer
+  PLONG plKey )                     //tm key
 {
   PTMX_TARGET_CLB pTargetClb ;              // ptr to target ctl block
   PTMX_TARGET_RECORD pTargetRecord = NULL;  // ptr to target record
@@ -2359,11 +2360,11 @@ USHORT EqfMemory::AddTmTarget(
   //LONG         lTagAlloc;                 // alloc size
   PBYTE        pByte;                     // position pointer
   PTMX_RECORD pTmRecord = *ppTmRecord;    //pointer to tm record data
-  ULONG       ulAddDataLen = 0;
+  LONG       lAddDataLen = 0;
 
   //allocate target control block record
-  ulAddDataLen = NTMComputeAddDataSize( TmProposal.szContext, TmProposal.szAddInfo );
-  fOK = UtlAlloc( (PVOID *) &pTargetClb, 0L, (LONG)(sizeof(TMX_TARGET_CLB)+ulAddDataLen), NOMSG );
+  lAddDataLen = NTMComputeAddDataSize( TmProposal.szContext, TmProposal.szAddInfo );
+  fOK = UtlAlloc( (PVOID *) &pTargetClb, 0L, (LONG)(sizeof(TMX_TARGET_CLB)+lAddDataLen), NOMSG );
 
   //allocate target record
   if ( fOK )
@@ -2405,14 +2406,14 @@ USHORT EqfMemory::AddTmTarget(
         //check space requirements
         {
           // re-alloc record buffer if too small
-          ULONG ulNewSize = RECLEN(pTmRecord) + sizeof(TMX_TARGET_RECORD) +
+          ULONG lNewSize = RECLEN(pTmRecord) + sizeof(TMX_TARGET_RECORD) +
                             RECLEN(pTargetRecord);
-          if ( ulNewSize > *pulRecBufSize)
+          if ( lNewSize > *plRecBufSize)
           {
-            fOK = UtlAlloc( (PVOID *)ppTmRecord, *pulRecBufSize, ulNewSize, NOMSG );
+            fOK = UtlAlloc( (PVOID *)ppTmRecord, *plRecBufSize, lNewSize, NOMSG );
             if ( fOK )
             {
-              *pulRecBufSize = ulNewSize;
+              *plRecBufSize = lNewSize;
               pTmRecord = *ppTmRecord;
             }
             else
@@ -2436,7 +2437,7 @@ USHORT EqfMemory::AddTmTarget(
 
           //add updated tm record to database
           usRc = TmBtree.EQFNTMUpdate(
-                               *pulKey,
+                               *plKey,
                                (PBYTE)pTmRecord,
                                RECLEN(pTmRecord) );
         } /* endif */
@@ -2594,13 +2595,13 @@ USHORT EqfMemory::TmtXUpdSeg
   USHORT     usRc = NO_ERROR;          // return code
   PTMX_RECORD pTmRecord = NULL;        // pointer to tm record
   BOOL        fLocked = FALSE;         // TM-database-has-been-locked flag
-  ULONG  ulLen = 0;                    //length indicator
+  LONG  lLen = 0;                    //length indicator
   PBYTE pByte;                         //position ptr
   USHORT usTarget;                     //nr of target records in tm record
   PTMX_TARGET_RECORD pTMXTargetRecord; // ptr to target record
   PTMX_TARGET_CLB    pTargetClb;       // ptr to target CLB
-  ULONG       ulLeftClbLen;            // remaining length of CLB area
-  ULONG       ulRecBufSize = 0L;       // current size of record buffer
+  LONG       lLeftClbLen;            // remaining length of CLB area
+  LONG       lRecBufSize = 0L;       // current size of record buffer
 
   //allocate 32K for tm record
   fOK = UtlAlloc( (PVOID *) &(pTmRecord), 0L, (LONG) TMX_REC_SIZE, NOMSG );
@@ -2610,7 +2611,7 @@ USHORT EqfMemory::TmtXUpdSeg
   }
   else
   {
-    ulRecBufSize = TMX_REC_SIZE;
+    lRecBufSize = TMX_REC_SIZE;
   } /* endif */
 
   // get TM record being modified and update the record
@@ -2618,22 +2619,22 @@ USHORT EqfMemory::TmtXUpdSeg
   {
     LOG_AND_SET_RC(usRc, T5INFO, BTREE_NOT_FOUND);
 
-    ulLen = TMX_REC_SIZE;
+    lLen = TMX_REC_SIZE;
     usRc =  TmBtree.EQFNTMGet( pTmPutIn->recordKey, (PCHAR)pTmRecord,
-                      &ulLen );
+                      &lLen );
 
     if ( usRc == BTREE_BUFFER_SMALL)
     {
-      fOK = UtlAlloc( (PVOID *)&pTmRecord, ulRecBufSize, ulLen, NOMSG );
+      fOK = UtlAlloc( (PVOID *)&pTmRecord, lRecBufSize, lLen, NOMSG );
       if ( fOK )
       {
-        ulRecBufSize = ulLen;
-        memset( pTmRecord, 0, ulLen );
+        lRecBufSize = lLen;
+        memset( pTmRecord, 0, lLen );
 
         usRc =  TmBtree.EQFNTMGet(
                           pTmPutIn->recordKey,  //tm record key
                           (PCHAR)pTmRecord,   //pointer to tm record data
-                          &ulLen );    //length
+                          &lLen );    //length
       }
       else
       {
@@ -2647,8 +2648,8 @@ USHORT EqfMemory::TmtXUpdSeg
       if ( ( RECLEN(pTmRecord) != 0) &&
            (pTmRecord->usFirstTargetRecord < RECLEN(pTmRecord)) )
       {
-        ULONG   ulLeftTgtLen;                    // remaining target length
-        ulLeftTgtLen = RECLEN(pTmRecord) - pTmRecord->usFirstTargetRecord;
+        LONG   lLeftTgtLen;                    // remaining target length
+        lLeftTgtLen = RECLEN(pTmRecord) - pTmRecord->usFirstTargetRecord;
 
         if ( !usRc )
         {
@@ -2658,27 +2659,27 @@ USHORT EqfMemory::TmtXUpdSeg
           pByte += pTmRecord->usFirstTargetRecord;
           pTMXTargetRecord = (PTMX_TARGET_RECORD)(pByte);
           pTargetClb = (PTMX_TARGET_CLB)(pByte + pTMXTargetRecord->usClb);
-          ulLeftClbLen = RECLEN(pTMXTargetRecord) -
+          lLeftClbLen = RECLEN(pTMXTargetRecord) -
                          pTMXTargetRecord->usClb;
-          ulLeftClbLen -= TARGETCLBLEN(pTargetClb); // subtract size of current CLB
+          lLeftClbLen -= TARGETCLBLEN(pTargetClb); // subtract size of current CLB
           usTarget = 1;           //initialize counter
 
           //loop until correct target is found
-          while ( (usTarget < pTmPutIn->targetKey) && ulLeftTgtLen )
+          while ( (usTarget < pTmPutIn->targetKey) && lLeftTgtLen )
           {
             // position to first target CLB
             pTMXTargetRecord = (PTMX_TARGET_RECORD)(pByte);
             pTargetClb = (PTMX_TARGET_CLB)(pByte + pTMXTargetRecord->usClb);
-            ulLeftClbLen = RECLEN(pTMXTargetRecord) -
+            lLeftClbLen = RECLEN(pTMXTargetRecord) -
                            pTMXTargetRecord->usClb;
-            ulLeftClbLen -= TARGETCLBLEN(pTargetClb); // subtract size of current CLB
+            lLeftClbLen -= TARGETCLBLEN(pTargetClb); // subtract size of current CLB
 
             // loop over all target CLBs
-            while ( (usTarget < pTmPutIn->targetKey) && ulLeftClbLen )
+            while ( (usTarget < pTmPutIn->targetKey) && lLeftClbLen > 0 )
             {
               usTarget++;
               pTargetClb = NEXTTARGETCLB(pTargetClb);
-              ulLeftClbLen -= TARGETCLBLEN(pTargetClb);
+              lLeftClbLen -= TARGETCLBLEN(pTargetClb);
             } /* endwhile */
 
             // continue with next target if no match yet
@@ -2687,13 +2688,13 @@ USHORT EqfMemory::TmtXUpdSeg
               // position at next target
               pTMXTargetRecord = (PTMX_TARGET_RECORD)(pByte);
               //move pointer to end of target
-              if (ulLeftTgtLen >= RECLEN(pTMXTargetRecord))
+              if (lLeftTgtLen >= RECLEN(pTMXTargetRecord))
               {
-                ulLeftTgtLen -= RECLEN(pTMXTargetRecord);
+                lLeftTgtLen -= RECLEN(pTMXTargetRecord);
               }
               else
               {
-                ulLeftTgtLen = 0;
+                lLeftTgtLen = 0;
               } /* endif */
               pByte += RECLEN(pTMXTargetRecord);
               pTMXTargetRecord = (PTMX_TARGET_RECORD)(pByte);
@@ -2708,7 +2709,7 @@ USHORT EqfMemory::TmtXUpdSeg
             pTMXTargetRecord = (PTMX_TARGET_RECORD)(pByte);
 
             //if target record exists
-            if ( ulLeftTgtLen && ( RECLEN(pTMXTargetRecord) != 0) )
+            if ( lLeftTgtLen > 0 && ( RECLEN(pTMXTargetRecord) != 0) )
             {
               // update requested fields
 
@@ -3023,17 +3024,17 @@ ULONG EQFCompress2Unicode( PSZ_W pOutput, PBYTE pTarget, ULONG ulLenComp )
 USHORT NTMAdjustAddDataInTgtCLB
 (
 	PTMX_RECORD	      *ppTmRecordStart,
-	PULONG     		   pulRecBufSize,
+	PLONG     		   plRecBufSize,
 	OtmProposal& 		   TmProposal,
 	PTMX_TARGET_CLB    *ppClb,
 	PTMX_RECORD        *ppCurTmRecord,
 	PTMX_TARGET_RECORD *ppTMXTargetRecord,
-	PLONG  		   pulLeftClbLen,
+	PLONG  		   plLeftClbLen,
 	PBOOL 			   pfUpdate)
 {
   BOOL    fOK = TRUE;
   USHORT  usOldLen = 0;
-  ULONG   ulNewLen = 0;
+  LONG    lNewLen = 0;
   USHORT  usRc = NO_ERROR;
   PTMX_RECORD  pCurTmRecord = NULL;
   PTMX_TARGET_RECORD  pTMXTargetRecord;           //ptr to target record
@@ -3047,18 +3048,18 @@ USHORT NTMAdjustAddDataInTgtCLB
 
   if ( TmProposal.szContext[0] )
   {
-	  ulNewLen = NTMComputeAddDataSize( TmProposal.szContext, TmProposal.szAddInfo );
+	  lNewLen = NTMComputeAddDataSize( TmProposal.szContext, TmProposal.szAddInfo );
   } /* endif */
 
-  if ( usOldLen == ulNewLen )
+  if ( usOldLen == lNewLen )
   {
 	  // no resizing required, set update flag as data may have been changed
-	  if ( ulNewLen )
+	  if ( lNewLen )
 	  {
 		  *pfUpdate = TRUE;
 	  } /* endif */
   }
-  else if ( usOldLen > ulNewLen )
+  else if ( usOldLen > lNewLen )
   {
 	  // new length is smaller, reduce CLB size later when the additional data area has been re-filled but
     // remember position of next CLB
@@ -3068,17 +3069,17 @@ USHORT NTMAdjustAddDataInTgtCLB
   else
   {
 	  // new length is larger, re-alloc record and adjust pointers
-	  ULONG ulDiff = ulNewLen - usOldLen;
+	  LONG lDiff = lNewLen - usOldLen;
 
 	  // re-alloc record buffer if too small
-	  ULONG ulNewSize = RECLEN(pCurTmRecord) + (ULONG)ulDiff;
-	  if ( ulNewSize > *pulRecBufSize)
+	  LONG lNewSize = RECLEN(pCurTmRecord) + (LONG)lDiff;
+	  if ( lNewSize > *plRecBufSize)
 	  {
-	    fOK = UtlAlloc( (PVOID *)ppTmRecordStart, *pulRecBufSize,
-					    ulNewSize, NOMSG );
+	    fOK = UtlAlloc( (PVOID *)ppTmRecordStart, *plRecBufSize,
+					    lNewSize, NOMSG );
 	    if ( fOK )
 	    {
-		    *pulRecBufSize = ulNewSize;
+		    *plRecBufSize = lNewSize;
 		    pCurClb = (PTMX_TARGET_CLB) ADJUSTPTR( *ppTmRecordStart, pCurTmRecord, pCurClb );
 		    // *ppTMRecordStart + (pClb-ppCurTmRecord)
 		    pTMXTargetRecord = (PTMX_TARGET_RECORD) ADJUSTPTR( *ppTmRecordStart, pCurTmRecord, pTMXTargetRecord );
@@ -3095,10 +3096,10 @@ USHORT NTMAdjustAddDataInTgtCLB
 	  if ( fOK )
 	  {
 	    pNextClb = NEXTTARGETCLB(pCurClb);
-	    memmove( ((PBYTE)pNextClb) + ulDiff, pNextClb, RECLEN(pCurTmRecord) - ((PBYTE)pNextClb - (PBYTE)pCurTmRecord) );
-	    RECLEN(pCurTmRecord)  += ulDiff;
-	    RECLEN(pTMXTargetRecord) += ulDiff;
-	    *pulLeftClbLen += ulDiff;
+	    memmove( ((PBYTE)pNextClb) + lDiff, pNextClb, RECLEN(pCurTmRecord) - ((PBYTE)pNextClb - (PBYTE)pCurTmRecord) );
+	    RECLEN(pCurTmRecord)  += lDiff;
+	    RECLEN(pTMXTargetRecord) += lDiff;
+	    *plLeftClbLen += lDiff;
 	    *pfUpdate         = TRUE;
 	  } /* endif */
   } /* endif */
@@ -3109,14 +3110,14 @@ USHORT NTMAdjustAddDataInTgtCLB
   NtmStoreAddData( pCurClb, ADDDATA_ADDINFO_ID, TmProposal.szAddInfo );
 
   // reduce size of CLB when the new content is smaller
-  if ( usOldLen > ulNewLen )
+  if ( usOldLen > lNewLen )
   {
 	  // new length is smaller, reduce the CLB size and adjust following data
-	  ULONG ulDiff = usOldLen - ulNewLen;
-	  memmove( ((PBYTE)pNextClb) - ulDiff, pNextClb, RECLEN(pCurTmRecord) - ((PBYTE)pNextClb - (PBYTE)pCurTmRecord) );
-	  RECLEN(pCurTmRecord)       -= ulDiff;
-	  RECLEN(pTMXTargetRecord)   -= ulDiff;
-	  *pulLeftClbLen -= ulDiff;
+	  ULONG lDiff = usOldLen - lNewLen;
+	  memmove( ((PBYTE)pNextClb) - lDiff, pNextClb, RECLEN(pCurTmRecord) - ((PBYTE)pNextClb - (PBYTE)pCurTmRecord) );
+	  RECLEN(pCurTmRecord)       -= lDiff;
+	  RECLEN(pTMXTargetRecord)   -= lDiff;
+	  *plLeftClbLen -= lDiff;
 	  *pfUpdate         = TRUE;
   } /* endif */
 

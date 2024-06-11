@@ -194,7 +194,7 @@ typedef struct _RECPARAM
 {
     USHORT  usNum;           // record number
     USHORT  usOffset;        // record offset
-    ULONG   ulLen;           // record length
+    LONG     lLen;           // record length
 }  RECPARAM, * PRECPARAM;
 
 /**********************************************************************/
@@ -641,9 +641,9 @@ struct BTREE
     SHORT
     EQFNTMInsert
     (
-    PULONG  pulKey,           // pointer to key
+    PLONG  plKey,           // pointer to key
     PBYTE   pData,            // pointer to user data
-    ULONG   ulLen             // length of user data
+    LONG    lLen              // length of user data
     );
 
     //+----------------------------------------------------------------------------+
@@ -699,7 +699,7 @@ struct BTREE
     (
     ULONG  ulKey,                       // key to be searched for
     PCHAR  pchBuffer,                   // space for user data
-    PULONG  pulLength                   // in/out length of returned user data
+    PLONG  plLength                     // in/out length of returned user data
     );
 
 
@@ -819,9 +819,9 @@ struct BTREE
 
     ULONG QDAMGetrecDataLen_V3 ( PBTREEBUFFER_V3, SHORT );
     SHORT QDAMDeleteDataFromBuffer_V3( RECPARAM recParam);
-    SHORT QDAMDictUpdateLocal ( PWCHAR, PBYTE, ULONG );
+    SHORT QDAMDictUpdateLocal ( PWCHAR, PBYTE, LONG );
     
-    SHORT QDAMDictExactLocal  ( PWCHAR, PBYTE, PULONG, USHORT );
+    SHORT QDAMDictExactLocal  ( PWCHAR, PBYTE, PLONG, USHORT );
     SHORT EQFNTMCreate
     (
     PCHAR  pUserData,                   // user data
@@ -832,7 +832,7 @@ struct BTREE
 
     SHORT QDAMDictCreateLocal ( TMX_SIGN*, ULONG );
                                 
-    SHORT QDAMDictInsertLocal ( PWCHAR, PBYTE, ULONG );
+    SHORT QDAMDictInsertLocal ( PWCHAR, PBYTE, LONG );
     BOOL   QDAMDictLockStatus ( PWCHAR );
     VOID   QDAMDictUpdStatus ();
     SHORT QDAMFindRecord_V3( PWCHAR, PBTREEBUFFER_V3 * );
@@ -949,7 +949,7 @@ struct BTREE
     );
 
 
-    SHORT QDAMAddToBuffer_V3( PBYTE, ULONG, PRECPARAM);
+    SHORT QDAMAddToBuffer_V3( PBYTE, LONG, PRECPARAM);
     SHORT QDAMWriteHeader ();
 
     SHORT QDAMDictUpdSignLocal
@@ -1046,7 +1046,7 @@ size_t GetFileSize()const;
 BOOL QDAMTerseData
 (
    PUCHAR  pData,                   // pointer to data
-   PULONG  pulLen                  // length of the string
+   PLONG   plLen                    // length of the string
 );
 
 

@@ -64,12 +64,12 @@ USHORT EqfMemory::TmtXDelSegm
   BOOL fOK;                            // success indicator
   USHORT usRc = NO_ERROR;              // return code
   USHORT usMatchesFound = 0;           // compact area hits
-  ULONG  ulLen = 0;                    // length indication
+  LONG  lLen = 0;                      // length indication
   PTMX_RECORD pTmRecord = NULL;        // pointer to tm record
   CHAR szString[MAX_EQF_PATH];         // character string
   PULONG pulSids = NULL;               // ptr to sentence ids
   PULONG pulSidStart = NULL;           // ptr to sentence ids
-  ULONG ulRecBufSize = TMX_REC_SIZE;   // current size of record buffer
+  LONG lRecBufSize = TMX_REC_SIZE;     // current size of record buffer
 
   //allocate pSentence
   fOK = UtlAlloc( (PVOID *) &(pTmRecord), 0L, (LONG) TMX_REC_SIZE, NOMSG );
@@ -129,23 +129,23 @@ USHORT EqfMemory::TmtXDelSegm
         while ( *pulSids )
         {
           ulKey = *pulSids;
-          ulLen = TMX_REC_SIZE;
+          lLen = TMX_REC_SIZE;
           usRc =  TmBtree.EQFNTMGet(
                             ulKey,  //tm record key
                             (PCHAR)pTmRecord,   //pointer to tm record data
-                            &ulLen );  //length
+                            &lLen );  //length
           // re-alloc buffer and try again if buffer overflow occured
           if ( usRc == BTREE_BUFFER_SMALL )
           {
-            fOK = UtlAlloc( (PVOID *)&(pTmRecord), ulRecBufSize, ulLen, NOMSG );
+            fOK = UtlAlloc( (PVOID *)&(pTmRecord), lRecBufSize, lLen, NOMSG );
             if ( fOK )
             {
-              ulRecBufSize = ulLen;
+              lRecBufSize = lLen;
 
               usRc =  TmBtree.EQFNTMGet(
                                 ulKey,
                                 (PCHAR)pTmRecord,
-                                &ulLen );
+                                &lLen );
             }
             else
             {
@@ -196,16 +196,16 @@ USHORT EqfMemory::TmtXDelSegmByKey
 )
 {
   PTMX_SENTENCE pSentence = NULL;    // ptr to sentence structure
-  ULONG ulKey=TmDelIn.recordKey;                         // tm record key
+  LONG lKey=TmDelIn.recordKey;                         // tm record key
   BOOL fOK;                            // success indicator
   USHORT usRc = NO_ERROR;              // return code
   USHORT usMatchesFound = 0;           // compact area hits
-  ULONG  ulLen = 0;                    // length indication
+  LONG  lLen = 0;                    // length indication
   PTMX_RECORD pTmRecord = NULL;        // pointer to tm record
   CHAR szString[MAX_EQF_PATH];         // character string
   //PULONG pulSids = NULL;               // ptr to sentence ids
   //PULONG pulSidStart = NULL;           // ptr to sentence ids
-  ULONG ulRecBufSize = TMX_REC_SIZE;   // current size of record buffer
+  LONG lRecBufSize = TMX_REC_SIZE;   // current size of record buffer
 
   //allocate pSentence
   fOK = UtlAlloc( (PVOID *) &(pTmRecord), 0L, (LONG) TMX_REC_SIZE, NOMSG );
@@ -218,23 +218,23 @@ USHORT EqfMemory::TmtXDelSegmByKey
   // update TM databse
   if ( !usRc )
   {
-    ulLen = TMX_REC_SIZE;
+    lLen = TMX_REC_SIZE;
     usRc =  TmBtree.EQFNTMGet(
-                      ulKey,  //tm record key
+                      lKey,  //tm record key
                       (PCHAR)pTmRecord,   //pointer to tm record data
-                      &ulLen );  //length
+                      &lLen );  //length
     // re-alloc buffer and try again if buffer overflow occured
     if ( usRc == BTREE_BUFFER_SMALL )
     {
-      fOK = UtlAlloc( (PVOID *)&(pTmRecord), ulRecBufSize, ulLen, NOMSG );
+      fOK = UtlAlloc( (PVOID *)&(pTmRecord), lRecBufSize, lLen, NOMSG );
       if ( fOK )
       {
-        ulRecBufSize = ulLen;
+        lRecBufSize = lLen;
 
         usRc =  TmBtree.EQFNTMGet(
-                          ulKey,
+                          lKey,
                           (PCHAR)pTmRecord,
-                          &ulLen );
+                          &lLen );
       }
       else
       {
@@ -248,7 +248,7 @@ USHORT EqfMemory::TmtXDelSegmByKey
       //find target record and delete, if the target record was the
       //only target in the tm record, delete the entire record
       usRc = FindTargetByKeyAndDelete( pTmRecord,
-                          TmDelIn, pSentence, pTmDelOut, &ulKey );
+                          TmDelIn, pSentence, pTmDelOut, &lKey );
     } /* endif */
   } /* endif */
 
@@ -572,7 +572,7 @@ USHORT EqfMemory::FindTargetByKeyAndDelete(
                             OtmProposal&  TmDel,
                             PTMX_SENTENCE pSentence,
                             TMX_EXT_OUT_W * pTmExtOut,
-                            PULONG pulKey )
+                            PLONG plKey )
 {
   USHORT usRc = 0;
   PTMX_SOURCE_RECORD pTMXSourceRecord; //ptr to source record
@@ -739,7 +739,7 @@ USHORT EqfMemory::FindTargetByKeyAndDelete(
                                      pTmExtOut );
             NTMGetNameFromID( &pTMXSourceRecord->usLangId, (USHORT)LANG_KEY,
                         pTmExtOut->szOriginalSourceLanguage, NULL );
-            pTmExtOut->ulRecKey = TmDel.recordKey = *pulKey;
+            pTmExtOut->ulRecKey = TmDel.recordKey = *plKey;
             pTmExtOut->usTargetKey = TmDel.targetKey = usTarget;
             
             //if ( !pClb->bMultiple || (BOOL)TmDel.lTargetTime )
@@ -755,7 +755,7 @@ USHORT EqfMemory::FindTargetByKeyAndDelete(
               /* the key (only get rid of any target data)  */
               /**********************************************/
               usRc = TmBtree.EQFNTMUpdate(
-                                    *pulKey,
+                                    *plKey,
                                     (PBYTE)pTmRecord,
                                     RECLEN(pTmRecord) );
             } /* endif */

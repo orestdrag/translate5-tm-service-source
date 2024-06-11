@@ -1119,21 +1119,20 @@ USHORT EqfMemory::NTMDestroyLongNameTable()
 // ----------------------------------------------------------------------------+
 USHORT EqfMemory::NTMReadLongNameTable(){
   USHORT      usRC = NO_ERROR;         // function return code
-  ULONG       ulLen = 0;               // record length
+  LONG        lLen = 0;                // record length
 
   // call to obtain exact length of record
-  ulLen = 0;
-  usRC =  TmBtree.EQFNTMGet( LONGNAME_KEY, 0, &ulLen );
+  usRC =  TmBtree.EQFNTMGet( LONGNAME_KEY, 0, &lLen );
 
   if ( usRC == NO_ERROR )
   {
     // allocate buffer area if it is too small
-    if ( pLongNames->ulBufSize < ulLen )
+    if ( pLongNames->ulBufSize < lLen )
     {
       if ( UtlAlloc( (PVOID *)&pLongNames->pszBuffer, 0L,
-                     ulLen, NOMSG ))
+                     lLen, NOMSG ))
       {
-        pLongNames->ulBufSize = ulLen;
+        pLongNames->ulBufSize = lLen;
       }
       else
       {
@@ -1145,7 +1144,7 @@ USHORT EqfMemory::NTMReadLongNameTable(){
     if ( usRC == NO_ERROR )
     {
       usRC = TmBtree.EQFNTMGet( LONGNAME_KEY,
-                        (PCHAR)pLongNames->pszBuffer, &ulLen );
+                        (PCHAR)pLongNames->pszBuffer, &lLen );
     } /* endif */
 
 
@@ -1173,7 +1172,7 @@ USHORT EqfMemory::NTMReadLongNameTable(){
 
           memcpy( pNewArea,
                   (PBYTE)pLongNames->pszBuffer + sizeof(TERSEHEADER),
-                  ulLen - sizeof(TERSEHEADER) );
+                  lLen - sizeof(TERSEHEADER) );
           T5LOG(T5ERROR) << "::TEMPORARY_COMMENTED in NTMReadLongNameTable, fUtlHuffmanExpand";
 #ifdef TEMPORARY_COMMENTED
           if ( !fUtlHuffmanExpand( (PUCHAR)pNewArea, pTerseHeader->usDataSize,
@@ -1211,7 +1210,7 @@ USHORT EqfMemory::NTMReadLongNameTable(){
       PSZ    pszTemp;                  // ptr for buffer processing
 
       // remember used space in buffer area
-      pLongNames->ulBufUsed = ulLen;
+      pLongNames->ulBufUsed = lLen;
 
       // count number of entries in long name buffer
       pszTemp = pLongNames->pszBuffer;
@@ -1564,22 +1563,22 @@ USHORT EqfMemory::NTMLoadNameTable
 (
   ULONG       ulTableKey,              // key of table record
   PTMX_TABLE  pTMTable,                // ptr to table data pointer
-  PULONG      pulSize                  // ptr to buffer for size of table data
+  PLONG       plSize                   // ptr to buffer for size of table data
 )
 {
   USHORT      usRc = NO_ERROR;         // function return code
 
   // call to obtain exact length of record
-  *pulSize = 0;
-  usRc =  TmBtree.EQFNTMGet( ulTableKey, 0, pulSize );
+  *plSize = 0;
+  usRc =  TmBtree.EQFNTMGet( ulTableKey, 0, plSize );
   
   PBYTE pOldTable = nullptr; 
   // read table data
   if ( usRc == NO_ERROR )
   {
-    ULONG ulLen = *pulSize;
-    pOldTable = new BYTE[ulLen + 1];
-    usRc =  TmBtree.EQFNTMGet( ulTableKey, (PCHAR)(pOldTable), &ulLen );
+    LONG lLen = *plSize;
+    pOldTable = new BYTE[lLen + 1];
+    usRc =  TmBtree.EQFNTMGet( ulTableKey, (PCHAR)(pOldTable), &lLen );
   } /* endif */
 
   // handle tersed name tables
@@ -1602,10 +1601,10 @@ USHORT EqfMemory::NTMLoadNameTable
       // unterse data
       if ( usRc == NO_ERROR )
       {
-        ULONG ulNewLen = 0;
+        LONG lNewLen = 0;
 
         memcpy( pNewArea, (PBYTE)pOldTable + sizeof(TERSEHEADER),
-                *pulSize - sizeof(TERSEHEADER) );
+                *plSize - sizeof(TERSEHEADER) );
        
         T5LOG(T5ERROR) << ":: TEMPORARY_COMMENTED temcom_id = 51 in NTMLoadNameTable";
 #ifdef TEMPORARY_COMMENTED
@@ -1622,7 +1621,7 @@ USHORT EqfMemory::NTMLoadNameTable
       if ( usRc == NO_ERROR )
       {
         // set size of name table
-        *pulSize = pTerseHeader->usDataSize;
+        *plSize = pTerseHeader->usDataSize;
 
         // free tersed data area
         //UtlAlloc( (PVOID *)pTMTable, 0L, 0L, NOMSG );
@@ -1642,7 +1641,7 @@ USHORT EqfMemory::NTMLoadNameTable
   //   0xA0 under Windows (due to OemToAnsi) but should be 0xFF
   if ( (usRc == NO_ERROR) && (ulTableKey == LANG_KEY) )
   {
-    LONG lRest = *pulSize;
+    LONG lRest = *plSize;
     PBYTE pbTemp = (PBYTE)pOldTable;
     while ( lRest )
     {

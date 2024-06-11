@@ -1768,7 +1768,7 @@ public:
   PVOID      pvTempMatchList = nullptr;        // matchlist of FillMatchEntry function
   PVOID      pvIndexRecord = nullptr;          // index record area of FillMatchEntry function
   PVOID      pvTmRecord = nullptr;             // buffer for memory record used by GetFuzzy and GetExact
-  ULONG      ulRecBufSize = 0;                 // current size of pvTMRecord;
+  LONG       lRecBufSize = 0;                  // current size of pvTMRecord;
 
   // fields for time measurements and logging
   BOOL       fTimeLogging = 0;           // TRUE = Time logging is active
@@ -1896,7 +1896,7 @@ USHORT FindTargetByKeyAndDelete(
                             OtmProposal&  pTmDel,
                             PTMX_SENTENCE pSentence,
                             TMX_EXT_OUT_W * pTmExtOut,
-                            PULONG pulKey );
+                            PLONG plKey );
 
 
 USHORT TokenizeSource( PTMX_SENTENCE, PSZ, PSZ );
@@ -1923,15 +1923,16 @@ USHORT FillClb( PTMX_TARGET_CLB, OtmProposal& );
 USHORT ComparePutData
 (
   PTMX_RECORD *ppTmRecord,             // ptr to ptr of tm record data buffer
-  PULONG      pulRecBufSize,           // current size of record buffer
+  PLONG      plRecBufSize,           // current size of record buffer
   OtmProposal&  TmProposal,                  // pointer to get in data
-  PULONG      pulKey                   // tm key
+  PLONG      plKey                   // tm key
 );
+
 USHORT AddTmTarget(
   OtmProposal& TmProposal,       //pointer to get in data
   PTMX_RECORD *ppTmRecord,          //pointer to tm record data pointer
-  PULONG pulRecBufSize,             //ptr to current size of TM record buffer
-  PULONG pulKey );                  //tm key
+  PLONG plRecBufSize,             //ptr to current size of TM record buffer
+  PLONG plKey );                  //tm key
 
 /*! \brief Store the supplied proposal in the memory
     When the proposal aready exists it will be overwritten with the supplied data
@@ -2026,7 +2027,7 @@ USHORT AddTmTarget(
   ); 
 
 
-  USHORT AddToTm( OtmProposal&, PULONG );
+  USHORT AddToTm( OtmProposal&, PLONG );
   USHORT UpdateTmIndex( PTMX_SENTENCE, ULONG );
 
   void importDone(int iRC, char *pszError );
@@ -2073,7 +2074,7 @@ USHORT NTMLoadNameTable
 (
   ULONG       ulTableKey,              // key of table record
   PTMX_TABLE  pTMTable,              // ptr to table data pointer
-  PULONG      pulSize                  // ptr to buffer for size of table data
+  PLONG       plSize                  // ptr to buffer for size of table data
 );
 
 /*! \brief Get a list of memory proposals matching the given search key

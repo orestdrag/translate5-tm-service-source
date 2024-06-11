@@ -246,7 +246,7 @@ TMManager* TMManager::GetInstance(){
 
 std::shared_ptr<EqfMemory> TMManager::CreateNewEmptyTM(const std::string& strMemName, const std::string& strSrcLang, const std::string& strMemDescription, int& _rc_){
   std::shared_ptr<EqfMemory> NewMem;
-  ULONG ulKey = 0;
+  LONG lKey = 0;
   if ( _rc_ == NO_ERROR )
   {
     T5LOG( T5DEBUG) << ":: create the memory" ;    
@@ -281,28 +281,28 @@ std::shared_ptr<EqfMemory> TMManager::CreateNewEmptyTM(const std::string& strMem
   if ( _rc_ == NO_ERROR )
   {
     //insert initialized record to tm data file
-    ulKey = AUTHOR_KEY;
-    _rc_ = NewMem->TmBtree.EQFNTMInsert(&ulKey,
+    lKey = AUTHOR_KEY;
+    _rc_ = NewMem->TmBtree.EQFNTMInsert(&lKey,
               (PBYTE)&NewMem->Authors, TMX_TABLE_SIZE );
   }
   if ( _rc_ == NO_ERROR )
   {
-    ulKey = FILE_KEY;
-    _rc_ = NewMem->TmBtree.EQFNTMInsert(&ulKey,
+    lKey = FILE_KEY;
+    _rc_ = NewMem->TmBtree.EQFNTMInsert(&lKey,
                 (PBYTE)&NewMem->FileNames, TMX_TABLE_SIZE );     
   } /* endif */
 
   if ( _rc_ == NO_ERROR )
   {
-    ulKey = TAGTABLE_KEY;
-    _rc_ = NewMem->TmBtree.EQFNTMInsert(&ulKey,
+    lKey = TAGTABLE_KEY;
+    _rc_ = NewMem->TmBtree.EQFNTMInsert(&lKey,
                 (PBYTE)&NewMem->TagTables, TMX_TABLE_SIZE );
   } /* endif */
 
   if ( _rc_ == NO_ERROR )
   {
-    ulKey = LANG_KEY;
-    _rc_ = NewMem->TmBtree.EQFNTMInsert(&ulKey,
+    lKey = LANG_KEY;
+    _rc_ = NewMem->TmBtree.EQFNTMInsert(&lKey,
             (PBYTE)&NewMem->Languages, TMX_TABLE_SIZE );
   } /* endif */
 
@@ -312,8 +312,8 @@ std::shared_ptr<EqfMemory> TMManager::CreateNewEmptyTM(const std::string& strMem
     //initialize and insert compact area record
     memset( NewMem->bCompact, 0, size );
 
-    ulKey = COMPACT_KEY;
-    _rc_ = NewMem->TmBtree.EQFNTMInsert(&ulKey,
+    lKey = COMPACT_KEY;
+    _rc_ = NewMem->TmBtree.EQFNTMInsert(&lKey,
                         NewMem->bCompact, size);  
 
   } /* endif */
@@ -321,9 +321,9 @@ std::shared_ptr<EqfMemory> TMManager::CreateNewEmptyTM(const std::string& strMem
   // add long document table record
   if ( _rc_ == NO_ERROR )
   {
-    ulKey = LONGNAME_KEY;
+    lKey = LONGNAME_KEY;
     // write long document name buffer area to the database
-    _rc_ = NewMem->TmBtree.EQFNTMInsert(&ulKey,
+    _rc_ = NewMem->TmBtree.EQFNTMInsert(&lKey,
                         (PBYTE)NewMem->pLongNames->pszBuffer,
                         NewMem->pLongNames->ulBufUsed );        
 
