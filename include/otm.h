@@ -15,41 +15,6 @@
 /* NTM prototypes                                                     */
 /**********************************************************************/
 #define NTMREQUESTNEWKEY 0xFFFFFFFF
-//+----------------------------------------------------------------------------+
-// Internal function
-//+----------------------------------------------------------------------------+
-// Function name:     EQFNTMCreate
-//+----------------------------------------------------------------------------+
-// Function call:     EQFNTMCreate( pTMName, pUserData, usLen, ulStart, &pNTM);
-//+----------------------------------------------------------------------------+
-// Description:       This function will create the appropriate Transl.Memory
-//                    file.
-//+----------------------------------------------------------------------------+
-// Parameters:        PSZ  pTMName,         name of file to be created
-//                    PCHAR  pUserData,     user data
-//                    USHORT usLen,         length of user data
-//                    ULONG  ulStartKey,    first key to start automatic insert
-//                    PBTREE * ppBTIda      pointer to structure
-//+----------------------------------------------------------------------------+
-// Returncode type:   SHORT
-//+----------------------------------------------------------------------------+
-// Returncodes:       0                 no error happened
-//                    BTREE_NO_ROOM     memory shortage
-//                    BTREE_USERDATA    user data too long
-//                    BTREE_OPEN_ERROR  dictionary already exists
-//                    BTREE_READ_ERROR  read error from disk
-//                    BTREE_DISK_FULL   disk full condition encountered
-//                    BTREE_WRITE_ERROR write error to disk
-//+----------------------------------------------------------------------------+
-SHORT
-EQFNTMCreate
-(
-   PSZ  pTMName,                       // name of file to be created
-   PCHAR  pUserData,                   // user data
-   USHORT usLen,                       // length of user data
-   ULONG  ulStartKey,                  // first key to start automatic insert...
-   PBTREE  * ppBTIda                    // pointer to structure
-);
 
 
 //+----------------------------------------------------------------------------+
