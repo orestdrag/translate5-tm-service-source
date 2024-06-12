@@ -111,7 +111,7 @@ USHORT EQFMemOrganizeStart
     outputMsg = "";
     T5Logger::GetInstance()->desuppressLogging(ll);
   }
-  pRIDA->pMemTemp = TMManager::GetInstance()->CreateNewEmptyTM(pRIDA->szTempMemName, pRIDA->szSourceLanguage, "", iRC);
+  pRIDA->pMemTemp = TMManager::GetInstance()->CreateNewEmptyTM(pRIDA->szTempMemName, pRIDA->szSourceLanguage, "", iRC, true);
   
   if ( (iRC != 0) || (pRIDA->pMemTemp == NULL ) )
   {
@@ -187,9 +187,10 @@ NTMCloseOrganize ( PMEM_ORGANIZE_IDA pRIDA,           //pointer to organize IDA
   if ( pRIDA->pMem != NULL )
   {
     int use_count = pRIDA->pMem.use_count();
-    //if(use_count != 3)//1)
+
+    //if(use_count != 2)//1)
     //{
-    //  T5LOG(T5WARNING) << ":: use_count for tm for reorganize is not 3, but " << use_count;
+    //  T5LOG(T5WARNING) << ":: use_count for tm for reorganize is not 2, but " << use_count;
     //}
     //TMManager::GetInstance()->CloseTM(strMemName);
     //pRIDA->pMem = nullptr;
@@ -212,7 +213,7 @@ VOID EQFMemOrganizeProcess
 )
 {
   USHORT            usRc = TRUE;    // Return code to control a process
-  USHORT            usDosRc;        // Dos Returncode
+  USHORT            usDosRc = 0;    // Dos Returncode
   PMEM_ORGANIZE_IDA pRIDA;          // Pointer to the organize IDA
   PSZ               pReplAddr[3];   // Arrey of pointers to replacement strings
 
@@ -323,13 +324,16 @@ VOID EQFMemOrganizeProcess
     }
     //pRIDA->pMemTemp->TmBtree.fb.Flush();
     //pRIDA->pMemTemp->InBtree.fb.Flush();  
-    pRIDA->pMemTemp = nullptr;
+    pRIDA->pMem->TmBtree.fb.data = std::move(pRIDA->pMemTemp->TmBtree.fb.data);
+    pRIDA->pMem->InBtree.fb.data = std::move(pRIDA->pMemTemp->InBtree.fb.data);
+
+    //pRIDA->pMemTemp = nullptr;
     //TMManager::GetInstance()->closeMemory( pRIDA->pMemTemp.get() );
 
     if (usRc)
     {
       //T5LOG(T5FATAL) <<"UNIMPLEMENTED FUNCTION";
-      usDosRc = NTMCloseOrganize( pRIDA, FALSE );
+      //usDosRc = NTMCloseOrganize( pRIDA, FALSE );
 
       // set the progress indicator to 100 percent
       if ( !pRIDA->fBatch )
@@ -371,7 +375,7 @@ VOID EQFMemOrganizeProcess
       } /* endif */
     } /* endif */
     
-    pRIDA->pMem->importDetails->usProgress = pCommArea->usComplete;
+    pRIDA->pMem->importDetails->usProgress = pCommArea->usComplete + 1;
     // -----------------------------------------------------
     // Issue message WM_EQF_MEMORGANIZE_END
     pRIDA->NextTask = MEM_END_ORGANIZE;

@@ -172,6 +172,7 @@ void EqfMemory::reorganizeDone(int iRC, char *pszError )
     strError =  pszError;
     T5LOG(T5ERROR) << ":: memName = " << szName <<", reorganize failed: " << pszError << " import details = " << importDetails->toString() ;
   }
+  tmMutex.unlock();
 }
 
 /*! \brief Close all open memories
@@ -244,7 +245,8 @@ TMManager* TMManager::GetInstance(){
   return &tmm;
 }
 
-std::shared_ptr<EqfMemory> TMManager::CreateNewEmptyTM(const std::string& strMemName, const std::string& strSrcLang, const std::string& strMemDescription, int& _rc_){
+std::shared_ptr<EqfMemory> TMManager::CreateNewEmptyTM(const std::string& strMemName, const std::string& strSrcLang, 
+        const std::string& strMemDescription, int& _rc_, bool keepInRamOnly){
   std::shared_ptr<EqfMemory> NewMem;
   ULONG ulKey = 0;
   if ( _rc_ == NO_ERROR )
@@ -276,7 +278,7 @@ std::shared_ptr<EqfMemory> TMManager::CreateNewEmptyTM(const std::string& strMem
     //call create function for data file
     NewMem->usAccessMode = 1;//ASD_LOCKED;         // new TMs are always in exclusive access...
     
-    _rc_ = NewMem->TmBtree.QDAMDictCreateLocal( &(NewMem->stTmSign),FIRST_KEY );
+    _rc_ = NewMem->TmBtree.QDAMDictCreateLocal( &(NewMem->stTmSign),FIRST_KEY, keepInRamOnly);
   }
   if ( _rc_ == NO_ERROR )
   {
@@ -339,7 +341,7 @@ std::shared_ptr<EqfMemory> TMManager::CreateNewEmptyTM(const std::string& strMem
   {
     //fill signature record structure
     strcpy( NewMem->stTmSign.szName, NewMem->InBtree.fb.fileName.c_str() );
-    _rc_ = NewMem->InBtree.QDAMDictCreateLocal(&NewMem->stTmSign, START_KEY );                        
+    _rc_ = NewMem->InBtree.QDAMDictCreateLocal(&NewMem->stTmSign, START_KEY, keepInRamOnly);                        
   } /* endif */
 
   if(_rc_ == NO_ERROR){   
@@ -1385,7 +1387,6 @@ int TMManager::CloseTM(const std::string& strMemName){
 }
 
 int TMManager::CloseTMUnsafe(const std::string& strMemName){
-  //std::lock_guard<std::mutex> l{mutex_access_tms};
   if(!IsMemoryLoadedUnsafe(strMemName)){
     return 404;
   }

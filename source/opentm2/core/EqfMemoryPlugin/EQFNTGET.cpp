@@ -1038,6 +1038,7 @@ USHORT ExactTest
       if ( pTmClb->NTMGetIDFromNameEx( pGetIn->szFileName,
                                pGetIn->szLongName,
                                (USHORT)FILE_KEY, &usGetFile,
+                               NTMGETID_NOUPDATE_OPT,//0,
                                &usAlternateGetFile ))
       {
         usGetFile = 1;

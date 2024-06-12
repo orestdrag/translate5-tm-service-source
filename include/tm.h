@@ -4133,7 +4133,10 @@ class TMManager{
   std::shared_ptr<EqfMemory> requestReadOnlyTMPointer(const std::string& strMemName, std::shared_ptr<int>& refBack);
   std::shared_ptr<EqfMemory> requestWriteTMPointer(const std::string& strMemName, std::shared_ptr<int>& refBack);
 
-  std::shared_ptr<EqfMemory> CreateNewEmptyTM(const std::string& strMemName, const std::string& strSrcLang, const std::string& strMemDescription, int& _rc_);
+  std::shared_ptr<EqfMemory> CreateNewEmptyTM(const std::string& strMemName, const std::string& strSrcLang, 
+      const std::string& strMemDescription, int& _rc_, bool keepInRamOnly = false);
+
+
     /*! \brief OpenTM2 API session handle
     */
     LONG hSession = 0;

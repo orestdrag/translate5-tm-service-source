@@ -2185,7 +2185,8 @@ SHORT BTREE::QDAMAllocKeyRecords
 SHORT BTREE::QDAMDictCreateLocal
 (
    PTMX_SIGN pSign,
-   ULONG ulStartKey         // translation memory
+   ULONG ulStartKey,         // translation memory
+   bool keepInRamOnly
 )
 {
   const SHORT sNumberOfKey = 20;
@@ -2194,13 +2195,16 @@ SHORT BTREE::QDAMDictCreateLocal
   SHORT i;
   SHORT sRc = 0;                       // return code
   USHORT  usAction;                    // used in open of file
-    
+
+  if( false == keepInRamOnly )
+  { 
     // Try to create the index file
-  fb.file = fopen(fb.fileName.c_str(), "w+b");
+    fb.file = fopen(fb.fileName.c_str(), "w+b");
   
-  if(!fb.file){
-    sRc = -1;
-    T5LOG(T5ERROR) << "::Can't create file " << fb.fileName;
+    if(!fb.file){
+      sRc = -1;
+      T5LOG(T5ERROR) << "::Can't create file " << fb.fileName;
+    }
   }
 
   if ( !sRc )

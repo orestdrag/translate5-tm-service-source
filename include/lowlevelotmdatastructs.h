@@ -872,15 +872,9 @@ struct BTREE: public BTREEDATA
     SHORT QDAMDictUpdateLocal ( PWCHAR, PBYTE, ULONG );
     
     SHORT QDAMDictExactLocal  ( PWCHAR, PBYTE, PULONG, USHORT );
-    SHORT EQFNTMCreate
-    (
-    PCHAR  pUserData,                   // user data
-    USHORT usLen,                       // length of user data
-    ULONG  ulStartKey                  // first key to start automatic insert...
-    );
 
 
-    SHORT QDAMDictCreateLocal ( TMX_SIGN*, ULONG );
+    SHORT QDAMDictCreateLocal ( TMX_SIGN*, ULONG, bool keepInRamOnly = false);
                                 
     SHORT QDAMDictInsertLocal ( PWCHAR, PBYTE, ULONG );
     BOOL   QDAMDictLockStatus ( PWCHAR );
