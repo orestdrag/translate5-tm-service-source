@@ -172,7 +172,7 @@ void EqfMemory::reorganizeDone(int iRC, char *pszError )
     strError =  pszError;
     T5LOG(T5ERROR) << ":: memName = " << szName <<", reorganize failed: " << pszError << " import details = " << importDetails->toString() ;
   }
-  tmMutex.unlock();
+  //tmMutex.unlock();
 }
 
 /*! \brief Close all open memories
