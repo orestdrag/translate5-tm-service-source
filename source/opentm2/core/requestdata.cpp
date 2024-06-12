@@ -441,7 +441,7 @@ void AddToJson(std::stringstream& ss, const char* key, T value, bool fAddSeparat
 int CreateMemRequestData::createNewEmptyMemory(){
   // create memory database
   if(!_rc_){
-    mem = TMManager::GetInstance()->CreateNewEmptyTM(strMemName, strSrcLang, strMemDescription, _rc_);
+    mem = TMManager::GetInstance()->CreateNewEmptyTM(strMemName, strSrcLang, strMemDescription, _rc_, false);
   }
   T5LOG( T5INFO) << " done, usRC = " << _rc_ ;
   if(!_rc_){
