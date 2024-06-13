@@ -175,7 +175,7 @@ EqfMemory::NTMGetIDFromName(
                   PUSHORT  pusID       )  //output
 {
   return( NTMGetIDFromNameEx( pszName, pszLongName, usTableType,
-                              pusID, NULL ) );
+                              pusID, 0, NULL ) );
 
 } /* end of function NTMGetIDFromName */
 
@@ -193,6 +193,7 @@ USHORT EqfMemory::NTMGetIDFromNameEx
   PSZ         pszLongName,             // input, long name (only for FILE_KEY)
   USHORT      usTableType,             // input, type of table to use
   PUSHORT     pusID,                   // output, ID for name being looked up
+  LONG        lOptions,
   PUSHORT     pusAlternativeID         // output, alternative ID
 )
 {
@@ -203,6 +204,18 @@ USHORT EqfMemory::NTMGetIDFromNameEx
   BOOL        fLongName = FALSE;
 
   // initialize ID
+  
+  // initialize ID
+  if ( lOptions & NTMGETID_NOUPDATE_OPT )
+  {
+    *pusID = NTMGETID_NOTFOUND_ID;           // use as not-found indicator
+  }
+  else
+  {
+    *pusID = 0;
+  } /* endif */
+  if ( pusAlternativeID )  *pusAlternativeID = NTMGETID_NOTFOUND_ID;
+
   *pusID = 0;
   if ( pusAlternativeID )  *pusAlternativeID = NTMGETID_NOTFOUND_ID;
 
@@ -275,7 +288,7 @@ USHORT EqfMemory::NTMGetIDFromNameEx
           // return ID of found entry
            *pusID = pEntry->usId;
         }
-        else //if ( !(lOptions & NTMGETID_NOUPDATE_OPT) )
+        else if ( !(lOptions & NTMGETID_NOUPDATE_OPT) )
         {
           ULONG   ulNameLen = strlen(pszLongName) + 1;
           ULONG   ulAddLen = ulNameLen + sizeof(USHORT);
@@ -457,7 +470,7 @@ USHORT EqfMemory::NTMGetIDFromNameEx
            else 
            {
              // name is not contained in name table
-             //if ( !(lOptions & NTMGETID_NOUPDATE_OPT) )
+             if ( !(lOptions & NTMGETID_NOUPDATE_OPT) )
              {
                usRc = NTMAddNameToTable( pszName, usTableType,
                                          pusID );
