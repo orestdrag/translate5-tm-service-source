@@ -2337,19 +2337,6 @@ typedef CHAR SERVERNAME [MAX_SERVER_NAME];
 #define USELESSWORD -7               /* useless word token                      */
 #define DUMMYTAG    -8               /* dummy tag token which indicates end of */
                                      /* associated text                        */
-typedef struct _TOKENENTRY     // entry in tokenlist :
-{
-  // !!!! Attention: below has to match TOKENENTRYSEG definition ....  !!!!
-  SHORT     sTokenid;          // Tokenid
-  USHORT    usLength;          // Length of data string
-  SHORT     sAddInfo;          // additional information from tag table
-  CHAR    * pDataString;       // pointer to data string
-  USHORT    usOrgId;           // original id
-  USHORT    ClassId;           // class id of token
-  CHAR_W * pDataStringW;       // pointer to data string  - Unicode
-  // !!!! Attention: above has to match TOKENENTRYSEG definition ....  !!!!
-
-} TOKENENTRY, *PTOKENENTRY;
 
 typedef struct _EXCLUSIONLIST
    {

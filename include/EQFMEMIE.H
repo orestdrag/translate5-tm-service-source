@@ -26,36 +26,6 @@
 //+----------------------------------------------------------------------------+
 
 //
-// EXTMEMEXPORTSTART
-//
-// This function is called once at the begin of the memory export
-USHORT /**/ EXTMEMEXPORTSTART
-( 
-  PLONG            plHandle,           // ptr to buffer receiving the handle for the external/import
-  PSZ              pszOutFile,         // fully qualified file name for the exported memory
-  PMEMEXPIMPINFO   pMemInfo            // pointer to structure containing general information for the exported memory
-);
-
-//
-// EXTMEMEXPORTPROCESS
-//
-// This function is called for each segment being exported
-USHORT /**/ EXTMEMEXPORTPROCESS
-( 
-  LONG             lHandle,                 // export/import handle as set by ExtMemExportStart function
-  PMEMEXPIMPSEG    pSegment                 // pointer to structure containing the segment data
-);
-
-//
-// EXTMEMEXPORTEND
-//
-// This function is called once at the end of the memory export
-USHORT /**/ EXTMEMEXPORTEND
-( 
-  LONG             lHandle                  // export/import handle as set by ExtMemExportStart function
-);
-
-//
 // EXTMEMIMPORTSTART
 //
 // This function is called once at the begin of the memory import

@@ -2218,7 +2218,6 @@ int ExportRequestData::execute(){
   if (// requestAcceptHeader.compare( "application/xml" ) == 0  || 
      EXPORT_MEM_TMX_STREAM == command)
   {
-    T5LOG( T5INFO) <<"::getMem:: mem = " <<  strMemName << "; supported type found application/xml, tempFile = " << strTempFile;
     ExportTmx();
     if ( _rc_ != 0 )
     {
@@ -2341,6 +2340,7 @@ int ExportRequestData::ExportTmx(){
     memset( &fctdata, 0, sizeof( FCTDATA ) );
     fctdata.fComplete = TRUE;
     fctdata.usExportProgress = 0;
+    fctdata.numOfProposalsRequested = numberOfRequestedProposals;
     if(isStreamingRequest()){
       fctdata.responseHandler = responseHandler;
     }
@@ -2351,7 +2351,8 @@ int ExportRequestData::ExportTmx(){
 
   if ( _rc_ == 0 )
   {
-    if(isStreamingRequest()){
+    if(COMMAND::EXPORT_MEM_INTERNAL_FORMAT_STREAM == command  //isStreamingRequest()
+    ){
       // Create response headers
       proxygen::HTTPMessage response;
       response.setHTTPVersion(1, 1);

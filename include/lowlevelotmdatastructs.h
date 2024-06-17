@@ -9,6 +9,38 @@
 #include "win_types.h"
 
 
+#include <folly/io/IOBufQueue.h>
+
+#include <proxygen/httpserver/ResponseHandler.h>
+
+class ChunkBuffer{
+  //long m_bytesCollecedInChunk = 0;
+  //long m_bytesSend = 0;
+  //static constexpr size_t chunkSize_ = 4096;
+  //std::vector<unsigned char> m_buff;
+  proxygen::ResponseHandler* m_responseHandler = nullptr;
+
+  bool canFit(long size);
+  
+  void triggerChunkSend();
+public:
+  void writeToBuff(const void * data, long size);
+  void setResponseHandler(proxygen::ResponseHandler* responseHandler){m_responseHandler = responseHandler;}
+  bool isActive()const {return m_responseHandler != 0; }
+
+  ChunkBuffer(){//m_buff.reserve(chunkSize_+1);
+  }
+  ~ChunkBuffer(){
+    //T5LOG(T5INFO)<< "called dctor of chunk buffer- sending last chunk";
+    //triggerChunkSend();
+  }
+
+  void SendResponce(const std::string& memName, const std::string& nextInternalKey);
+
+
+  folly::IOBufQueue bufQueue;
+};
+
 #define ENTRYENCODE_LEN    15          // number of significant characters
 #define MAX_LIST           20          // number of recently used records
 #define COLLATE_SIZE      256          // size of the collating sequence
@@ -1373,6 +1405,85 @@ typedef struct _MEMEXPIMPSEG
 } MEMEXPIMPSEG, *PMEMEXPIMPSEG;
 
 
+#include "CXMLWRITER.H"
+
+// size of file read buffer in preprocess step
+#define TMX_BUFFER_SIZE 8096
+
+// callback function which is used by ExtMemImportprocess to insert segments into the memory
+typedef USHORT (/*APIENTRY*/ *PFN_MEMINSERTSEGMENT)( LONG lMemHandle, PMEMEXPIMPSEG pSegment );
+class TMXParseHandler;
+//class SAXParser;
+struct LOADEDTABLE;
+
+typedef struct _TOKENENTRY     // entry in tokenlist :
+{
+  // !!!! Attention: below has to match TOKENENTRYSEG definition ....  !!!!
+  SHORT     sTokenid;          // Tokenid
+  USHORT    usLength;          // Length of data string
+  SHORT     sAddInfo;          // additional information from tag table
+  CHAR    * pDataString;       // pointer to data string
+  USHORT    usOrgId;           // original id
+  USHORT    ClassId;           // class id of token
+  CHAR_W * pDataStringW;       // pointer to data string  - Unicode
+  // !!!! Attention: above has to match TOKENENTRYSEG definition ....  !!!!
+
+} TOKENENTRY, *PTOKENENTRY;
+class ImportStatusDetails;
+
+
+#include <xercesc/util/PlatformUtils.hpp>
+#include <xercesc/framework/XMLPScanToken.hpp>
+#include <xercesc/parsers/SAXParser.hpp>
+#include <xercesc/sax/HandlerBase.hpp>
+#include <xercesc/util/XMLString.hpp>
+#include <xercesc/util/OutOfMemoryException.hpp>
+#include <xercesc/framework/MemBufInputSource.hpp>
+
+//+----------------------------------------------------------------------------+
+//| Our TMX import export class                                                |
+//|                                                                            |
+//+----------------------------------------------------------------------------+
+class CTMXExportImport
+{
+  public:
+    // constructor/desctructor
+	  CTMXExportImport();
+	  ~CTMXExportImport();
+    // export methods
+    USHORT WriteHeader( const char *pszOutFile, PMEMEXPIMPINFO pMemInfo );
+    USHORT WriteSegment( PMEMEXPIMPSEG pSegment  );
+    USHORT WriteEnd();
+    // import methods
+    USHORT StartImport( const char *pszInFile, PMEMEXPIMPINFO pMemInfo, ImportStatusDetails* pImportStatusDetails ); 
+    USHORT ImportNext( PFN_MEMINSERTSEGMENT pfnInsertSegment, LONG pMemHandle, ImportStatusDetails*     pImportData  ); 
+    USHORT EndImport(); 
+    USHORT getLastError( PSZ pszErrorBuffer, int iBufferLength );
+
+
+    CXmlWriter m_xw;
+  protected:
+    USHORT WriteTUV( PSZ pszLanguage, PSZ pszMarkup, PSZ_W pszSegmentData );
+    USHORT PreProcessInFile( const char *pszInFile, const char *pszOutFile );
+
+
+    TMXParseHandler *m_handler;          // our SAX handler 
+    xercesc::SAXParser* m_parser;
+    xercesc::XMLPScanToken m_SaxToken; 
+    unsigned int m_iSourceSize;          // size of source file
+    TOKENENTRY* m_pTokBuf;               // buffer for TaTagTokenize tokens
+    CHAR m_szActiveTagTable[50];         // buffer for name of currently loaded markup table
+    LOADEDTABLE* m_pLoadedTable;         // pointer to currently loaded markup table
+    LOADEDTABLE* m_pLoadedRTFTable;      // pointer to loaded RTF tag table
+    CHAR m_szInFile[512];                // buffer for input file
+    CHAR m_TempFile[540];                // buffer for temporary file name
+    BYTE m_bBuffer[TMX_BUFFER_SIZE+1];
+    MEMEXPIMPINFO* m_pMemInfo;
+    CHAR_W m_szSegBuffer[MAX_SEGMENT_SIZE+1]; // buffer for the processing of segment data
+    int  m_currentTu;                    // export: number of currently processed tu
+};
+
+
 typedef struct _MEM_EXPORT_IDA
 {
  CHAR         szMemName[MAX_LONGFILESPEC];// Memory database name without extension
@@ -1412,7 +1523,7 @@ typedef struct _MEM_EXPORT_IDA
  ULONG         ulOemCP;                // ASCII cp of system preferences language
  ULONG         ulAnsiCP;
  // fields for external memory export methods
- LONG          lExternalExportHandle;  // handle of external memory export functions
+ CTMXExportImport*          lExternalExportHandle;  // handle of external memory export functions
  //HMODULE       hmodMemExtExport;                 // handle of external export module/DLL
  PMEMEXPIMPINFO pstMemInfo;                        // buffer for memory information
  PMEMEXPIMPSEG  pstSegment;                        // buffer for segment data

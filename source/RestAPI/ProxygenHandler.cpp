@@ -135,21 +135,28 @@ void ProxygenHandler::onBody(std::unique_ptr<folly::IOBuf> body) noexcept {
 void ProxygenHandler::onEOM() noexcept {  
   if(pRequest && pRequest->command >= COMMAND::START_COMMANDS_WITH_BODY)
   {
-    body_->coalesce();      
-    pRequest->strBody = (char*) body_->data();
-     //fix garbage in json 
-    if(pRequest->strBody.empty()){
-      pRequest->_rest_rc_ = 404;
-    }else if(TMManager::GetInstance()->fWriteRequestsAllowed == false){
-      pRequest->_rest_rc_ = 423;  
+    //size_t bodyLen = body_->length();
+
+    if(nullptr == body_ && COMMAND::EXPORT_MEM_TMX_STREAM == pRequest->command){
+      T5Logger::GetInstance()->SetBodyBuffer(", without body \n" );
+        pRequest->run();
     }else{
-      size_t json_end = pRequest->strBody.find("\n}") ;
-      if(json_end > 0 && json_end != std::string::npos){
-        pRequest->strBody = pRequest->strBody.substr(0, json_end + 2);
+      body_->coalesce();      
+      pRequest->strBody = (char*) body_->data();
+      //fix garbage in json 
+      if(pRequest->strBody.empty()){
+        pRequest->_rest_rc_ = 404;
+      }else if(TMManager::GetInstance()->fWriteRequestsAllowed == false){
+        pRequest->_rest_rc_ = 423;  
+      }else{
+        size_t json_end = pRequest->strBody.find("\n}") ;
+        if(json_end > 0 && json_end != std::string::npos){
+          pRequest->strBody = pRequest->strBody.substr(0, json_end + 2);
+        }
+        std::string truncatedInput = pRequest->strBody.size() > 3000 ? pRequest->strBody.substr(0, 3000) : pRequest->strBody;
+        T5Logger::GetInstance()->SetBodyBuffer(", with body = \n\"" + truncatedInput +"\"\n");
+        pRequest->run();
       }
-      std::string truncatedInput = pRequest->strBody.size() > 3000 ? pRequest->strBody.substr(0, 3000) : pRequest->strBody;
-      T5Logger::GetInstance()->SetBodyBuffer(", with body = \n\"" + truncatedInput +"\"\n");
-      pRequest->run();
     }
  
     sendResponse();
@@ -226,6 +233,9 @@ void ProxygenHandler::sendResponse()noexcept{
       }
     }
     
+    //if(COMMAND::EXPORT_MEM_TMX_STREAM == pRequest->command){
+      //do nothing
+    //}else 
     if(pRequest->isStreamingRequest()){
       downstream_->sendEOM();
     }else{

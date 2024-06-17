@@ -295,7 +295,7 @@ typedef struct _NODEAREA
 } NODEAREA, *PNODEAREA;
 
 // structure for loaded tag tables
-using LOADEDTABLE = struct _LOADEDTABLE
+struct LOADEDTABLE
 {
    CHAR        szName[MAX_FNAME];      // tag table name (w/o path and ext.)
    SHORT       sUseCount;              // number of active table users

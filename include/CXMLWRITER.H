@@ -1,3 +1,4 @@
+#pragma once
 //+----------------------------------------------------------------------------+
 //| CXMLWRITER.H                                                               |
 //+----------------------------------------------------------------------------+
@@ -17,31 +18,13 @@
 //+----------------------------------------------------------------------------+
 //
 #include <vector>
+
 #include <proxygen/httpserver/ResponseHandler.h>
+#include <folly/io/IOBufQueue.h>
 #include "opentm2/core/utilities/LogWrapper.h"
 #include "win_types.h"
 
-class ChunkBuffer{
-  long m_bytesCollecedInChunk = 0;
-  long m_bytesSend = 0;
-  static constexpr size_t chunkSize_ = 4096;
-  std::vector<unsigned char> m_buff;
-  proxygen::ResponseHandler* m_responseHandler = nullptr;
 
-  bool canFit(long size);
-  
-  void triggerChunkSend();
-public:
-  void writeToBuff(const void * data, long size);
-  void setResponseHandler(proxygen::ResponseHandler* responseHandler){m_responseHandler = responseHandler;}
-  bool isActive()const {return m_responseHandler != 0; }
-
-  ChunkBuffer(){m_buff.reserve(chunkSize_+1);}
-  ~ChunkBuffer(){
-    T5LOG(T5INFO)<< "called dctor of chunk buffer- sending last chunk";
-    triggerChunkSend();
-  }
-};
 
 class  CXmlWriter
 {
@@ -142,6 +125,10 @@ public:
   enum { UTF8, UTF16 } Encoding; 
 
 
+  //ChunkBuffer chunkBuffer;
+
+  folly::IOBufQueue bufQueue;
+
 protected:
   //proxygen::ResponseHandler* m_responseHandler = nullptr;
   FILE *m_hf;                          // handle of output file
@@ -177,5 +164,4 @@ protected:
   void Init( void );
   int writeData(const void* buff, long size, long n);
 
-  ChunkBuffer chunkBuffer;
 };

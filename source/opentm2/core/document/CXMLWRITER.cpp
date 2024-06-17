@@ -152,11 +152,13 @@
 #include "../utilities/EncodingHelper.h"
 
 bool ChunkBuffer::canFit(long size){
-  T5LOG(T5DEVELOP) << "buffsize = " << m_buff.size() <<"; size = " << size;
-  return m_bytesCollecedInChunk + size + 1 < chunkSize_;
+  return true;
+  //T5LOG(T5DEVELOP) << "buffsize = " << m_buff.size() <<"; size = " << size;
+  //return m_bytesCollecedInChunk + size + 1 < chunkSize_;
 }
 
 void ChunkBuffer::triggerChunkSend(){
+  /*
   if(m_bytesCollecedInChunk)
   {
     m_responseHandler->sendChunkHeader(m_bytesCollecedInChunk);    
@@ -165,11 +167,35 @@ void ChunkBuffer::triggerChunkSend(){
     m_responseHandler->sendChunkTerminator();
     m_bytesSend += m_bytesCollecedInChunk;
     m_bytesCollecedInChunk = 0;
-  }
+  }//*/
+}
+
+void ChunkBuffer::SendResponce(const std::string& memName, const std::string& nextInternalKey)
+{
+  /*
+  // Create response headers
+  proxygen::HTTPMessage response;
+  response.setHTTPVersion(1, 1);
+  response.setStatusCode(200);
+  response.setStatusMessage("OK");
+  //response.setIsChunked(true);
+  
+  // Add headers to the response
+  std::stringstream contDisposition;
+  contDisposition << "attachment; filename=\"" << memName  << ".tmx\"";
+  response.getHeaders().add("Content-Type", "application/octet-stream");
+  response.getHeaders().add("Content-Disposition", contDisposition.str());
+  response.getHeaders().add("NextInternalKey", nextInternalKey);
+  // Send response headers
+  m_responseHandler->sendHeaders(response);
+  m_responseHandler.sendBody(std::move(bufQueue));
+  m_responseHandler->sendEOM();//*/
 }
 
 void ChunkBuffer::writeToBuff(const void* buff, long size)
 {
+  bufQueue.append(folly::IOBuf::copyBuffer(buff, size));
+  /*
   if(!isActive()) return;
 
   if(!canFit(size))
@@ -184,6 +210,7 @@ void ChunkBuffer::writeToBuff(const void* buff, long size)
   T5LOG(T5DEBUG) << "writting data buff, m_bytesCollected = " << m_bytesCollecedInChunk <<"; bytesSend = " << m_bytesSend <<"; size = " << size;
   memcpy(&m_buff[m_bytesCollecedInChunk], buff, size);
   m_bytesCollecedInChunk += size;
+  //*/
 }
 
 int CXmlWriter::writeData(const void* buff, long size, long n){
@@ -191,7 +218,7 @@ int CXmlWriter::writeData(const void* buff, long size, long n){
   if(m_hf){
     fwrite(buff, size, n, m_hf);
   }
-  if(chunkBuffer.isActive())
+  //if(chunkBuffer.isActive())
   {
     // Send buffer in chunks
     size_t totalSize = size*n;
@@ -200,9 +227,8 @@ int CXmlWriter::writeData(const void* buff, long size, long n){
     //             .body(buff)//std::move(buff))
     //             .send();
     //m_responseHandler->sendBody(folly::IOBuf::copyBuffer(buff, totalSize));
-    chunkBuffer.writeToBuff(buff, totalSize);
-    
-    
+    //chunkBuffer.writeToBuff(buff, totalSize);  
+    bufQueue.append(folly::IOBuf::copyBuffer(buff, totalSize));
   }
   return rc;
 }
@@ -239,20 +265,21 @@ void CXmlWriter::SetFileName( const char *strFileName )
 
 void CXmlWriter::SetResponseHandler(proxygen::ResponseHandler* rh){
   //m_responseHandler = rh;
-  chunkBuffer.setResponseHandler(rh);
+  //chunkBuffer.setResponseHandler(rh);
 }
 
 BOOL CXmlWriter::WriteStartDocument()
 {
   BOOL fOK = TRUE;
 
-  if(!chunkBuffer.isActive()){
-    m_hf = FilesystemHelper::OpenFile(m_strFileName, "w", false);
-  }else{
+  //if(!chunkBuffer.isActive()){
+  //if(!m_strFileName){
+  //  m_hf = FilesystemHelper::OpenFile(m_strFileName, "w", false);
+  //}else{
     m_hf = nullptr;
-  }
+  //}
 
-  if ( m_hf || chunkBuffer.isActive() )
+  //if ( m_hf || chunkBuffer.isActive() )
   {
     // write BOM 
     if ( Encoding == UTF16 )
@@ -279,10 +306,10 @@ BOOL CXmlWriter::WriteStartDocument()
     Push( CXmlWriter::Document, L"doc" );
 
   }
-  else
-  {
-    fOK = FALSE;
-  } /* endif */
+  //else
+  //{
+  //  fOK = FALSE;
+  //} /* endif */
 
   return( fOK );
 }

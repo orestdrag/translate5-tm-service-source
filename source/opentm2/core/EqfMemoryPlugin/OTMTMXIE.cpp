@@ -92,8 +92,6 @@ XERCES_CPP_NAMESPACE_USE
 // size of token buffer
 #define TMXTOKBUFSIZE 32000
 
-// size of file read buffer in preprocess step
-#define TMX_BUFFER_SIZE 8096
 
 // max length of a segment text
 
@@ -709,94 +707,6 @@ USHORT  MEMINSERTSEGMENT
 
 BOOL MADGetNextAttr( HADDDATAKEY *ppKey, PSZ_W pszAttrNameBuffer, PSZ_W pszValueBuffer, int iBufSize  );
 
-//+----------------------------------------------------------------------------+
-//| Our TMX import export class                                                |
-//|                                                                            |
-//+----------------------------------------------------------------------------+
-class CTMXExportImport
-{
-  public:
-    // constructor/desctructor
-	  CTMXExportImport();
-	  ~CTMXExportImport();
-    // export methods
-    USHORT WriteHeader( const char *pszOutFile, PMEMEXPIMPINFO pMemInfo );
-    USHORT WriteSegment( PMEMEXPIMPSEG pSegment  );
-    USHORT WriteEnd();
-    // import methods
-    USHORT StartImport( const char *pszInFile, PMEMEXPIMPINFO pMemInfo, ImportStatusDetails* pImportStatusDetails ); 
-    USHORT ImportNext( PFN_MEMINSERTSEGMENT pfnInsertSegment, LONG pMemHandle, ImportStatusDetails*     pImportData  ); 
-    USHORT EndImport(); 
-    USHORT getLastError( PSZ pszErrorBuffer, int iBufferLength );
-
-  protected:
-    USHORT WriteTUV( PSZ pszLanguage, PSZ pszMarkup, PSZ_W pszSegmentData );
-    USHORT PreProcessInFile( const char *pszInFile, const char *pszOutFile );
-
-
-    CXmlWriter m_xw;
-    TMXParseHandler *m_handler;          // our SAX handler 
-    SAXParser* m_parser;
-    XMLPScanToken m_SaxToken; 
-    unsigned int m_iSourceSize;          // size of source file
-    PTOKENENTRY m_pTokBuf;               // buffer for TaTagTokenize tokens
-    CHAR m_szActiveTagTable[50];         // buffer for name of currently loaded markup table
-    PLOADEDTABLE m_pLoadedTable;         // pointer to currently loaded markup table
-    PLOADEDTABLE m_pLoadedRTFTable;      // pointer to loaded RTF tag table
-    CHAR m_szInFile[512];                // buffer for input file
-    CHAR m_TempFile[540];                // buffer for temporary file name
-    BYTE m_bBuffer[TMX_BUFFER_SIZE+1];
-    PMEMEXPIMPINFO m_pMemInfo;
-    CHAR_W m_szSegBuffer[MAX_SEGMENT_SIZE+1]; // buffer for the processing of segment data
-    int  m_currentTu;                    // export: number of currently processed tu
-};
-
-
-//+----------------------------------------------------------------------------+
-//| Interface functions called by TranslationManager                           |
-//|                                                                            |
-//+----------------------------------------------------------------------------+
-USHORT EXTMEMEXPORTSTART
-( 
-  PLONG            plHandle,           // ptr to buffer receiving the handle for the external/import
-  PSZ              pszOutFile,         // fully qualified file name for the exported memory
-  PMEMEXPIMPINFO   pMemInfo            // pointer to structure containing general information for the exported memory
-)
-{
-  USHORT           usRC = 0;           // function return code
-  CTMXExportImport *pTMXExport = new CTMXExportImport;
-  pTMXExport->WriteHeader( pszOutFile, pMemInfo ); 
-  *plHandle = (LONG)pTMXExport;
-  return( usRC );
-} /* end of function EXTMEMEXPORTSTART */
-
-USHORT EXTMEMEXPORTPROCESS
-( 
-  LONG             lHandle,                 // export/import handle as set by ExtMemExportStart function
-  PMEMEXPIMPSEG    pSegment                 // pointer to structure containing the segment data
-)
-{
-  USHORT           usRC = 0;           // function return code
-  CTMXExportImport *pTMXExport = (CTMXExportImport *)lHandle;
-  pTMXExport->WriteSegment( pSegment ); 
-  return( usRC );
-} /* end of function EXTMEMEXPORTPROCESS */
-
-//
-// EXTMEMEXPORTEND
-//
-// This function is called once at the end of the memory export
-USHORT EXTMEMEXPORTEND
-( 
-  LONG             lHandle                  // export/import handle as set by ExtMemExportStart function
-)
-{
-  USHORT           usRC = 0;           // function return code
-  CTMXExportImport *pTMXExport = (CTMXExportImport *)lHandle;
-  pTMXExport->WriteEnd(); 
-  delete pTMXExport;
-  return( usRC );
-} /* end of function EXTMEMEXPORTEND */
 
 USHORT  EXTMEMIMPORTSTART
 ( 

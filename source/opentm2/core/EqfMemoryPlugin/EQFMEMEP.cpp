@@ -380,7 +380,32 @@ USHORT EQFMemExportEnd ( PPROCESSCOMMAREA pCommArea,
     if(pExportIDA->invalidXmlSegments){
       T5LOG(T5ERROR) << pExportIDA->invalidXmlSegments <<" segments was not exported because of invalid xml";
     }
-    EXTMEMEXPORTEND(pExportIDA->lExternalExportHandle );
+   
+    {//EXTMEMEXPORTEND;
+      pExportIDA->lExternalExportHandle->WriteEnd();
+      // Create response headers
+      {
+        proxygen::HTTPMessage response;
+        response.setHTTPVersion(1, 1);
+        response.setStatusCode(200);
+        response.setStatusMessage("OK");
+        //response.setIsChunked(true);
+        
+        // Add headers to the response
+        std::stringstream contDisposition;
+        std::string nextInternalKey = std::to_string(pExportIDA->pMem->ulNextKey) + ":" + std::to_string(pExportIDA->pMem->usNextTarget);
+        contDisposition << "attachment; filename=\"" << pExportIDA->pMem->szName  << ".tmx\"";
+        response.getHeaders().add("Content-Type", "application/octet-stream");
+        response.getHeaders().add("Content-Disposition", contDisposition.str());
+        response.getHeaders().add("NextInternalKey", nextInternalKey);
+        // Send response headers
+        pExportIDA->pstMemInfo->responseHandler->sendHeaders(response);
+        //pExportIDA->pstMemInfo->responseHandler->sendBody(std::move(pExportIDA->lExternalExportHandle->m_xw.bufQueue));
+        pExportIDA->pstMemInfo->responseHandler->sendBody(pExportIDA->lExternalExportHandle->m_xw.bufQueue.move());
+        //pExportIDA->pstMemInfo->responseHandler->sendEOM();
+      }
+      delete pExportIDA->lExternalExportHandle ;
+    }
 
     if ( pExportIDA->pstMemInfo ) UtlAlloc( (PVOID *)&pExportIDA->pstMemInfo, 0L, 0L, NOMSG );
     if ( pExportIDA->pstSegment ) UtlAlloc( (PVOID *)&pExportIDA->pstSegment, 0L, 0L, NOMSG );
@@ -714,8 +739,11 @@ USHORT  MemExportStart( PPROCESSCOMMAREA  pCommArea,
   }
   // set first extract flag        
   if(pCommArea->startingRecordKey != 0 ){
-    pExportIDA->pProposal->recordKey = pCommArea->startingRecordKey;
-    pExportIDA->pProposal->targetKey = pCommArea->startingTargetKey;    
+    //pExportIDA->pProposal->recordKey = pCommArea->startingRecordKey;
+    //pExportIDA->pProposal->targetKey = pCommArea->startingTargetKey;    
+    pExportIDA->pMem->ulNextKey = pCommArea->startingRecordKey;
+    pExportIDA->pMem->usNextTarget = pCommArea->startingTargetKey;
+
     pExportIDA->fFirstExtract = FALSE;
   }else{                                 
     pExportIDA->fFirstExtract = TRUE;
@@ -765,7 +793,11 @@ USHORT  MemExportStart( PPROCESSCOMMAREA  pCommArea,
       T5LOG( T5INFO) <<"MemExportStart::calling external function, mem name = " << pExportIDA->pstMemInfo->szName << "; source lang = "<< pExportIDA->pstMemInfo->szSourceLang<<
            "; markup = " << pExportIDA->pstMemInfo->szFormat;
 
-      usRc = EXTMEMEXPORTSTART(&(pExportIDA->lExternalExportHandle) , pExportIDA->ControlsIda.szPathContent, pExportIDA->pstMemInfo );
+      //usRc = EXTMEMEXPORTSTART( );
+      {
+        pExportIDA->lExternalExportHandle = new CTMXExportImport;
+        pExportIDA->lExternalExportHandle->WriteHeader( pExportIDA->ControlsIda.szPathContent, pExportIDA->pstMemInfo  ); 
+      }
     } /* endif */
    }
    else
@@ -919,7 +951,7 @@ USHORT MemExportProcess ( PMEM_EXPORT_IDA  pExportIDA ) // pointer to the export
          pExportIDA->pProposal->getTarget( pExportIDA->pstSegment->szTarget, sizeof(pExportIDA->pstSegment->szTarget) / sizeof(CHAR_W) );
          pExportIDA->pProposal->getContext( pExportIDA->pstSegment->szContext, sizeof(pExportIDA->pstSegment->szContext) / sizeof(CHAR_W) );
          pExportIDA->pProposal->getAddInfo( pExportIDA->pstSegment->szAddInfo, sizeof(pExportIDA->pstSegment->szAddInfo) / sizeof(CHAR_W) );
-         pExportIDA->pProposal->getInternalKey( pExportIDA->pstSegment->szInternalKey, sizeof(pExportIDA->pstSegment->szAddInfo) / sizeof(CHAR_W)); 
+         pExportIDA->pProposal->getInternalKey( pExportIDA->pstSegment->szInternalKey, sizeof(pExportIDA->pstSegment->szInternalKey) ); 
         
         auto ll = T5Logger::GetInstance()->suppressLogging(); 
         bool fValidXml =  IsValidXml( pExportIDA->pstSegment->szSource);
@@ -928,10 +960,11 @@ USHORT MemExportProcess ( PMEM_EXPORT_IDA  pExportIDA ) // pointer to the export
           fValidXml =  IsValidXml( pExportIDA->pstSegment->szTarget);        
           T5Logger::GetInstance()->desuppressLogging(ll);
           if(fValidXml){
-            usRc = EXTMEMEXPORTPROCESS( pExportIDA->lExternalExportHandle , pExportIDA->pstSegment );
+            usRc = pExportIDA->lExternalExportHandle->WriteSegment( pExportIDA->pstSegment );
             if(!usRc){
               pExportIDA->segmentsExported++;
-              if(pExportIDA->segmentsExported >= pExportIDA->numOfRequestedSegmentsForExport){
+              if(pExportIDA->numOfRequestedSegmentsForExport > 0 &&
+                pExportIDA->segmentsExported >= pExportIDA->numOfRequestedSegmentsForExport){
                 pExportIDA->fEOF = TRUE;
                 LOG_AND_SET_RC(usRc, T5INFO, MEM_PROCESS_END);
               }
