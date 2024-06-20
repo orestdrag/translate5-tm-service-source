@@ -346,6 +346,7 @@ bool RequestData::isWriteRequest(){
       || command == COMMAND::UPDATE_ENTRY
       //|| command == COMMAND::CREATE_MEM// should be handled as service command
       || command == COMMAND::IMPORT_MEM
+      || command == COMMAND::IMPORT_MEM_STREAM
       || command == COMMAND::REORGANIZE_MEM
       || command == COMMAND::IMPORT_LOCAL_MEM
       ;
@@ -860,7 +861,11 @@ int ImportRequestData::checkData(){
 
   // decode TMX data and write it to temp file
   std::string strError;
-  _rc_ = FilesystemHelper::DecodeBase64ToFile( strTmxData.c_str(), strTempFile.c_str(), strError ) ;
+  if( isBase64 ){
+    _rc_ = FilesystemHelper::DecodeBase64ToFile( strTmxData.c_str(), strTempFile.c_str(), strError ) ;
+  }else{
+    _rc_ = FilesystemHelper::WriteToFile( strTempFile, strTmxData, strError);
+  }
   if ( _rc_ != 0 )
   {
     return buildErrorReturn( _rc_, (char *)strError.c_str(), INTERNAL_SERVER_ERROR);
@@ -868,6 +873,124 @@ int ImportRequestData::checkData(){
   }
   return 0;  
 }
+
+
+int ImportStreamRequestData::parseJSON(){
+  T5LOG( T5INFO) << "+POST " << strMemName << "/import\n";
+  if ( _rc_ != 0 )
+  {
+    return buildErrorReturn( _rc_, "parseJSON, rc is not 0 at the start of function", INTERNAL_SERVER_ERROR );
+  } /* endif */
+
+  if ( strMemName.empty() )
+  {
+    return buildErrorReturn( _rc_, "import::Missing name of memory", BAD_REQUEST );
+  } /* endif */
+
+  // check if memory exists
+  if(int existscode = TMManager::GetInstance()->TMExistsOnDisk(strMemName))
+  {
+    std::string msg = "import::Missing tm files on disk, code=";
+    msg += std::to_string(existscode);
+    return buildErrorReturn( existscode, msg.c_str(), NOT_FOUND);
+  }
+
+  // find the memory to our memory list
+  // extract TMX data
+  int loggingThreshold = -1; //0-develop(show all logs), 1-debug+, 2-info+, 3-warnings+, 4-errors+, 5-fatals only
+  
+  void *parseHandle = json_factory.parseJSONStart( strBody, &_rc_ );
+  if ( parseHandle == NULL )
+  {
+    return buildErrorReturn( _rc_, "import::Missing or incorrect JSON data in request body", BAD_REQUEST );
+  } /* end */
+
+  std::string name;
+  std::string value;
+  try{
+  while ( _rc_ == 0 )
+  {
+    _rc_ = json_factory.parseJSONGetNext( parseHandle, name, value );
+      if ( _rc_ == 0 )
+      {
+        if(strcasecmp(name.c_str(), "timeout") == 0){
+          timeout = std::stol(value);
+        }else if(strcasecmp(name.c_str(), "loggingThreshold") == 0){
+          loggingThreshold = std::stoi(value);
+          T5LOG( T5WARNING) <<"OtmMemoryServiceWorker::import::set new threshold for logging" << loggingThreshold;
+          T5Logger::GetInstance()->SetLogLevel(loggingThreshold);        
+        }else if(strcasecmp(name.c_str(), "framingTags") == 0){
+          std::string strInclosingTagsBehaviour = value;
+          if(strcasecmp(value.c_str(), "saveAll") == 0){
+            inclosingTagsBehaviour = InclosingTagsBehaviour::saveAll;
+          }else if(strcasecmp(value.c_str(), "skipAll") == 0){
+            inclosingTagsBehaviour = InclosingTagsBehaviour::skipAll;
+          }else if(strcasecmp(value.c_str(), "skipPaired") == 0){
+            inclosingTagsBehaviour = InclosingTagsBehaviour::skipPaired;
+          }
+        }else{
+          T5LOG( T5WARNING) << "JSON parsed unexpected name, " << name;
+        }
+      }else if(_rc_ != 2002){// _rc_ != INFO_ENDOFPARAMETERLISTREACHED
+        std::string msg = "failed to parse JSON, _rc_ = " + std::to_string(_rc_);
+        return buildErrorReturn(_rc_, msg.c_str(), BAD_REQUEST);
+      }
+    } /* endwhile */
+    json_factory.parseJSONStop( parseHandle );
+  }
+  catch(...)
+  {
+    return buildErrorReturn(444, "Json parsing failed", 400);
+  }
+  if(_rc_ == 2002) _rc_ = 0;
+  return _rc_; 
+}
+
+int ImportStreamRequestData::checkData()
+{
+  return 0;  
+}
+
+int ImportStreamRequestData::execute(){
+  if ( mem == nullptr )
+  {
+    return  buildErrorReturn( 404, "mem not found or can't be opened" );
+  }
+  // close the memory - when open
+  if ( false == memIsAvailableToOperate(mem.get()) )
+  {
+    std::string msg = "mem is not available to operate, status= " + StatusToString(mem->eStatus);
+    return buildErrorReturn( 500, msg.c_str() );
+  }
+  mem->eStatus = IMPORT_RUNNING_STATUS;
+  mem->eImportStatus = IMPORT_RUNNING_STATUS;
+
+  T5LOG( T5DEBUG) <<  "status for " << strMemName << " was changed to import";
+  // start the import background process
+  pData = new( IMPORTMEMORYDATA );
+  pData->inclosingTagsBehaviour = inclosingTagsBehaviour;
+  strcpy( pData->szMemory, strMemName.c_str() );
+  //pData->fileData = std::move(fileData);
+
+  if(mem->importDetails == nullptr){
+    mem->importDetails = new ImportStatusDetails;
+  }
+  
+  mem->importDetails->reset();
+
+  LONG lCurTime = 0;  
+  time( &lCurTime );                  
+  mem->importDetails->lImportStartTime = lCurTime;
+  mem->importDetails->lImportTimeoutSec = timeout;
+  pData->mem = mem;
+
+  //importMemoryProcess(pData);//to do in same thread
+  std::thread worker_thread(importMemoryProcess, pData);
+  worker_thread.detach();
+
+  return( CREATED );
+}
+
 
 int SaveAllTMsToDiskRequestData::execute(){
   if(_rc_) {

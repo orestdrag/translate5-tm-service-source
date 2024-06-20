@@ -17,6 +17,7 @@
 #include <time.h>
 #include "OtmMemoryServiceWorker.h"
 #include "ProxygenStats.h"
+#include <folly/io/Cursor.h>
 
 
 using namespace std::chrono;
@@ -59,6 +60,18 @@ class ProxygenHandler : public proxygen::RequestHandler {
 
   std::unique_ptr<folly::IOBuf> body_;
 
+  void parseRequestBody();
+  folly::IOBufQueue requestBody_;
+  std::string jsonBody_; // Parsed JSON body
+  //folly::io::Cursor cursor;// Cursor to iterate over requestBody_
+
+
+  void processRequest();
+
+  void handleAttachedFile();
+
+  std::unique_ptr<proxygen::HTTPMessage> headers_;
+
 #ifdef TIME_MEASURES
   //time_t startingTime;
   //time_t endingTime;
@@ -66,6 +79,79 @@ class ProxygenHandler : public proxygen::RequestHandler {
 #endif
 
   void sendResponse()noexcept;
+
+
+  folly::IOBufQueue bodyQueue_{folly::IOBufQueue::cacheChainLength()};
+
+  struct MultipartPart {
+    std::unordered_map<std::string, std::string> headers;
+    std::string body;
+  };
+
+  void handleFilePart(const MultipartPart& part) {
+    // Handle file upload
+    auto fileData = part.body;
+    // Save the file or process it as needed
+  }
+
+  void handleJSONPart(const MultipartPart& part) {
+    // Handle JSON data
+    //auto jsonData = part.body;
+    // Parse and process the JSON data
+    //auto json = folly::parseJson(jsonData);
+    // ...
+  }
+
+  std::string getBoundaryFromHeaders(const proxygen::HTTPMessage& headers) {
+    auto contentType = headers.getHeaders().getSingleOrEmpty("Content-Type");
+    if (contentType.empty()) {
+      return "";
+    }
+    std::string boundaryPrefix = "boundary=";
+    auto boundaryPos = contentType.find(boundaryPrefix);
+    if (boundaryPos == std::string::npos) {
+      return "";
+    }
+    std::string boundary = contentType.substr(boundaryPos + boundaryPrefix.length());
+    if (boundary.front() == '"' && boundary.back() == '"') {
+      boundary = boundary.substr(1, boundary.length() - 2);
+    }
+    return "--" + boundary; // Prefix with "--" as per multipart form data boundary format
+  }
+
+   std::vector<MultipartPart> parseMultipart(const std::string& body, const std::string& boundary) {
+    std::vector<MultipartPart> parts;
+    std::istringstream stream(body);
+    std::string line;
+    MultipartPart part;
+    bool isBody = false;
+
+    while (std::getline(stream, line)) {
+      if (line.find(boundary) != std::string::npos) {
+        if (!part.body.empty()) {
+          parts.push_back(std::move(part));
+          part = MultipartPart();
+        }
+        isBody = false;
+      } else if (line == "\r") {
+        isBody = true;
+      } else if (!isBody) {
+        auto delimiterPos = line.find(": ");
+        if (delimiterPos != std::string::npos) {
+          std::string headerName = line.substr(0, delimiterPos);
+          std::string headerValue = line.substr(delimiterPos + 2);
+          part.headers[headerName] = headerValue;
+        }
+      } else {
+        part.body += line + "\n";
+      }
+    }
+    if (!part.body.empty()) {
+      parts.push_back(std::move(part));
+    }
+
+    return parts;
+  }
 };
 
 } // namespace ProxygenService

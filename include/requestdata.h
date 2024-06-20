@@ -110,6 +110,7 @@ protected:
     int execute() override  ;
 };
 
+
 #include "../source/RestAPI/ProxygenStats.h"
 //namespace ProxygenService;
 //class ProxygenService::ProxygenStats;
@@ -125,6 +126,9 @@ public:
   char szError[512];
   std::shared_ptr<EqfMemory> mem;
   BOOL fDeleteTmx = false;
+  //BOOL fImpoortFromFile = 0;
+  //folly::IOBuf fileData;
+  std::string fileData;
   ProxygenStats* stats_ = nullptr;
   InclosingTagsBehaviour inclosingTagsBehaviour = InclosingTagsBehaviour::saveAll;
   //ushort * pusImportPersent = nullptr;
@@ -134,7 +138,10 @@ public:
 
 class ImportRequestData:public RequestData{
 public:
-    ImportRequestData(): RequestData(COMMAND::IMPORT_MEM) {};
+    ImportRequestData(bool Base64TMX = true): RequestData(COMMAND::IMPORT_MEM) { isBase64 = Base64TMX; };
+
+    std::string strTmxData;
+    bool isBase64;
 protected:
     int parseJSON() override ;
     int checkData() override ;
@@ -146,10 +153,26 @@ protected:
     InclosingTagsBehaviour inclosingTagsBehaviour;
     IMPORTMEMORYDATA* pData = nullptr;
     std::string strTempFile;
-    std::string strTmxData;
     long timeout = 0;
 };
 
+#include <folly/io/IOBufQueue.h>
+class ImportStreamRequestData:public RequestData{
+public:
+    ImportStreamRequestData(): RequestData(COMMAND::IMPORT_MEM_STREAM) { };
+    
+    //folly::IOBuf fileData;
+    std::string fileData;
+protected:
+    int parseJSON() override ;
+    int checkData() override ;
+    int execute() override   ;
+
+    BOOL fClose = false;
+    InclosingTagsBehaviour inclosingTagsBehaviour;
+    IMPORTMEMORYDATA* pData = nullptr;
+    long timeout = 0;
+};
 
 class ImportLocalRequestData:public RequestData{
 public:

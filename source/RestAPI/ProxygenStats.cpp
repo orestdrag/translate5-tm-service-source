@@ -25,6 +25,7 @@ int ProxygenStats::recordRequest(int command) {
       break;
     }
     case COMMAND::IMPORT_MEM: 
+    case COMMAND::IMPORT_MEM_STREAM: 
     case COMMAND::IMPORT_LOCAL_MEM:
     {        
       importMemReqCount_++;
@@ -120,6 +121,7 @@ int ProxygenStats::addRequestTime(int command,milliseconds time) {
     }
     case COMMAND::IMPORT_LOCAL_MEM:
     case COMMAND::IMPORT_MEM: 
+    case COMMAND::IMPORT_MEM_STREAM:
     {        
       importMemSumTime_ += time;
       break;

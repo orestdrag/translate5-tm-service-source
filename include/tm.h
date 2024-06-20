@@ -1081,8 +1081,6 @@ typedef struct _TMX_MATCHENTRY
 class ImportStatusDetails;
 
 
-// callback function which is used by ExtMemImportprocess to insert segments into the memory
-typedef USHORT (/*APIENTRY*/ *PFN_MEMINSERTSEGMENT)( LONG lMemHandle, PMEMEXPIMPSEG pSegment );
 // IDs of TMX elelements
 typedef enum
 {
@@ -2986,8 +2984,6 @@ typedef struct _TMT_GLOBALS { /* tmtg */
                                           // if 65520 bytes are read-in at once during MemImport
 #define  MEM_PROP_SIZE              2048  // Global size of all memory database properties
 #define  MEM_BLOCK_SIZE             1024  // Translation Memory block size
-#define  SEGMENT_CLUSTER_LENGTH        4  // Length of segment cluster
-#define  SEGMENT_NUMBER_LENGTH         6  // Length of segment number
 #define  PROCESS_NUMB_OF_MESSAGES     10  // Number of messages to be process till next message is issued
 #define  MEM_DBCS                      0  // 0 = No support,    1 = DBCS support
 #define  MEM_LOAD_PATTERN_NAME        "*" // Default names to be shown for load dialog
@@ -3124,9 +3120,9 @@ typedef struct _SEG_CTRL_DATA
 
 
 
-
+/*/
 //#ifdef _OTMMEMORY_H_
-typedef struct _MEM_LOAD_IDA
+using MEM_LOAD_IDA = struct _MEM_LOAD_IDA
 {
  CHAR         szMemName[MAX_LONGFILESPEC];    // Memory database name
  CHAR         szShortMemName[MAX_FILESPEC];   // Memory database name
@@ -3144,7 +3140,6 @@ typedef struct _MEM_LOAD_IDA
  ULONG        ulTotalSize;                    // total size of import file
  BOOL         fFirstRead;                     // Read Flag
  PLOADEDTABLE pFormatTable;                   // Pointer to Format Table
- PTOKENENTRY  pTokenList;                     // Pointer to Token List
  BOOL         fEOF;                           // Indicates end of file
  PTOKENENTRY  pTokenEntry;                    // A pointer to token entries
  PTOKENENTRY  pTokenEntryWork;                // A work pointer to token entries
@@ -3162,6 +3157,7 @@ typedef struct _MEM_LOAD_IDA
  BOOL         fDisplayNotReplacedMessage;     // message flag if segment not /*@47A*/
                                               // not replaced message should /*@47A*/
                                               // be displayed or not         /*@47A*/
+                                              /*
  CHAR         szTargetLang[MAX_LANG_LENGTH];
  CHAR         szTagTable[MAX_FNAME];
  BOOL         fTagLangDlgCanceled;
@@ -3226,7 +3222,10 @@ typedef struct _MEM_LOAD_IDA
  CHAR_W        szMatchSegIdInfo[512];     // buffer for the complete match segment ID entry
  ULONG         ulSequenceNumber;          // segment sequence number within current external memory file
  //ULONG         ulActiveSegment;
-}MEM_LOAD_IDA, * PMEM_LOAD_IDA;
+ std::string fileData;
+};
+using PMEM_LOAD_IDA = MEM_LOAD_IDA *;
+//*/
 
 
 /*! \brief search a string in a proposal

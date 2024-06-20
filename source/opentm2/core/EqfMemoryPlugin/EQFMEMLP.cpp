@@ -87,8 +87,8 @@
 
 
 //--- declaration of internal functions
-static USHORT  MemLoadStart( PVOID *ppIda, HWND, ImportStatusDetails*     pImportData);
-static USHORT  MemLoadProcess(  PMEM_LOAD_IDA pLIDA );
+static USHORT  MemLoadStart( MEM_LOAD_DLG_IDA* pIda, HWND, ImportStatusDetails*     pImportData);
+static USHORT  MemLoadProcess(  MEM_LOAD_DLG_IDA* pLIDA );
 
 
 USHORT /*APIENTRY*/ MEMINSERTSEGMENT
@@ -108,7 +108,7 @@ static void GetElapsedTime( long long *plTime )
 
 USHORT MemHandleCodePageValue
 (
-  PMEM_LOAD_IDA pLIDA,                           // ptr to memory load IDA
+  MEM_LOAD_DLG_IDA* pLIDA,                           // ptr to memory load IDA
   PSZ_W       pszCodePage,                       // ptr to specified code page value 
   PBOOL       pfRestartImport                    // caller's restart the import flag 
 );
@@ -122,7 +122,7 @@ USHORT MemHandleCodePageValue
 
 //#endif
 
-USHORT MemLoadAndConvert( PMEM_LOAD_IDA pLIDA, PSZ_W pszBuffer, ULONG usSize, PULONG pusBytesRead );
+USHORT MemLoadAndConvert( MEM_LOAD_DLG_IDA* pLIDA, PSZ_W pszBuffer, ULONG usSize, PULONG pusBytesRead );
 
 INT_PTR /*CALLBACK*/ NTMTagLangDlg( HWND,         // Dialog window handle
                WINMSG,       // Message ID
@@ -132,48 +132,6 @@ INT_PTR /*CALLBACK*/ NTMTagLangDlg( HWND,         // Dialog window handle
 
 #include "lowlevelotmdatastructs.h"
 
-typedef struct _MEM_LOAD_DLG_IDA
-{
- CHAR         szMemName[MAX_LONGFILESPEC];// TM name to import to
- CHAR         szShortMemName[MAX_FILESPEC];// TM name to import to
- CHAR         szMemPath[2048];            // TM path + name to import to
- CHAR         szFilePath[2048];           // File to be imported path + name
- HFILE        hFile;                      // Handle of file to be imported
- PMEM_IDA     pIDA;                       // pointer to the memory database IDA
- BOOL         fAscii;                     // TRUE = ASCII else internal format
- CHAR         szName[MAX_FNAME];          // file to be imp. name without ext
- CHAR         szExt[MAX_FEXT];            // file to be imp. ext. with leading dot
- CHAR         szString[2048];             // string buffer
- CHAR         szDummy[_MAX_DIR];          // string buffer
- BOOL         fDisabled;                  // Dialog disable flag
- CONTROLSIDA  ControlsIda;                //ida of controls utility
- HPROP        hPropLast;                  // Last used properties handle
- PMEM_LAST_USED pPropLast;                // Pointer to the last used properties
- BOOL         fBatch;                     // TRUE = we are in batch mode
- HWND         hwndErrMsg;                 // parent handle for error messages
- PDDEMEMIMP   pDDEMemImp;                 // ptr to batch memory import data
- HWND         hwndNotify;                 // send notification about completion
- OBJNAME      szObjName;                  // name of object to be finished
- USHORT       usImpMode;                  // mode for import
- BOOL         fMerge;                     // TRUE = TM is being merged
- PSZ          pszList;                    // list of selected import files or NULL
- BOOL         fSkipInvalidSegments;       // TRUE = skip invalid segments during import
- ULONG        ulOemCP;                    // CP of system preferences lang.
- ULONG        ulAnsiCP;                   // CP of system preferences lang.
- BOOL         fIgnoreEqualSegments;       // TRUE = ignore segments with identical source and target string
- BOOL         fAdjustTrailingWhitespace;  // TRUE = adjust trailing whitespace of target string
- BOOL         fMTReceiveCounting;         // TRUE = count received words and write counts to folder properties
- OBJNAME      szFolObjName;               // object name of folder (only set with fMTReceiveCounting = TRUE)
- HWND         hwndToCombo;                // handle of "to memory" combo box
- BOOL         fYesToAll;                  // yes-to-all flag for merge confirmation
- BOOL         fImpModeSet;                // TRUE = imp mode has been set by the impot file check logic
- std::shared_ptr<EqfMemory>    mem;                      // pointer to memory being imported
- OtmProposal  *pProposal;                 // buffer for proposal data
- BOOL          fForceNewMatchID;          // create a new match segment ID even when the match already has one
- BOOL          fCreateMatchID;            // create match segment IDs
- CHAR          szMatchIDPrefix[256];      // prefix to be used for the match segment ID
- CHAR_W        szMatchIDPrefixW[256];     // prefix to be used for the match segment ID (UTF16 version)
-}MEM_LOAD_DLG_IDA, * PMEM_LOAD_DLG_IDA;
 
 
 //+----------------------------------------------------------------------------+
@@ -247,92 +205,53 @@ typedef struct _MEM_LOAD_DLG_IDA
 //|   }                                                                        |
 //|   return ( process handle )                                                |
 //+----------------------------------------------------------------------------+
-static USHORT  MemLoadStart( PVOID *ppIda,
+static USHORT  MemLoadStart( MEM_LOAD_DLG_IDA* pLIDA,
                              HWND             hWnd,
                              ImportStatusDetails*     pImportData )
 {
    BOOL             fOK = TRUE;          // Return code
-   USHORT           usDosRc = TRUE;       // Return code from Dos open operation
-   PMEM_LOAD_IDA    pLIDA;                // Pointer load data area
-   PMEM_LOAD_DLG_IDA  pDialogIDA;         // Pointer to the dialog IDA
+   USHORT           usDosRc = 0;       // Return code from Dos open operation
    PSZ              pReplAddr[2];         // Pointer to an address list of replacement strings
-
    //--- Get pointer to dialog IDA
-   pDialogIDA = (PMEM_LOAD_DLG_IDA)*ppIda;
 
-   //--- Allocate storage for TM load IDA _MEM_LOAD_IDA. If an error occurred
-   //--- set fOK to FALSE and issue appropriate message.
-   fOK = UtlAllocHwnd( (PVOID *)&pLIDA, 0L, (LONG)sizeof( MEM_LOAD_IDA ), ERROR_STORAGE, pDialogIDA->hwndErrMsg );
-   *ppIda = pLIDA;
+    // Set segment ID to 1 in case the first segment ID is in error or
+    // no segment ID is present at all.
+    // Put also the address of MEM_IDA into MEM_LOAD_IDA
+    strcpy(pLIDA->szSegmentID, "1");
 
-   if ( fOK )
-   {
-      // Set segment ID to 1 in case the first segment ID is in error or
-      // no segment ID is present at all.
-      // Put also the address of MEM_IDA into MEM_LOAD_IDA
-      strcpy(pLIDA->szSegmentID, "1");
-      //--- initialize flag that message ERROR_MEM_NOT_REPLACED        /*@47A*/
-      //--- will be displayed                                          /*@47A*/
-      pLIDA->fDisplayNotReplacedMessage = TRUE;                        /*@47A*/
-
-      pLIDA->pProposal = new(OtmProposal);
-   } /* endif */
+    pLIDA->pProposal = new(OtmProposal);
 
    // If fOK. Get file and memory database handle as well as their path
    // and names from the dialog IDA and store them in the MEM_LOAD_IDA.
    // Then open the tagtable and get its Size. If an error occurred
    // set fOK to FALSE and issue the appropriate message.
-   if(pDialogIDA->mem == nullptr){
+   if(pLIDA->mem == nullptr){
     fOK = false;
    }
    
    if ( fOK )
    {
       // Move values from dialog IDA to load IDA
-      pLIDA->hFile = pDialogIDA->hFile;
-      pLIDA->mem  = pDialogIDA->mem;
-      strcpy( pLIDA->szMemName, pDialogIDA->szMemName );
-      strcpy( pLIDA->szShortMemName, pDialogIDA->szShortMemName );
-      pLIDA->fMerge = pDialogIDA->fMerge;
-      strcpy( pLIDA->szMemPath, pDialogIDA->szMemPath );
-      strcpy( pLIDA->szFilePath, pDialogIDA->szFilePath );
-
-      pLIDA->fBatch     = pDialogIDA->fBatch;
-      pLIDA->fSkipInvalidSegments = pDialogIDA->fSkipInvalidSegments;
-      pLIDA->hwndErrMsg = pDialogIDA->hwndErrMsg;
-      pLIDA->pDDEMemImp = pDialogIDA->pDDEMemImp;
-
-      pLIDA->hwndNotify = pDialogIDA->hwndNotify;
-      strcpy( pLIDA->szObjName, pDialogIDA->szObjName );
-
-      pLIDA->fIgnoreEqualSegments = pDialogIDA->fIgnoreEqualSegments;
-      pLIDA->fMTReceiveCounting   = pDialogIDA->fMTReceiveCounting;
-      strcpy( pLIDA->szFolObjName, pDialogIDA->szFolObjName );
-
-      pLIDA->fAdjustTrailingWhitespace = pDialogIDA->fAdjustTrailingWhitespace;
-
-      pLIDA->usImpMode  = pDialogIDA->usImpMode;
-      pLIDA->pszList    = pDialogIDA->pszList;
-
-      pLIDA->fYesToAll  = pDialogIDA->fYesToAll;
-
-      pLIDA->pszActFile = pLIDA->pszList;
-
-      pLIDA->fCreateMatchID = pDialogIDA->fCreateMatchID;
-      pLIDA->fForceNewMatchID = pDialogIDA->fForceNewMatchID;
-      strcpy( pLIDA->szMatchIDPrefix, pDialogIDA->szMatchIDPrefix );
-      wcscpy( pLIDA->szMatchIDPrefixW, pDialogIDA->szMatchIDPrefixW );
 
       pLIDA->ulAnsiCP = pLIDA->ulOemCP = 1;
 
       // read the file size of the file to be imported and store it in IDA
-      usDosRc = UtlGetFileSize( pLIDA->hFile, &(pLIDA->ulTotalSize), FALSE );
+      if(pLIDA->hFile){
+        //usDosRc = UtlGetFileSize( pLIDA->hFile, &(pLIDA->ulTotalSize), FALSE );
+      }else if(!pLIDA->fileData.empty()){
+        //pLIDA->ulTotalSize = pLIDA->fileData.size();
+      }else{
+        T5LOG(T5ERROR) << "stream and file pointer of tmx file both are equal to null";
+        fOK = FALSE;
+      }
+
       if (usDosRc)
       {
         fOK = FALSE;
       }
       else
       {
+        /*
         // Create full path to the memory database format table
         Properties::GetInstance()->get_value( KEY_OTM_DIR, pLIDA->szFullFtabPath, MAX_EQF_PATH );
         strcat(pLIDA->szFullFtabPath, "/TABLE/");
@@ -340,7 +259,7 @@ static USHORT  MemLoadStart( PVOID *ppIda,
 
         // Load the format table and allocate storage for it
         fOK = ( TALoadTagTableHwnd( MEM_FORMAT_TABLE, &pLIDA->pFormatTable,
-                                     TRUE, TRUE, pLIDA->hwndErrMsg ) == NO_ERROR);
+                                     TRUE, TRUE, pLIDA->hwndErrMsg ) == NO_ERROR);//*/
       } /* endif */
    } /* endif */
 
@@ -369,95 +288,67 @@ static USHORT  MemLoadStart( PVOID *ppIda,
    {
      PWCHAR pRest = NULL;
      USHORT usLastColPos = 0;
-
+    /*
      pRest = NULL;
      TATagTokenizeW( MEM_CONTEXT_TOKEN_END, pLIDA->pFormatTable, TRUE, &pRest, &usLastColPos, pLIDA->pTokenList, NUMB_OF_TOKENS);
-     pLIDA->sContextEndTokenID = pLIDA->pTokenList->sTokenid;
 
      pRest = NULL;
      TATagTokenizeW( MEM_CONTROL_TOKEN_END, pLIDA->pFormatTable, TRUE, &pRest, &usLastColPos, pLIDA->pTokenList, NUMB_OF_TOKENS);
-     pLIDA->sControlEndTokenID = pLIDA->pTokenList->sTokenid;
-
 
      pRest = NULL;
      TATagTokenizeW( NTM_DESCRIPTION_TOKEN_END, pLIDA->pFormatTable, TRUE, &pRest, &usLastColPos, pLIDA->pTokenList, NUMB_OF_TOKENS);
-     pLIDA->sDescriptionEndTokenID = pLIDA->pTokenList->sTokenid;
 
      pRest = NULL;
      TATagTokenizeW( MEM_MEMORYDB_TOKEN_END, pLIDA->pFormatTable, TRUE, &pRest, &usLastColPos, pLIDA->pTokenList, NUMB_OF_TOKENS);
-     pLIDA->sMemMemoryDBEndTokenID = pLIDA->pTokenList->sTokenid;
 
      pRest = NULL;
      TATagTokenizeW( NTM_MEMORYDB_TOKEN_END, pLIDA->pFormatTable, TRUE, &pRest, &usLastColPos, pLIDA->pTokenList, NUMB_OF_TOKENS);
-     pLIDA->sNTMMemoryDBEndTokenID = pLIDA->pTokenList->sTokenid;
 
      pRest = NULL;
      TATagTokenizeW( MEM_SEGMENT_TOKEN_END, pLIDA->pFormatTable, TRUE, &pRest, &usLastColPos, pLIDA->pTokenList, NUMB_OF_TOKENS);
-     pLIDA->sSegmentEndTokenID = pLIDA->pTokenList->sTokenid;
 
      pRest = NULL;
      TATagTokenizeW( MEM_SOURCE_TOKEN_END, pLIDA->pFormatTable, TRUE, &pRest, &usLastColPos, pLIDA->pTokenList, NUMB_OF_TOKENS);
-     pLIDA->sSourceEndTokenID = pLIDA->pTokenList->sTokenid;
 
      pRest = NULL;
      TATagTokenizeW( MEM_TARGET_TOKEN_END, pLIDA->pFormatTable, TRUE, &pRest, &usLastColPos, pLIDA->pTokenList, NUMB_OF_TOKENS);
-     pLIDA->sTargetEndTokenID = pLIDA->pTokenList->sTokenid;
 
      pRest = NULL;
      TATagTokenizeW( MEM_CONTEXT_TOKEN, pLIDA->pFormatTable, TRUE, &pRest, &usLastColPos, pLIDA->pTokenList, NUMB_OF_TOKENS);
-     pLIDA->sContextTokenID = pLIDA->pTokenList->sTokenid;
 
      pRest = NULL;
      TATagTokenizeW( MEM_CONTROL_TOKEN, pLIDA->pFormatTable, TRUE, &pRest, &usLastColPos, pLIDA->pTokenList, NUMB_OF_TOKENS);
-     pLIDA->sControlTokenID = pLIDA->pTokenList->sTokenid;
 
      pRest = NULL;
      TATagTokenizeW( NTM_DESCRIPTION_TOKEN, pLIDA->pFormatTable, TRUE, &pRest, &usLastColPos, pLIDA->pTokenList, NUMB_OF_TOKENS);
-     pLIDA->sDescriptionTokenID = pLIDA->pTokenList->sTokenid;
 
      pRest = NULL;
      TATagTokenizeW( MEM_MEMORYDB_TOKEN, pLIDA->pFormatTable, TRUE, &pRest, &usLastColPos, pLIDA->pTokenList, NUMB_OF_TOKENS);
-     pLIDA->sMemMemoryDBTokenID = pLIDA->pTokenList->sTokenid;
 
      pRest = NULL;
      TATagTokenizeW( NTM_MEMORYDB_TOKEN, pLIDA->pFormatTable, TRUE, &pRest, &usLastColPos, pLIDA->pTokenList, NUMB_OF_TOKENS);
-     pLIDA->sNTMMemoryDBTokenID = pLIDA->pTokenList->sTokenid;
 
      pRest = NULL;
      TATagTokenizeW( MEM_SEGMENT_TOKEN, pLIDA->pFormatTable, TRUE, &pRest, &usLastColPos, pLIDA->pTokenList, NUMB_OF_TOKENS);
-     pLIDA->sSegmentTokenID = pLIDA->pTokenList->sTokenid;
 
      pRest = NULL;
      TATagTokenizeW( MEM_SOURCE_TOKEN, pLIDA->pFormatTable, TRUE, &pRest, &usLastColPos, pLIDA->pTokenList, NUMB_OF_TOKENS);
-     pLIDA->sSourceTokenID = pLIDA->pTokenList->sTokenid;
 
      pRest = NULL;
      TATagTokenizeW( MEM_TARGET_TOKEN, pLIDA->pFormatTable, TRUE, &pRest, &usLastColPos, pLIDA->pTokenList, NUMB_OF_TOKENS);
-     pLIDA->sTargetTokenID = pLIDA->pTokenList->sTokenid;
 
      pRest = NULL;
      TATagTokenizeW( MEM_CODEPAGE_TOKEN, pLIDA->pFormatTable, TRUE, &pRest, &usLastColPos, pLIDA->pTokenList, NUMB_OF_TOKENS);
-     pLIDA->sCodePageTokenID = pLIDA->pTokenList->sTokenid;
 
      pRest = NULL;
      TATagTokenizeW( MEM_CODEPAGE_TOKEN_END, pLIDA->pFormatTable, TRUE, &pRest, &usLastColPos, pLIDA->pTokenList, NUMB_OF_TOKENS);
-     pLIDA->sCodePageEndTokenID = pLIDA->pTokenList->sTokenid;
 
      pRest = NULL;
      TATagTokenizeW( MEM_ADDDATA_TOKEN, pLIDA->pFormatTable, TRUE, &pRest, &usLastColPos, pLIDA->pTokenList, NUMB_OF_TOKENS);
-     pLIDA->sAddInfoTokenID = pLIDA->pTokenList->sTokenid;
 
      pRest = NULL;
      TATagTokenizeW( MEM_ADDDATA_TOKEN_END, pLIDA->pFormatTable, TRUE, &pRest, &usLastColPos, pLIDA->pTokenList, NUMB_OF_TOKENS);
-     pLIDA->sAddInfoEndTokenID = pLIDA->pTokenList->sTokenid;
-
-
-     // if no codepage token is contained in markup table change token ID to an invalid value
-     if ( pLIDA->sCodePageTokenID == TEXT_TOKEN)
-     {
-       pLIDA->sCodePageTokenID = -999;
-     } /* endif */
-
+  //*/
      pLIDA->pTokenList->sTokenid = ENDOFLIST;             // enable correct start of import process
    } /* endif */
 
@@ -478,7 +369,6 @@ static USHORT  MemLoadStart( PVOID *ppIda,
        {
          UtlClose( pLIDA->hFile, FALSE );
          pLIDA->hFile = NULL; 
-         pDialogIDA->hFile = NULL;
        } /* endif */
 
        memset( pLIDA->pstMemInfo, 0, sizeof(MEMEXPIMPINFO) );
@@ -490,7 +380,8 @@ static USHORT  MemLoadStart( PVOID *ppIda,
          pLIDA->pstMemInfo->fTagsInCurlyBracesOnly = TRUE;
        }
        
-       fOK = (EqfPluginWrapper::MemImportStart( &(pLIDA->lExternalImportHandle) , pLIDA->szFilePath, pLIDA->pstMemInfo,  pImportData ) == 0);
+       memset(&(pLIDA->TMXImport), 0 ,sizeof(pLIDA->TMXImport));
+       fOK = (pLIDA->TMXImport.StartImport(pLIDA->szFilePath, pLIDA->pstMemInfo,  pImportData ) == 0);
        pLIDA->mem->getSourceLanguage( szMemSourceLang, sizeof(szMemSourceLang) );
 
        // check if memory source lanuage matchs source language of imported file
@@ -509,8 +400,6 @@ static USHORT  MemLoadStart( PVOID *ppIda,
          pLIDA->mem->setDescription( pLIDA->pstMemInfo->szDescription );
        } /* endif */
      } /* endif */
-
-     pLIDA->fControlFound = TRUE; // avoid error message at end of import 
 
      //** GQ TODO: cleanup of resources in case of failures
    } /* endif */
@@ -541,7 +430,7 @@ static USHORT  MemLoadStart( PVOID *ppIda,
        pLIDA->mem->getSourceLanguage( pLIDA->pstMemInfo->szSourceLang, sizeof(pLIDA->pstMemInfo->szSourceLang) );
 
        //fOK = (pLIDA->pfnMemImpStart( &(pLIDA->lExternalImportHandle), pLIDA->szFilePath, pLIDA->pstMemInfo ) == 0);
-       fOK = (EqfPluginWrapper::MemImportStart(  &(pLIDA->lExternalImportHandle) , pLIDA->szFilePath, pLIDA->pstMemInfo, pImportData ) == 0);
+       fOK = (pLIDA->TMXImport.StartImport(pLIDA->szFilePath, pLIDA->pstMemInfo, pImportData ) == 0);
        
        pLIDA->mem->getSourceLanguage( szMemSourceLang, sizeof(szMemSourceLang) );
 
@@ -568,8 +457,6 @@ static USHORT  MemLoadStart( PVOID *ppIda,
 
      } /* endif */
 
-     pLIDA->fControlFound = TRUE; // avoid error message at end of import 
-
      //** GQ TODO: cleanup of resources in case of failures
    } /* endif */
 
@@ -581,7 +468,7 @@ static USHORT  MemLoadStart( PVOID *ppIda,
      {
        pLIDA->pfnMemImpEnd( pLIDA->lExternalImportHandle );
      }//*/
-     EqfPluginWrapper::MemImportEnd(pLIDA->lExternalImportHandle);
+     pLIDA->TMXImport.EndImport();
 
       // Clean the storage allocations if the MemLoadStart function failed.
       if ( pLIDA != NULL )
@@ -604,8 +491,8 @@ static USHORT  MemLoadStart( PVOID *ppIda,
 
          if ( pLIDA->pProposal != NULL ) delete(pLIDA->pProposal);
 
-         UtlAlloc( (PVOID *) &pLIDA, 0L, 0L, NOMSG );
-         *ppIda = NULL;
+         //UtlAlloc( (PVOID *) &pLIDA, 0L, 0L, NOMSG );
+         //*ppLIDA = NULL;
  
          // Dismiss the slider window if it had been created
 //WINAPI
@@ -627,7 +514,7 @@ static USHORT  MemLoadStart( PVOID *ppIda,
 //+----------------------------------------------------------------------------+
 //|Function name:     MemLoadProcess                                           |
 //+----------------------------------------------------------------------------+
-//|Function call:     static USHORT MemLoadProcess( PMEM_LOAD_IDA  pLIDA  )    |
+//|Function call:     static USHORT MemLoadProcess( MEM_LOAD_DLG_IDA*  pLIDA  )    |
 //+----------------------------------------------------------------------------+
 //|Description:       Import a segment to TM                                   |
 //|                   read a block of data from a file if needed and add a     |
@@ -687,7 +574,7 @@ static USHORT  MemLoadStart( PVOID *ppIda,
 //|   }                                                                        |
 //|   return usRc                                                              |
 //+----------------------------------------------------------------------------+
-static USHORT MemLoadProcess( PMEM_LOAD_IDA  pLIDA, ImportStatusDetails*     pImportData  ) //pointer to the load IDA
+static USHORT MemLoadProcess( MEM_LOAD_DLG_IDA*  pLIDA, ImportStatusDetails*     pImportData  ) //pointer to the load IDA
 {
    USHORT    usRc = MEM_PROCESS_OK;   // Function return code
    BOOL      fProcess = TRUE;         // process segment flag
@@ -707,7 +594,7 @@ static USHORT MemLoadProcess( PMEM_LOAD_IDA  pLIDA, ImportStatusDetails*     pIm
    {
      //pLIDA->lProgress = 0;
      
-     usRc = EqfPluginWrapper::MemImportProcess( pLIDA->lExternalImportHandle , MEMINSERTSEGMENT, (LONG)pLIDA, pImportData);
+     usRc = pLIDA->TMXImport.ImportNext( MEMINSERTSEGMENT, (LONG)pLIDA, pImportData);
 
      // handle any error conditions
      if ( pLIDA->pstMemInfo->fError )  
@@ -756,6 +643,10 @@ USHORT MemFuncImportMem
   memset( &PrivateData, 0, sizeof( FCTDATA ) );
   PrivateData.fComplete = TRUE;
   PrivateData.mem = mem;
+  
+  if(!pData->fileData.empty())
+    PrivateData.fileData = std::move(pData->fileData);
+  
   usRC = MemFuncPrepImport( &PrivateData, pszInFile, lOptions );
   if ( usRC == 0 )
   {
@@ -783,7 +674,7 @@ USHORT MemFuncPrepImport
   BOOL        fOK = TRUE;              // internal O.K. flag
   USHORT      usRC = NO_ERROR;         // function return code
   PSZ         pszParm;                 // error parameter pointer
-  PMEM_LOAD_DLG_IDA pLoadIDA = NULL;   // Pointer to the load IDA
+  MEM_LOAD_DLG_IDA* pLoadIDA = &pData->MemLoadIda;   // Pointer to the load IDA
 
   bool fOkFailHandled = false;
    /*******************************************************************/
@@ -791,7 +682,8 @@ USHORT MemFuncPrepImport
    /* in the function  EQFMemloadStart. Only in case of an error      */
    /* it will be freed here.                                          */
    /*******************************************************************/
-   fOK = UtlAllocHwnd( (PVOID *)&pLoadIDA, 0L, (LONG)sizeof(MEM_LOAD_DLG_IDA), ERROR_STORAGE, HWND_FUNCIF );
+   memset(pLoadIDA, 0, sizeof(*pLoadIDA));
+   //fOK = UtlAllocHwnd( (PVOID *)&pLoadIDA, 0L, (LONG)sizeof(MEM_LOAD_DLG_IDA), ERROR_STORAGE, HWND_FUNCIF );
     if ( fOK )
     {  // use def.target lang. from system preferences of TM
           pLoadIDA->ulOemCP = 1;
@@ -901,9 +793,9 @@ USHORT MemFuncPrepImport
    /*******************************************************************/
    /* Check if input file exists                                      */
    /*******************************************************************/
-   if ( fOK )
+   if ( fOK  )
    {
-     if ( !UtlFileExist( pszInFile ) )
+     if ( pData->fileData.empty() && !UtlFileExist( pszInFile ) )
      {
        pszParm = pszInFile;
        T5LOG(T5ERROR) <<  "::FILE_NOT_EXISTS::" << pszParm;
@@ -921,22 +813,15 @@ USHORT MemFuncPrepImport
    {
      //USHORT      usDosRc;              // Return code from Dos functions
      USHORT      usAction;             // Action for DosOpen
-
-     strcpy( pLoadIDA->szFilePath, pszInFile );
-     pLoadIDA->hFile = FilesystemHelper::OpenFile(pszInFile, "r", false);
-     /*usDosRc = UtlOpenHwnd ( pLoadIDA->szFilePath, //filename
-                       &(pLoadIDA->hFile),    //file handle (out)
-                       &usAction,      // action taken (out)
-                       0L,             // Create file size
-                       FILE_NORMAL,    // Normal attributes
-                       FILE_OPEN,      // Open if exists else fail
-                       OPEN_SHARE_DENYWRITE,// Deny Write access
-                       0L,             // Reserved but handle errors
-                       TRUE,           // display error message
-                       HWND_FUNCIF );//*/
-     if( pLoadIDA->hFile == NULLHANDLE )
-     {
-        fOK = FALSE;
+     if(pData->fileData.empty()){
+      strcpy( pLoadIDA->szFilePath, pszInFile );
+      pLoadIDA->hFile = FilesystemHelper::OpenFile(pszInFile, "r", false);
+      if( pLoadIDA->hFile == NULLHANDLE )
+      {
+          fOK = FALSE;
+      }
+     }else{
+      pLoadIDA->hFile = nullptr;
      }
      //if ( usDosRc )  //--- error from open
      //{
@@ -956,7 +841,6 @@ USHORT MemFuncPrepImport
    {
      pLoadIDA->fBatch     = TRUE;
      pLoadIDA->hwndErrMsg = HWND_FUNCIF;
-     pData->pvMemLoadIda = (PVOID)pLoadIDA;
    }else if(!fOkFailHandled){
       fOkFailHandled = true;
       T5LOG(T5ERROR) << "MemFuncPrepImport::Open the input file  fails" ;
@@ -976,7 +860,7 @@ USHORT MemFuncPrepImport
          //  pFactory->closeMemory( pLoadIDA->pMem );
          //  pLoadIDA->pMem = NULL;
          //} /* endif */
-         if ( pLoadIDA->hFile )
+         if ( pLoadIDA->hFile && pLoadIDA->hFile )
          {
             UtlClose( pLoadIDA->hFile, FALSE );
          } /* endif */
@@ -1008,11 +892,8 @@ USHORT MemFuncImportProcess
 )
 {
   USHORT      usRC = NO_ERROR;         // function return code
-  PMEM_LOAD_DLG_IDA pDialogIDA;        // Pointer to the DLG load IDA
-  PMEM_LOAD_IDA     pLoadData;         // Pointer to the load IDA
+  MEM_LOAD_DLG_IDA* pLIDA =  &pData->MemLoadIda;        // Pointer to the DLG load IDA
   USHORT            usPhase;           // current processing phase
-
-  pLoadData = (PMEM_LOAD_IDA)pData->pvMemLoadIda;
   
   UtlSetUShort( QS_LASTERRORMSGID, 0 );
   usPhase = pData->usMemLoadPhase;
@@ -1022,13 +903,16 @@ USHORT MemFuncImportProcess
     case MEM_START_IMPORT:
        T5LOG( T5INFO) << "::MEM_START_IMPORT";
        pData->mem->importDetails->usProgress = 0;
-       pDialogIDA = (PMEM_LOAD_DLG_IDA)pData->pvMemLoadIda;
+       
+       if(!pData->fileData.empty()){
+        pLIDA->fileData = std::move(pData->fileData);
+       }
 
-       if ( !MemLoadStart( &(pData->pvMemLoadIda), HWND_FUNCIF, pData->mem->importDetails ) )
+       if ( !MemLoadStart( &(pData->MemLoadIda), HWND_FUNCIF, pData->mem->importDetails ) )
        {
          //TMManager *pFactory = TMManager::GetInstance();
-         //pFactory->closeMemory( pDialogIDA->mem );
-         if ( pDialogIDA->hFile ) CloseFile( &(pDialogIDA->hFile));
+         //pFactory->closeMemory( pLIDA->mem );
+         if ( pLIDA->hFile ) CloseFile( &(pLIDA->hFile));
          pData->usMemLoadRC = UtlQueryUShort( QS_LASTERRORMSGID );
          if ( pData->usMemLoadRC == 0 ) pData->usMemLoadRC = ERROR_MEMIMP_ERROR;
          usPhase = 0;
@@ -1037,29 +921,28 @@ USHORT MemFuncImportProcess
        {
          usPhase = MEM_IMPORT_TASK;
        } /* endif */
-       UtlAlloc( (PVOID *) &pDialogIDA, 0L, 0L, NOMSG );
+       //UtlAlloc( (PVOID *) &pLIDA, 0L, 0L, NOMSG );
       break;
 
     case MEM_IMPORT_TASK:
       {
         
         T5LOG( T5INFO) << "::MEM_IMPORT_TASK, progress = " << pData->mem->importDetails->usProgress;
-        USHORT usRc = MemLoadProcess( pLoadData, pData->mem->importDetails );
+        USHORT usRc = MemLoadProcess( pLIDA, pData->mem->importDetails );
         switch ( usRc )
         {
           case MEM_PROCESS_OK:     
             usPhase = MEM_IMPORT_TASK;
             break;
           case MEM_PROCESS_END:
-            pDialogIDA = (PMEM_LOAD_DLG_IDA)pData->pvMemLoadIda;
             if(!pData->mem->importDetails->importRc){
               pData->mem->importDetails->usProgress = 100;
             }
-            if ( pDialogIDA->hFile ) CloseFile( &(pLoadData->hFile));
-            if ( pLoadData->mem )
+            if ( pLIDA->hFile ) CloseFile( &(pLIDA->hFile));
+            if ( pLIDA->mem )
             {
               // organize index file of imported memory
-              pLoadData->mem->NTMOrganizeIndexFile();
+              pLIDA->mem->NTMOrganizeIndexFile();
 
               //TMManager *pFactory = TMManager::GetInstance();
               //pFactory->closeMemory( pLoadData->mem);
@@ -1071,10 +954,10 @@ USHORT MemFuncImportProcess
             usPhase = MEM_END_IMPORT;
             break;
           default:
-            pDialogIDA = (PMEM_LOAD_DLG_IDA)pData->pvMemLoadIda;
-            if ( pDialogIDA->hFile ) CloseFile( &(pLoadData->hFile));
+            pLIDA = (MEM_LOAD_DLG_IDA*)&pData->MemLoadIda;
+            if ( pLIDA->hFile ) CloseFile( &(pLIDA->hFile));
             pData->usMemLoadRC = usRC = usRc? usRc : UtlQueryUShort( QS_LASTERRORMSGID );
-            strncpy(pData->szError, pLoadData->pstMemInfo->szError, sizeof(pData->szError));
+            strncpy(pData->szError, pLIDA->pstMemInfo->szError, sizeof(pData->szError));
             usPhase = MEM_END_IMPORT;
             break;
         } /* end switch */
@@ -1082,31 +965,30 @@ USHORT MemFuncImportProcess
       break;
 
     case MEM_END_IMPORT:
-       if ( pLoadData != NULL )
+       if ( pLIDA != NULL )
        {
-         if ( ( pLoadData->usImpMode == MEM_FORMAT_TMX ) || 
-              ( pLoadData->usImpMode == MEM_FORMAT_TMX_TRADOS ) ||
-              ( pLoadData->usImpMode == MEM_FORMAT_XLIFF_MT ) )
+         if ( ( pLIDA->usImpMode == MEM_FORMAT_TMX ) || 
+              ( pLIDA->usImpMode == MEM_FORMAT_TMX_TRADOS ) ||
+              ( pLIDA->usImpMode == MEM_FORMAT_XLIFF_MT ) )
          {
            //if ( pLoadData->pfnMemImpEnd )     pLoadData->pfnMemImpEnd( pLoadData->lExternalImportHandle );
-           EqfPluginWrapper::MemImportEnd(pLoadData->lExternalImportHandle);
+           pLIDA->TMXImport.WriteEnd();
 
-           if ( pLoadData->pstMemInfo )       UtlAlloc( (PVOID *)&pLoadData->pstMemInfo, 0L, 0L, NOMSG );
-           if ( pLoadData->pstSegment)        UtlAlloc( (PVOID *)&pLoadData->pstSegment, 0L, 0L, NOMSG );
+           if ( pLIDA->pstMemInfo )       UtlAlloc( (PVOID *)&pLIDA->pstMemInfo, 0L, 0L, NOMSG );
+           if ( pLIDA->pstSegment)        UtlAlloc( (PVOID *)&pLIDA->pstSegment, 0L, 0L, NOMSG );
          } /* endif */
 
-         if ( pLoadData->mem )
+         if ( pLIDA->mem )
          {
            //TMManager *pFactory = TMManager::GetInstance();
            //pFactory->closeMemory( pLoadData->mem);
            //pLoadData->mem = NULLHANDLE;
          } /* endif */
-         pDialogIDA = (PMEM_LOAD_DLG_IDA)pData->pvMemLoadIda;
-         if ( pDialogIDA->hFile ) CloseFile( &(pLoadData->hFile));
-         if ( pLoadData->pFormatTable )
+         if ( pLIDA->hFile ) CloseFile( &(pLIDA->hFile));
+         if ( pLIDA->pFormatTable )
          {
-           TAFreeTagTable( pLoadData->pFormatTable );
-           pLoadData->pFormatTable = NULL;
+           TAFreeTagTable( pLIDA->pFormatTable );
+           pLIDA->pFormatTable = NULL;
          } /* endif */
               
         {
@@ -1133,9 +1015,9 @@ USHORT MemFuncImportProcess
           }
         }
 
-         UtlAlloc( (PVOID *) &(pLoadData->pTokenList),   0L, 0L, NOMSG );
-         if ( pLoadData->pProposal != NULL ) delete(pLoadData->pProposal);
-         UtlAlloc( (PVOID *) &pLoadData,                 0L, 0L, NOMSG );
+         UtlAlloc( (PVOID *) &(pLIDA->pTokenList),   0L, 0L, NOMSG );
+         if ( pLIDA->pProposal != NULL ) delete(pLIDA->pProposal);
+         //UtlAlloc( (PVOID *) &pLIDA,                 0L, 0L, NOMSG );
        } /* endif */
        usPhase = 0;;
        if(!pData->mem->importDetails->importRc){
@@ -1159,7 +1041,7 @@ USHORT MemFuncImportProcess
 // load some data from file and convert it if necessary
 // usSize is size of pszBuffer(filled as output!) in number of CHAR_W's
 
-USHORT MemLoadAndConvert( PMEM_LOAD_IDA pLIDA, PSZ_W pszBuffer, ULONG ulSize, PULONG pulBytesRead )
+USHORT MemLoadAndConvert( MEM_LOAD_DLG_IDA* pLIDA, PSZ_W pszBuffer, ULONG ulSize, PULONG pulBytesRead )
 {
   USHORT usDosRc = NO_ERROR;
   ULONG  ulBytesRead = 0;
@@ -1245,7 +1127,8 @@ USHORT MemLoadAndConvert( PMEM_LOAD_IDA pLIDA, PSZ_W pszBuffer, ULONG ulSize, PU
         } /* endif */
 
         // if first read skip any unicode text prefix
-        if ( (usDosRc == NO_ERROR) && (pLIDA->fFirstRead == FALSE) )
+        if ( (usDosRc == NO_ERROR) // && (pLIDA->fFirstRead == FALSE)//seems like not used field 
+        )
         {
           PSZ pszPrefix = UNICODEFILEPREFIX;
           int iLen = strlen(pszPrefix);
@@ -1388,7 +1271,7 @@ T5LOG(T5ERROR) << ":: TO_BE_REPLACED_WITH_LINUX_CODE id = x if ( IsDBCSLeadByteE
 
 USHORT MemHandleCodePageValue
 (
-  PMEM_LOAD_IDA pLIDA,                           // ptr to memory load IDA
+  MEM_LOAD_DLG_IDA* pLIDA,                           // ptr to memory load IDA
   PSZ_W       pszCodePage,                       // ptr to specified code page value 
   PBOOL       pfRestartImport                    // caller's restart the import flag 
 )
@@ -1542,7 +1425,7 @@ USHORT /*APIENTRY*/ MEMINSERTSEGMENT
 {
   USHORT usRC = 0;
 
-  PMEM_LOAD_IDA pLIDA = (PMEM_LOAD_IDA)lMemHandle;
+  MEM_LOAD_DLG_IDA* pLIDA = (MEM_LOAD_DLG_IDA*)lMemHandle;
 
   pLIDA->mem->importDetails->segmentsCount++;           // Increase segment sequence number in any case
 

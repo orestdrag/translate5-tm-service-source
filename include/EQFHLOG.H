@@ -365,7 +365,6 @@ typedef struct _ANALYSISHIST
 //+----------------------------------------------------------------------------+
 //|  Layout of additional info part for task LONGNAME                          |
 //+----------------------------------------------------------------------------+
-#define MAX_LONGFILESPEC       256     // max length of long file name + extension
 typedef struct _LONGNAMEHIST
 {
   CHAR        szLongName[MAX_LONGFILESPEC];  // long document name

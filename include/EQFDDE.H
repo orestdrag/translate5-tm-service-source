@@ -461,19 +461,7 @@ typedef struct _DDEMEMCRT
 
 
 
-/**********************************************************************/
-/* structure which holds info for the task "translation memory import"*/
-/**********************************************************************/
-typedef struct _DDEMEMIMP
-{
-  HWND    hwndOwner;                   // handle of instance window
-  CHAR    szName[MAX_LONGFILESPEC];    // TM name
-  CHAR    szInFile[CCHMAXPATH+1];      // input file name
-  CHAR    szCurDir[CCHMAXPATH+1];      // current/active directory
-  USHORT usBatchOccurrence[MAXALLBATCH];   // occurency of each spec
-  DDERETURN  DDEReturn;                    // return structure
-  HWND hwndErrMsg;                         // HWND to be used for error messages
-} DDEMEMIMP, *PDDEMEMIMP;
+
 
 /**********************************************************************/
 /* structure which holds info for the task "document open"            */

@@ -52,6 +52,7 @@ constexpr  std::initializer_list<std::pair<const COMMAND, const char*>> CommandT
         { UPDATE_ENTRY, "UPDATE_ENTRY" },
         { TAGREPLACEMENTTEST, "TAGREPLACEMENTTEST" } ,
         { IMPORT_MEM, "IMPORT_MEM" },
+        { IMPORT_MEM_STREAM, "IMPORT_MEM_STREAM" },
         { IMPORT_LOCAL_MEM, "IMPORT_LOCAL_MEM" },
         { REORGANIZE_MEM, "REORGANIZE_MEM" },
         { CLONE_TM_LOCALY, "CLONE_MEM"}
@@ -121,28 +122,64 @@ void ProxygenHandler::onRequest(std::unique_ptr<HTTPMessage> req) noexcept {
     pRequest->run();
     sendResponse();
   }
+  headers_ = std::move(req);
 }
 
 void ProxygenHandler::onBody(std::unique_ptr<folly::IOBuf> body) noexcept {
   //ss_body << (char* ) body->data();
-  if(body_ == nullptr){
-    body_ = std::move(body);
-  }else{
-    body_->appendToChain(std::move(body));
+  if(COMMAND::IMPORT_MEM_STREAM == pRequest->command){
+    //getUpload
+    //((ImportStreamRequestData*) pRequest)->fileData.appendToChain(body.get());//std::move(body));
   }
+  bodyQueue_.append(std::move(body));
+  //if(body_ == nullptr){
+  //  body_ = std::move(body);
+  //}else{
+  //  body_->appendToChain(std::move(body));
+  //}
+  
 }
 
 void ProxygenHandler::onEOM() noexcept {  
   if(pRequest && pRequest->command >= COMMAND::START_COMMANDS_WITH_BODY)
   {
-    body_->coalesce();      
-    pRequest->strBody = (char*) body_->data();
-     //fix garbage in json 
-    if(pRequest->strBody.empty()){
-      pRequest->_rest_rc_ = 404;
-    }else if(TMManager::GetInstance()->fWriteRequestsAllowed == false){
-      pRequest->_rest_rc_ = 423;  
-    }else{
+    auto body = bodyQueue_.move();
+    if(
+        (COMMAND::IMPORT_MEM == pRequest->command 
+          &&  (false == ((ImportRequestData*)pRequest)->isBase64)
+        )
+      {
+      if (nullptr == body) 
+      {
+        pRequest->buildErrorReturn(400, "Requests body not found!", 400);
+      }else{
+        std::string boundary;
+        if (headers_) {
+          boundary = getBoundaryFromHeaders(*headers_);
+          if (boundary.empty()) {
+            proxygen::ResponseBuilder(downstream_)
+              .status(400, "Bad Request")
+              .sendWithEOM();
+            return;
+          }
+        }
+        auto parts = parseMultipart(body->moveToFbString().toStdString(), boundary);
+        for (auto& part : parts) {
+          if (part.headers.at("Content-Disposition").find("filename=") != std::string::npos) {
+            // Handle file part
+            //((ImportStreamRequestData*) pRequest)->fileData = part.body;
+            ((ImportRequestData*) pRequest)->strTmxData = part.body;
+          } else if (part.headers.at("Content-Disposition").find("name=\"json_data\"") != std::string::npos) {
+            // Handle JSON part
+            pRequest->strBody = part.body;
+          }
+        }        
+      }
+    }else{// not import stream 
+      pRequest->strBody = body->moveToFbString().toStdString();
+    }
+
+    if(pRequest && !pRequest->_rest_rc_){
       size_t json_end = pRequest->strBody.find("\n}") ;
       if(json_end > 0 && json_end != std::string::npos){
         pRequest->strBody = pRequest->strBody.substr(0, json_end + 2);
@@ -177,6 +214,34 @@ void ProxygenHandler::onError(ProxygenError /*err*/) noexcept {
     pRequest = nullptr;
   }
   delete this;
+}
+
+void ProxygenHandler::parseRequestBody() {
+  // Parse JSON body from requestBody_
+  //cursor.clone(&requestBody_.);
+  //jsonBody_ = cursor.clone()->moveToFbString().toStdString();
+}
+
+void ProxygenHandler::processRequest(){
+  // Process the JSON body (jsonBody_) and any attached file
+  // Example: Log or handle the JSON data
+  T5LOG(T5INFO) << "Received JSON body: " << jsonBody_;
+
+  // Example: Handle the attached file if present
+  handleAttachedFile();
+}
+
+void ProxygenHandler::handleAttachedFile() {
+    // Access and process the attached file if available
+    //auto uploadStream = downstream_->getRequestBody();
+    //if (uploadStream) {
+    //    folly::io::Cursor cursor(uploadStream);
+    //    while (!cursor.isAtEnd()) {
+            //auto buf = cursor.read();
+            // Example: Process 'buf' (e.g., save to file, analyze data)
+            // saveToFile(buf);
+    //    }
+   // }
 }
 
 //#define LOG_SEND_RESPONSE 1

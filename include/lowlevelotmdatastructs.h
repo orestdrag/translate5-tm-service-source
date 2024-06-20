@@ -57,6 +57,7 @@ typedef char* PSZ;
         UPDATE_ENTRY,
         TAGREPLACEMENTTEST,
         IMPORT_MEM,
+        IMPORT_MEM_STREAM,
         IMPORT_LOCAL_MEM,
         CLONE_TM_LOCALY,
         //IMPORT_MEM_INTERNAL_FORMAT
@@ -82,6 +83,7 @@ const std::map<const COMMAND,const char*> CommandToStringsMap {
         { UPDATE_ENTRY, "UPDATE_ENTRY" },
         { TAGREPLACEMENTTEST, "TAGREPLACEMENTTEST" } ,
         { IMPORT_MEM, "IMPORT_MEM" },
+        { IMPORT_MEM_STREAM, "IMPORT_MEM_STREAM" },
         { IMPORT_LOCAL_MEM, "IMPORT_LOCAL_MEM" },
         { REORGANIZE_MEM, "REORGANIZE_MEM" },
         { CLONE_TM_LOCALY, "CLONE_MEM"}
@@ -1336,6 +1338,7 @@ typedef struct _MEMEXPIMPINFO
   PSZ     pszMarkupList;                   // pointer to a list of markup tables (zero terminated C strigns followed by another zero)
   BYTE    fUnused[20];                     // room for enhancements
   proxygen::ResponseHandler* responseHandler = nullptr;
+  std::string fileData;
   //InclosingTagsBehaviour inclosingTagsBehaviour = InclosingTagsBehaviour::saveAll;
 } MEMEXPIMPINFO, *PMEMEXPIMPINFO;
 
@@ -1408,8 +1411,8 @@ typedef struct _MEM_EXPORT_IDA
  // fields for external memory export methods
  LONG          lExternalExportHandle;  // handle of external memory export functions
  //HMODULE       hmodMemExtExport;                 // handle of external export module/DLL
- PMEMEXPIMPINFO pstMemInfo;                        // buffer for memory information
- PMEMEXPIMPSEG  pstSegment;                        // buffer for segment data
+ MEMEXPIMPINFO* pstMemInfo;                        // buffer for memory information
+ MEMEXPIMPSEG*  pstSegment;                        // buffer for segment data
 
  BOOL         fDataCorrupted;             // TRUE = data has been corrupted during export
  CHAR_W       szBackConvArea[MEM_EXPORT_WORK_AREA]; // Work area for conversion check
@@ -2005,9 +2008,478 @@ typedef struct _DDEMSGBUFFER
 #include <proxygen/httpserver/ResponseHandler.h>
 
 class ImportStatusDetails;
+
+
+#define  SEGMENT_CLUSTER_LENGTH        4  // Length of segment cluster
+#define  SEGMENT_NUMBER_LENGTH         6  // Length of segment number
+#define MAX_LONGFILESPEC       256     // max length of long file name + extension
+/**********************************************************************/
+/* structure which holds info for the task "translation memory import"*/
+/**********************************************************************/
+typedef struct _DDEMEMIMP
+{
+  HWND    hwndOwner;                   // handle of instance window
+  CHAR    szName[MAX_LONGFILESPEC];    // TM name
+  CHAR    szInFile[CCHMAXPATH+1];      // input file name
+  CHAR    szCurDir[CCHMAXPATH+1];      // current/active directory
+  USHORT usBatchOccurrence[MAXALLBATCH];   // occurency of each spec
+  DDERETURN  DDEReturn;                    // return structure
+  HWND hwndErrMsg;                         // HWND to be used for error messages
+} DDEMEMIMP, *PDDEMEMIMP;
+
+
+
+typedef struct _TOKENENTRY     // entry in tokenlist :
+{
+  // !!!! Attention: below has to match TOKENENTRYSEG definition ....  !!!!
+  SHORT     sTokenid;          // Tokenid
+  USHORT    usLength;          // Length of data string
+  SHORT     sAddInfo;          // additional information from tag table
+  CHAR    * pDataString;       // pointer to data string
+  USHORT    usOrgId;           // original id
+  USHORT    ClassId;           // class id of token
+  CHAR_W * pDataStringW;       // pointer to data string  - Unicode
+  // !!!! Attention: above has to match TOKENENTRYSEG definition ....  !!!!
+
+} TOKENENTRY, *PTOKENENTRY;
+
+#define MAX_TRNOTE_DESC     40             // length of TRNote Desc. Prefix
+
+
+typedef int   (*PFN)();
+
+typedef struct _TAGLIST
+{
+   USHORT       uOffset;              /* offset in TagTable                     */
+   USHORT       uNumber;              /* number of tags in list                 */
+} TAGLIST;
+
+typedef struct _TAGTABLE           /* Tagtable                                    */
+{
+  USHORT      uLength;             /* length of data following                    */
+  CHAR        chId[30];            /* file id for tagtab   @@                 */
+  USHORT      uNumTags;            /* number of tags                              */
+  USHORT      usVersion;           // version string
+  TAGLIST     stTagIndex[27];      /* offset to tags in variable tag part of table */
+  TAGLIST     stAttributeIndex[27];/* offset to attributes in variable attribute */
+                                   /* part of table                               */
+  TAGLIST     stFixTag;          /* offset to first fixed length TAG           */
+  TAGLIST     stVarStartTag;     /* offset to first tag starting with wildcard */
+  TAGLIST     stAttribute;       /* offset to first attribute                  */
+  USHORT        uTagstart;         /* offset to first entry in Tagstart table    */
+  USHORT        uStartpos;         /* offset to first entry in Tagstart position table */
+  USHORT        uAttrEndDelim;     /* offset to first attribute end delimiter   */
+  USHORT      uAttrLength;       /* attribute length, not used at moment    */
+  USHORT        uTagNames;         /* offset to first Tagstring                  */
+  CHAR    szSegmentExit[MAX_FILESPEC];    // name of user exit dll
+  CHAR    chTrnote1Text[MAX_TRNOTE_DESC]; // Indicates a note of level 1
+  CHAR    chTrnote2Text[MAX_TRNOTE_DESC]; // indicates a note of level 2
+  CHAR    chStartText[MAX_TRNOTE_DESC];       // tag, may be followed by TRNote
+  CHAR    chEndText[MAX_TRNOTE_DESC];            // end tag
+  USHORT  uAddInfos;                             // offset to additional tag infos
+   // new fields contained in tagtables TAGTABLE_VERSION3 and above
+   CHAR        chSingleSubst;          // character to use for single substitution
+   CHAR        chMultSubst;            // character to use for multiple substitution
+   CHAR        szDescriptiveName[MAX_DESCRIPTION]; // descriptive name for format (displayed in format combobox)
+   CHAR        szDescription[MAX_DESCRIPTION]; // format description
+   USHORT      usCharacterSet;         // characterset to use for import/export
+   BOOL        fUseUnicodeForSegFile;  // TRUE = store segmented files in Unicode format
+   ULONG       ulPassword;             // protection password
+   ULONG       aulFree[9];             // for future use
+   BOOL        fProtected;             // TRUE = markup table is protected
+     /*******************************************************************/
+      /* The following BOOL fReflow is a 3state BOOL:                    */
+      /* 0           = not used, as previously                           */
+      /* 1           = Reflow allowed                                    */
+      /* 2           = no Reflow, for MRI etc                            */
+      /*******************************************************************/
+   BOOL        fReflow;                //status of Reflow
+   BOOL        afFree[8];              // for future use
+   CHAR        szFree[80];             // for future use
+} TAGTABLE, *PTAGTABLE;
+
+// structure for tag tree nodes (used in EQFBFastTokenize)
+typedef struct _NODE
+{
+   CHAR_W   chPos;                       // character position in tag
+   CHAR_W   chNode;                      // node character
+   SHORT  sTokenID;                    // ID of token
+   struct _NODE *pNext;                // ptr to next node (NULL = end of chain)
+} NODE, *PNODE;
+
+
+
+/**********************************************************************/
+/* Structures for new tokenize function                               */
+/**********************************************************************/
+typedef struct _TREENODE
+{
+   CHAR_W   chPos;                       // character position in tag
+   CHAR_W   chNode;                      // node character
+   SHORT    sTokenID;                    // ID of token
+   PSZ_W    pszEndDel;                   // ptr to tag end delimiter
+   USHORT   usLength;                    // length of length-terminated tags
+   USHORT   usColPos;                    // colums position or 0
+   BOOL     fAttr;                       // tag-has-attributes flag
+   BOOL     fUnique;                     // this-path-is-unique flag
+                                       // ( if flag is FALSE there are more
+                                       // possible paths on the current level)
+   BOOL   fNoMatch;                    // no match due to substitution characters
+   BOOL   fTransInfo;                  // TRUE = tag may contain translatable info
+   struct _TREENODE *pNextLevel;       // ptr to next node level (NULL = end of chain)
+   struct _TREENODE *pNextChar;        // ptr to next character on same level
+} TREENODE, *PTREENODE;
+
+/**********************************************************************/
+/* Structure for allocated node ares                                  */
+/**********************************************************************/
+typedef struct _NODEAREA
+{
+  PTREENODE   pFreeNode;               // ptr to next free node
+  USHORT      usFreeNodes;             // number of free nodes
+  struct _NODEAREA *pNext;             // ptr to next node area or NULL if none
+  PTREENODE   pRootNode;               // root node of node tree
+  TREENODE    Nodes[1];                // array of nodes
+} NODEAREA, *PNODEAREA;
+
+
+typedef EQF_BOOL (*PFNGETSEGCONTTEXT)( PSZ_W, PSZ_W, PSZ_W, PSZ_W, LONG, ULONG );
+
+// structure for loaded tag tables
+using LOADEDTABLE = struct _LOADEDTABLE
+{
+   CHAR        szName[MAX_FNAME];      // tag table name (w/o path and ext.)
+   SHORT       sUseCount;              // number of active table users
+   PTAGTABLE   pTagTable;              // pointer to tag table in memory
+   PNODE       pTagTree;               // Tag tree of table
+   PNODE       pAttrTree;              // attribute tree of table
+   PNODEAREA   pNodeArea;              // area for node trees
+   PNODEAREA   pAttrNodeArea;          // area for attribute node tree
+   HMODULE     hmodUserExit;           // user exit (if any)
+   BOOL        fUserExitLoadFailed;    // TRUE = load of user exit failed
+   PFN         pfnProtTable;           // creat eprotect table function
+   BOOL        fProtTableLoadFailed;   // TRUE = ProtTable function load failed
+   // new fields contained in tagtables TAGTABLE_VERSION3 and above
+   // these fields are copied from the TAGTABLE structure (if available) or filled
+   // with default values (for older tagtables)
+   CHAR        chSingleSubst;          // character to use for single substitution
+   CHAR        chMultSubst;            // character to use for multiple substitution
+   CHAR        szDescriptiveName[MAX_DESCRIPTION]; // descriptive name for format (displayed in format combobox)
+   CHAR        szDescription[MAX_DESCRIPTION]; // format description
+   USHORT      usCharacterSet;         // characterset to use for import/export
+   BOOL        fUseUnicodeForSegFile;  // TRUE = store segmented files in Unicode format
+   PSZ_W       pTagNamesW;
+   PSZ_W       pAttributesW;
+   PVOID       pTagTableW;
+   PFN         pfnCompareContext;      // compare context info function
+   BOOL        fCompareContextLoadFailed;  // TRUE = CompareContext function load failed
+   PFN         pfnProtTableW;          // create protect table function (Unicode)
+   PFNGETSEGCONTTEXT         pfnGetSegContext;       // get segment context function (Unicode)
+   BOOL        fGetSegContextLoadFailed;  // TRUE = GetSegContext function load failed
+   BOOL        fReflow;                   // 0=notspec. 1= Reflow allowed, 2= no Reflow
+   PFN         pfnQueryExitInfo;        // query exit info function
+   BOOL        fQueryExitInfoLoadFailed;// TRUE = query exit info function load failed
+   CHAR_W      chMultSubstW;			// multiple substitution
+   CHAR_W      chSingleSubstW;          // single substitution
+   CHAR_W      chTrnote1TextW[MAX_TRNOTE_DESC]; // TRNotesText1
+   CHAR_W      chTrnote2TextW[MAX_TRNOTE_DESC]; // TRNotesText2
+   ULONG       ulTRNote1Len;			// length of TRNotesText1
+   ULONG       ulTRNote2Len;			// lenght of TRNotesText2
+   // timestamp when tag table was loaded the last time
+   ULONG       ulTimeStamp;
+};
+using PLOADEDTABLE = LOADEDTABLE *;
+
+#include <vector>
+#include <proxygen/httpserver/ResponseHandler.h>
+#include "opentm2/core/utilities/LogWrapper.h"
+#include "win_types.h"
+
+class ChunkBuffer{
+  long m_bytesCollecedInChunk = 0;
+  long m_bytesSend = 0;
+  static constexpr size_t chunkSize_ = 4096;
+  std::vector<unsigned char> m_buff;
+  proxygen::ResponseHandler* m_responseHandler = nullptr;
+
+  bool canFit(long size);
+  
+  void triggerChunkSend();
+public:
+  void writeToBuff(const void * data, long size);
+  void setResponseHandler(proxygen::ResponseHandler* responseHandler){m_responseHandler = responseHandler;}
+  bool isActive()const {return m_responseHandler != 0; }
+
+  ChunkBuffer(){m_buff.reserve(chunkSize_+1);}
+  ~ChunkBuffer(){
+    T5LOG(T5INFO)<< "called dctor of chunk buffer- sending last chunk";
+    triggerChunkSend();
+  }
+};
+
+class  CXmlWriter
+{
+public:
+	CXmlWriter();
+  CXmlWriter( const char *strFileName );
+	virtual ~CXmlWriter() {};
+	void SetFileName( const char *strFileName );
+  void SetResponseHandler(proxygen::ResponseHandler* rh);
+
+
+	BOOL WriteStartDocument();
+
+  void WriteStartDocType( const WCHAR * type );
+  void WriteEntity( const WCHAR *name, const WCHAR *value );
+  void WriteEndDocType();
+
+	void WriteStylesheet( const char *stylesheet );
+	void WriteStylesheet( const WCHAR *stylesheet );
+
+  // write string, escape characters
+  void WriteString( const char * text );
+  void WriteString( const WCHAR *text );
+
+  // write string, enclose in CDATA section
+  void WriteCDataString( const char * text );
+  void WriteCDataString( const WCHAR *text );
+
+  // write integer value as string
+  void WriteInt( int iValue );
+
+  // write the start of an attribute
+  void WriteStartAttribute( const char * prefix, const char * localName, const char * ns );
+  void WriteStartAttribute( const WCHAR *prefix, const WCHAR * localName, const WCHAR * ns );
+  void WriteStartAttribute( const char * localName, const char * ns )
+    { WriteStartAttribute( NULL, localName, ns ); };
+  void WriteStartAttribute( const char * localName)
+    { WriteStartAttribute( NULL, localName, NULL ); };
+  void WriteStartAttribute( const WCHAR * localName)
+    { WriteStartAttribute( NULL, localName, NULL ); };
+
+  // write complete attribute string
+	void WriteAttributeString( const WCHAR *localname, const WCHAR *value )
+    { WriteAttributeString( localname, NULL, value ); };
+	void WriteAttributeString( const char *localname, const char *value )
+    { WriteAttributeString( localname, NULL, value ); };
+  void WriteAttributeString( const WCHAR *localName, const WCHAR * ns, const WCHAR *value );
+  void WriteAttributeString( const char *localName, const char * ns, const char *value );
+
+  // write the end of an attrbute
+  void WriteEndAttribute();
+
+  // write start of a new element
+  void WriteStartElement( const WCHAR * localName )
+    { WriteStartElement( NULL, localName, NULL ); };
+  void WriteStartElement( const char * localName )
+    { WriteStartElement( NULL, localName, NULL ); };
+  void WriteStartElement( const WCHAR * localName, const WCHAR * ns )
+    { WriteStartElement( NULL, localName, ns ); };
+  void WriteStartElement( const char * localName, const char * ns )
+    { WriteStartElement( NULL, localName, ns ); };
+  void WriteStartElement( const WCHAR * prefix, const WCHAR * localName, const WCHAR * ns );
+  void WriteStartElement( const char * prefix, const char * localName, const char * ns );
+
+
+  // write the end of an element
+  void WriteEndElement();
+
+  // write a complete element string
+  void WriteElementString( const char * localName, const char * value )
+    { WriteElementString( localName, NULL, value ); };
+  void WriteElementString( const char * localName, const char * ns, const char * value );
+  void WriteElementString( const WCHAR * localName, const WCHAR * value )
+    { WriteElementString( localName, NULL, value ); };
+  void WriteElementString( const WCHAR * localName, const WCHAR * ns, const WCHAR * value );
+
+  // write end of the document
+	void WriteEndDocument();
+
+  // write a comment 
+  void WriteComment( const WCHAR * text );
+  void WriteComment( const char * text );
+
+  // write text without escaping characters
+  void WriteRaw( const WCHAR * text );
+  void WriteRaw( const WCHAR * text, int iLen );
+
+  // close output file
+  void Close();
+    
+  // size of indention
+  int Indention;
+
+  // formatting
+  enum { Indented, None } Formatting; 
+
+  // encoding
+  enum { UTF8, UTF16 } Encoding; 
+
+
+protected:
+  //proxygen::ResponseHandler* m_responseHandler = nullptr;
+  FILE *m_hf;                          // handle of output file
+  int m_iStackSize;
+  int m_iCurIndention;
+  int m_iColumn;
+  //char m_strFileName[_MAX_PATH];
+  char m_strFileName[MAX_PATH];
+  char m_Buffer[2048];
+  BOOL m_fLFBeforeEnd;                 // TRUE = insert LF before adding end element
+  typedef enum _ElementType { Tag, Attribute, Document, Undefined } ElementType;
+  struct _Element
+  {
+    enum _ElementType ElementType;
+    WCHAR *pName;                      // name of element
+    struct _Element *pPrev;            // previous element 
+    BOOL  fContent;                    // TRUE = contains other elements
+  };
+  struct _Element * m_pRoot;
+  int Push( enum _ElementType type, const WCHAR *name );
+  int Pop( enum _ElementType *pType, WCHAR **ppName );
+  void WriteIndention( int iIndention );
+
+  void WriteStringInt( const WCHAR * text );
+
+  // conversion utilities
+  void AnsiToUnicode( const char *pAnsiText, WCHAR **pUnicodeText );
+
+  ElementType GetCurElement( void );
+  void SetContentFlag( void );
+  BOOL GetContentFlag( void );
+  BOOL m_fOpenTag;
+  void Init( void );
+  int writeData(const void* buff, long size, long n);
+
+  ChunkBuffer chunkBuffer;
+};
+
+
+// callback function which is used by ExtMemImportprocess to insert segments into the memory
+typedef USHORT (/*APIENTRY*/ *PFN_MEMINSERTSEGMENT)( LONG lMemHandle, PMEMEXPIMPSEG pSegment );
+
+#include <xercesc/util/PlatformUtils.hpp>
+#include <xercesc/framework/XMLPScanToken.hpp>
+#include <xercesc/parsers/SAXParser.hpp>
+#include <xercesc/sax/HandlerBase.hpp>
+#include <xercesc/util/XMLString.hpp>
+#include <xercesc/util/OutOfMemoryException.hpp>
+#include <xercesc/framework/MemBufInputSource.hpp>
+
+//+----------------------------------------------------------------------------+
+//| Our TMX import export class                                                |
+//|                                                                            |
+//+----------------------------------------------------------------------------+
+class TMXParseHandler;
+
+
+// size of file read buffer in preprocess step
+#define TMX_BUFFER_SIZE 8096
+
+class CTMXExportImport
+{
+  public:
+    // constructor/desctructor
+	  CTMXExportImport();
+	  ~CTMXExportImport();
+    // export methods
+    USHORT WriteHeader( const char *pszOutFile, PMEMEXPIMPINFO pMemInfo );
+    USHORT WriteSegment( PMEMEXPIMPSEG pSegment  );
+    USHORT WriteEnd();
+    // import methods
+    USHORT StartImport( const char *pszInFile, PMEMEXPIMPINFO pMemInfo, ImportStatusDetails* pImportStatusDetails ); 
+    USHORT ImportNext( PFN_MEMINSERTSEGMENT pfnInsertSegment, LONG pMemHandle, ImportStatusDetails*     pImportData  ); 
+    USHORT EndImport(); 
+    USHORT getLastError( PSZ pszErrorBuffer, int iBufferLength );
+
+  protected:
+    USHORT WriteTUV( PSZ pszLanguage, PSZ pszMarkup, PSZ_W pszSegmentData );
+    USHORT PreProcessInFile( const char *pszInFile, const char *pszOutFile );
+
+
+    CXmlWriter m_xw;
+    TMXParseHandler *m_handler;          // our SAX handler 
+    xercesc::SAXParser* m_parser;
+    xercesc::XMLPScanToken m_SaxToken; 
+    unsigned int m_iSourceSize;          // size of source file
+    PTOKENENTRY m_pTokBuf;               // buffer for TaTagTokenize tokens
+    CHAR m_szActiveTagTable[50];         // buffer for name of currently loaded markup table
+    PLOADEDTABLE m_pLoadedTable;         // pointer to currently loaded markup table
+    PLOADEDTABLE m_pLoadedRTFTable;      // pointer to loaded RTF tag table
+    CHAR m_szInFile[512];                // buffer for input file
+    CHAR m_TempFile[540];                // buffer for temporary file name
+    BYTE m_bBuffer[TMX_BUFFER_SIZE+1];
+    PMEMEXPIMPINFO m_pMemInfo;
+    CHAR_W m_szSegBuffer[MAX_SEGMENT_SIZE+1]; // buffer for the processing of segment data
+    int  m_currentTu;                    // export: number of currently processed tu
+};
+
+
+struct MEM_LOAD_DLG_IDA
+{
+ CHAR         szMemName[MAX_LONGFILESPEC];// TM name to import to
+ CHAR         szShortMemName[MAX_FILESPEC];// TM name to import to
+ CHAR         szMemPath[2048];            // TM path + name to import to
+ CHAR         szFilePath[2048];           // File to be imported path + name
+ HFILE        hFile;                      // Handle of file to be imported
+ PMEM_IDA     pIDA;                       // pointer to the memory database IDA
+ BOOL         fAscii;                     // TRUE = ASCII else internal format
+ CHAR         szName[MAX_FNAME];          // file to be imp. name without ext
+ CHAR         szExt[MAX_FEXT];            // file to be imp. ext. with leading dot
+ CHAR         szString[2048];             // string buffer
+ CHAR         szDummy[_MAX_DIR];          // string buffer
+ BOOL         fDisabled;                  // Dialog disable flag
+ CONTROLSIDA  ControlsIda;                //ida of controls utility
+ HPROP        hPropLast;                  // Last used properties handle
+ PMEM_LAST_USED pPropLast;                // Pointer to the last used properties
+ BOOL         fBatch;                     // TRUE = we are in batch mode
+ HWND         hwndErrMsg;                 // parent handle for error messages
+ PDDEMEMIMP   pDDEMemImp;                 // ptr to batch memory import data
+ HWND         hwndNotify;                 // send notification about completion
+ OBJNAME      szObjName;                  // name of object to be finished
+ USHORT       usImpMode;                  // mode for import
+ BOOL         fMerge;                     // TRUE = TM is being merged
+ PSZ          pszList;                    // list of selected import files or NULL
+ BOOL         fSkipInvalidSegments;       // TRUE = skip invalid segments during import
+ ULONG        ulOemCP;                    // CP of system preferences lang.
+ ULONG        ulAnsiCP;                   // CP of system preferences lang.
+ BOOL         fIgnoreEqualSegments;       // TRUE = ignore segments with identical source and target string
+ BOOL         fAdjustTrailingWhitespace;  // TRUE = adjust trailing whitespace of target string
+ BOOL         fMTReceiveCounting;         // TRUE = count received words and write counts to folder properties
+ OBJNAME      szFolObjName;               // object name of folder (only set with fMTReceiveCounting = TRUE)
+ HWND         hwndToCombo;                // handle of "to memory" combo box
+ BOOL         fYesToAll;                  // yes-to-all flag for merge confirmation
+ BOOL         fImpModeSet;                // TRUE = imp mode has been set by the impot file check logic
+ std::shared_ptr<EqfMemory>    mem;                      // pointer to memory being imported
+ OtmProposal  *pProposal;                 // buffer for proposal data
+ BOOL          fForceNewMatchID;          // create a new match segment ID even when the match already has one
+ BOOL          fCreateMatchID;            // create match segment IDs
+ CHAR          szMatchIDPrefix[256];      // prefix to be used for the match segment ID
+ CHAR_W        szMatchIDPrefixW[256];     // prefix to be used for the match segment ID (UTF16 version)
+
+ CHAR         szSegmentID[SEGMENT_CLUSTER_LENGTH +
+                          SEGMENT_NUMBER_LENGTH + 2]; // Segment identification
+
+ PTOKENENTRY  pTokenList;                     // Pointer to Token List
+ std::string fileData;
+
+ PTOKENENTRY  pTokenEntry;                    // A pointer to token entries
+ PTOKENENTRY  pTokenEntryWork;                // A work pointer to token entries
+
+ MEMEXPIMPINFO* pstMemInfo;                        // buffer for memory information
+
+ 
+ CTMXExportImport TMXImport;             // handle of external memory import functions
+ PLOADEDTABLE pFormatTable;                   // Pointer to Format Table
+
+ MEMEXPIMPSEG*  pstSegment;                        // buffer for segment data
+ BOOL         fEOF;                           // Indicates end of file
+};
+//using MEM_LOAD_DLG_IDA* = MEM_LOAD_DLG_IDA *;
 // internal session data area
 typedef struct _FCTDATA
 {
+  std::string fileData;
   ULONG       lMagicWord;              // FUNCDATA area identifier
   LONG        lCheckSum;               // checksum of FUNCDATA area
   SHORT       sLastFunction;           // last function performed
@@ -2022,7 +2494,7 @@ typedef struct _FCTDATA
   HWND        hwndErrMsg;              // handle for error mesages (HWND_FUNCIF)
 
   // area used by mem import
-  PVOID       pvMemLoadIda;            // pointer to analysis input data
+  MEM_LOAD_DLG_IDA       MemLoadIda;            // pointer to analysis input data
   USHORT      usMemLoadPhase;          // current/next phase of TM import
   USHORT      usMemLoadRC;             // return code
 
@@ -2106,8 +2578,6 @@ typedef struct _PROPMEMORY
  CHAR         szLANDriveList[MAX_DRIVELIST];  // Work variable: List of LAN drives
 } PROPTRANSLMEM, *PPROPTRANSLMEM;
 
-
-typedef EQF_BOOL (*PFNGETSEGCONTTEXT)( PSZ_W, PSZ_W, PSZ_W, PSZ_W, LONG, ULONG );
 
 
 

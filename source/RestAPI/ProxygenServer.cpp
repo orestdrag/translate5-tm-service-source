@@ -255,12 +255,14 @@ class ProxygenHandlerFactory : public RequestHandlerFactory {
             requestHandler->pRequest = new DeleteEntriesReorganizeRequestData();
           }else if(urlCommand ==  "import"){ // update 
             requestHandler->pRequest = new ImportRequestData();
+          }else if(urlCommand == "importtmx"){
+            //requestHandler->pRequest = new ImportStreamRequestData();
+            requestHandler->pRequest = new ImportRequestData(false);
           }else if(urlCommand == "clone"){
             requestHandler->pRequest = new CloneTMRequestData();
           }else if(urlCommand == "importlocal"){
             requestHandler->pRequest = new ImportLocalRequestData();
           }
-
         }else if(methodStr == "GET"){
           if(urlCommand ==  "status"){ // update 
             requestHandler->pRequest = new StatusMemRequestData();
@@ -272,9 +274,9 @@ class ProxygenHandlerFactory : public RequestHandlerFactory {
           }else if(urlCommand == "download.tmx"){
             requestHandler->pRequest = new ExportRequestData(EXPORT_MEM_TMX_STREAM);
           }
+          }
         }
       }
-    }
     }
     catch(...){
       T5LOG(T5ERROR) << "url wasn't parsed correctly, url: " << url;

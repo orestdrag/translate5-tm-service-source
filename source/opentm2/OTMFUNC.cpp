@@ -133,7 +133,10 @@ USHORT EqfImportMem
 {
   USHORT      usRC = NO_ERROR;         // function return code
   FCTDATA    Data;// = NULL;            // ptr to function data area
-
+  if(!pData->fileData.empty())
+  {
+    Data.fileData = std::move(pData->fileData);
+  }
   // call TM import
   usRC = MemFuncImportMem( &Data, pData->szInFile, pData->mem, lOptions );
   strcpy(pData->szError, Data.szError);

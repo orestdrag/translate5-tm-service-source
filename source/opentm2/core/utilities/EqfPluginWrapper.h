@@ -15,9 +15,5 @@ public:
     static USHORT MemExportStart     (PLONG plHandle, char* pszOutFile, PMEMEXPIMPINFO pMemInfo );
     static USHORT MemExportProcess   (LONG plHandle, PMEMEXPIMPSEG pSeg);
     static USHORT MemExportEnd       (LONG plHandle );
-
-    static USHORT MemImportStart     (PLONG plHandle, char*  pszInFile, PMEMEXPIMPINFO pMemInfo, ImportStatusDetails*     pImportData   );
-    static USHORT MemImportProcess   (LONG plHandle, PFN_MEMINSERTSEGMENT pfnInsertSegment, LONG lMemHandle, ImportStatusDetails*     pImportData );
-    static USHORT MemImportEnd       (LONG plHandle );
 };
 #endif

@@ -306,6 +306,25 @@ int FilesystemHelper::DecodeBase64ToFile( const char *pStringData, const char *p
   return( iRC );
 }
 
+//*
+int FilesystemHelper::WriteToFile( const std::string pszFile, const std::string& Data, std::string &strError )
+{
+  int iRC = 0;
+  if(Data.empty() || pszFile.empty())
+  {
+    strError = "can't save tmx into the file \'" + (pszFile) +"\'   - data or file are empty";
+    T5LOG(T5ERROR) << strError << iRC ;
+    return( -1);
+  }
+
+  auto file = FilesystemHelper::OpenFile(pszFile.c_str(), "w+", false);
+  FilesystemHelper::WriteToFile(file, &Data[0], Data.size());
+  FilesystemHelper::CloseFile(file);
+
+  return( iRC );
+}
+//*/
+
 
 void importMemoryProcess( void* pvData )
 {

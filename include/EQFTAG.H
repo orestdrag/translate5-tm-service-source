@@ -15,7 +15,6 @@
 #define FORMATID           "FORMATTABLE"   // id of formattable
 #define CHAR_MULT_SUBST     '%'            // multiple substitution character
 #define CHAR_SNGL_SUBST     '?'            // single substitution character
-#define MAX_TRNOTE_DESC     40             // length of TRNote Desc. Prefix
 #define   TRNOTE1_STRING  "Note 1:"     // default identifier for TRNOTE level 1
 #define   TRNOTE2_STRING  "Note 2:"     // default identifier for TRNOTE level 2
 
@@ -102,11 +101,6 @@ typedef struct _ATTRIBUTE      // attribute entry in attribute table:
   USHORT    usLength;          // length of attribute
 } ATTRIBUTE, * PATTRIBUTE;
 
-typedef struct _TAGLIST
-{
-   USHORT       uOffset;              /* offset in TagTable                     */
-   USHORT       uNumber;              /* number of tags in list                 */
-} TAGLIST;
 
 typedef struct _TAGADDINFO     // additional tag/attribute info
 {
@@ -169,58 +163,6 @@ typedef enum _TAGTABLE_REFLOW
 // pTagTableW is stored in PLOADEDTABLE and must be freed when the Tagtable is freed.
 
 
-typedef struct _TAGTABLE           /* Tagtable                                    */
-{
-  USHORT      uLength;             /* length of data following                    */
-  CHAR        chId[30];            /* file id for tagtab   @@                 */
-  USHORT      uNumTags;            /* number of tags                              */
-  USHORT      usVersion;           // version string
-  TAGLIST     stTagIndex[27];      /* offset to tags in variable tag part of table */
-  TAGLIST     stAttributeIndex[27];/* offset to attributes in variable attribute */
-                                   /* part of table                               */
-  TAGLIST     stFixTag;          /* offset to first fixed length TAG           */
-  TAGLIST     stVarStartTag;     /* offset to first tag starting with wildcard */
-  TAGLIST     stAttribute;       /* offset to first attribute                  */
-  USHORT        uTagstart;         /* offset to first entry in Tagstart table    */
-  USHORT        uStartpos;         /* offset to first entry in Tagstart position table */
-  USHORT        uAttrEndDelim;     /* offset to first attribute end delimiter   */
-  USHORT      uAttrLength;       /* attribute length, not used at moment    */
-  USHORT        uTagNames;         /* offset to first Tagstring                  */
-  CHAR    szSegmentExit[MAX_FILESPEC];    // name of user exit dll
-  CHAR    chTrnote1Text[MAX_TRNOTE_DESC]; // Indicates a note of level 1
-  CHAR    chTrnote2Text[MAX_TRNOTE_DESC]; // indicates a note of level 2
-  CHAR    chStartText[MAX_TRNOTE_DESC];       // tag, may be followed by TRNote
-  CHAR    chEndText[MAX_TRNOTE_DESC];            // end tag
-  USHORT  uAddInfos;                             // offset to additional tag infos
-   // new fields contained in tagtables TAGTABLE_VERSION3 and above
-   CHAR        chSingleSubst;          // character to use for single substitution
-   CHAR        chMultSubst;            // character to use for multiple substitution
-   CHAR        szDescriptiveName[MAX_DESCRIPTION]; // descriptive name for format (displayed in format combobox)
-   CHAR        szDescription[MAX_DESCRIPTION]; // format description
-   USHORT      usCharacterSet;         // characterset to use for import/export
-   BOOL        fUseUnicodeForSegFile;  // TRUE = store segmented files in Unicode format
-   ULONG       ulPassword;             // protection password
-   ULONG       aulFree[9];             // for future use
-   BOOL        fProtected;             // TRUE = markup table is protected
-     /*******************************************************************/
-      /* The following BOOL fReflow is a 3state BOOL:                    */
-      /* 0           = not used, as previously                           */
-      /* 1           = Reflow allowed                                    */
-      /* 2           = no Reflow, for MRI etc                            */
-      /*******************************************************************/
-   BOOL        fReflow;                //status of Reflow
-   BOOL        afFree[8];              // for future use
-   CHAR        szFree[80];             // for future use
-} TAGTABLE, *PTAGTABLE;
-
-// structure for tag tree nodes (used in EQFBFastTokenize)
-typedef struct _NODE
-{
-   CHAR_W   chPos;                       // character position in tag
-   CHAR_W   chNode;                      // node character
-   SHORT  sTokenID;                    // ID of token
-   struct _NODE *pNext;                // ptr to next node (NULL = end of chain)
-} NODE, *PNODE;
 
 //typedef struct _NODE // old version!
 //{
@@ -241,26 +183,6 @@ typedef struct _NODE16
 } NODE16, *PNODE16;
 
 
-/**********************************************************************/
-/* Structures for new tokenize function                               */
-/**********************************************************************/
-typedef struct _TREENODE
-{
-   CHAR_W   chPos;                       // character position in tag
-   CHAR_W   chNode;                      // node character
-   SHORT    sTokenID;                    // ID of token
-   PSZ_W    pszEndDel;                   // ptr to tag end delimiter
-   USHORT   usLength;                    // length of length-terminated tags
-   USHORT   usColPos;                    // colums position or 0
-   BOOL     fAttr;                       // tag-has-attributes flag
-   BOOL     fUnique;                     // this-path-is-unique flag
-                                       // ( if flag is FALSE there are more
-                                       // possible paths on the current level)
-   BOOL   fNoMatch;                    // no match due to substitution characters
-   BOOL   fTransInfo;                  // TRUE = tag may contain translatable info
-   struct _TREENODE *pNextLevel;       // ptr to next node level (NULL = end of chain)
-   struct _TREENODE *pNextChar;        // ptr to next character on same level
-} TREENODE, *PTREENODE;
 
 // tree node for UTF16 coded files
 // not used currently: instead TREENODE has been changed accordingly
@@ -282,62 +204,7 @@ typedef struct _TREENODE16
    struct _TREENODE *pNextChar;        // ptr to next character on same level
 } TREENODE16, *PTREENODE16;
 
-/**********************************************************************/
-/* Structure for allocated node ares                                  */
-/**********************************************************************/
-typedef struct _NODEAREA
-{
-  PTREENODE   pFreeNode;               // ptr to next free node
-  USHORT      usFreeNodes;             // number of free nodes
-  struct _NODEAREA *pNext;             // ptr to next node area or NULL if none
-  PTREENODE   pRootNode;               // root node of node tree
-  TREENODE    Nodes[1];                // array of nodes
-} NODEAREA, *PNODEAREA;
 
-// structure for loaded tag tables
-using LOADEDTABLE = struct _LOADEDTABLE
-{
-   CHAR        szName[MAX_FNAME];      // tag table name (w/o path and ext.)
-   SHORT       sUseCount;              // number of active table users
-   PTAGTABLE   pTagTable;              // pointer to tag table in memory
-   PNODE       pTagTree;               // Tag tree of table
-   PNODE       pAttrTree;              // attribute tree of table
-   PNODEAREA   pNodeArea;              // area for node trees
-   PNODEAREA   pAttrNodeArea;          // area for attribute node tree
-   HMODULE     hmodUserExit;           // user exit (if any)
-   BOOL        fUserExitLoadFailed;    // TRUE = load of user exit failed
-   PFN         pfnProtTable;           // creat eprotect table function
-   BOOL        fProtTableLoadFailed;   // TRUE = ProtTable function load failed
-   // new fields contained in tagtables TAGTABLE_VERSION3 and above
-   // these fields are copied from the TAGTABLE structure (if available) or filled
-   // with default values (for older tagtables)
-   CHAR        chSingleSubst;          // character to use for single substitution
-   CHAR        chMultSubst;            // character to use for multiple substitution
-   CHAR        szDescriptiveName[MAX_DESCRIPTION]; // descriptive name for format (displayed in format combobox)
-   CHAR        szDescription[MAX_DESCRIPTION]; // format description
-   USHORT      usCharacterSet;         // characterset to use for import/export
-   BOOL        fUseUnicodeForSegFile;  // TRUE = store segmented files in Unicode format
-   PSZ_W       pTagNamesW;
-   PSZ_W       pAttributesW;
-   PVOID       pTagTableW;
-   PFN         pfnCompareContext;      // compare context info function
-   BOOL        fCompareContextLoadFailed;  // TRUE = CompareContext function load failed
-   PFN         pfnProtTableW;          // create protect table function (Unicode)
-   PFNGETSEGCONTTEXT         pfnGetSegContext;       // get segment context function (Unicode)
-   BOOL        fGetSegContextLoadFailed;  // TRUE = GetSegContext function load failed
-   BOOL        fReflow;                   // 0=notspec. 1= Reflow allowed, 2= no Reflow
-   PFN         pfnQueryExitInfo;        // query exit info function
-   BOOL        fQueryExitInfoLoadFailed;// TRUE = query exit info function load failed
-   CHAR_W      chMultSubstW;			// multiple substitution
-   CHAR_W      chSingleSubstW;          // single substitution
-   CHAR_W      chTrnote1TextW[MAX_TRNOTE_DESC]; // TRNotesText1
-   CHAR_W      chTrnote2TextW[MAX_TRNOTE_DESC]; // TRNotesText2
-   ULONG       ulTRNote1Len;			// length of TRNotesText1
-   ULONG       ulTRNote2Len;			// lenght of TRNotesText2
-   // timestamp when tag table was loaded the last time
-   ULONG       ulTimeStamp;
-};
-using PLOADEDTABLE = LOADEDTABLE *;
 
 /**********************************************************************/
 /* Error codes returned by EQFB... functions                          */
