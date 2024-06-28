@@ -85,22 +85,9 @@ class ProxygenHandler : public proxygen::RequestHandler {
 
   struct MultipartPart {
     std::unordered_map<std::string, std::string> headers;
-    std::string body;
+    //std::string body;
+    std::unique_ptr<folly::IOBuf> body;
   };
-
-  void handleFilePart(const MultipartPart& part) {
-    // Handle file upload
-    auto fileData = part.body;
-    // Save the file or process it as needed
-  }
-
-  void handleJSONPart(const MultipartPart& part) {
-    // Handle JSON data
-    //auto jsonData = part.body;
-    // Parse and process the JSON data
-    //auto json = folly::parseJson(jsonData);
-    // ...
-  }
 
   std::string getBoundaryFromHeaders(const proxygen::HTTPMessage& headers) {
     auto contentType = headers.getHeaders().getSingleOrEmpty("Content-Type");
@@ -119,6 +106,83 @@ class ProxygenHandler : public proxygen::RequestHandler {
     return "--" + boundary; // Prefix with "--" as per multipart form data boundary format
   }
 
+  std::vector<MultipartPart> parseMultipart(std::unique_ptr<folly::IOBuf>& body, const std::string& boundary) {
+    std::vector<MultipartPart> parts;
+    std::string boundaryLine = boundary + "\r\n";
+    std::string endBoundaryLine = boundary + "--\r\n";
+
+    std::string bodyStr = body->moveToFbString().toStdString();
+    size_t pos = 0;
+    size_t nextPos = 0;
+
+    while ((nextPos = bodyStr.find(boundaryLine, pos)) != std::string::npos) {
+      std::string partStr = bodyStr.substr(pos, nextPos - pos);
+      pos = nextPos + boundaryLine.length();
+
+      if (partStr.empty()) {
+        continue;
+      }
+
+      MultipartPart part;
+      std::istringstream partStream(partStr);
+      std::string line;
+      bool isBody = false;
+      std::unique_ptr<folly::IOBuf> partBody = folly::IOBuf::create(0);
+
+      while (std::getline(partStream, line)) {
+        if (line == "\r") {
+          isBody = true;
+        } else if (!isBody) {
+          auto delimiterPos = line.find(": ");
+          if (delimiterPos != std::string::npos) {
+            std::string headerName = line.substr(0, delimiterPos);
+            std::string headerValue = line.substr(delimiterPos + 2);
+            part.headers[headerName] = headerValue;
+          }
+        } else {
+          auto buf = folly::IOBuf::copyBuffer(line + "\n");
+          partBody->prependChain(std::move(buf));
+        }
+      }
+
+      part.body = std::move(partBody);
+      parts.push_back(std::move(part));
+    }
+
+    if ((nextPos = bodyStr.find(endBoundaryLine, pos)) != std::string::npos) {
+      std::string partStr = bodyStr.substr(pos, nextPos - pos);
+      if (!partStr.empty()) {
+        MultipartPart part;
+        std::istringstream partStream(partStr);
+        std::string line;
+        bool isBody = false;
+        std::unique_ptr<folly::IOBuf> partBody = folly::IOBuf::create(0);
+
+        while (std::getline(partStream, line)) {
+          if (line == "\r") {
+            isBody = true;
+          } else if (!isBody) {
+            auto delimiterPos = line.find(": ");
+            if (delimiterPos != std::string::npos) {
+              std::string headerName = line.substr(0, delimiterPos);
+              std::string headerValue = line.substr(delimiterPos + 2);
+              part.headers[headerName] = headerValue;
+            }
+          } else {
+            auto buf = folly::IOBuf::copyBuffer(line + "\n");
+            partBody->prependChain(std::move(buf));
+          }
+        }
+
+        part.body = std::move(partBody);
+        parts.push_back(std::move(part));
+      }
+    }
+
+    return parts;
+  }
+
+/*
    std::vector<MultipartPart> parseMultipart(const std::string& body, const std::string& boundary) {
     std::vector<MultipartPart> parts;
     std::istringstream stream(body);
@@ -152,6 +216,7 @@ class ProxygenHandler : public proxygen::RequestHandler {
 
     return parts;
   }
+  /*/
 };
 
 } // namespace ProxygenService

@@ -207,7 +207,10 @@ class ProxygenHandlerFactory : public RequestHandlerFactory {
         if( methodStr == "GET"){
           requestHandler->pRequest = new ListTMRequestData();
         }else if( methodStr == "POST" ){
-          requestHandler->pRequest = new CreateMemRequestData();
+          std::string contentTypeHeader = headers.getSingleOrEmpty("Content-Type");
+          bool isMultipart = contentTypeHeader.find("multipart/form-data") != std::string::npos;
+          requestHandler->pRequest = new CreateMemRequestData(!isMultipart);
+
         }
       }else{// mem name is not empty, but command is empty 
         if(methodStr == "POST"){
@@ -257,7 +260,7 @@ class ProxygenHandlerFactory : public RequestHandlerFactory {
             requestHandler->pRequest = new ImportRequestData();
           }else if(urlCommand == "importtmx"){
             //requestHandler->pRequest = new ImportStreamRequestData();
-            requestHandler->pRequest = new ImportRequestData(false);
+            requestHandler->pRequest = new ImportRequestData(false); 
           }else if(urlCommand == "clone"){
             requestHandler->pRequest = new CloneTMRequestData();
           }else if(urlCommand == "importlocal"){
@@ -274,9 +277,9 @@ class ProxygenHandlerFactory : public RequestHandlerFactory {
           }else if(urlCommand == "download.tmx"){
             requestHandler->pRequest = new ExportRequestData(EXPORT_MEM_TMX_STREAM);
           }
-          }
         }
       }
+    }
     }
     catch(...){
       T5LOG(T5ERROR) << "url wasn't parsed correctly, url: " << url;

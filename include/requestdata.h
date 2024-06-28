@@ -86,11 +86,13 @@ class CreateMemRequestData: public RequestData{
     
     std::string strSrcLang;
     std::string strMemDescription;
-    std::string strMemB64EncodedData; // for import in internal format
+    std::vector<unsigned char> binTmData; // for import in internal format
+    std::string strTmData;
     std::string strTempFile;
+    bool isBase64;
     
     CreateMemRequestData(const std::string& json): RequestData(COMMAND::CREATE_MEM,json, ""){}
-    CreateMemRequestData(): RequestData(COMMAND::CREATE_MEM) {};
+    CreateMemRequestData(bool b64 = false): RequestData(COMMAND::CREATE_MEM) {isBase64 = b64;};
 
 protected:
     int parseJSON() override;

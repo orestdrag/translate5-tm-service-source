@@ -307,7 +307,7 @@ int FilesystemHelper::DecodeBase64ToFile( const char *pStringData, const char *p
 }
 
 //*
-int FilesystemHelper::WriteToFile( const std::string pszFile, const std::string& Data, std::string &strError )
+int FilesystemHelper::WriteToFile( const std::string& pszFile, const std::string& Data, std::string &strError )
 {
   int iRC = 0;
   if(Data.empty() || pszFile.empty())

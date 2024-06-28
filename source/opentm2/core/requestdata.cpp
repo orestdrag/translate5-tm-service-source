@@ -497,10 +497,21 @@ int CreateMemRequestData::importInInternalFomat(){
 
   // decode binary data and write it to temp file
   std::string strError;
-  _rc_ = FilesystemHelper::DecodeBase64ToFile( strMemB64EncodedData.c_str(), strTempFile.c_str(), strError );
+  if(isBase64){
+    _rc_ = FilesystemHelper::DecodeBase64ToFile( strTmData.c_str(), strTempFile.c_str(), strError );
+  }else{
+    if(binTmData.size() > 0){
+      auto filesize = FilesystemHelper::WriteToFile(strTempFile, &binTmData[0], binTmData.size());
+      if(0 == filesize){
+        return buildErrorReturn( _rc_, "cant write tm data to temp file", 500);
+      }
+    }else{
+      return buildErrorReturn( _rc_, "binary tm  file data not found", 400);
+    }
+  }
   if ( _rc_ != 0 )
   {
-      return buildErrorReturn( _rc_, (char *)strError.c_str(), INTERNAL_SERVER_ERROR);
+    return buildErrorReturn( _rc_, (char *)strError.c_str(), INTERNAL_SERVER_ERROR);
   }
 
   // make temporary directory for the memory files of the package
@@ -559,7 +570,7 @@ int CreateMemRequestData::checkData(){
     return buildErrorReturn( ERROR_INPUT_PARMS_INVALID, "Error: Missing memory name input parameter", BAD_REQUEST);
   } /* end */
   
-  if ( !_rc_ && strSrcLang.empty() && strMemB64EncodedData.empty())// it's import in internal format
+  if ( !_rc_ && strSrcLang.empty() && strTmData.empty() && binTmData.empty())// it's import in internal format
   {
     return buildErrorReturn( ERROR_INPUT_PARMS_INVALID, "Error: Missing source language input parameter", BAD_REQUEST );
   } /* end */
@@ -631,7 +642,7 @@ int CreateMemRequestData::parseJSON(){
     {      
       if ( strcasecmp( name.c_str(), "data" ) == 0 )
       {
-        strMemB64EncodedData = value;
+        strTmData = value;
         T5LOG( T5DEBUG) << "JSON parsed name = " << name << "; size = " << value.size();
       }
       else
@@ -661,7 +672,7 @@ int CreateMemRequestData::parseJSON(){
 }
 
 int CreateMemRequestData::execute(){
-  if ( strMemB64EncodedData.empty() ) // create empty tm
+  if ( strTmData.empty()  && binTmData.empty()) // create empty tm
   {
     createNewEmptyMemory();
   }else{

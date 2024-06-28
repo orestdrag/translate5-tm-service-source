@@ -139,14 +139,34 @@ void ProxygenHandler::onBody(std::unique_ptr<folly::IOBuf> body) noexcept {
   //}
   
 }
+// Function to convert folly::IOBuf to std::vector<unsigned char>
+std::vector<unsigned char> iobufToVector(const std::unique_ptr<folly::IOBuf>& buf) {
+  std::vector<unsigned char> data;
+  for (auto range = buf->begin(); range != buf->end(); range++) {
+    data.insert(data.end(), range->begin(), range->end());
+  }
+  return data;
+}
+
+// Function to convert folly::IOBuf to std::string
+std::string iobufToString(const std::unique_ptr<folly::IOBuf>& buf) {
+  std::string data;
+  for (auto range = buf->begin(); range != buf->end(); range++) {
+    data.append(reinterpret_cast<const char*>(range->begin()), range->size());
+  }
+  return data;
+}
 
 void ProxygenHandler::onEOM() noexcept {  
   if(pRequest && pRequest->command >= COMMAND::START_COMMANDS_WITH_BODY)
   {
     auto body = bodyQueue_.move();
     if(
-        (COMMAND::IMPORT_MEM == pRequest->command 
-          &&  (false == ((ImportRequestData*)pRequest)->isBase64)
+          (COMMAND::IMPORT_MEM == pRequest->command 
+          &&  (false == ((ImportRequestData*)pRequest)->isBase64))
+        || 
+          (COMMAND::CREATE_MEM == pRequest->command 
+          &&  (false == ((CreateMemRequestData*)pRequest)->isBase64))
         )
       {
       if (nullptr == body) 
@@ -163,15 +183,19 @@ void ProxygenHandler::onEOM() noexcept {
             return;
           }
         }
-        auto parts = parseMultipart(body->moveToFbString().toStdString(), boundary);
+        auto parts = parseMultipart(body, boundary);
         for (auto& part : parts) {
           if (part.headers.at("Content-Disposition").find("filename=") != std::string::npos) {
             // Handle file part
             //((ImportStreamRequestData*) pRequest)->fileData = part.body;
-            ((ImportRequestData*) pRequest)->strTmxData = part.body;
+            if(COMMAND::IMPORT_MEM  == pRequest->command){
+              ((ImportRequestData*) pRequest)->strTmxData = iobufToString(part.body);
+            }else if (COMMAND::CREATE_MEM  == pRequest->command){
+              ((CreateMemRequestData*) pRequest)->binTmData = iobufToVector(part.body);
+            }
           } else if (part.headers.at("Content-Disposition").find("name=\"json_data\"") != std::string::npos) {
             // Handle JSON part
-            pRequest->strBody = part.body;
+            pRequest->strBody = iobufToString(part.body);
           }
         }        
       }

@@ -105,7 +105,7 @@ public:
     \returns 0 is sucessfull or a return code
     */
     static int DecodeBase64ToFile( const char *pStringData, const char *pszFile, std::string &strError );
-    static int WriteToFile( const std::string pszFile, const std::string& Data, std::string &strError );
+    static int WriteToFile( const std::string& pszFile, const std::string& Data, std::string &strError );
 
 #ifdef _USING_FILESYSTEM_
     static  std::vector<fs::directory_entry> FindFiles(const std::string& name);
