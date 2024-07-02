@@ -207,12 +207,17 @@ void ProxygenHandler::onEOM() noexcept {
       size_t json_end = pRequest->strBody.find("\n}") ;
       if(json_end > 0 && json_end != std::string::npos){
         pRequest->strBody = pRequest->strBody.substr(0, json_end + 2);
+      }else if(false == pRequest->strBody.empty()){
+        pRequest->buildErrorReturn(117, "Request canceled:: Json body should be send in pretty format only", 400);
+        T5LOG(T5ERROR) << "received json in non pretty format - canceling request;";
       }
+    }
+
+    if(pRequest && !pRequest->_rest_rc_){
       std::string truncatedInput = pRequest->strBody.size() > 3000 ? pRequest->strBody.substr(0, 3000) : pRequest->strBody;
       T5Logger::GetInstance()->SetBodyBuffer(", with body = \n\"" + truncatedInput +"\"\n");
       pRequest->run();
     }
- 
     sendResponse();
   }
 }

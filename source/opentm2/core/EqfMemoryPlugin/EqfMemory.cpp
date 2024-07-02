@@ -259,8 +259,7 @@ int EqfMemory::putProposal
     int *piProgress
   )
   {
-    this->ulNextKey = FIRST_KEY;
-    this->usNextTarget = 1;
+    this->resetInternalCursor();
 
     return( this->getNextProposal( Proposal, piProgress ) );
   }

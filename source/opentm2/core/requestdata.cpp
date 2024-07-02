@@ -3166,6 +3166,7 @@ int ConcordanceExtendedSearchRequestData::execute()
   int iActualSearchTime = 0; // for the first call run until end of TM or one proposal has been found
 
   auto filters = searchFilterFactory.getListOfFilters();
+  mem->resetInternalCursor();
 
   do
   {

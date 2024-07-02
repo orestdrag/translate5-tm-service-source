@@ -22,6 +22,15 @@
 #include "./EncodingHelper.h"
 
 
+void EqfMemory::resetInternalCursor(){
+  this->setInternalCursor(FIRST_KEY, 1);
+}
+
+void EqfMemory::setInternalCursor(ULONG recordKey, USHORT targetKey){
+  this->ulNextKey = recordKey;
+  this->usNextTarget = targetKey;
+}
+
 //+----------------------------------------------------------------------------+
 //|External function                                                           |
 //+----------------------------------------------------------------------------+

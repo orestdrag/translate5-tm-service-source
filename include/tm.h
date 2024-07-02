@@ -1873,6 +1873,9 @@ public:
   static const int UPDATE_TARGLANG = 0x04;           // update target language
   static const int UPDATE_DATE     = 0x08;           // update proposal update time
 
+  void setInternalCursor(ULONG recordKey, USHORT targetKey);
+  void resetInternalCursor();
+
   ushort TmtXDelSegm
 (
   OtmProposal& pTmDelIn,  //ptr to input struct
