@@ -22,6 +22,33 @@
 #include "LogWrapper.h"
 
 
+//which tm we can open in current version
+constexpr int HIGHEST_GLOB_VER_SUPPORTED = T5GLOBVERSION; // 1st number in version
+constexpr int HIGHEST_MAJ_VER_SUPPORTED = 6; //T5MAJVERSION - 2nd number in 0.5.20
+constexpr int HIGHEST_MIN_VER_SUPPORTED = 0; // 3rd number in version not used
+
+constexpr int LOWEST_GLOB_VER_SUPPORTED = T5GLOBVERSION;
+constexpr int LOWEST_MAJ_VER_SUPPORTED = 5; // 
+constexpr int LOWEST_MIN_VER_SUPPORTED = 0;//not used yet
+
+int TMVersionSupportCheck(int globVersion, int majorVersion, int minorVersion)
+{
+  int rc = 0;
+  //if ( globVersion > T5GLOBVERSION  || majorVersion > T5MAJVERSION )
+  if ( globVersion > HIGHEST_GLOB_VER_SUPPORTED  || majorVersion > HIGHEST_MAJ_VER_SUPPORTED )
+  {
+    T5LOG(T5ERROR) << "TM was created in newer vertions of t5memory, v" << globVersion << "."<< majorVersion<<"."<<minorVersion;
+    rc = ERROR_VERSION_NOT_SUPPORTED;
+  }
+  //else if (globVersion < T5GLOBVERSION  ||  majorVersion < T5MAJVERSION )
+  else if (globVersion < LOWEST_GLOB_VER_SUPPORTED  ||  majorVersion < LOWEST_MAJ_VER_SUPPORTED )
+  {
+    T5LOG(T5ERROR) << "TM was created in older vertions of t5memory, v"<<globVersion<<"."<<majorVersion<<"."<<minorVersion;
+    rc = VERSION_MISMATCH;
+  } /* endif */
+  return rc;
+}
+
 //+----------------------------------------------------------------------------+
 //|External function                                                           |
 //+----------------------------------------------------------------------------+
@@ -74,16 +101,7 @@ USHORT EqfMemory::OpenX()
 
       if ( usRc == NO_ERROR )
       {
-        if ( stTmSign.bGlobVersion > T5GLOBVERSION  || stTmSign.bMajorVersion > T5MAJVERSION )
-        {
-          T5LOG(T5ERROR) << "TM was created in newer vertions of t5memory, v0."<<stTmSign.bMajorVersion<<"."<<stTmSign.bMinorVersion;
-          usRc = ERROR_VERSION_NOT_SUPPORTED;
-        }
-        else if (stTmSign.bGlobVersion < T5GLOBVERSION  || stTmSign.bMajorVersion < T5MAJVERSION )
-        {
-          T5LOG(T5ERROR) << "TM was created in older vertions of t5memory, v"<<stTmSign.bGlobVersion<<"."<<stTmSign.bMajorVersion<<"."<<stTmSign.bMinorVersion;
-          usRc = VERSION_MISMATCH;
-        } /* endif */
+        usRc = TMVersionSupportCheck(stTmSign.bGlobVersion, stTmSign.bMajorVersion, stTmSign.bMinorVersion);
       }
       else if ( usAccessMode & ASD_ORGANIZE )
       {
