@@ -2288,6 +2288,27 @@ int ResourceInfoRequestData::execute(){
   return _rest_rc_;
 }
 
+
+int ExportRequestData::parseJSON(){
+  numberOfRequestedProposals = 0;
+  
+  memset( szKey , sizeof(szKey) / sizeof(szKey[0]), 0 ); 
+  if(strBody.empty()){
+    return 0;
+  }
+  
+  JSONFactory::JSONPARSECONTROL parseControl[] = { 
+    { L"startFromInternalKey",         JSONFactory::ASCII_STRING_PARM_TYPE, &( szKey ), sizeof( szKey ) / sizeof( szKey[0] ) },
+    { L"limit",          JSONFactory::INT_PARM_TYPE, &(numberOfRequestedProposals), 0},
+    //{ L"loggingThreshold",JSONFactory::INT_PARM_TYPE        , &(loggingThreshold), 0}, 
+    { L"",               JSONFactory::ASCII_STRING_PARM_TYPE, NULL, 0 } 
+  };
+
+  std::wstring strInputParmsW = EncodingHelper::convertToWChar( strBody.c_str() );
+  _rc_ = json_factory.parseJSON( strInputParmsW, parseControl );
+  return 0;
+}
+
 int ExportRequestData::checkData(){
   T5LOG( T5INFO) <<"::getMem::=== getMem request, memory = " << strMemName << "; format = " << requestAcceptHeader;
   _rc_ = OtmMemoryServiceWorker::getInstance()->verifyAPISession();
@@ -2312,14 +2333,14 @@ int ExportRequestData::checkData(){
     }
   }
 
-  if(command == EXPORT_MEM_TMX){
-    return buildErrorReturn(400, "Base64 export is not supported in this version, use stream export with t5memory/{memname}/download.tmx instead", 400);
-  }
+  //if(command == EXPORT_MEM_TMX){
+  //  return buildErrorReturn(400, "Base64 export is not supported in this version, use stream export with t5memory/{memname}/download.tmx instead", 400);
+  //}
   return _rc_;
 }
 
 int ExportRequestData::execute(){
-  if(command != EXPORT_MEM_TMX_STREAM){
+  if(command != EXPORT_MEM_TMX_STREAM && command != EXPORT_MEM_TMX){
     // get a temporary file name for the memory package file or TMX file
     strTempFile = FilesystemHelper::BuildTempFileName();
     if ( _rc_ != 0 )
@@ -2329,9 +2350,9 @@ int ExportRequestData::execute(){
   }
   // export the memory in internal format
   if (// requestAcceptHeader.compare( "application/xml" ) == 0  || 
-     EXPORT_MEM_TMX_STREAM == command)
+     EXPORT_MEM_TMX_STREAM == command
+     || EXPORT_MEM_TMX == command )
   {
-    T5LOG( T5INFO) <<"::getMem:: mem = " <<  strMemName << "; supported type found application/xml, tempFile = " << strTempFile;
     ExportTmx();
     if ( _rc_ != 0 )
     {
@@ -2377,11 +2398,13 @@ int ExportRequestData::execute(){
   //_rc_ = FilesystemHelper::LoadFileIntoByteVector( strTempFile, vMemData );
   //outputMessage = std::string(vMemData.begin(), vMemData.end());
   //cleanup
-  if(false == isStreamingRequest()){
-    if(T5Logger::GetInstance()->CheckLogLevel(T5DEBUG) == false){ //for DEBUG and DEVELOP modes leave file in fs
+  //if(false == isStreamingRequest()){
+    if(T5Logger::GetInstance()->CheckLogLevel(T5DEBUG) == false 
+      && COMMAND::EXPORT_MEM_TMX != command
+      && COMMAND::EXPORT_MEM_TMX_STREAM != command ){ //for DEBUG and DEVELOP modes leave file in fs
       FilesystemHelper::DeleteFile( strTempFile );
     }
-  }
+  //}
   
   if ( _rc_ != 0 )
   {
@@ -2445,50 +2468,76 @@ int ExportRequestData::ExportZipStream(){
   return _rc_;
 }
 
+std::string convertIOBufQueueToString(folly::IOBufQueue& bufQueue) {
+
+    std::string result;
+    folly::io::Cursor cursor(bufQueue.front());
+
+    while (!cursor.isAtEnd()) {
+      const auto chunk = cursor.peekBytes();
+      result.append(reinterpret_cast<const char*>(chunk.data()), chunk.size());
+      cursor.skip(chunk.size());
+    }
+
+    return result;
+}
+
 int ExportRequestData::ExportTmx(){
   
   //mem
   // call TM export
   if ( _rc_ == NO_ERROR )
   {
-    memset( &fctdata, 0, sizeof( FCTDATA ) );
+    //memset( &fctdata, 0, sizeof( FCTDATA ) );
     fctdata.fComplete = TRUE;
     fctdata.usExportProgress = 0;
-    if(isStreamingRequest()){
+    fctdata.numOfProposalsRequested = numberOfRequestedProposals;
+    //if(isStreamingRequest()){
       fctdata.responseHandler = responseHandler;
-    }
+    //}
+    mem->SplitProposalKeyIntoRecordAndTarget(szKey, &fctdata.startingRecordKey, &fctdata.startingTargetKey);
+    fctdata.recordKey = fctdata.startingRecordKey;
+    fctdata.targetKey = fctdata.startingTargetKey;
 
     _rc_ = fctdata.MemFuncPrepExport( (PSZ)strMemName.c_str(), (PSZ)strTempFile.c_str(), TMX_UTF8_OPT | OVERWRITE_OPT | COMPLETE_IN_ONE_CALL_OPT, mem );
   } 
 
   if ( _rc_ == 0 )
   {
-    if(isStreamingRequest()){
-      // Create response headers
-      proxygen::HTTPMessage response;
-      response.setHTTPVersion(1, 1);
-      response.setStatusCode(200);
-      response.setStatusMessage("OK");
-      response.setIsChunked(true);
-      
-      // Add headers to the response
-      std::stringstream contDisposition;
-      contDisposition << "attachment; filename=\"" << mem->szName  << ".tmx\"";
-      response.getHeaders().add("Content-Type", "application/octet-stream");
-      response.getHeaders().add("Content-Disposition", contDisposition.str());
-      // Send response headers
-      responseHandler->sendHeaders(response);
-    }
-
     while ( !fctdata.fComplete )
     {
       _rc_ = fctdata.MemFuncExportProcess(  );
     }
   }
+  
   if(_rc_){
     T5LOG(T5ERROR) <<  "end of function EqfExportMem with error code::  RC = " << _rc_;
-  }else{ 
+    buildErrorReturn(_rc_, "Error happened during tmx  export", 500);
+  }else{    
     T5LOG( T5DEBUG) << "end of function EqfExportMem::success ";
+     // Create response headers
+    if(COMMAND::EXPORT_MEM_TMX_STREAM == command){
+      proxygen::HTTPMessage response;
+      response.setHTTPVersion(1, 1);
+      response.setStatusCode(200);
+      response.setStatusMessage("OK");
+      //response.setIsChunked(true);
+      
+      // Add headers to the response
+      std::stringstream contDisposition;
+      //std::string nextInternalKey = std::to_string(fctdata.recordKey) + ":" + std::to_string(fctdata.targetKey);
+      std::string nextInternalKey = std::to_string(mem->ulNextKey) + ":" + std::to_string(mem->usNextTarget);
+      
+      contDisposition << "attachment; filename=\"" << mem->szName  << ".tmx\"";
+      response.getHeaders().add("Content-Type", "application/octet-stream");
+      response.getHeaders().add("Content-Disposition", contDisposition.str());
+      response.getHeaders().add("NextInternalKey", nextInternalKey);
+      // Send response headers
+      responseHandler->sendHeaders(response);
+      responseHandler->sendBody(fctdata.bufQueue.move());
+    }else {//non stream would be handled later;
+      this->outputMessage = convertIOBufQueueToString(fctdata.bufQueue);//fctdata.bufQueue.move();
+    }
   }
   return 0;
 }

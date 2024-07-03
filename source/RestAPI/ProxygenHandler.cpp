@@ -94,8 +94,9 @@ void ProxygenHandler::onRequest(std::unique_ptr<HTTPMessage> req) noexcept {
   T5LOG(T5DEBUG) << "received request url:\"" << pRequest->strUrl <<"\"; type " << searchInCommandToStringsMap(pRequest->command);  
  
   std::string requestAcceptHeader = headers.getSingleOrEmpty("Accept");
-  if(pRequest->isStreamingRequest()){
-    pRequest->responseHandler = downstream_;    
+  pRequest->responseHandler = downstream_;   
+  
+  if(pRequest->isStreamingRequest()){ 
   }else if(EXPORT_MEM_TMX == pRequest->command){
     if(requestAcceptHeader == "application/xml"){
       pRequest->command = COMMAND::EXPORT_MEM_TMX;   
@@ -200,7 +201,11 @@ void ProxygenHandler::onEOM() noexcept {
         }        
       }
     }else{// not import stream 
-      pRequest->strBody = body->moveToFbString().toStdString();
+      if(body){
+        pRequest->strBody = body->moveToFbString().toStdString();
+      }else if(COMMAND::EXPORT_MEM_TMX_STREAM != pRequest->command){
+        pRequest->buildErrorReturn(400, "Missing body", 400);
+      }
     }
 
     if(pRequest && !pRequest->_rest_rc_){
@@ -320,6 +325,9 @@ void ProxygenHandler::sendResponse()noexcept{
       }
     }
     
+    //if(COMMAND::EXPORT_MEM_TMX_STREAM == pRequest->command){
+      //do nothing
+    //}else 
     if(pRequest->isStreamingRequest()){
       downstream_->sendEOM();
     }else{
@@ -340,8 +348,10 @@ void ProxygenHandler::sendResponse()noexcept{
 
       std::string appVersion = std::to_string(T5GLOBVERSION) + ":" + std::to_string(T5MAJVERSION) + ":" + std::to_string(T5MINVERSION)  ;
       builder->header("t5memory-version", appVersion);  
-      if(pRequest->command == COMMAND::EXPORT_MEM_INTERNAL_FORMAT){
+      if(COMMAND::EXPORT_MEM_INTERNAL_FORMAT == pRequest->command ){
         builder->header("Content-Type", "application/zip");
+      } else if(COMMAND::EXPORT_MEM_TMX == pRequest->command){
+        builder->header("Content-Type", "application/xml");
       } else {
         builder->header("Content-Type", "application/json");
       }

@@ -380,7 +380,12 @@ USHORT EQFMemExportEnd ( PPROCESSCOMMAREA pCommArea,
     if(pExportIDA->invalidXmlSegments){
       T5LOG(T5ERROR) << pExportIDA->invalidXmlSegments <<" segments was not exported because of invalid xml";
     }
-    EXTMEMEXPORTEND(pExportIDA->lExternalExportHandle );
+   
+    {//EXTMEMEXPORTEND;
+      pExportIDA->lExternalExportHandle->WriteEnd();
+     
+      delete pExportIDA->lExternalExportHandle ;
+    }
 
     if ( pExportIDA->pstMemInfo ) UtlAlloc( (PVOID *)&pExportIDA->pstMemInfo, 0L, 0L, NOMSG );
     if ( pExportIDA->pstSegment ) UtlAlloc( (PVOID *)&pExportIDA->pstSegment, 0L, 0L, NOMSG );
@@ -709,9 +714,20 @@ USHORT  MemExportStart( PPROCESSCOMMAREA  pCommArea,
   //--- Get pointer to export IDA
   pExportIDA = (PMEM_EXPORT_IDA)pCommArea->pUserIDA;
 
-  // set first extract flag                                          
-  pExportIDA->fFirstExtract = TRUE;
+  if(pCommArea->numOfProposalsRequested){
+    pExportIDA->numOfRequestedSegmentsForExport = pCommArea->numOfProposalsRequested;
+  }
+  // set first extract flag        
+  if(pCommArea->startingRecordKey != 0 ){
+    //pExportIDA->pProposal->recordKey = pCommArea->startingRecordKey;
+    //pExportIDA->pProposal->targetKey = pCommArea->startingTargetKey;    
+    pExportIDA->pMem->ulNextKey = pCommArea->startingRecordKey;
+    pExportIDA->pMem->usNextTarget = pCommArea->startingTargetKey;
 
+    pExportIDA->fFirstExtract = FALSE;
+  }else{                                 
+    pExportIDA->fFirstExtract = TRUE;
+  }
   if ( (pExportIDA->usExpMode == MEM_FORMAT_TMX) || (pExportIDA->usExpMode == MEM_FORMAT_TMX_UTF8) ||
        (pExportIDA->usExpMode == MEM_FORMAT_TMX_NOCRLF) || (pExportIDA->usExpMode == MEM_FORMAT_TMX_UTF8_NOCRLF) )
   {
@@ -757,7 +773,12 @@ USHORT  MemExportStart( PPROCESSCOMMAREA  pCommArea,
       T5LOG( T5INFO) <<"MemExportStart::calling external function, mem name = " << pExportIDA->pstMemInfo->szName << "; source lang = "<< pExportIDA->pstMemInfo->szSourceLang<<
            "; markup = " << pExportIDA->pstMemInfo->szFormat;
 
-      usRc = EXTMEMEXPORTSTART(&(pExportIDA->lExternalExportHandle) , pExportIDA->ControlsIda.szPathContent, pExportIDA->pstMemInfo );
+      //usRc = EXTMEMEXPORTSTART( );
+      {
+        pExportIDA->lExternalExportHandle = new CTMXExportImport;
+        pExportIDA->lExternalExportHandle->m_xw.bufQueue = pCommArea->pBufQueue;
+        pExportIDA->lExternalExportHandle->WriteHeader( pExportIDA->ControlsIda.szPathContent, pExportIDA->pstMemInfo  ); 
+      }
     } /* endif */
    }
    else
@@ -861,7 +882,7 @@ USHORT MemExportProcess ( PMEM_EXPORT_IDA  pExportIDA ) // pointer to the export
 
    if ( (iTmRC == NO_ERROR) || iTmRC == EqfMemory::INFO_ENDREACHED )
    {
-     if ( iTmRC == EqfMemory::INFO_ENDREACHED )
+     if ( iTmRC == EqfMemory::INFO_ENDREACHED  )
      {
        //--- Stop Address has been reached before END_OF_TM
        pExportIDA->fEOF = TRUE;
@@ -911,7 +932,7 @@ USHORT MemExportProcess ( PMEM_EXPORT_IDA  pExportIDA ) // pointer to the export
          pExportIDA->pProposal->getTarget( pExportIDA->pstSegment->szTarget, sizeof(pExportIDA->pstSegment->szTarget) / sizeof(CHAR_W) );
          pExportIDA->pProposal->getContext( pExportIDA->pstSegment->szContext, sizeof(pExportIDA->pstSegment->szContext) / sizeof(CHAR_W) );
          pExportIDA->pProposal->getAddInfo( pExportIDA->pstSegment->szAddInfo, sizeof(pExportIDA->pstSegment->szAddInfo) / sizeof(CHAR_W) );
-         pExportIDA->pProposal->getInternalKey( pExportIDA->pstSegment->szInternalKey, sizeof(pExportIDA->pstSegment->szAddInfo) / sizeof(CHAR_W)); 
+         pExportIDA->pProposal->getInternalKey( pExportIDA->pstSegment->szInternalKey, sizeof(pExportIDA->pstSegment->szInternalKey) ); 
         
         auto ll = T5Logger::GetInstance()->suppressLogging(); 
         bool fValidXml =  IsValidXml( pExportIDA->pstSegment->szSource);
@@ -920,7 +941,15 @@ USHORT MemExportProcess ( PMEM_EXPORT_IDA  pExportIDA ) // pointer to the export
           fValidXml =  IsValidXml( pExportIDA->pstSegment->szTarget);        
           T5Logger::GetInstance()->desuppressLogging(ll);
           if(fValidXml){
-            usRc = EXTMEMEXPORTPROCESS( pExportIDA->lExternalExportHandle , pExportIDA->pstSegment );
+            usRc = pExportIDA->lExternalExportHandle->WriteSegment( pExportIDA->pstSegment );
+            if(!usRc){
+              pExportIDA->segmentsExported++;
+              if(pExportIDA->numOfRequestedSegmentsForExport > 0 &&
+                pExportIDA->segmentsExported >= pExportIDA->numOfRequestedSegmentsForExport){
+                pExportIDA->fEOF = TRUE;
+                LOG_AND_SET_RC(usRc, T5INFO, MEM_PROCESS_END);
+              }
+            }
           }else{
             T5LOG(T5ERROR) << "skipping tu with invalid target segment: "<< *pExportIDA->pProposal;
           } 
@@ -1622,61 +1651,17 @@ USHORT FCTDATA::MemFuncPrepExport
   // open the TM
   if ( fOK )
   {
-     int iRC = 0;
-     TMManager *pFactory = TMManager::GetInstance();
      pIDA->pMem = _mem.get();
      //_mem->FlushFilebuffers();
      if ( pIDA->pMem == NULL )
      {
        T5LOG(T5ERROR) <<"ERROR in MemFuncPrepExport::pIDA->pMem == NULL; memName = "<< pszMemName,
-       pFactory->showLastError( NULL, pszMemName, NULL, HWND_FUNCIF );
        fOK = FALSE;
      }
      
   } /* endif */
 
-  
   strcpy( pIDA->ControlsIda.szPathContent, pszOutFile );
-  
-  if(responseHandler){
-    pIDA->hFile = nullptr;
-  }
-  else{
-    // check if output file has been specified
-    if ( fOK )
-    {
-      if ( (pszOutFile == NULL) || (*pszOutFile == EOS))
-      {
-        T5LOG(T5ERROR) << "::ERROR in MemFuncPrepExport::ERROR_NO_EXPORT_NAME";
-        fOK = FALSE;
-      } /* endif */
-    } /* endif */
-
-    // check existence of output file
-    if ( fOK )
-    {
-      if ( ( UtlFileExist( pIDA->ControlsIda.szPathContent ) 
-          && !(lOptions & OVERWRITE_OPT) )
-        )
-      {
-        pszParm = pIDA->ControlsIda.szPathContent;
-        T5LOG(T5ERROR) << ";;ERROR in MemFuncPrepExport:: ERROR_FILE_EXISTS_ALREADY_BATCH, file exists, fName = " << pIDA->ControlsIda.szPathContent << "; pszParam = " << pszParm;
-        fOK = FALSE;
-      } /* endif */
-    } /* endif */
-
-    // open output file
-    if ( fOK )
-    {    
-      pIDA->hFile = FilesystemHelper::OpenFile(pIDA->ControlsIda.szPathContent, "w+", false);
-      if(pIDA->hFile){
-        T5LOG( T5DEBUG) << "MemFuncPrepExport:: opened output file, fName = " << pIDA->ControlsIda.szPathContent;
-      }else{
-        T5LOG(T5ERROR) << "Error in MemFuncPrepExport:: can't open output file, fName = ", pIDA->ControlsIda.szPathContent;
-        fOK = false;
-      }
-    } /* endif */
-  }
 
   // prepare memory Export
   if ( fOK )
@@ -1777,12 +1762,17 @@ USHORT FCTDATA::MemFuncExportProcess()
 {
   USHORT      usRC = NO_ERROR;         // function return code
   PPROCESSCOMMAREA pCommArea = (PPROCESSCOMMAREA)this->pvMemExportCommArea;  // ptr to commmunication area
-  pCommArea->responseHandler = responseHandler;
   PMEM_EXPORT_IDA  pIDA = (PMEM_EXPORT_IDA)pCommArea->pUserIDA;               // pointer to instance area
 
   switch ( pIDA->NextTask )
   {
     case MEM_START_EXPORT:
+      pCommArea->pBufQueue = &bufQueue;
+      pCommArea->startingRecordKey = recordKey;
+      pCommArea->startingTargetKey = targetKey;
+      pCommArea->numOfProposalsRequested = numOfProposalsRequested;
+      pCommArea->responseHandler = responseHandler;
+
       usRC = EQFMemExportStart( pCommArea, HWND_FUNCIF );
       if ( usRC != NO_ERROR )
       {
@@ -1818,6 +1808,8 @@ USHORT FCTDATA::MemFuncExportProcess()
       break;
   } /* endswitch */
   this->usExportProgress = pCommArea->usComplete;
+  //this->recordKey = pIDA->pMem->ulNextKey;
+  //this->targetKey = pIDA->pMem->usNextTarget;
   return( usRC );
 
 } /* end of function MemFuncExportProcess */

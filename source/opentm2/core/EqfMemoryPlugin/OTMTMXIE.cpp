@@ -708,54 +708,6 @@ USHORT  MEMINSERTSEGMENT
 BOOL MADGetNextAttr( HADDDATAKEY *ppKey, PSZ_W pszAttrNameBuffer, PSZ_W pszValueBuffer, int iBufSize  );
 
 
-
-
-//+----------------------------------------------------------------------------+
-//| Interface functions called by TranslationManager                           |
-//|                                                                            |
-//+----------------------------------------------------------------------------+
-USHORT EXTMEMEXPORTSTART
-( 
-  PLONG            plHandle,           // ptr to buffer receiving the handle for the external/import
-  PSZ              pszOutFile,         // fully qualified file name for the exported memory
-  PMEMEXPIMPINFO   pMemInfo            // pointer to structure containing general information for the exported memory
-)
-{
-  USHORT           usRC = 0;           // function return code
-  CTMXExportImport *pTMXExport = new CTMXExportImport;
-  pTMXExport->WriteHeader( pszOutFile, pMemInfo ); 
-  *plHandle = (LONG)pTMXExport;
-  return( usRC );
-} /* end of function EXTMEMEXPORTSTART */
-
-USHORT EXTMEMEXPORTPROCESS
-( 
-  LONG             lHandle,                 // export/import handle as set by ExtMemExportStart function
-  PMEMEXPIMPSEG    pSegment                 // pointer to structure containing the segment data
-)
-{
-  USHORT           usRC = 0;           // function return code
-  CTMXExportImport *pTMXExport = (CTMXExportImport *)lHandle;
-  pTMXExport->WriteSegment( pSegment ); 
-  return( usRC );
-} /* end of function EXTMEMEXPORTPROCESS */
-
-//
-// EXTMEMEXPORTEND
-//
-// This function is called once at the end of the memory export
-USHORT EXTMEMEXPORTEND
-( 
-  LONG             lHandle                  // export/import handle as set by ExtMemExportStart function
-)
-{
-  USHORT           usRC = 0;           // function return code
-  CTMXExportImport *pTMXExport = (CTMXExportImport *)lHandle;
-  pTMXExport->WriteEnd(); 
-  delete pTMXExport;
-  return( usRC );
-} /* end of function EXTMEMEXPORTEND */
-
 USHORT  EXTMEMIMPORTSTART
 ( 
   PLONG            plHandle,           // ptr to buffer receiving the handle for the external/import
