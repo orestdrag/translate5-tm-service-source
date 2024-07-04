@@ -640,7 +640,7 @@ USHORT MemFuncImportMem
 
   // when running in COMPLETE_IN_ONE_CALL_OPT mode we use our own data area to be independent of other API calls running in parallel
   FCTDATA PrivateData;
-  memset( &PrivateData, 0, sizeof( FCTDATA ) );
+  //memset( &PrivateData, 0, sizeof( FCTDATA ) );
   PrivateData.fComplete = TRUE;
   PrivateData.mem = mem;
   
