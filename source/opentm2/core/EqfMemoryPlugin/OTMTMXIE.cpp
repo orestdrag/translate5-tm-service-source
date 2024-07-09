@@ -138,10 +138,10 @@ XERCES_CPP_NAMESPACE_USE
 #define CONTEXT_PROP        "tmgr:context"
 #define CONTEXT_PROP_W      L"tmgr:context"
 
-#define SEGNUM_PROP_OLD      "tmgr-segNum"
-#define SEGNUM_PROP_W_OLD    L"tmgr-segNum"
-#define SEGNUM_PROP          "tmgr:segNum"
-#define SEGNUM_PROP_W        L"tmgr:segNum"
+#define SEGID_PROP_OLD      "tmgr-segId"
+#define SEGID_PROP_W_OLD    L"tmgr-segId"
+#define SEGID_PROP          "tmgr:segId"
+#define SEGID_PROP_W        L"tmgr:segId"
 
 #define NOTE_PROP_OLD      "tmgr-note"
 #define NOTE_PROP_W_OLD    L"tmgr-note"
@@ -911,7 +911,7 @@ USHORT CTMXExportImport::WriteSegment
 
   // add segment number as property
   m_xw.WriteStartElement( "prop" );
-  m_xw.WriteAttributeString( "type", SEGNUM_PROP );
+  m_xw.WriteAttributeString( "type", SEGID_PROP );
   m_xw.WriteInt( pSegment->lSegNum );
   m_xw.WriteEndElement(); // prop
 
@@ -1964,7 +1964,7 @@ void TMXParseHandler::startElement(const XMLCh* const name, AttributeList& attri
               {
                 CurElement.PropID = TMNOTESTYLE_PROP;
               } 
-              else if ( (strcasecmp( pszAttVal, SEGNUM_PROP ) == 0) || (strcasecmp( pszAttVal, SEGNUM_PROP_OLD ) == 0) )
+              else if ( (strcasecmp( pszAttVal, SEGID_PROP ) == 0) || (strcasecmp( pszAttVal, SEGID_PROP_OLD ) == 0) )
               {
                 CurElement.PropID = SEG_PROP;
               } 

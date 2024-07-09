@@ -1450,9 +1450,11 @@ USHORT /*APIENTRY*/ MEMINSERTSEGMENT
     pLIDA->pProposal->setTarget( pSegment->szTarget );
     pLIDA->pProposal->setTargetLanguage( pSegment->szTargetLang );
     pLIDA->pProposal->setAddInfo( pSegment->szAddInfo );
-    pLIDA->pProposal->setSegmentNum( pSegment->lSegNum );
+    pLIDA->pProposal->setSegmentId( pSegment->lSegNum );
 
     pLIDA->pProposal->pInputSentence = new TMX_SENTENCE(pSegment->szSource, pSegment->szTarget);
+
+    pLIDA->pProposal->setSegmentId(0);// set to 0 to generate new idd
 
     //pLIDA->ulActiveSegment++;
     // insert/replace segment in(to) memory

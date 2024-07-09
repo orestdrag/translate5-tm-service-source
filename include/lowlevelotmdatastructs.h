@@ -290,7 +290,7 @@ typedef struct _TMX_SIGN
   CHAR szName[_TMX_SIGN_SZ_NAME];
   CHAR szSourceLanguage[MAX_LANG_LENGTH];
   CHAR szDescription[MAX_MEM_DESCRIPTION];
-
+  ULONG segmentIndex = 0;//highest generated segment id, used for generating new id's
 } TMX_SIGN, * PTMX_SIGN;
 
 
@@ -1686,6 +1686,7 @@ typedef enum _PROCWINSTYLE
 #define BTREE_LOOKUPTABLE_CORRUPTED   BTREE_BASE+34  // lookup table is corrupted
 #define BTREE_LOOKUPTABLE_TOO_SMALL   BTREE_BASE+35  // lookup table is too small, file is too big
 #define BTREE_NOT_SUPPORTED           BTREE_BASE+36 //
+#define SEGMENT_ID_NOT_EQUAL          BTREE_BASE+81 // segment and requested id is not equal
 
 
 #define MAX_NUM_DICTS      1900        // max. number of dict concurrently open
@@ -2608,7 +2609,7 @@ typedef struct _MEMPROPOSAL
 	char szDocShortName[MEMPROPOSAL_MAXNAMELEN];
 
 	/*! \brief Segment number within the document from which the proposal comes from. */
-  long lSegmentNum;                  
+  long lSegmentId;                  
 
 	/*! \brief source language. */
 	char szSourceLanguage[MEMPROPOSAL_MAXNAMELEN];

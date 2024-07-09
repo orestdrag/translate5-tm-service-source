@@ -150,12 +150,12 @@ public:
   /* \brief get proposal segment number
    	\returns proposal segment number
    */
-  long getSegmentNum();
+  long getSegmentId();
   	
   /* \brief set the proposal segment number
-     \param lSegmentNum new segment number of proposal
+     \param lSegmentId new segment number of proposal
    */
-  void setSegmentNum( long lSegmentNum );
+  void setSegmentId( long lSegmentId );
   	
   /* \brief get proposal source language
      \param pszBuffer Pointer to buffer receiving the proposal source language
@@ -222,7 +222,7 @@ public:
   /* \brief set the proposal time stamp
      \param lTime new time stamp of proposal
    */
-  void setUpdateTime( long lSegmentNum );
+  void setUpdateTime( long lUpdateTime );
 
   /* \brief get proposal fuzziness
      \returns proposal fuzziness
@@ -392,7 +392,7 @@ public:
 	char szDocName[OTMPROPOSAL_MAXNAMELEN];
 
 	/*! \brief Segment number within the document from which the proposal comes from. */
-  long lSegmentNum;                  
+  long lSegmentId;                  
 
 	/*! \brief source language. */
   //std::string strSourceLanguage;

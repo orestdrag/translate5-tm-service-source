@@ -496,7 +496,7 @@ USHORT EqfMemory::FindTargetAndDelete(
                     {
                       if ( 
                            (pClb->usFileId == usId) &&
-                           (pClb->ulSegmId == TmDel.lSegmentNum) &&
+                           (pClb->ulSegmId == TmDel.lSegmentId) &&
                            (pClb->bTranslationFlag == (BYTE)ProposalTypeToFlag(TmDel.eType))
                            )
                       {
@@ -752,7 +752,9 @@ USHORT EqfMemory::FindTargetByKeyAndDelete(
             pTmExtOut->usTargetKey = TmDel.targetKey = usTarget;
             
             //if ( !pClb->bMultiple || (BOOL)TmDel.lTargetTime )
-            {
+            if(pTargetClb->ulSegmId != TmDel.lSegmentId){
+                return SEGMENT_ID_NOT_EQUAL;
+            } else {
               TMDelTargetClb( pTmRecord, pTMXTargetRecord, pTargetClb );
 
               //add updated tm record to database

@@ -649,7 +649,7 @@ int EqfMemory::ExtOutToOtmProposal
   Proposal.setAddInfo( pExtOut->szAddInfo );
   Proposal.setContext( pExtOut->szContext );
   Proposal.setDocName( pExtOut->szLongName );
-  Proposal.setSegmentNum( pExtOut->ulSourceSegmentId );
+  Proposal.setSegmentId( pExtOut->ulSourceSegmentId );
   Proposal.setType( FlagToProposalType( pExtOut->usTranslationFlag ) );
   Proposal.setUpdateTime( pExtOut->lTargetTime );
   Proposal.setContextRanking( 0 );
@@ -683,7 +683,7 @@ int EqfMemory::MatchToOtmProposal
   pProposal->setAddInfo( pMatch->szAddInfo );
   pProposal->setContext( pMatch->szContext );
   pProposal->setDocName( pMatch->szLongName );
-  pProposal->setSegmentNum( pMatch->ulSegmentId );
+  pProposal->setSegmentId( pMatch->ulSegmentId );
   pProposal->setType( FlagToProposalType( pMatch->usTranslationFlag ) );
   pProposal->setUpdateTime( pMatch->lTargetTime );
   pProposal->SetProposalKey( pMatch->ulKey, pMatch->usTargetNum );
@@ -761,7 +761,7 @@ int EqfMemory::OtmProposalToGetIn
   int threshold = TM_DEFAULT_THRESHOLD;
   //Properties::GetInstance()->get_value_or_default(KEY_TRIPLES_THRESHOLD, threshold, threshold);
   pGetIn->usMatchThreshold = threshold;
-  pGetIn->ulSegmentId = Proposal.getSegmentNum();
+  pGetIn->ulSegmentId = Proposal.getSegmentId();
   pGetIn->pvReplacementList = (PVOID)Proposal.getReplacementList();
   //pGetIn->fSourceLangIsPrefered = Proposal.isSourceLangIsPrefered();
   pGetIn->fSourceLangIsPrefered = LanguageFactory::getInstance()->isPreferedLang( (pGetIn->szSourceLanguage) );

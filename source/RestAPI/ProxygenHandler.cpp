@@ -95,7 +95,7 @@ void ProxygenHandler::onRequest(std::unique_ptr<HTTPMessage> req) noexcept {
  
   std::string requestAcceptHeader = headers.getSingleOrEmpty("Accept");
   pRequest->responseHandler = downstream_;   
-  
+
   if(pRequest->isStreamingRequest()){ 
   }else if(EXPORT_MEM_TMX == pRequest->command){
     if(requestAcceptHeader == "application/xml"){

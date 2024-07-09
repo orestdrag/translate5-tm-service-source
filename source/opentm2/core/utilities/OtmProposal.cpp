@@ -193,17 +193,17 @@ void OtmProposal::setDocName( char *pszBuffer )
 /* \brief get proposal segment number
   \returns proposal segment number
   */
-long OtmProposal::getSegmentNum()
+long OtmProposal::getSegmentId()
 {  
-  return( lSegmentNum );
+  return( lSegmentId );
 }
   	
 /* \brief set the proposal segment number
-    \param lSegmentNum new segment number of proposal
+    \param lSegmentId new segment number of proposal
   */
-void OtmProposal::setSegmentNum( long lSegmentNumIn )
+void OtmProposal::setSegmentId( long lSegmentIdIn )
 {  
-  lSegmentNum = lSegmentNumIn;
+  lSegmentId = lSegmentIdIn;
   fFilled = 1;
 }
 
@@ -489,7 +489,7 @@ std::ostream & operator<<( std::ostream & o, OtmProposal & proposal ){
   o <<ALIGN "internal key: \"" << buff << "\"\n";
   buff[0] = L'\0';
 
-  long segNum = proposal.getSegmentNum();
+  long segNum = proposal.getSegmentId();
   o <<ALIGN "segment num: \"" << segNum << "\"\n";
 
   long memoryIndex = proposal.getMemoryIndex();

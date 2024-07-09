@@ -1953,6 +1953,10 @@ int StatusMemRequestData::execute() {
                               + ":"+ std::to_string(mem->stTmSign.bMajorVersion) 
                               + ":" + std::to_string(mem->stTmSign.bMinorVersion);
     json_factory.addParmToJSON( outputMessage, "tmCreatedInT5M_version", creationT5MVersion.c_str() );
+    json_factory.addParmToJSON( outputMessage, "segmentIndex", std::to_string(mem->stTmSign.segmentIndex) );
+    json_factory.addParmToJSON( outputMessage, "sourceLang", mem->stTmSign.szSourceLanguage );
+    json_factory.addParmToJSON( outputMessage, "internalDescription", mem->stTmSign.szDescription );
+    //json_factory.addParmToJSON( outputMessage, "internalName", mem->stTmSign.szName );
     if ( ( (mem->eImportStatus == IMPORT_FAILED_STATUS) 
         || (mem->eImportStatus == REORGANIZE_FAILED_STATUS)) && ( !mem->strError.empty() ) )
     {
@@ -2037,8 +2041,8 @@ int addProposalToJSONString
     pJsonFactory->addParmToJSONW( strJSON, L"source", Data.szSource );
     pJsonFactory->addParmToJSONW( strJSON, L"target", Data.szTarget ); 
   } 
-  pJsonFactory->addParmToJSONW( strJSON, L"segmentNumber", Data.getSegmentNum() );
-  pJsonFactory->addParmToJSONW( strJSON, L"id", Data.szId);
+  pJsonFactory->addParmToJSONW( strJSON, L"segmentId", Data.getSegmentId() );
+  //pJsonFactory->addParmToJSONW( strJSON, L"id", Data.szId);
   pJsonFactory->addParmToJSONW( strJSON, L"documentName", Data.szDocName );
   pJsonFactory->addParmToJSONW( strJSON, L"sourceLang", Data.szSourceLanguage );
   pJsonFactory->addParmToJSONW( strJSON, L"targetLang", Data.szTargetLanguage );
@@ -2564,7 +2568,7 @@ int UpdateEntryRequestData::parseJSON(){
   { L"sourceLang",     JSONFactory::ASCII_STRING_PARM_TYPE, &( Data.szIsoSourceLang ), sizeof( Data.szIsoSourceLang ) },
   { L"targetLang",     JSONFactory::ASCII_STRING_PARM_TYPE, &( Data.szIsoTargetLang ), sizeof( Data.szIsoTargetLang ) },  
 
-  { L"segmentNumber",  JSONFactory::INT_PARM_TYPE,          &( Data.lSegmentNum ), 0 },
+  { L"segmentId",  JSONFactory::INT_PARM_TYPE,          &( Data.lSegmentId ), 0 },
   { L"documentName",   JSONFactory::ASCII_STRING_PARM_TYPE, &( Data.szDocName ), sizeof( Data.szDocName ) },
   { L"type",           JSONFactory::ASCII_STRING_PARM_TYPE, &( szType ), sizeof( szType ) },
   { L"author",         JSONFactory::ASCII_STRING_PARM_TYPE, &( Data.szTargetAuthor ), sizeof( Data.szTargetAuthor ) },
@@ -2735,7 +2739,7 @@ int DeleteEntryRequestData::parseJSON(){
   JSONFactory::JSONPARSECONTROL parseControl[] = { 
   { L"source",         JSONFactory::UTF16_STRING_PARM_TYPE, &( Data.szSource ), sizeof( Data.szSource ) / sizeof( Data.szSource[0] ) },
   { L"target",         JSONFactory::UTF16_STRING_PARM_TYPE, &( Data.szTarget ), sizeof( Data.szTarget ) / sizeof( Data.szTarget[0] ) },
-  { L"segmentNumber",  JSONFactory::INT_PARM_TYPE,          &( Data.lSegmentNum ), 0 },
+  { L"segmentId",  JSONFactory::INT_PARM_TYPE,          &( Data.lSegmentId ), 0 },
   { L"documentName",   JSONFactory::ASCII_STRING_PARM_TYPE, &( Data.szDocName ), sizeof( Data.szDocName ) },
   { L"sourceLang",     JSONFactory::ASCII_STRING_PARM_TYPE, &( Data.szIsoSourceLang ), sizeof( Data.szIsoSourceLang ) },
   { L"targetLang",     JSONFactory::ASCII_STRING_PARM_TYPE, &( Data.szIsoTargetLang ), sizeof( Data.szIsoTargetLang ) },
@@ -2764,11 +2768,11 @@ int DeleteEntryRequestData::parseJSON(){
 
 int DeleteEntryRequestData::checkData(){
   if(Data.recordKey || Data.targetKey){
-    if(Data.recordKey && Data.targetKey){
+    if(Data.recordKey && Data.targetKey && Data.lSegmentId){
       return 0;
     }else{
       return buildErrorReturn( ERROR_INPUT_PARMS_INVALID, 
-      "Error: to delete entry by key you should point both recordKey and targetKey", BAD_REQUEST);
+      "Error: to delete entry by key you should provide all three fields: recordKey, targetKey and segmentId", BAD_REQUEST);
     }
   }
   
@@ -2802,36 +2806,31 @@ int DeleteEntryRequestData::checkData(){
 
 int DeleteEntryRequestData::execute(){
   auto hSession = OtmMemoryServiceWorker::getInstance()->hSession;
-  // prepare the proposal data
-  if ( szDateTime[0] != 0 )
-  {
-    // use provided time stamp
-    convertUTCTimeToLong( szDateTime, &(Data.lTargetTime) );
-  }
-  else
-  {
-    // a lTime value of zero automatically sets the update time
-    // so refresh the time stamp (using OpenTM2 very special time logic...)
-    // and convert the time to a date time string
-    LONG            lTimeStamp;             // buffer for current time
-    time( (time_t*)&lTimeStamp );
-    lTimeStamp -= 10800L; // correction: - 3 hours (this is a tribute to the old OS/2 times)
-    convertTimeToUTC( lTimeStamp, szDateTime );
-  }
 
-  std::string errorStr;
-  //errorStr.reserve(1000);
-  // update the memory delete entry
-  
-  TMX_EXT_OUT_W TmPutOut;
-  //bool internalKey = false;
-  
+  std::string errorStr;  
+  TMX_EXT_OUT_W TmPutOut;  
   memset( &TmPutOut, 0, sizeof(TmPutOut) );
   
-  if(Data.recordKey && Data.targetKey){
+  if(Data.recordKey && Data.targetKey && Data.lSegmentId){
     //internalKey = true;
     _rc_ = mem->TmtXDelSegmByKey(Data, &TmPutOut);
   }else{
+    // prepare the proposal data
+    if ( szDateTime[0] != 0 )
+    {
+      // use provided time stamp
+      convertUTCTimeToLong( szDateTime, &(Data.lTargetTime) );
+    }
+    else
+    {
+      // a lTime value of zero automatically sets the update time
+      // so refresh the time stamp (using OpenTM2 very special time logic...)
+      // and convert the time to a date time string
+      LONG            lTimeStamp;             // buffer for current time
+      time( (time_t*)&lTimeStamp );
+      lTimeStamp -= 10800L; // correction: - 3 hours (this is a tribute to the old OS/2 times)
+      convertTimeToUTC( lTimeStamp, szDateTime );
+    }
     EqfGetOpenTM2Lang( hSession, Data.szIsoSourceLang, Data.szSourceLanguage );
     EqfGetOpenTM2Lang( hSession, Data.szIsoTargetLang, Data.szTargetLanguage );
     Data.eType = getMemProposalType( szType );
@@ -2844,7 +2843,9 @@ int DeleteEntryRequestData::execute(){
   if(_rc_ == 6020){
     //seg not found
     errorStr = "Segment not found";
-  }
+  }else if(_rc_ == SEGMENT_ID_NOT_EQUAL){
+    return buildErrorReturn( _rc_, "SEGMENT_ID_IS_NOT_EQUAL", 400);
+  } 
 
 
   std::wstring strOutputParmsW;
@@ -2894,7 +2895,7 @@ int FuzzySearchRequestData::parseJSON(){
   Data.clear();
   int loggingThreshold = -1;
   JSONFactory::JSONPARSECONTROL parseControl[] = { { L"source",         JSONFactory::UTF16_STRING_PARM_TYPE, &( Data.szSource ), sizeof( Data.szSource ) / sizeof( Data.szSource[0] ) },
-                                                   { L"segmentNumber",  JSONFactory::INT_PARM_TYPE,          &( Data.lSegmentNum ), 0 },
+                                                   { L"segmentId",  JSONFactory::INT_PARM_TYPE,          &( Data.lSegmentId ), 0 },
                                                    { L"documentName",   JSONFactory::ASCII_STRING_PARM_TYPE, &( Data.szDocName ), sizeof( Data.szDocName ) },
                                                    { L"sourceLang",     JSONFactory::ASCII_STRING_PARM_TYPE, &( Data.szIsoSourceLang ), sizeof( Data.szIsoSourceLang ) },
                                                    { L"targetLang",     JSONFactory::ASCII_STRING_PARM_TYPE, &( Data.szIsoTargetLang ), sizeof( Data.szIsoTargetLang ) },

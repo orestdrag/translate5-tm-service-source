@@ -918,7 +918,7 @@ USHORT MemExportProcess ( PMEM_EXPORT_IDA  pExportIDA ) // pointer to the export
          if ( pExportIDA->pProposal->getType() == OtmProposal::eptMachine ) pExportIDA->pstSegment->usTranslationFlag = 1;
          if ( pExportIDA->pProposal->getType() == OtmProposal::eptGlobalMemory ) pExportIDA->pstSegment->usTranslationFlag = 2;
 
-         pExportIDA->pstSegment->lSegNum = pExportIDA->pProposal->getSegmentNum();
+         pExportIDA->pstSegment->lSegNum = pExportIDA->pProposal->getSegmentId();
          pExportIDA->pstSegment->lTime = pExportIDA->pProposal->getUpdateTime();
          //pExportIDA->pMem->getSourceLanguage( pExportIDA->pstSegment->szSourceLang, sizeof(pExportIDA->pstSegment->szSourceLang) );
          pExportIDA->pProposal->getOriginalSourceLanguage( pExportIDA->pstSegment->szSourceLang, sizeof(pExportIDA->pstSegment->szSourceLang) );
@@ -1242,7 +1242,7 @@ USHORT MemExportWriteFile ( PMEM_EXPORT_IDA  pExportIDA ) // pointer to the
              //| +---------------------------------------- seg id
              //+------------------------------------------ <Control>
               MEM_CONTROL_BEGIN_TAG,
-              pExportIDA->pProposal->getSegmentNum(),
+              pExportIDA->pProposal->getSegmentId(),
               X15_STR,
               chMTFlag,
               X15_STR,

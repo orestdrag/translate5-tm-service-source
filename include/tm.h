@@ -4433,13 +4433,6 @@ std::vector<EqfMemory *> *pHandleToMemoryList;
   \param pOtmProposal pointer to OtmProposal object
   \returns 0 in any case
 */
-void copyOtmProposalToMemProposal( OtmProposal *pOtmProposal, PMEMPROPOSAL pProposal  );
-
-/*! \brief copy the data of a MEMPROPOSAL structure to a OtmProposal object
-  \param pMemProposal pointer to MEMPROPOSAL structure 
-  \param pOtmProposal pointer to OtmProposal object
-  \returns 0 in any case
-*/
 void copyMemProposalToOtmProposal( PMEMPROPOSAL pProposal, OtmProposal *pOtmProposal );
 
 ////OTMFUNC region

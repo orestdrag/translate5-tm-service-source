@@ -197,6 +197,15 @@ USHORT EqfMemory::TmtXReplace
   szString[0] = 0;
   BOOL        fLocked = FALSE;         // TM-database-has-been-locked flag
   BOOL         fUpdateOfIndexFailed = FALSE; // TRUE = update of index failed
+  if(TmProposal.lSegmentId > 0)
+  {
+    if(TmProposal.lSegmentId >= stTmSign.segmentIndex - 1){
+      stTmSign.segmentIndex = TmProposal.lSegmentId;
+    }
+    //keep id that was send
+  }else{ // generate new id
+    TmProposal.setSegmentId( ++stTmSign.segmentIndex);
+  }
 
   if ( !usRc )
   {
@@ -275,6 +284,8 @@ USHORT EqfMemory::TmtXReplace
     pTmPutOut->ulTmKey = TmProposal.recordKey = ulNewKey;
     pTmPutOut->usTargetKey = TmProposal.targetKey;
     RewriteCompactTable();
+    
+    usRc = TmBtree.QDAMDictUpdSignLocal(&stTmSign);
   }
 
   // unlock TM database if database has been locked
@@ -1231,7 +1242,7 @@ USHORT EqfMemory::FillClb
       UtlTime( &(pTargetClb->lTime) );
     } /* endif */
     pTargetClb->usFileId = usFile;
-    pTargetClb->ulSegmId = TmProposal.getSegmentNum();
+    pTargetClb->ulSegmId = TmProposal.getSegmentId();
     pTargetClb->usAuthorId = usAuthor;
     pTargetClb->usAddDataLen = 0;
     if ( TmProposal.szContext[0] ) 
@@ -2129,7 +2140,7 @@ USHORT EqfMemory::ComparePutData
                 {
                   targetKey++;
                   if ( (//
-                        (pClb->ulSegmId == TmProposal.lSegmentNum) &&
+                        (pClb->ulSegmId == TmProposal.lSegmentId) &&
                         (pClb->usFileId == usPutFile)
                         ) ||
                         pClb->bMultiple )
@@ -2145,7 +2156,7 @@ USHORT EqfMemory::ComparePutData
                     {
                       pClb->bMultiple = FALSE;
                       pClb->lTime     = TmProposal.lTargetTime;
-                      pClb->ulSegmId  = TmProposal.getSegmentNum();
+                      pClb->ulSegmId  = TmProposal.getSegmentId();
                       pClb->usFileId  = usPutFile;
                       pClb->bTranslationFlag       = ProposalTypeToFlag(TmProposal.eType);
                       pClb->usAuthorId = usAuthorId;
@@ -2240,7 +2251,7 @@ USHORT EqfMemory::ComparePutData
                     {
                       UtlTime( &(pClb->lTime) );
                     } /* endif */
-                    pClb->ulSegmId   = TmProposal.getSegmentNum();
+                    pClb->ulSegmId   = TmProposal.getSegmentId();
                     pClb->usFileId   = usPutFile;
                     pClb->bTranslationFlag = ProposalTypeToFlag(TmProposal.eType);
                     pClb->usAuthorId = usAuthorId;
@@ -3217,7 +3228,7 @@ USHORT TMLoopAndDelTargetClb
 		{
       *pTargetKey++;
 			if ( (pClb->usLangId == usPutLang) &&
-			     (pClb->ulSegmId == TmProposal.lSegmentNum) &&
+			     (pClb->ulSegmId == TmProposal.lSegmentId) &&
 			     (pClb->usFileId == usPutFile) && !pClb->bMultiple )
 			{  	// remove target CLB and target record (if only 1 CLB)
 				// as the segment is putted with a new value
