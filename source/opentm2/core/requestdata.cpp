@@ -334,6 +334,10 @@ int RequestData::requestTM(){
       mem->FlushFilebuffers();
     }
   }  
+  
+  if(false == fValid){
+    return buildErrorReturn(404, "Memory not found", 404);
+  }
 
   return fValid == 0;
 }
@@ -358,8 +362,9 @@ bool RequestData::isReadOnlyRequest(){
       || command == COMMAND::CONCORDANCE
       || command == COMMAND::EXPORT_MEM_TMX
       || command == COMMAND::EXPORT_MEM_INTERNAL_FORMAT
-      || command == EXPORT_MEM_TMX_STREAM
-      || command == EXPORT_MEM_INTERNAL_FORMAT_STREAM
+      || command == COMMAND::EXPORT_MEM_TMX_STREAM
+      || command == COMMAND::EXPORT_MEM_INTERNAL_FORMAT_STREAM
+      || command == COMMAND::GET_ENTRY
      ;
 }
 
@@ -2239,6 +2244,11 @@ int ResourceInfoRequestData::execute(){
       AddRequestDataToJson(ssOutput, "UpdateEntry", sumTime, requestCount);
       ssOutput <<",";
 
+      requestCount = pStats->getEntryRequestCount();
+      sumTime = pStats->getEntrySumTime();
+      AddRequestDataToJson(ssOutput, "GetEntry", sumTime, requestCount);
+      ssOutput <<",";
+
       requestCount = pStats->getDeleteEntryRequestCount();
       sumTime = pStats->getDeleteEntrySumTime();
       AddRequestDataToJson(ssOutput, "DeleteEntry", sumTime, requestCount);
@@ -2722,6 +2732,72 @@ int UpdateEntryRequestData::execute(){
 
 
 
+int GetEntryRequestData::parseJSON(){
+  if ( strMemName.empty() )
+  {
+    return buildErrorReturn( _rc_, "Missing name of memory", BAD_REQUEST);
+  } /* endif */
+    // parse input parameters
+  std::wstring strInputParmsW = EncodingHelper::convertToWChar( strBody.c_str() );
+  // parse input parameters
+  Data.clear();
+
+  auto loggingThreshold = -1;
+       
+  JSONFactory::JSONPARSECONTROL parseControl[] = { 
+  { L"loggingThreshold",JSONFactory::INT_PARM_TYPE        , &(loggingThreshold), 0},
+  { L"recordKey",      JSONFactory::INT_PARM_TYPE         , &(recordKey), 0 },
+  { L"targetKey",      JSONFactory::INT_PARM_TYPE         , &(targetKey), 0 },
+  { L"",               JSONFactory::ASCII_STRING_PARM_TYPE, NULL, 0 } };
+
+  _rc_ = json_factory.parseJSON( strInputParmsW, parseControl );  
+ 
+  if(loggingThreshold >=0) T5Logger::GetInstance()->SetLogLevel(loggingThreshold);  
+
+  if ( _rc_ )
+  {
+    return buildErrorReturn( _rc_, "Error during parsing json: Parsing of input parameters failed", BAD_REQUEST );
+  } /* endif */
+  return( _rc_ );
+}
+
+int GetEntryRequestData::checkData()
+{
+  if( 0 == recordKey){
+    return buildErrorReturn( ERROR_INPUT_PARMS_INVALID, 
+    "Error: Missing recordKey. Both recordKey and targetKey should be provided", BAD_REQUEST);
+  }
+  if( 0 == targetKey ){
+    return buildErrorReturn( ERROR_INPUT_PARMS_INVALID, 
+    "Error: Missing targetKey. Both recordKey and targetKey should be provided", BAD_REQUEST);
+  }
+  return 0;
+}
+
+
+int GetEntryRequestData::execute()
+{
+  if(nullptr == mem){
+    return buildErrorReturn( ERROR_INPUT_PARMS_INVALID, 
+    "Error: memptr is null", 500);
+  } 
+  _rc_ = mem->getProposal(recordKey, targetKey, Data);
+
+  if(Data.targetKey != targetKey || Data.recordKey != recordKey){
+    std::string errMsg = "Requested entry not found! Next internalKey after requested is : " + std::to_string(Data.recordKey);
+    errMsg += ";" + std::to_string(Data.targetKey);
+    return buildErrorReturn(939, errMsg.c_str(), 400);
+  }
+  // return the entry data
+  std::wstring outputMessageW;
+  
+  if( 0 == _rc_) {
+    addProposalToJSONString(outputMessageW, Data);
+  }
+  //json_factory.terminateJSONW( outputMessageW );
+  outputMessage = EncodingHelper::convertToUTF8(outputMessageW.c_str());
+  return 0;
+}
 
 
 int DeleteEntryRequestData::parseJSON(){

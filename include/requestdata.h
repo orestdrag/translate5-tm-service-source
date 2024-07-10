@@ -417,6 +417,21 @@ protected:
     int execute  () override ;
 };
 
+class GetEntryRequestData: public RequestData{
+public:
+    GetEntryRequestData(const std::string& json, const std::string& memName): RequestData(GET_ENTRY, json, memName) {};
+    GetEntryRequestData(): RequestData(GET_ENTRY){}
+
+protected:
+    OtmProposal Data;
+    ulong recordKey = 0, targetKey = 0;
+
+    int parseJSON() override ;
+    int checkData() override ;
+    int execute  () override ;
+
+};
+
 class DeleteEntriesReorganizeRequestData: public RequestData{
     private:
 

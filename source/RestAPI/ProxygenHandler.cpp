@@ -48,6 +48,7 @@ constexpr  std::initializer_list<std::pair<const COMMAND, const char*>> CommandT
         { FUZZY, "FUZZY" },
         { CONCORDANCE, "CONCORDANCE" },
         { DELETE_ENTRY, "DELETE_ENTRY" },
+        { GET_ENTRY, "GET_ENTRY" },
         { DELETE_ENTRIES_REORGANIZE, "DELETE_ENTRIES_REORGANIZE" },
         { UPDATE_ENTRY, "UPDATE_ENTRY" },
         { TAGREPLACEMENTTEST, "TAGREPLACEMENTTEST" } ,

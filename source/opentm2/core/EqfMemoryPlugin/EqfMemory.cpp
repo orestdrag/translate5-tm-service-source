@@ -417,6 +417,48 @@ int EqfMemory::setSequentialAccessKey
 }
 
 
+/*! \brief Get the the proposal having the supplied key (InternalKey from the OtmProposal)
+    \param pszKey internal key of the proposal
+    \param Proposal buffer for the returned proposal data
+  	\returns 0 or error code in case of errors
+*/
+int EqfMemory::getProposal
+(
+  ulong recordKey,
+  ushort targetKey,
+  OtmProposal &Proposal
+)
+{
+  int iRC = 0;
+  TMX_EXT_IN_W TmExtIn;
+  TMX_EXT_OUT_W TmExtOut;
+  memset( &TmExtIn, 0, sizeof(TMX_EXT_IN_W) );
+  memset( &TmExtOut, 0, sizeof(TMX_EXT_OUT_W) );
+  Proposal.clear();
+
+  TmExtIn.ulTmKey = recordKey;
+  TmExtIn.usNextTarget = targetKey;
+  TmExtIn.usConvert    = MEM_OUTPUT_ASIS;
+
+  if ( iRC == 0 )
+  {
+    iRC = (int)TmtXExtract(  &TmExtIn,  &TmExtOut);
+  } /* endif */     
+
+  if ( iRC == 0 )
+  {
+    ExtOutToOtmProposal( &TmExtOut, Proposal );
+    // set current proposal internal key ,which is used in updateProposal
+    Proposal.SetProposalKey(  TmExtIn.ulTmKey, TmExtIn.usNextTarget );
+    this->ulNextKey = TmExtOut.ulTmKey;
+    this->usNextTarget = TmExtOut.usNextTarget;
+  } /* endif */      
+
+  if ( iRC != 0 ) handleError( iRC, this->szName );
+
+  return( iRC );
+}
+
 
 /*! \brief Get the the proposal having the supplied key (InternalKey from the OtmProposal)
     \param pszKey internal key of the proposal

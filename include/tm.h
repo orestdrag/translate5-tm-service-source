@@ -2064,6 +2064,12 @@ USHORT AddTmTarget(
     OtmProposal &Proposal
   ); 
 
+  int getProposal
+  (
+    ulong recordKey,
+    ushort targetKey,
+    OtmProposal &Proposal
+  );
 
   USHORT TmtXReplace
   (

@@ -256,6 +256,8 @@ class ProxygenHandlerFactory : public RequestHandlerFactory {
             requestHandler->pRequest = new DeleteEntryRequestData();
           }else if(urlCommand == "entriesdelete"){
             requestHandler->pRequest = new DeleteEntriesReorganizeRequestData();
+          }else if(urlCommand == "getentry"){
+            requestHandler->pRequest = new GetEntryRequestData();
           }else if(urlCommand ==  "import"){ // update 
             requestHandler->pRequest = new ImportRequestData();
           }else if(urlCommand == "importtmx"){

@@ -66,6 +66,11 @@ int ProxygenStats::recordRequest(int command) {
       deleteEntryReorganizeReqCount_ ++;
       break;
     }
+    case COMMAND::GET_ENTRY:
+    {
+      getEntryReqCount_++;
+      break;
+    }
     case COMMAND::SAVE_ALL_TM_ON_DISK: 
     {        
       saveAllTmsReqCount_++;
@@ -149,6 +154,11 @@ int ProxygenStats::addRequestTime(int command,milliseconds time) {
     case COMMAND::UPDATE_ENTRY: 
     {        
       updateEntrySumTime_ += time;
+      break;
+    }
+    case COMMAND::GET_ENTRY:
+    {
+      getEntrySumTime_ += time;
       break;
     }
     case COMMAND::DELETE_ENTRY: 

@@ -142,6 +142,13 @@ class ProxygenStats {
     return unrecognizedRequestCount_;
   }
 
+  virtual milliseconds getEntrySumTime(){
+    return getEntrySumTime_;
+  }
+  virtual uint64_t getEntryRequestCount(){
+    return getEntryReqCount_;
+  }
+
   virtual uint64_t getOtherRequestCount(){
     return otherRequestCount_;
   }
@@ -179,6 +186,7 @@ class ProxygenStats {
   atomic_uint64_t concordanceReqCount_{0};
   atomic_uint64_t updateEntryReqCount_{0};
   atomic_uint64_t deleteEntryReqCount_{0};
+  atomic_uint64_t getEntryReqCount_{0};
 
   atomic_uint64_t saveAllTmsReqCount_{0};
   atomic_uint64_t getListOfMemoriesReqCount_{0};
@@ -198,6 +206,7 @@ class ProxygenStats {
   
   milliseconds fuzzyReqSumTime_{0};
   milliseconds concordanceSumTime_{0};
+  milliseconds getEntrySumTime_{0};
   milliseconds updateEntrySumTime_{0};
   milliseconds deleteEntrySumTime_{0};
   milliseconds deleteEntryReorganizeSumTime_{0};
