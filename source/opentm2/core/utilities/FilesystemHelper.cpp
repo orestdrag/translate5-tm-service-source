@@ -510,7 +510,7 @@ int FileBuffer::SetOffset(size_t newOffset, int fileAnchor){
     return 0;
 }
 
-int FileBuffer::Flush(){
+int FileBuffer::Flush(bool forced){
     #ifdef  LOG_FILE_WRITE
      T5LOG(T5TRANSACTION) <<"called flush  filebuffer " << fileName <<" to disk;";// << " , stacktrace:" << GET_STACKTRACE_EXPL;
     #endif
@@ -518,9 +518,9 @@ int FileBuffer::Flush(){
     bool fileWasOpened = file != nullptr;
 
     size_t writenBytes = 0;
-    if(!FilesystemHelper::FileExists(fileName)){
+    if(!FilesystemHelper::FileExists(fileName) && !forced){
         T5LOG(T5WARNING) << "File is not exists on disk so flushing would be skipped, fName = " << fileName;
-    }else if(status & FileBufferStatus::MODIFIED){
+    }else if(forced || (status & FileBufferStatus::MODIFIED)){
         if(VLOG_IS_ON(1)){
             T5LOG( T5INFO) << "Flush:: writing files from buffer";
         }

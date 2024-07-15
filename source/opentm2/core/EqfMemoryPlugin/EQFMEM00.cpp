@@ -322,19 +322,9 @@ VOID EQFMemOrganizeProcess
     if(use_count != 1){
       T5LOG(T5WARNING) << ":: use_count for temporary tm is not 1, but " << use_count;
     }
-    //pRIDA->pMemTemp->TmBtree.fb.Flush();
-    //pRIDA->pMemTemp->InBtree.fb.Flush();  
-    pRIDA->pMem->TmBtree.fb.data = std::move(pRIDA->pMemTemp->TmBtree.fb.data);
-    pRIDA->pMem->InBtree.fb.data = std::move(pRIDA->pMemTemp->InBtree.fb.data);
-
-    //pRIDA->pMemTemp = nullptr;
-    //TMManager::GetInstance()->closeMemory( pRIDA->pMemTemp.get() );
 
     if (usRc)
     {
-      //T5LOG(T5FATAL) <<"UNIMPLEMENTED FUNCTION";
-      //usDosRc = NTMCloseOrganize( pRIDA, FALSE );
-
       // set the progress indicator to 100 percent
       if ( !pRIDA->fBatch )
       {
@@ -415,23 +405,16 @@ VOID EQFMemOrganizeEnd
   PPROCESSCOMMAREA  pCommArea
 )
 {
-  PMEM_ORGANIZE_IDA pRIDA;          // Pointer to the data for the organize process
-  PSZ               pReplAddr[2];   // Arrey of pointers to replacement strings
+  PMEM_ORGANIZE_IDA pRIDA = (PMEM_ORGANIZE_IDA)pCommArea->pUserIDA;
 
-  // Get the address of the process IDA by means of the process handle
-  pRIDA = (PMEM_ORGANIZE_IDA)pCommArea->pUserIDA;
+  FilesystemHelper::DeleteFile(FilesystemHelper::GetTmdPath(pRIDA->pMem->szName));
+  pRIDA->pMem->TmBtree.fb.data = std::move(pRIDA->pMemTemp->TmBtree.fb.data);
+  pRIDA->pMem->TmBtree.fb.Flush(true);
 
-  // Check if the termination was due to a
-  // CLOSE message. Mp2 is in that case not zero.
   
-  // Refresh the memory database list box
-  sprintf( pCommArea->szBuffer, "%s:%s", pRIDA->szPluginName, pRIDA->szMemName );
-
-  if ( pRIDA->hwndErrMsg != HWND_FUNCIF )
-  {
-    EqfSend2Handler( MEMORYHANDLER, WM_EQFN_PROPERTIESCHANGED, MP1FROMSHORT( PROP_CLASS_MEMORY ), MP2FROMP( pCommArea->szBuffer ));
-    EqfRemoveObject( TWBFORCE, HWND_FUNCIF );
-  } /* endif */
+  FilesystemHelper::DeleteFile(FilesystemHelper::GetTmiPath(pRIDA->pMem->szName));
+  pRIDA->pMem->InBtree.fb.data = std::move(pRIDA->pMemTemp->InBtree.fb.data);
+  pRIDA->pMem->InBtree.fb.Flush(true);
 
   LONG lCurTime = 0;  
   time( &lCurTime );
@@ -446,7 +429,8 @@ VOID EQFMemOrganizeEnd
             
     pRIDA->pMem->importDetails->importTimestamp = buff;
   }
-  //pRIDA->pMem->importDetails->usProgress = 100;
+
+  pRIDA->pMem->importDetails->usProgress = 100;
 } /* end of function EQFMemOrganizeEnd */
 
 

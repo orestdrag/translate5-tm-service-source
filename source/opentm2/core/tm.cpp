@@ -162,8 +162,8 @@ void EqfMemory::reorganizeDone(int iRC, char *pszError )
   if ( iRC == 0 )
   {
     eImportStatus = AVAILABLE_STATUS;
-    TmBtree.fb.Flush();
-    InBtree.fb.Flush();
+    //TmBtree.fb.Flush(true);
+    //InBtree.fb.Flush(true);
     T5LOG( T5TRANSACTION) <<":: success, memName = " << szName;
   }
   else

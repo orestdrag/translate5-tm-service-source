@@ -452,6 +452,11 @@ SHORT BTREE::EQFNTMSign
 }
 
 
+ULONG BTREE::GetNumOfSavedRecords()const{
+  ULONG fileSize  = fb.data.size();
+  return fileSize/(ulong)BTREE_REC_SIZE_V3 ;
+}
+
 //+----------------------------------------------------------------------------+
 //|External function                                                           |
 //+----------------------------------------------------------------------------+
