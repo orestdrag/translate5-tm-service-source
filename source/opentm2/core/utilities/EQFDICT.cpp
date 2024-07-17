@@ -4503,7 +4503,7 @@ SHORT QDAMGetszData_V3
    ULONG        ulTerseLen = 0;                  // length of tersed string
    BOOL         fTerse = FALSE;                  // entry tersed??
    PUSHORT      pusOffset = NULL;                // pointer to offset
-   ULONG        ulFitLen;                        // free to be filled length
+   LONG         lFitLen;                         // free to be filled length
    USHORT       usNum;                           // record number
    ULONG        ulLZSSLen;
    PBTREE   pBT = pBTIda;
@@ -4590,28 +4590,28 @@ SHORT QDAMGetszData_V3
          }
          else if ( *pulDataLen >= ulLen )
          {
-            ulFitLen = BTREE_REC_SIZE_V3 - sizeof(BTREEHEADER) - *pusOffset;
-            ulFitLen = ulLen < (ulFitLen - usLenFieldSize) ?  ulLen : (ulFitLen - usLenFieldSize) ;
+            lFitLen = BTREE_REC_SIZE_V3 - sizeof(BTREEHEADER) - *pusOffset;
+            lFitLen = ulLen < (lFitLen - usLenFieldSize) ?  ulLen : (lFitLen - usLenFieldSize) ;
 
             if ( fTerse )
             {
-               memcpy(pData,pTempData+usLenFieldSize,ulFitLen-usLenFieldSize);
+               memcpy(pData,pTempData+usLenFieldSize,lFitLen-usLenFieldSize);
                ulTerseLen = LENGTHOFDATA(pBT,pTempData);
                /**********************************************************/
                /* adjust pointers                                        */
                /**********************************************************/
-               ulLen -= ulFitLen;
-               pData += (ulFitLen - usLenFieldSize);
+               ulLen -= lFitLen;
+               pData += (lFitLen - usLenFieldSize);
             }
             else
             {
-               memcpy( pData, pTempData, ulFitLen );
+               memcpy( pData, pTempData, lFitLen );
                *pulDataLen = ulLen;
                /**********************************************************/
                /* adjust pointers                                        */
                /**********************************************************/
-               ulLen -= ulFitLen;
-               pData += ulFitLen;
+               ulLen -= lFitLen;
+               pData += lFitLen;
             } /* endif */
 
 
@@ -4638,13 +4638,13 @@ SHORT QDAMGetszData_V3
                      pusOffset = (PUSHORT) pRecord->contents.uchData;
                      pTempData = (PCHAR)(pRecord->contents.uchData + *pusOffset);
 
-                     ulFitLen =  LENGTHOFDATA( pBT, pTempData );
-                     ulFitLen = ulLen < ulFitLen?  ulLen: ulFitLen ;
+                     lFitLen =  LENGTHOFDATA( pBT, pTempData );
+                     lFitLen = ulLen < lFitLen?  ulLen: lFitLen ;
                      pTempData += usLenFieldSize;      // get pointer to data
 
-                     memcpy( pData, pTempData, ulFitLen );
-                     ulLen -= ulFitLen;
-                     pData += ulFitLen;
+                     memcpy( pData, pTempData, lFitLen );
+                     ulLen -= lFitLen;
+                     pData += lFitLen;
                   } /* endif */
                }
                else

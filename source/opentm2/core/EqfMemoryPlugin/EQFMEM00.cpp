@@ -29,39 +29,6 @@
 BOOL EQFTMMaintain( PSZ );
 
 
-// ================ Close the Tm to be organized and close the temporary Tm ============
-USHORT CloseTmAndTempTm
-(
-  PMEM_ORGANIZE_IDA  pRIDA                  // Pointer to the organize instance area
-)
-// The function returns TRUE if everything OK else FALSE
-{
-  USHORT    usTmRc1 = FALSE;        // Tm return code
-  USHORT    usTmRc2 = FALSE;        // Tm return code
-  USHORT    usRc = TRUE;            // Function return code
-  TMManager *pFactory = TMManager::GetInstance();
-
-  if ( pRIDA->pMem != NULL )
-  {
-    // Close the translation memory to be organized
-    usTmRc1 = (USHORT)pFactory->closeMemory( pRIDA->pMem.get() );
-    pRIDA->pMem = NULL;
-  } /* endif */
-
-  if ( pRIDA->pMemTemp != NULL )
-  {
-    // Close the temporary translation memory
-    usTmRc2 = (USHORT)pFactory->closeMemory( pRIDA->pMemTemp.get() );
-    pRIDA->pMemTemp = NULL;
-  } /* endif */
-
-  if ( usTmRc1 || usTmRc2 )
-  {
-    usRc = FALSE;
-  } /* endif */
-
-  return usRc;
- } /* end of function CloseTmAndTempTm  */
 
 //#define EqfRemoveObject( flg, hwnd)  (BOOL)WinSendMsg( EqfQueryObjectManager(),\
 //                                                WM_EQF_REMOVEOBJECT,           \
@@ -225,7 +192,7 @@ VOID EQFMemOrganizeProcess
 
   int iProgress = 0;
   int iRC = 0;
-
+  try{
   if ( pRIDA->fFirstGet )
   {
     iRC = pRIDA->pMem->getFirstProposal( *(pRIDA->pProposal), &iProgress );
@@ -235,6 +202,12 @@ VOID EQFMemOrganizeProcess
   {
     iRC = pRIDA->pMem->getNextProposal( *(pRIDA->pProposal), &iProgress );
   } /* endif */         
+  }catch(...)
+  {
+    pRIDA->pMem->ulNextKey++;
+    pRIDA->pMem->usNextTarget = 1;
+    iRC = EqfMemory::ERROR_ENTRYISCORRUPTED;
+  }
 
   if ( iRC == NO_ERROR )
   {
@@ -307,7 +280,8 @@ VOID EQFMemOrganizeProcess
       }
     } /* endif */
   }
-  else if ( iRC == EqfMemory::ERROR_ENTRYISCORRUPTED )
+  else if ( iRC == EqfMemory::ERROR_ENTRYISCORRUPTED// || iRC == BTREE_BUFFER_SMALL 
+  )
   {
     pCommArea->usComplete = (USHORT)iProgress;
     pRIDA->pMem->importDetails->invalidSegments++;    
@@ -384,13 +358,14 @@ VOID EQFMemOrganizeProcess
     {
       pRIDA->usRC = UtlGetDDEErrorCode( pRIDA->hwndErrMsg );
     } /* endif */
+    pRIDA->pMemTemp.reset();
 
     // Close the input translation memory and temporary translation memory
-    CloseTmAndTempTm( pRIDA );
+    //CloseTmAndTempTm( pRIDA );
 
     // Delete the temporary translation memory    
-    std::string strMsg;
-    TMManager::GetInstance()->DeleteTM( pRIDA->szTempMemName, strMsg );
+    //std::string strMsg;
+    //TMManager::GetInstance()->DeleteTM( pRIDA->szTempMemName, strMsg );
 
     // Issue message WM_EQF_MEMORGANIZE_END
     pRIDA->NextTask = MEM_END_ORGANIZE;    
@@ -407,14 +382,16 @@ VOID EQFMemOrganizeEnd
 {
   PMEM_ORGANIZE_IDA pRIDA = (PMEM_ORGANIZE_IDA)pCommArea->pUserIDA;
 
-  FilesystemHelper::DeleteFile(FilesystemHelper::GetTmdPath(pRIDA->pMem->szName));
-  pRIDA->pMem->TmBtree.fb.data = std::move(pRIDA->pMemTemp->TmBtree.fb.data);
-  pRIDA->pMem->TmBtree.fb.Flush(true);
+  if(nullptr != pRIDA->pMemTemp){
+    FilesystemHelper::DeleteFile(FilesystemHelper::GetTmdPath(pRIDA->pMem->szName));
+    pRIDA->pMem->TmBtree.fb.data = std::move(pRIDA->pMemTemp->TmBtree.fb.data);
+    pRIDA->pMem->TmBtree.fb.Flush(true);
 
-  
-  FilesystemHelper::DeleteFile(FilesystemHelper::GetTmiPath(pRIDA->pMem->szName));
-  pRIDA->pMem->InBtree.fb.data = std::move(pRIDA->pMemTemp->InBtree.fb.data);
-  pRIDA->pMem->InBtree.fb.Flush(true);
+    
+    FilesystemHelper::DeleteFile(FilesystemHelper::GetTmiPath(pRIDA->pMem->szName));
+    pRIDA->pMem->InBtree.fb.data = std::move(pRIDA->pMemTemp->InBtree.fb.data);
+    pRIDA->pMem->InBtree.fb.Flush(true);
+  }
 
   LONG lCurTime = 0;  
   time( &lCurTime );

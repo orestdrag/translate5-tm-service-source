@@ -8,6 +8,7 @@
 #include "EQF.H"
 #include "FilesystemHelper.h"
 
+#include "EQFDASD.H"
 
 
 /*! \brief Checks if there is opened memory in import process
@@ -159,6 +160,10 @@ void EqfMemory::importDone(int iRC, char *pszError )
 void EqfMemory::reorganizeDone(int iRC, char *pszError )
 {
   eStatus = OPEN_STATUS;
+
+  unsigned int mask = ~ASD_ORGANIZE;
+  usAccessMode &= mask;
+  
   if ( iRC == 0 )
   {
     eImportStatus = AVAILABLE_STATUS;

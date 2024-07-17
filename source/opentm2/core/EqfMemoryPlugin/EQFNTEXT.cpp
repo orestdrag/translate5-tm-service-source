@@ -311,7 +311,7 @@ USHORT EqfMemory::TmtXExtract
           /****************************************************************/
           if ( usRc != NO_ERROR )
           {
-            if ( (usRc == BTREE_NOT_FOUND) || ( usRc == BTREE_CORRUPTED ) || ((usAccessMode & ASD_ORGANIZE) != 0) )
+            if ( (usRc == BTREE_NOT_FOUND) || ( usRc == BTREE_CORRUPTED ) || (usRc == BTREE_BUFFER_SMALL) || ((usAccessMode & ASD_ORGANIZE) != 0) )
             {
               pTmExtIn->ulTmKey ++;
               pTmExtIn->usNextTarget = 1;

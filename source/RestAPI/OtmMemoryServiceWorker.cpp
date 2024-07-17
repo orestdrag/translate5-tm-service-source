@@ -370,7 +370,7 @@ void importMemoryProcess( void* pvData )
 }
 
 
-
+#include "EQFDASD.H"
 
 void reorganizeMemoryProcess( void* pvData )
 {
@@ -384,6 +384,7 @@ void reorganizeMemoryProcess( void* pvData )
   pData->szError[0] = 0;
 
   int _rc_ = 0;
+  pRIDA->pMem->usAccessMode |= ASD_ORGANIZE;
   while((_rc_ == NO_ERROR || _rc_ == CONTINUE_RC) && !pData->fComplete  )
   {      
     // continue current organize process

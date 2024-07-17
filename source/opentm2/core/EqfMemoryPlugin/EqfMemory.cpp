@@ -353,7 +353,7 @@ int EqfMemory::getNextProposal
     Proposal.SetProposalKey(  TmExtIn.ulTmKey, TmExtIn.usNextTarget );
   } /* endif */       
 
-  if ( (iRC == 0) || (iRC == BTREE_CORRUPTED) )
+  if ( (iRC == 0) || (iRC == BTREE_CORRUPTED)  || iRC == BTREE_BUFFER_SMALL)
   {
     this->ulNextKey = TmExtOut.ulTmKey;
     this->usNextTarget = TmExtOut.usNextTarget;
