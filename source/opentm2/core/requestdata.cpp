@@ -1251,6 +1251,71 @@ int ProposalFilter::StrToFilterType(const char* str, FilterType &filterType, Fil
     return 0;
   }
 
+
+int SearchFilterFactory::parseJSONNameAndValueW(const std::wstring& w_name, const std::wstring& w_value){
+  std::string name = EncodingHelper::convertToUTF8(w_name);
+  std::string value = EncodingHelper::convertToUTF8(w_value);
+  return parseJSONNameAndValue(name, value);
+}
+
+int SearchFilterFactory::parseJSONNameAndValue(const std::string& name, const std::string& value){
+  int _rc_ = 0;
+  int loggingThreshold = -1;
+  if(strcasecmp(name.c_str(), "sourceSearchMode") == 0)
+  {
+    _rc_ = ProposalFilter::StrToFilterType(value.c_str(), sourceSearchMode, sourceSearchOptions);
+  }      
+  else if(strcasecmp(name.c_str(), "targetSearchMode") == 0)
+  {
+    _rc_ = ProposalFilter::StrToFilterType(value.c_str(), targetSearchMode, targetSearchOptions);
+  }
+  else if(strcasecmp(name.c_str(), "addInfoSearchMode") == 0)
+  {
+    _rc_ = ProposalFilter::StrToFilterType(value.c_str(), addInfoSearchMode, addInfoSearchOptions);
+  }
+  else if(strcasecmp(name.c_str(), "contextSearchMode") == 0)
+  {
+    _rc_ = ProposalFilter::StrToFilterType(value.c_str(), contextSearchMode, contextSearchOptions);
+  }
+  else if(strcasecmp(name.c_str(), "authorSearchMode") == 0)
+  {
+    _rc_ = ProposalFilter::StrToFilterType(value.c_str(), authorSearchMode, authorSearchOptions);
+  }
+  else if(strcasecmp(name.c_str(), "documentSearchMode") == 0)
+  {
+    _rc_ = ProposalFilter::StrToFilterType(value.c_str(), documentSearchMode, documentSearchOptions);
+  }
+  else if(strcasecmp(name.c_str(), "timestampSpanStart") == 0)
+  {
+    convertUTCTimeToLong((PSZ)value.c_str(), &timestampSpanStart);
+    
+    if(!timestampSpanStart){
+      T5LOG(T5ERROR) << "Can't parse start timestamp " << value;
+      _rc_ = 1001;
+    }
+  }
+  else if(strcasecmp(name.c_str(), "timestampSpanEnd") == 0)
+  {
+    convertUTCTimeToLong((PSZ)value.c_str(), &timestampSpanEnd);
+    if(!timestampSpanEnd){
+      T5LOG(T5ERROR) << "Can't parse end timestamp " << value;
+      _rc_ = 1002;
+    }
+  }
+  else      
+  if(strcasecmp(name.c_str(), "loggingThreshold") == 0){
+    loggingThreshold = std::stoi(value);
+    T5LOG( T5WARNING) <<"OtmMemoryServiceWorker::import::set new threshold for logging" << loggingThreshold;
+    T5Logger::GetInstance()->SetLogLevel(loggingThreshold);        
+  }else 
+  {
+    bool FLAGS_log_every_json_unexpected_name = false;
+    if(FLAGS_log_every_json_unexpected_name)
+      T5LOG( T5WARNING) << "JSON parsed unexpected name, " << name << "; \nvalue: " << value;
+  }
+  return _rc_;
+}
+
 int SearchFilterFactory::parseJSON(std::string& str){
   int _rc_ = 0;
   int loggingThreshold = -1; //0-develop(show all logs), 1-debug+, 2-info+, 3-warnings+, 4-errors+, 5-fatals only
@@ -1271,88 +1336,7 @@ int SearchFilterFactory::parseJSON(std::string& str){
     _rc_ = json_factory.parseJSONGetNext( parseHandle, name, value );
     if ( _rc_ == 0 )
     {
-      if ( strcasecmp( name.c_str(), "source" ) == 0 )
-      {
-        source = value;
-        if(sourceSearchMode == ProposalFilter::NONE) sourceSearchMode = ProposalFilter::UNKNOWN;
-      }
-      else if(strcasecmp(name.c_str(), "sourceSearchMode") == 0)
-      {
-        _rc_ = ProposalFilter::StrToFilterType(value.c_str(), sourceSearchMode, sourceSearchOptions);
-      }
-      else if ( strcasecmp( name.c_str(), "target" ) == 0 )
-      {
-        target = value;
-        if(targetSearchMode == ProposalFilter::NONE) targetSearchMode = ProposalFilter::UNKNOWN;
-      }
-      else if(strcasecmp(name.c_str(), "targetSearchMode") == 0)
-      {
-        _rc_ = ProposalFilter::StrToFilterType(value.c_str(), targetSearchMode, targetSearchOptions);
-      }
-      else if ( strcasecmp( name.c_str(), "addInfo" ) == 0 )
-      {
-        addInfo = value;
-        if(addInfoSearchMode == ProposalFilter::NONE) addInfoSearchMode = ProposalFilter::UNKNOWN;
-      }
-      else if(strcasecmp(name.c_str(), "addInfoSearchMode") == 0)
-      {
-        _rc_ = ProposalFilter::StrToFilterType(value.c_str(), addInfoSearchMode, addInfoSearchOptions);
-      }
-      else if ( strcasecmp( name.c_str(), "context" ) == 0 )
-      {
-        context = value;
-        if(contextSearchMode == ProposalFilter::NONE) contextSearchMode = ProposalFilter::UNKNOWN;
-      }
-      else if(strcasecmp(name.c_str(), "contextSearchMode") == 0)
-      {
-        _rc_ = ProposalFilter::StrToFilterType(value.c_str(), contextSearchMode, contextSearchOptions);
-      }
-      else if(strcasecmp(name.c_str(), "author") == 0)
-      {
-        author = value;
-        if(authorSearchMode == ProposalFilter::NONE) authorSearchMode = ProposalFilter::UNKNOWN;
-      }
-      else if(strcasecmp(name.c_str(), "authorSearchMode") == 0)
-      {
-        _rc_ = ProposalFilter::StrToFilterType(value.c_str(), authorSearchMode, authorSearchOptions);
-      }
-      else if(strcasecmp(name.c_str(), "document") == 0)
-      {
-        document = value;
-        if(documentSearchMode == ProposalFilter::NONE) documentSearchMode = ProposalFilter::UNKNOWN;
-      }
-      else if(strcasecmp(name.c_str(), "documentSearchMode") == 0)
-      {
-        _rc_ = ProposalFilter::StrToFilterType(value.c_str(), documentSearchMode, documentSearchOptions);
-      }
-      else if(strcasecmp(name.c_str(), "timestampSpanStart") == 0)
-      {
-        convertUTCTimeToLong((PSZ)value.c_str(), &timestampSpanStart);
-        
-        if(!timestampSpanStart){
-          T5LOG(T5ERROR) << "Can't parse start timestamp " << value;
-          _rc_ = 1001;
-        }
-      }
-      else if(strcasecmp(name.c_str(), "timestampSpanEnd") == 0)
-      {
-        convertUTCTimeToLong((PSZ)value.c_str(), &timestampSpanEnd);
-        if(!timestampSpanEnd){
-          T5LOG(T5ERROR) << "Can't parse end timestamp " << value;
-          _rc_ = 1002;
-        }
-      }
-      else      
-      if(strcasecmp(name.c_str(), "loggingThreshold") == 0){
-        loggingThreshold = std::stoi(value);
-        T5LOG( T5WARNING) <<"OtmMemoryServiceWorker::import::set new threshold for logging" << loggingThreshold;
-        T5Logger::GetInstance()->SetLogLevel(loggingThreshold);        
-      }else 
-      {
-        bool FLAGS_log_every_json_unexpected_name = false;
-        if(FLAGS_log_every_json_unexpected_name)
-          T5LOG( T5WARNING) << "JSON parsed unexpected name, " << name << "; \nvalue: " << value;
-      }
+      _rc_ = parseJSONNameAndValue(name, value);
     }else if(_rc_ != 2002){// _rc_ != INFO_ENDOFPARAMETERLISTREACHED
       std::string msg = "failed to parse JSON, _rc_ = " + std::to_string(_rc_);
       T5LOG(T5ERROR) << msg;
@@ -1365,6 +1349,14 @@ int SearchFilterFactory::parseJSON(std::string& str){
 }
 
 std::string SearchFilterFactory::checkParsedModes(){
+  if(!source.empty() && sourceSearchMode == ProposalFilter::NONE) sourceSearchMode = ProposalFilter::UNKNOWN;
+  if(!target.empty() && targetSearchMode == ProposalFilter::NONE) targetSearchMode = ProposalFilter::UNKNOWN;
+  if(!addInfo.empty() && addInfoSearchMode == ProposalFilter::NONE) addInfoSearchMode = ProposalFilter::UNKNOWN;
+  
+  if(!context.empty() && contextSearchMode == ProposalFilter::NONE) contextSearchMode = ProposalFilter::UNKNOWN;
+  if(!author.empty() && authorSearchMode == ProposalFilter::NONE) authorSearchMode = ProposalFilter::UNKNOWN;
+  if(!document.empty() && documentSearchMode == ProposalFilter::NONE) documentSearchMode = ProposalFilter::UNKNOWN;
+
   std::string msg;
   if(sourceSearchMode == ProposalFilter::UNKNOWN ){
     msg = "sourceSearchMode is unknown; Please provide valid data(EXACT|CONCORDANCE)";
@@ -1520,6 +1512,48 @@ int ReorganizeRequestData::execute(){
   return( _rc_ );
 }
 
+
+int DeleteEntriesReorganizeRequestData::parseJSON(){ 
+  _rc_ = OtmMemoryServiceWorker::getInstance()->verifyAPISession();
+  if ( _rc_ != 0 )
+  {
+    return buildErrorReturn( _rc_, "can't verifyAPISession", INTERNAL_SERVER_ERROR);
+  } /* endif */
+
+  if ( strMemName.empty() )
+  {
+    return buildErrorReturn( _rc_, "::Missing name of memory", BAD_REQUEST);
+  } /* endif */
+
+  // parse input parameters
+  std::wstring strInputParmsW = EncodingHelper::convertToWChar( strBody.c_str() );
+  
+  JSONFactory::JSONPARSECONTROL parseControl[] = { 
+    //searchFilterFactory
+    { L"source",     JSONFactory::UTF8_STRING_CLASS_PARM_TYPE, &(  searchFilterFactory.source ), 0 },
+    { L"target",     JSONFactory::UTF8_STRING_CLASS_PARM_TYPE, &(  searchFilterFactory.target ), 0 },
+    { L"addInfo",     JSONFactory::UTF8_STRING_CLASS_PARM_TYPE, &(  searchFilterFactory.addInfo ), 0 },
+    { L"context",     JSONFactory::UTF8_STRING_CLASS_PARM_TYPE, &(  searchFilterFactory.context ), 0 },
+    { L"author",     JSONFactory::UTF8_STRING_CLASS_PARM_TYPE, &(  searchFilterFactory.author ), 0 },
+    { L"document",     JSONFactory::UTF8_STRING_CLASS_PARM_TYPE, &(  searchFilterFactory.document ), 0 },
+
+    //{ L"timestampSpanStart",     JSONFactory::TIMESTAMP_PARM_TYPE, &(  searchFilterFactory.timestampSpanStart ), 0 },
+    //{ L"timestampSpanEnd",     JSONFactory::TIMESTAMP_PARM_TYPE, &(  searchFilterFactory.timestampSpanEnd ), 0 },
+
+    { L"",               JSONFactory::ASCII_STRING_PARM_TYPE, NULL, 0 } 
+  };
+
+  
+  JSONParseCallback callback = std::bind(&SearchFilterFactory::parseJSONNameAndValueW, &searchFilterFactory, std::placeholders::_1, std::placeholders::_2);
+
+  _rc_ = json_factory.parseJSON( strInputParmsW, parseControl, callback );
+    
+  if(_rc_ == 1001){buildErrorReturn(_rc_,"Can't parse start timestamp", BAD_REQUEST);}
+  else if(_rc_ == 1002){buildErrorReturn(_rc_,"Can't parse end timestamp", BAD_REQUEST);}
+    
+  return _rc_;
+    
+}
 
 int DeleteEntriesReorganizeRequestData::checkData(){
   if ( strMemName.empty() )
@@ -2523,35 +2557,15 @@ int ExportRequestData::ExportTmx(){
       _rc_ = fctdata.MemFuncExportProcess(  );
     }
   }
+
+  nextInternalKey = std::to_string(mem->ulNextKey) + ":" + std::to_string(mem->usNextTarget);
   
   if(_rc_){
     T5LOG(T5ERROR) <<  "end of function EqfExportMem with error code::  RC = " << _rc_;
     buildErrorReturn(_rc_, "Error happened during tmx  export", 500);
   }else{    
     T5LOG( T5DEBUG) << "end of function EqfExportMem::success ";
-     // Create response headers
-    if(COMMAND::EXPORT_MEM_TMX_STREAM == command){
-      proxygen::HTTPMessage response;
-      response.setHTTPVersion(1, 1);
-      response.setStatusCode(200);
-      response.setStatusMessage("OK");
-      //response.setIsChunked(true);
-      
-      // Add headers to the response
-      std::stringstream contDisposition;
-      //std::string nextInternalKey = std::to_string(fctdata.recordKey) + ":" + std::to_string(fctdata.targetKey);
-      std::string nextInternalKey = std::to_string(mem->ulNextKey) + ":" + std::to_string(mem->usNextTarget);
-      
-      contDisposition << "attachment; filename=\"" << mem->szName  << ".tmx\"";
-      response.getHeaders().add("Content-Type", "application/octet-stream");
-      response.getHeaders().add("Content-Disposition", contDisposition.str());
-      response.getHeaders().add("NextInternalKey", nextInternalKey);
-      // Send response headers
-      responseHandler->sendHeaders(response);
-      responseHandler->sendBody(fctdata.bufQueue.move());
-    }else {//non stream would be handled later;
-      this->outputMessage = convertIOBufQueueToString(fctdata.bufQueue);//fctdata.bufQueue.move();
-    }
+    this->outputMessage = convertIOBufQueueToString(fctdata.bufQueue);//fctdata.bufQueue.move();
   }
   return 0;
 }
@@ -3181,26 +3195,38 @@ int ConcordanceExtendedSearchRequestData::parseJSON(){
   
   int loggingThreshold = -1;
   JSONFactory::JSONPARSECONTROL parseControl[] = { 
-  { L"searchPosition", JSONFactory::ASCII_STRING_PARM_TYPE, &( Data.szSearchPos ), sizeof( Data.szSearchPos ) },
-  { L"sourceLang",     JSONFactory::ASCII_STRING_PARM_TYPE, &( Data.szIsoSourceLang ), sizeof( Data.szIsoSourceLang ) },
-  { L"targetLang",     JSONFactory::ASCII_STRING_PARM_TYPE, &( Data.szIsoTargetLang ), sizeof( Data.szIsoTargetLang ) },
-  { L"numResults",     JSONFactory::INT_PARM_TYPE,          &( Data.iNumOfProposals ), 0 },
-  { L"numOfProposals", JSONFactory::INT_PARM_TYPE,          &( Data.iNumOfProposals ), 0 },
-  { L"msSearchAfterNumResults", JSONFactory::INT_PARM_TYPE, &( Data.iSearchTime ), 0 },
-  { L"onlyCountSegments",       JSONFactory::INT_PARM_TYPE, &(fCountInsteadOfReturnSegments ), 0 },
-  { L"logicalOr",       JSONFactory::INT_PARM_TYPE, &(fCombineAsLogicalOr ), 0 },
-  { L"",               JSONFactory::ASCII_STRING_PARM_TYPE, NULL, 0 } };
+    { L"searchPosition", JSONFactory::ASCII_STRING_PARM_TYPE, &( Data.szSearchPos ), sizeof( Data.szSearchPos ) },
+    { L"sourceLang",     JSONFactory::ASCII_STRING_PARM_TYPE, &( Data.szIsoSourceLang ), sizeof( Data.szIsoSourceLang ) },
+    { L"targetLang",     JSONFactory::ASCII_STRING_PARM_TYPE, &( Data.szIsoTargetLang ), sizeof( Data.szIsoTargetLang ) },
+    { L"numResults",     JSONFactory::INT_PARM_TYPE,          &( Data.iNumOfProposals ), 0 },
+    { L"numOfProposals", JSONFactory::INT_PARM_TYPE,          &( Data.iNumOfProposals ), 0 },
+    { L"msSearchAfterNumResults", JSONFactory::INT_PARM_TYPE, &( Data.iSearchTime ), 0 },
+    { L"onlyCountSegments",       JSONFactory::INT_PARM_TYPE, &(fCountInsteadOfReturnSegments ), 0 },
+    { L"logicalOr",       JSONFactory::INT_PARM_TYPE, &(fCombineAsLogicalOr ), 0 },
+    //searchFilterFactory
+    { L"source",     JSONFactory::UTF8_STRING_CLASS_PARM_TYPE, &(  searchFilterFactory.source ), 0 },
+    { L"target",     JSONFactory::UTF8_STRING_CLASS_PARM_TYPE, &(  searchFilterFactory.target ), 0 },
+    { L"addInfo",     JSONFactory::UTF8_STRING_CLASS_PARM_TYPE, &(  searchFilterFactory.addInfo ), 0 },
+    { L"context",     JSONFactory::UTF8_STRING_CLASS_PARM_TYPE, &(  searchFilterFactory.context ), 0 },
+    { L"author",     JSONFactory::UTF8_STRING_CLASS_PARM_TYPE, &(  searchFilterFactory.author ), 0 },
+    { L"document",     JSONFactory::UTF8_STRING_CLASS_PARM_TYPE, &(  searchFilterFactory.document ), 0 },
 
-  if(loggingThreshold >=0) T5Logger::GetInstance()->SetLogLevel(loggingThreshold); 
+    //{ L"timestampSpanStart",     JSONFactory::TIMESTAMP_PARM_TYPE, &(  searchFilterFactory.timestampSpanStart ), 0 },
+    //{ L"timestampSpanEnd",     JSONFactory::TIMESTAMP_PARM_TYPE, &(  searchFilterFactory.timestampSpanEnd ), 0 },
 
-  _rc_ = json_factory.parseJSON( strInputParmsW, parseControl );
+    { L"",               JSONFactory::ASCII_STRING_PARM_TYPE, NULL, 0 } 
+  };
 
-  if(!_rc_){
-    _rc_ = searchFilterFactory.parseJSON(strBody); 
-    if(_rc_ == 1001){buildErrorReturn(_rc_,"Can't parse start timestamp", BAD_REQUEST);}
-    else if(_rc_ == 1002){buildErrorReturn(_rc_,"Can't parse end timestamp", BAD_REQUEST);}
-    //return _rc_;
-  }
+  if(loggingThreshold >=0) T5Logger::GetInstance()->SetLogLevel(loggingThreshold);
+
+  // Using std::bind to bind member function handleData of DataHandler to callback
+  JSONParseCallback callback = std::bind(&SearchFilterFactory::parseJSONNameAndValueW, &searchFilterFactory, std::placeholders::_1, std::placeholders::_2);
+ 
+
+  _rc_ = json_factory.parseJSON( strInputParmsW, parseControl, callback);
+
+  if(_rc_ == 1001){buildErrorReturn(_rc_,"Can't parse start timestamp", BAD_REQUEST);}
+  else if(_rc_ == 1002){buildErrorReturn(_rc_,"Can't parse end timestamp", BAD_REQUEST);}
 
   if(_rc_){
     return buildErrorReturn( _rc_, "::json parsing failed", BAD_REQUEST);

@@ -5,8 +5,17 @@
 
 #ifndef _OTMMSJSONFACTORY_H_
 #define _OTMMSJSONFACTORY_H_
-
+#include <functional>
 #include "string"
+
+
+// Define the callback function type
+//typedef int (*JSONParseCallback)(const std::wstring&, const std::wstring&);
+// Typedef for the callback function type
+typedef std::function<int(const std::wstring&, const std::wstring&)> JSONParseCallback;
+
+
+
 /*! \brief factory class for JSON related functions 
  
   This class is a singleton and provides functions for the processing
@@ -17,6 +26,30 @@ class JSONFactory
 {
 
 public:
+
+
+  /*! \brief Parameter types for the entries of a JSON parse control table
+*/
+  typedef enum 
+  {
+    ASCII_STRING_PARM_TYPE,
+    UTF8_STRING_PARM_TYPE,
+    UTF16_STRING_PARM_TYPE,
+    INT_PARM_TYPE, 
+
+    UTF8_STRING_CLASS_PARM_TYPE,
+    TIMESTAMP_PARM_TYPE,
+    SARCH_FILTER_PARM_TYPE
+  } PARMTYPE;
+
+typedef struct _JSONPARSECONTROL
+  {
+    wchar_t szName[40];      // name of the parameter
+    PARMTYPE type;           // type of the parameter
+    void *pvValue;           // pointer to a buffer receiving the value
+    int iBufferLen;          // size of the buffer in number of characters
+  } JSONPARSECONTROL, *PJSONPARSECONTROL;
+
 
 /*! \brief This static method returns a pointer to the JSON object.
 	The first call of the method creates the JSON instance.
@@ -155,25 +188,8 @@ public:
     int iValue
   ); 
 
-/*! \brief Parameter types for the entries of a JSON parse control table
-*/
-  typedef enum 
-  {
-    ASCII_STRING_PARM_TYPE,
-    UTF8_STRING_PARM_TYPE,
-    UTF16_STRING_PARM_TYPE,
-    INT_PARM_TYPE
-  } PARMTYPE;
 
-/*! \brief Entry of a JSON parse control table
-*/
-  typedef struct _JSONPARSECONTROL
-  {
-    wchar_t szName[40];      // name of the parameter
-    PARMTYPE type;           // type of the parameter
-    void *pvValue;           // pointer to a buffer receiving the value
-    int iBufferLen;          // size of the buffer in number of characters
-  } JSONPARSECONTROL, *PJSONPARSECONTROL;
+
 
 /*! \brief Parses a JSON string using the supplied control table
 
@@ -188,7 +204,7 @@ public:
   int parseJSON
   (
     std::wstring &JSONString,
-    PJSONPARSECONTROL paParserControl
+    PJSONPARSECONTROL paParserControl, JSONParseCallback callback = [](const std::wstring&, const std::wstring&) {return 0;}
   ); 
 
 

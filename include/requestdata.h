@@ -302,6 +302,8 @@ struct SearchFilterFactory{
   TIME_L timestampSpanEnd = 0;
 
   int parseJSON(std::string& w_str);
+  int parseJSONNameAndValueW(const std::wstring& w_name, const std::wstring& w_value);
+  int parseJSONNameAndValue(const std::string& name, const std::string& value);
   std::string checkParsedModes();
   std::vector<ProposalFilter> getListOfFilters();
 };
@@ -432,6 +434,7 @@ protected:
 
 };
 
+
 class DeleteEntriesReorganizeRequestData: public RequestData{
     private:
 
@@ -443,12 +446,7 @@ class DeleteEntriesReorganizeRequestData: public RequestData{
 protected:
     SearchFilterFactory searchFilterFactory;
 
-    int parseJSON() override { 
-        _rc_ = searchFilterFactory.parseJSON(strBody); 
-        if(_rc_ == 1001){buildErrorReturn(_rc_,"Can't parse start timestamp", BAD_REQUEST);}
-        else if(_rc_ == 1002){buildErrorReturn(_rc_,"Can't parse end timestamp", BAD_REQUEST);}
-        return _rc_;
-        };
+    int parseJSON() override ;
     int checkData() override ;
     int execute  () override ;
 };
@@ -473,7 +471,7 @@ protected:
   };
 
 class ExportRequestData: public RequestData{
-    private:
+private:
     int PrepareTMZip();
     int ExportZip();
     int ExportZipStream();
@@ -490,12 +488,15 @@ class ExportRequestData: public RequestData{
     USHORT PrepExport();
     USHORT ExportProc();
     std::string strTempFile;
-    public:
+public:
 
     //std::string requestFormat;//application/xml or application/binary
     ExportRequestData(const std::string& format, const std::string& memName): RequestData(EXPORT_MEM_TMX, "", memName){ requestAcceptHeader = format;};
     ExportRequestData(): RequestData(EXPORT_MEM_TMX){};
     ExportRequestData(COMMAND command): RequestData(command){};
+
+
+    std::string nextInternalKey;
 protected:
     int parseJSON() override ;
     int checkData() override ;

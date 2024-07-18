@@ -977,24 +977,6 @@ int JSONFactory::extractStringW
   return( 0 );
 }
 
-/*! \brief Parameter types for the entries of a JSON parse control table
-*/
-  typedef enum 
-  {
-    ASCII_STRING_PARM_TYPE,
-    UTF8_STRING_PARM_TYPE,
-    UTF16_STRING_PARM_TYPE,
-    INT_PARM_TYPE
-  } PARMTYPE;
-
-/*! \brief Entry of a JSON parse control table
-*/
-  typedef struct _JSONPARSECONTROL
-  {
-    wchar_t szName[40];      // name of the parameter
-    PARMTYPE type;           // type of the parameter
-    void *pvValue;           // pointer to a variable receiving the value
-  } JSONPARSECONTROL, *PJSONPARSECONTROL;
 
 /*! \brief Parses a JSON string using the supplied control table
 
@@ -1009,7 +991,7 @@ int JSONFactory::extractStringW
 int JSONFactory::parseJSON
 (
   std::wstring &JSONString,
-  PJSONPARSECONTROL pParserControl
+  PJSONPARSECONTROL pParserControl, JSONParseCallback callback 
 )
 {
   int iRC = 0;
@@ -1042,7 +1024,13 @@ int JSONFactory::parseJSON
         } /* endif */
       } /* endwhile */
 
-      if ( fFound )
+      if ( false == fFound )
+      {
+        if(callback){
+          iRC = callback( name, value);
+        }
+      }
+      else
       {
         switch ( pParm->type )
         {
@@ -1055,19 +1043,41 @@ int JSONFactory::parseJSON
             break;
           }
           case UTF8_STRING_PARM_TYPE:
+          {
             WideCharToMultiByte( CP_UTF8, 0, (LPWSTR)value.c_str(), -1, (char *)pParm->pvValue, pParm->iBufferLen - 1, NULL, NULL );
             *(((char *)pParm->pvValue) + (pParm->iBufferLen - 1)) = 0;
             break;
+          }
 
           case UTF16_STRING_PARM_TYPE:
+          {
             wcsncpy( (wchar_t *)pParm->pvValue, value.c_str(), pParm->iBufferLen - 1 );
             *(((wchar_t *)pParm->pvValue) + (pParm->iBufferLen - 1)) = 0;
             break;
+          }
 
           case INT_PARM_TYPE:
+          {
             wchar_t * pEnd;
             *((int *)pParm->pvValue) = wcstol( value.c_str(), &pEnd, 10 );
             break;
+          }
+
+          case UTF8_STRING_CLASS_PARM_TYPE:
+          {
+            std::string strVal = EncodingHelper::convertToUTF8(value);
+            *((std::string*)pParm->pvValue) = strVal; 
+            break;
+          }
+
+          case TIMESTAMP_PARM_TYPE:
+          {
+            break;
+          }
+          case SARCH_FILTER_PARM_TYPE:
+          {
+            break;
+          }
         } /* endswitch */
       } /* endif */
     } /* endif */       
@@ -1083,6 +1093,8 @@ int JSONFactory::parseJSON
 
   return( (iRC == INFO_ENDOFPARAMETERLISTREACHED) ? 0 : iRC );
 }
+
+
 
 /*! \brief Add a element name to a JSON string
   	\returns 0 or error code in case of errors

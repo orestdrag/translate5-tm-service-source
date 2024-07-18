@@ -326,10 +326,12 @@ void ProxygenHandler::sendResponse()noexcept{
       }
     }
     
+    
     //if(COMMAND::EXPORT_MEM_TMX_STREAM == pRequest->command){
       //do nothing
     //}else 
-    if(pRequest->isStreamingRequest()){
+    //if(pRequest->isStreamingRequest()){
+    if(COMMAND::EXPORT_MEM_INTERNAL_FORMAT_STREAM == pRequest->command){
       downstream_->sendEOM();
     }else{
       builder->status(pRequest->_rest_rc_, responseText);
@@ -353,7 +355,15 @@ void ProxygenHandler::sendResponse()noexcept{
         builder->header("Content-Type", "application/zip");
       } else if(COMMAND::EXPORT_MEM_TMX == pRequest->command){
         builder->header("Content-Type", "application/xml");
-      } else {
+      } if(COMMAND::EXPORT_MEM_TMX_STREAM == pRequest->command){
+        // Add headers to the response
+        std::stringstream contDisposition;
+        
+        builder->header("Content-Type", "application/octet-stream"); 
+        contDisposition << "attachment; filename=\"" << pRequest->strMemName  << ".tmx\"";
+        builder->header("Content-Disposition", contDisposition.str());
+        builder->header("NextInternalKey", ((ExportRequestData*) pRequest)->nextInternalKey);
+      }else {
         builder->header("Content-Type", "application/json");
       }
       
