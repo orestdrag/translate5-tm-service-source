@@ -64,6 +64,10 @@ public:
     }
     
     int run();
+
+    bool isSuccessful() const{
+        return _rest_rc_ == 200 || _rest_rc_ == 0;
+    }
 protected:
     virtual int parseJSON() = 0;
     virtual int checkData() = 0;
@@ -497,6 +501,8 @@ public:
 
 
     std::string nextInternalKey;
+
+    std::vector<unsigned char> vMemData;
 protected:
     int parseJSON() override ;
     int checkData() override ;

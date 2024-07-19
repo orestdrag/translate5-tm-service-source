@@ -159,6 +159,12 @@ std::string iobufToString(const std::unique_ptr<folly::IOBuf>& buf) {
   return data;
 }
 
+std::unique_ptr<folly::IOBuf> vectorToIobuf(const std::vector<unsigned char>& data) {
+    // Create an IOBuf with the data from the vector
+    auto buf = folly::IOBuf::copyBuffer(data.data(), data.size());
+    return buf;
+}
+
 void ProxygenHandler::onEOM() noexcept {  
   if(pRequest && pRequest->command >= COMMAND::START_COMMANDS_WITH_BODY)
   {
@@ -331,9 +337,10 @@ void ProxygenHandler::sendResponse()noexcept{
       //do nothing
     //}else 
     //if(pRequest->isStreamingRequest()){
-    if(COMMAND::EXPORT_MEM_INTERNAL_FORMAT_STREAM == pRequest->command){
-      downstream_->sendEOM();
-    }else{
+    //if(COMMAND::EXPORT_MEM_INTERNAL_FORMAT_STREAM == pRequest->command){
+    //   downstream_->sendEOM();
+    //}else
+    {
       builder->status(pRequest->_rest_rc_, responseText);
       if (FLAGS_request_number) {
         builder->header("Request-Number",
@@ -351,11 +358,11 @@ void ProxygenHandler::sendResponse()noexcept{
 
       std::string appVersion = std::to_string(T5GLOBVERSION) + ":" + std::to_string(T5MAJVERSION) + ":" + std::to_string(T5MINVERSION)  ;
       builder->header("t5memory-version", appVersion);  
-      if(COMMAND::EXPORT_MEM_INTERNAL_FORMAT == pRequest->command ){
+      if(COMMAND::EXPORT_MEM_INTERNAL_FORMAT == pRequest->command  && pRequest->isSuccessful()){
         builder->header("Content-Type", "application/zip");
-      } else if(COMMAND::EXPORT_MEM_TMX == pRequest->command){
+      } else if(COMMAND::EXPORT_MEM_TMX == pRequest->command  && pRequest->isSuccessful()){
         builder->header("Content-Type", "application/xml");
-      } if(COMMAND::EXPORT_MEM_TMX_STREAM == pRequest->command){
+      } if(COMMAND::EXPORT_MEM_TMX_STREAM == pRequest->command && pRequest->isSuccessful()){
         // Add headers to the response
         std::stringstream contDisposition;
         
@@ -363,14 +370,29 @@ void ProxygenHandler::sendResponse()noexcept{
         contDisposition << "attachment; filename=\"" << pRequest->strMemName  << ".tmx\"";
         builder->header("Content-Disposition", contDisposition.str());
         builder->header("NextInternalKey", ((ExportRequestData*) pRequest)->nextInternalKey);
-      }else {
+      }else if (COMMAND::EXPORT_MEM_INTERNAL_FORMAT_STREAM == pRequest->command  && pRequest->isSuccessful()){
+        std::stringstream contDisposition;
+        contDisposition << "attachment; filename=\"" << pRequest->strMemName  << ".tm\"";
+        builder->header("Content-Type", "application/octet-stream");
+        builder->header("Content-Disposition", contDisposition.str());
+        
+      }else{
         builder->header("Content-Type", "application/json");
       }
       
       //T5LOG( T5DEBUG) <<  ":: command = ", 
       //            CommandToStringsMap.find(this->command)->second, ", pRequest->strMemName = ", pRequest->strMemName.c_str());
-      if(pRequest->outputMessage.size())
+      if ( COMMAND::EXPORT_MEM_INTERNAL_FORMAT_STREAM == pRequest->command 
+       && (( (ExportRequestData*) pRequest)->vMemData.size())
+      )
+      {
+        ExportRequestData* pExpReqData = (ExportRequestData*)pRequest;
+        builder->body(vectorToIobuf(pExpReqData->vMemData));
+      }else if(pRequest->outputMessage.size()){
         builder->body(pRequest->outputMessage);
+      } else{
+        builder->body("{}");
+      }
       //builder->send();
       //delete pRequest;
       //pRequest = nullptr;

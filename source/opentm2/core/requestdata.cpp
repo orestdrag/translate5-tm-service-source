@@ -2343,15 +2343,21 @@ int ExportRequestData::parseJSON(){
   memset( szKey , sizeof(szKey) / sizeof(szKey[0]), 0 ); 
   if(strBody.empty()){
     return 0;
-  }
+  } 
+  
+  int loggingThreshold = -1;
   
   JSONFactory::JSONPARSECONTROL parseControl[] = { 
     { L"startFromInternalKey",         JSONFactory::ASCII_STRING_PARM_TYPE, &( szKey ), sizeof( szKey ) / sizeof( szKey[0] ) },
     { L"limit",          JSONFactory::INT_PARM_TYPE, &(numberOfRequestedProposals), 0},
-    //{ L"loggingThreshold",JSONFactory::INT_PARM_TYPE        , &(loggingThreshold), 0}, 
+    { L"loggingThreshold",JSONFactory::INT_PARM_TYPE        , &(loggingThreshold), 0}, 
     { L"",               JSONFactory::ASCII_STRING_PARM_TYPE, NULL, 0 } 
   };
 
+  if(loggingThreshold >= 0){
+    T5LOG( T5WARNING) <<"::ExportRequestData::set new threshold for logging" << loggingThreshold;
+    T5Logger::GetInstance()->SetLogLevel(loggingThreshold);
+  }
   std::wstring strInputParmsW = EncodingHelper::convertToWChar( strBody.c_str() );
   _rc_ = json_factory.parseJSON( strInputParmsW, parseControl );
   return 0;
@@ -2491,26 +2497,8 @@ int ExportRequestData::PrepareTMZip()
 
 int ExportRequestData::ExportZipStream(){
   _rc_ = PrepareTMZip();
-  if(!_rc_){
-    //send data.
-    proxygen::HTTPMessage response;
-    response.setHTTPVersion(1, 1);
-    response.setStatusCode(200);
-    response.setStatusMessage("OK");
-    response.setIsChunked(true);
-    
-    // Add headers to the response
-    std::stringstream contDisposition;
-    contDisposition << "attachment; filename=\"" << mem->szName  << ".tm\"";
-    response.getHeaders().add("Content-Type", "application/octet-stream");
-    response.getHeaders().add("Content-Disposition", contDisposition.str());
-    // Send response headers
-    responseHandler->sendHeaders(response);
-    std::vector<unsigned char> vMemData;
-    
+  if(!_rc_){    
     _rc_ = FilesystemHelper::LoadFileIntoByteVector( strTempFile, vMemData );
-  
-    responseHandler->sendBody(folly::IOBuf::copyBuffer(&vMemData[0], vMemData.size()));
   }
 
   return _rc_;
