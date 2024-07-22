@@ -1992,7 +1992,7 @@ int StatusMemRequestData::execute() {
                               + ":"+ std::to_string(mem->stTmSign.bMajorVersion) 
                               + ":" + std::to_string(mem->stTmSign.bMinorVersion);
     json_factory.addParmToJSON( outputMessage, "tmCreatedInT5M_version", creationT5MVersion.c_str() );
-    json_factory.addParmToJSON( outputMessage, "segmentIndex", std::to_string(mem->stTmSign.segmentIndex) );
+    json_factory.addParmToJSON( outputMessage, "segmentIndex", mem->stTmSign.segmentIndex );
     json_factory.addParmToJSON( outputMessage, "sourceLang", mem->stTmSign.szSourceLanguage );
     json_factory.addParmToJSON( outputMessage, "internalDescription", mem->stTmSign.szDescription );
     //json_factory.addParmToJSON( outputMessage, "internalName", mem->stTmSign.szName );
@@ -2493,6 +2493,8 @@ int ExportRequestData::PrepareTMZip()
   FilesystemHelper::ZipAdd( pZip, FilesystemHelper::GetTmdPath(strMemName) );
   FilesystemHelper::ZipAdd( pZip, FilesystemHelper::GetTmiPath(strMemName) );  
   FilesystemHelper::ZipClose( pZip );
+  
+  return 0;
 }
 
 int ExportRequestData::ExportZipStream(){

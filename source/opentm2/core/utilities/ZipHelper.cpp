@@ -7,6 +7,7 @@ int  FilesystemHelper::ZipAdd    ( ZIP * pZip, const std::string&  fName ){
         T5LOG( T5INFO) << "::adding to zip file " << fName;
     }else{
         T5LOG(T5ERROR) << ":: can't add to zip file " << fName;
+        return 11;
     }
     zip_entry_open(pZip, UtlGetFnameFromPath(fName.c_str()));
     {
@@ -31,6 +32,7 @@ int  FilesystemHelper::ZipClose  ( ZIP* pZip ){
         T5LOG( T5INFO) << "::closing zip file ";
     }else{
         T5LOG(T5ERROR) << ":: can't close zip file , ptr = nullptr";
+        return 12;
     }
     zip_close(pZip);
     return 0;

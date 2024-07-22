@@ -385,11 +385,16 @@ VOID EQFMemOrganizeEnd
   if(nullptr != pRIDA->pMemTemp){
     FilesystemHelper::DeleteFile(FilesystemHelper::GetTmdPath(pRIDA->pMem->szName));
     pRIDA->pMem->TmBtree.fb.data = std::move(pRIDA->pMemTemp->TmBtree.fb.data);
+    //get signature record and add to control block
+    USHORT usLen = sizeof( TMX_SIGN );
+    USHORT usRc = pRIDA->pMem->TmBtree.EQFNTMSign((PCHAR) &(pRIDA->pMem->stTmSign), &usLen );
     pRIDA->pMem->TmBtree.fb.Flush(true);
 
     
     FilesystemHelper::DeleteFile(FilesystemHelper::GetTmiPath(pRIDA->pMem->szName));
     pRIDA->pMem->InBtree.fb.data = std::move(pRIDA->pMemTemp->InBtree.fb.data);
+    usLen = sizeof( TMX_SIGN );
+    //usRc = pRIDA->pMem->InBtree.EQFNTMSign((PCHAR) &(pRIDA->pMem->stTmSign), &usLen );
     pRIDA->pMem->InBtree.fb.Flush(true);
   }
 

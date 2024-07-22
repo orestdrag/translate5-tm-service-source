@@ -292,7 +292,7 @@ typedef struct _TMX_SIGN
   CHAR szName[_TMX_SIGN_SZ_NAME];
   CHAR szSourceLanguage[MAX_LANG_LENGTH];
   CHAR szDescription[MAX_MEM_DESCRIPTION];
-  ULONG segmentIndex = 0;//highest generated segment id, used for generating new id's
+  LONG segmentIndex = 0;//highest generated segment id, used for generating new id's
 } TMX_SIGN, * PTMX_SIGN;
 
 
