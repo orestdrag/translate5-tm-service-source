@@ -515,6 +515,16 @@ typedef enum _SEARCHTYPE
 } SEARCHTYPE;
 
 
+
+
+///* Maximum size (entries) of the lookup table (it is a USHORT).
+#define MAX_NUMBER_OF_LOOKUP_ENTRIES 0x0FFFF
+//#define MAX_NUMBER_OF_LOOKUP_ENTRIES 0x00FF
+/* Initial size (entries) of the lookup table */
+#define MIN_NUMBER_OF_LOOKUP_ENTRIES 32
+
+
+
 struct BTREEDATA{
   BTREEDATA() {
     memset(this, 0, sizeof(*this));
@@ -523,9 +533,7 @@ struct BTREEDATA{
   USHORT       usFirstNode=0;                    // file pointer of record
   USHORT       usFirstLeaf=0;                    // file pointer of record
 
-  PBTREEINDEX_V3  pIndexBuffer_V3 = nullptr;     // Pointer to index records
-  USHORT       usIndexBuffer=0;                  // number of index buffers
-  PFN_QDAMCOMPARE compare = nullptr;             // Comparison function
+  //PFN_QDAMCOMPARE compare = nullptr;             // Comparison function
   USHORT       usNextFreeRecord;                 // Next record to expand to
   //CHAR         chFileName[144];                // Name of B-tree file
   RECPARAM     DataRecList[ MAX_LIST ];          // last used data records
@@ -553,11 +561,9 @@ struct BTREEDATA{
   USHORT       usOpenFlags=0;                    // settings used for open
   LONG         alUpdCtr[MAX_UPD_CTR];            // list of update counters
   HFILE        fpDummy=nullptr;                  // dummy/lock semaphore file handle
-  USHORT       usNumberOfLookupEntries=0;        // Number of allocated lookup-table-entries
+  //USHORT       usNumberOfLookupEntries=0;        // Number of allocated lookup-table-entries
   USHORT       usNumberOfAllocatedBuffers=0;     // Number of allocated buffers
   ULONG        ulReadRecCalls=0;                 // Number of calls to QDAMReadRecord
-  PLOOKUPENTRY_V3 LookupTable_V3=nullptr;        // Pointer to lookup-table
-  PACCESSCTRTABLEENTRY AccessCtrTable=nullptr;   // Pointer to access-counter-table
   BYTE         bRecSizeVersion=0;                  // record size version flag
   //} //end of PBTREEGLOB
 
@@ -571,9 +577,6 @@ struct BTREEDATA{
   /**********************************************************************/
   #define BTREE_VERSION3      3
 
-
-
-  HTM          htm=nullptr;                      // handle in remote case
   SHORT        sCurrentIndex=0;                  // current sequence array
   USHORT       usCurrentRecord=0;                // current sequence record
   USHORT       usDictNum=0;                      // index in global structure
@@ -588,6 +591,7 @@ struct BTREEDATA{
   //std::atomic<int> usOpenCount;                  // number of accesses...
   //PBTREE       pIdaList[ MAX_NUM_DICTS ];        // number of instances ...
   //End of qdam part
+
 };
 
 struct BTREE: public BTREEDATA
@@ -595,6 +599,10 @@ struct BTREE: public BTREEDATA
   //new fields 
   FileBuffer fb;
   std::vector<BYTE>         TempRecord;
+
+  std::vector<LOOKUPENTRY_V3> LookupTable_V3;        // Pointer to lookup-table
+  std::vector<ACCESSCTRTABLEENTRY> AccessCtrTable;   // Pointer to access-counter-table
+
 
   BTREE(){
     AllocateMem();
@@ -622,6 +630,17 @@ struct BTREE: public BTREEDATA
     TempRecord = std::vector<BYTE>(MAXDATASIZE, 0);
     return rc;
   }
+
+  void freeMem(){
+    freeLookupTable();
+  }
+
+  int initLookupTable();
+  int resetLookupTable();
+  void freeLookupTable();
+  int checkLookupTableAndRealocate(int number);  
+  int allocateNewLookupTableBuffer(int number, PLOOKUPENTRY_V3& pLEntry, PBTREEBUFFER_V3&   pBuffer);
+
     //+----------------------------------------------------------------------------+
     // Internal function
     //+----------------------------------------------------------------------------+
@@ -760,8 +779,6 @@ struct BTREE: public BTREEDATA
     ULONG   ulLen             // length of user data
     );
 
-
-    int resetLookupTable();
     
     //+----------------------------------------------------------------------------+
     // External function

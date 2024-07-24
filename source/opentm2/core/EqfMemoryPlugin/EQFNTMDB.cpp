@@ -457,6 +457,129 @@ ULONG BTREE::GetNumOfSavedRecords()const{
   return fileSize/(ulong)BTREE_REC_SIZE_V3 ;
 }
 
+
+int BTREE::initLookupTable(){
+  int sRc = 0 ;
+  #ifdef OLD_CODE
+  /* Allocate space for LookupTable */
+  usNumberOfLookupEntries = 0;
+  
+  UtlAlloc( (PVOID *)&LookupTable_V3, 0L, (LONG) MIN_NUMBER_OF_LOOKUP_ENTRIES * sizeof(LOOKUPENTRY_V3), NOMSG );
+
+  if ( LookupTable_V3 )
+  {
+    /* Allocate space for AccessCtrTable */
+    UtlAlloc( (PVOID *)&AccessCtrTable, 0L, (LONG) MIN_NUMBER_OF_LOOKUP_ENTRIES * sizeof(ACCESSCTRTABLEENTRY), NOMSG );
+    if ( !AccessCtrTable )
+    {
+      UtlAlloc( (PVOID *)&LookupTable_V3, 0L, 0L, NOMSG );
+      sRc = BTREE_NO_ROOM;
+    }
+    else
+    {
+      usNumberOfLookupEntries = MIN_NUMBER_OF_LOOKUP_ENTRIES;
+    } /* endif */
+  }
+  else
+  {
+    sRc = BTREE_NO_ROOM;
+  } /* endif */
+  #else
+  LookupTable_V3.reserve(MIN_NUMBER_OF_LOOKUP_ENTRIES);
+  AccessCtrTable.reserve(MIN_NUMBER_OF_LOOKUP_ENTRIES);
+
+  #endif
+
+  return sRc;
+}
+
+int BTREE::checkLookupTableAndRealocate(int number){
+  int sRc = 0;
+  
+  #ifdef OLD_CODE
+  bool fMemOK = true;
+
+  if ( number >= MAX_NUMBER_OF_LOOKUP_ENTRIES )
+  {
+    /* There is no room for this record number in the lookup table */
+    sRc = BTREE_LOOKUPTABLE_TOO_SMALL;
+  }
+  else if ( !LookupTable_V3 || !AccessCtrTable )
+  {
+    sRc = BTREE_LOOKUPTABLE_NULL;
+  }
+  else
+  {
+    if ( number >= usNumberOfLookupEntries )
+    {
+      /* The lookup-table entry for the record to read doesn't exist */
+      /* Reallocate memory for LookupTable and AccessCounterTable */
+      fMemOK = UtlAlloc( (PVOID *)&LookupTable_V3,
+              (LONG) usNumberOfLookupEntries * sizeof(LOOKUPENTRY_V3),
+              (LONG) (number + 10) * sizeof(LOOKUPENTRY_V3), NOMSG );
+      if ( fMemOK==TRUE )
+      {
+        fMemOK = UtlAlloc( (PVOID *)&AccessCtrTable,
+                (LONG) usNumberOfLookupEntries * sizeof(ACCESSCTRTABLEENTRY),
+                (LONG) (number + 10) * sizeof(ACCESSCTRTABLEENTRY), NOMSG );
+        if ( fMemOK==TRUE )
+        {
+          usNumberOfLookupEntries = number + 10;
+        }
+        else
+        {
+          sRc = BTREE_NO_ROOM;
+        } /* endif */
+      }
+      else
+      {
+        sRc = BTREE_NO_ROOM;
+      } /* endif */
+    } /* endif */
+  } /* endif */
+  #else
+  if ( number >= LookupTable_V3.size() )
+  {
+    LookupTable_V3.resize(number+10);
+    AccessCtrTable.resize(number+10);
+  }
+
+  #endif
+
+  return sRc;
+}
+
+void BTREE::freeLookupTable(){
+  /* free allocated space for lookup-table and buffers */  
+  
+  #ifdef OLD_CODE
+   
+  if ( LookupTable_V3 )
+  {
+    USHORT i;
+    PLOOKUPENTRY_V3 pLEntry = LookupTable_V3;
+
+    for ( i=0; i < usNumberOfLookupEntries; i++ )
+    {
+      if ( pLEntry->pBuffer )
+      {
+        UtlAlloc( (PVOID *)&(pLEntry->pBuffer), 0L, 0L, NOMSG );
+      } /* endif */
+      pLEntry++;
+    } /* endfor */
+
+    UtlAlloc( (PVOID *)&LookupTable_V3, 0L, 0L, NOMSG );
+    UtlAlloc( (PVOID *)&AccessCtrTable, 0L, 0L, NOMSG );
+    usNumberOfLookupEntries = 0;
+    usNumberOfAllocatedBuffers = 0;
+  } /* endif */
+  #else
+  resetLookupTable();
+
+  #endif
+
+}
+
 //+----------------------------------------------------------------------------+
 //|External function                                                           |
 //+----------------------------------------------------------------------------+
@@ -1470,6 +1593,7 @@ SHORT BTREE::QDAMDictUpdateLocal
 
 int BTREE::resetLookupTable(){
   int rc = 0;
+  #ifdef OLD_CODE
   for (int i=0; !rc && (i < usNumberOfLookupEntries); i++ )
   {
     auto pLEntry = LookupTable_V3 + i;
@@ -1493,7 +1617,58 @@ int BTREE::resetLookupTable(){
   }
   //UtlAlloc( (PVOID *)&LookupTable_V3, 0L,(LONG) MIN_NUMBER_OF_LOOKUP_ENTRIES * sizeof(LOOKUPENTRY_V3), NOMSG );
   memset(LookupTable_V3, 0, usNumberOfLookupEntries*sizeof(_LOOKUPENTRY_V3));
+  #else
+  for (int i=0; i < LookupTable_V3.size(); i++ )
+  {
+    if ( LookupTable_V3[i].pBuffer )
+    {
+      UtlAlloc( (PVOID *)&(LookupTable_V3[i].pBuffer), 0L, 0L, NOMSG );
+      (usNumberOfAllocatedBuffers)--;
+    } /* endif */
+  } /* endfor */
+  #endif
   return rc;
+}
+
+
+int BTREE::allocateNewLookupTableBuffer(int number, PLOOKUPENTRY_V3& pLEntry, PBTREEBUFFER_V3& pBuffer){
+  /********************************************************************/
+  /* Allocate space for a new buffer and let pBuffer point to it      */
+  /********************************************************************/
+  int sRc = 0;
+  //if ( !LookupTable_V3 || ( number >= usNumberOfLookupEntries ))
+  if(number >= LookupTable_V3.size())
+  {
+    SET_AND_LOG(sRc,BTREE_LOOKUPTABLE_CORRUPTED);
+  }
+  else
+  {
+    //pLEntry = LookupTable_V3 + number;
+    pLEntry = &LookupTable_V3[number];
+
+    /* Safety-Check: is the lookup table entry (ptr. to buffer) for the
+                     record to read NULL ? */
+    if ( pLEntry->pBuffer )
+    {
+      /* ptr. isn't NULL: this should never occur */
+      SET_AND_LOG(sRc, BTREE_LOOKUPTABLE_CORRUPTED);
+    }
+    else
+    {
+      /* Allocate memory for a buffer */
+      UtlAlloc( (PVOID *)&(pLEntry->pBuffer), 0L, (LONG) BTREE_BUFFER_V3 , NOMSG );
+      if ( pLEntry->pBuffer )
+      {
+        (usNumberOfAllocatedBuffers)++;
+        pBuffer = pLEntry->pBuffer;
+      }
+      else
+      {
+        sRc = BTREE_NO_ROOM;
+      } /* endif */
+    } /* endif */
+  } /* endif */
+  return sRc;
 }
 //+----------------------------------------------------------------------------+
 //|External function                                                           |

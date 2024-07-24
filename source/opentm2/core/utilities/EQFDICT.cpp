@@ -525,13 +525,6 @@ typedef enum _DICTCMD
 
 static BTREEHEADRECORD header; // Static buffer for database header record
 
-
-///* Maximum size (entries) of the lookup table (it is a USHORT).
-#define MAX_NUMBER_OF_LOOKUP_ENTRIES 0x0FFFF
-//#define MAX_NUMBER_OF_LOOKUP_ENTRIES 0x00FF
-/* Initial size (entries) of the lookup table */
-#define MIN_NUMBER_OF_LOOKUP_ENTRIES 32
-
 /**********************************************************************/
 /* typedef used for all vital information on our new approach...      */
 /* NOTE: this structure is limited to COLLATE_SIZE, which is 256      */
@@ -1078,39 +1071,7 @@ SHORT BTREE::QDAMReadRecordFromDisk_V3
   DEBUGEVENT2( QDAMREADRECORDFROMDISK_LOC, FUNCENTRY_EVENT, usNumber, DB_GROUP, "" );
   int resRead = 0;
   
-  /********************************************************************/
-  /* Allocate space for a new buffer and let pBuffer point to it      */
-  /********************************************************************/
-  if ( !LookupTable_V3 || ( usNumber >= usNumberOfLookupEntries ))
-  {
-    SET_AND_LOG(sRc,BTREE_LOOKUPTABLE_CORRUPTED);
-  }
-  else
-  {
-    pLEntry = LookupTable_V3 + usNumber;
-
-    /* Safety-Check: is the lookup table entry (ptr. to buffer) for the
-                     record to read NULL ? */
-    if ( pLEntry->pBuffer )
-    {
-      /* ptr. isn't NULL: this should never occur */
-      SET_AND_LOG(sRc, BTREE_LOOKUPTABLE_CORRUPTED);
-    }
-    else
-    {
-      /* Allocate memory for a buffer */
-      UtlAlloc( (PVOID *)&(pLEntry->pBuffer), 0L, (LONG) BTREE_BUFFER_V3 , NOMSG );
-      if ( pLEntry->pBuffer )
-      {
-        (usNumberOfAllocatedBuffers)++;
-        pBuffer = pLEntry->pBuffer;
-      }
-      else
-      {
-        sRc = BTREE_NO_ROOM;
-      } /* endif */
-    } /* endif */
-  } /* endif */
+  sRc = allocateNewLookupTableBuffer(usNumber, pLEntry, pBuffer);
 
   if ( !sRc )
   {
@@ -1305,47 +1266,8 @@ SHORT  BTREE::QDAMReadRecord_V3
   *ppReadBuffer = NULL;
   INC_READ_COUNT;
 
-  /********************************************************************/
-  /* If Lookup-Table is too small allocate additional memory for it   */
-  /********************************************************************/
-  if ( usNumber >= MAX_NUMBER_OF_LOOKUP_ENTRIES )
-  {
-    /* There is no room for this record number in the lookup table */
-    sRc = BTREE_LOOKUPTABLE_TOO_SMALL;
-  }
-  else if ( !LookupTable_V3 || !AccessCtrTable )
-  {
-    sRc = BTREE_LOOKUPTABLE_NULL;
-  }
-  else
-  {
-    if ( usNumber >= usNumberOfLookupEntries )
-    {
-      /* The lookup-table entry for the record to read doesn't exist */
-      /* Reallocate memory for LookupTable and AccessCounterTable */
-      fMemOK = UtlAlloc( (PVOID *)&LookupTable_V3,
-              (LONG) usNumberOfLookupEntries * sizeof(LOOKUPENTRY_V3),
-              (LONG) (usNumber + 10) * sizeof(LOOKUPENTRY_V3), NOMSG );
-      if ( fMemOK==TRUE )
-      {
-        fMemOK = UtlAlloc( (PVOID *)&AccessCtrTable,
-                (LONG) usNumberOfLookupEntries * sizeof(ACCESSCTRTABLEENTRY),
-                (LONG) (usNumber + 10) * sizeof(ACCESSCTRTABLEENTRY), NOMSG );
-        if ( fMemOK==TRUE )
-        {
-          usNumberOfLookupEntries = usNumber + 10;
-        }
-        else
-        {
-          sRc = BTREE_NO_ROOM;
-        } /* endif */
-      }
-      else
-      {
-        sRc = BTREE_NO_ROOM;
-      } /* endif */
-    } /* endif */
-  } /* endif */
+  sRc = checkLookupTableAndRealocate(usNumber);
+  
 
   if ( !sRc )
   {
@@ -1353,7 +1275,8 @@ SHORT  BTREE::QDAMReadRecord_V3
     /* If record is in memory set ppReadBuffer                        */
     /* else call QDAMReadRecordFromDisk to read it into memory        */
     /******************************************************************/
-    pLEntry = LookupTable_V3 + usNumber;
+    //pLEntry = LookupTable_V3 + usNumber;
+    pLEntry = &LookupTable_V3[usNumber];
 
     if ( pLEntry->pBuffer )
     {
@@ -1373,7 +1296,7 @@ SHORT  BTREE::QDAMReadRecord_V3
     {
       /* Record isn't in memory -> read it from disk */
       sRc =  QDAMReadRecordFromDisk_V3( usNumber, ppReadBuffer, fNewRec );
-      pACTEntry=AccessCtrTable + usNumber;
+      pACTEntry = &AccessCtrTable[usNumber];
       pACTEntry->ulAccessCounter = 0L;
     } /* endif */
   } /* endif */
@@ -1389,10 +1312,10 @@ SHORT  BTREE::QDAMReadRecord_V3
   {
     if ( ulReadRecCalls >= MAX_READREC_CALLS )
     {
-      for ( i=0; !sRc && (i < usNumberOfLookupEntries); i++ )
+      for ( i=0; !sRc && (i < LookupTable_V3.size()); i++ )
       {
-        pLEntry = LookupTable_V3 + i;
-        pACTEntry = AccessCtrTable + i;
+        pLEntry = &LookupTable_V3[i];
+        pACTEntry = &AccessCtrTable[i];
         if ( pLEntry->pBuffer && !((pLEntry->pBuffer)->fLocked) && (i!=usNumber)
              && (pACTEntry->ulAccessCounter<MAX_READREC_CALLS) )
         {
@@ -1428,7 +1351,7 @@ SHORT  BTREE::QDAMReadRecord_V3
   if ( !sRc )
   {
     /* Increase the access counter for the record just read by  ACCESSBONUSPOINTS */
-    pACTEntry=AccessCtrTable + usNumber;
+    pACTEntry = &AccessCtrTable[usNumber];
     pACTEntry->ulAccessCounter += ACCESSBONUSPOINTS;
   } /* endif */
 
@@ -1614,14 +1537,9 @@ QDAMRemoveDict
 //                    endif
 //------------------------------------------------------------------------------
 
-SHORT QDAMDictFlushLocal
-(
-   PBTREE pBTIda
-)
+SHORT QDAMDictFlushLocal( PBTREE pBT)
 {
-  int i = 0;
   SHORT sRc = 0;                                 // return code
-  PBTREE  pBT = pBTIda;
 
   DEBUGEVENT2( QDAMDICTFLUSHLOCAL_LOC, FUNCENTRY_EVENT, 0, DB_GROUP, "" );
 
@@ -1631,18 +1549,17 @@ SHORT QDAMDictFlushLocal
   }
   else
   {
-    if ( pBT->LookupTable_V3 != NULL  )
+    //if ( pBT->LookupTable_V3 != NULL  )
     {
       BOOL fRecordWritten = FALSE;
-      PLOOKUPENTRY_V3 pLEntry = pBT->LookupTable_V3;
-      for ( i=0; !sRc && (i < pBT->usNumberOfLookupEntries); i++ )
+      for (int i=0; !sRc && (i < pBT->LookupTable_V3.size()); i++ )
       {
+        PLOOKUPENTRY_V3 pLEntry = &pBT->LookupTable_V3[i];
         if ( pLEntry->pBuffer /*&&  (pLEntry->pBuffer)->fNeedToWrite*/ )
         {
-          sRc = pBTIda->QDAMWRecordToDisk_V3( pLEntry->pBuffer);
+          sRc = pBT->QDAMWRecordToDisk_V3( pLEntry->pBuffer);
           fRecordWritten = TRUE;
         } /* endif */
-        pLEntry++;
       } /* endfor */
     } /* endif */
   }
@@ -1739,42 +1656,7 @@ SHORT BTREE::QDAMDictClose()
      /*******************************************************************/
      //if ( pBT  )
      {
-      /* free allocated space for lookup-table and buffers */   
-      if ( LookupTable_V3 )
-      {
-        USHORT i;
-        PLOOKUPENTRY_V3 pLEntry = LookupTable_V3;
-
-        for ( i=0; i < usNumberOfLookupEntries; i++ )
-        {
-          if ( pLEntry->pBuffer )
-          {
-            UtlAlloc( (PVOID *)&(pLEntry->pBuffer), 0L, 0L, NOMSG );
-          } /* endif */
-          pLEntry++;
-        } /* endfor */
-
-        UtlAlloc( (PVOID *)&LookupTable_V3, 0L, 0L, NOMSG );
-        UtlAlloc( (PVOID *)&AccessCtrTable, 0L, 0L, NOMSG );
-        usNumberOfLookupEntries = 0;
-        usNumberOfAllocatedBuffers = 0;
-      } /* endif */
-       
-       
-
-       /*****************************************************************/
-       /* free index buffer list                                        */
-       /*****************************************************************/
-        PBTREEINDEX_V3 pIndexBuffer, pTempIndexBuffer;  // temp ptr for freeing index
-        pIndexBuffer = pIndexBuffer_V3;
-        while ( pIndexBuffer  )
-        {
-          pTempIndexBuffer = pIndexBuffer->pNext;
-          UtlAlloc( (PVOID *)&pIndexBuffer, 0L, 0L, NOMSG );
-          pIndexBuffer = pTempIndexBuffer;
-        } /* endwhile */
-       
-       //UtlAlloc( (PVOID *)&pBTIda,0L, 0L, NOMSG );     // free allocated memory
+      freeLookupTable();
      } /* endif */
      /********************************************************************/
      /* unlock the dictionary                                            */
@@ -2214,7 +2096,7 @@ SHORT BTREE::QDAMDictCreateLocal
     sCurrentIndex = 0;
     usFirstNode=usFirstLeaf = 1;
     usCurrentRecord = 0;
-    compare = QDAMKeyCompare;
+    //compare = NTMKeyCompare;
     usNextFreeRecord = 1;
     usFreeKeyBuffer = 0;
     usFreeDataBuffer = 0;
@@ -2237,30 +2119,9 @@ SHORT BTREE::QDAMDictCreateLocal
     /******************************************************************/
     /* new key compare routine ....                                   */
     /******************************************************************/
-    compare = NTMKeyCompare;
+    //compare = NTMKeyCompare;
 
-    /* Allocate space for LookupTable */
-    usNumberOfLookupEntries = 0;
-    UtlAlloc( (PVOID *)&LookupTable_V3, 0L, (LONG) MIN_NUMBER_OF_LOOKUP_ENTRIES * sizeof(LOOKUPENTRY_V3), NOMSG );
-
-    if ( LookupTable_V3 )
-    {
-      /* Allocate space for AccessCtrTable */
-      UtlAlloc( (PVOID *)&AccessCtrTable, 0L, (LONG) MIN_NUMBER_OF_LOOKUP_ENTRIES * sizeof(ACCESSCTRTABLEENTRY), NOMSG );
-      if ( !AccessCtrTable )
-      {
-        UtlAlloc( (PVOID *)&LookupTable_V3, 0L, 0L, NOMSG );
-        sRc = BTREE_NO_ROOM;
-      }
-      else
-      {
-        usNumberOfLookupEntries = MIN_NUMBER_OF_LOOKUP_ENTRIES;
-      } /* endif */
-    }
-    else
-    {
-      sRc = BTREE_NO_ROOM;
-    } /* endif */
+   sRc = initLookupTable();
     usNumberOfAllocatedBuffers = 0;
   }
 
@@ -2728,7 +2589,7 @@ SHORT BTREE::QDAMFindRecord_V3
       }
       else
       {
-        sResult = (*compare)(this, pKey, pKey2);
+        sResult = NTMKeyCompare(this, pKey, pKey2);
         if ( sResult < 0 )
         {
           sHigh = sMid - 1;                        // Go left
@@ -3498,7 +3359,7 @@ SHORT BTREE::QDAMLocateKey_V3
 
       if ( pKey2 )
       {
-        sResult = (*compare)(this, pKey, pKey2);
+        sResult = NTMKeyCompare(this, pKey, pKey2);
         if ( sResult < 0 )
         {
           sHigh = sMid - 1;                        // Go left
@@ -3768,7 +3629,8 @@ SHORT QDAMFindParent_V3
       }
       else
       {
-        sResult = (*pBT->compare)(pBTIda, chKey, pKey2);
+        //sResult = (*pBT->compare)(pBTIda, chKey, pKey2);
+        sResult = NTMKeyCompare(pBTIda, chKey, pKey2);
         if ( sResult < 0 )
         {
           sHigh = sMid - 1;                        // Go left
@@ -4138,14 +4000,14 @@ SHORT QDAMSplitNode_V3
         
         if ( pParentKey )
         {
-           fCompare = ((*(pBT->compare))(pBTIda, pParentKey, pKey) <= 0 ) ;
+           fCompare = NTMKeyCompare(pBTIda, pParentKey, pKey) <= 0  ;
            /***********************************************************/
            /* check in which part we will lay                         */
            /***********************************************************/
            if ( fCompare )
            {
               pParentKey = QDAMGetszKey_V3(*record, (SHORT)(OCCUPIED(*record)-MINFREEKEYS), pBT->usVersion);
-              fCompare = ((*(pBT->compare))(pBTIda, pParentKey, pKey) <= 0 ) ;
+              fCompare = (NTMKeyCompare(pBTIda, pParentKey, pKey) <= 0 ) ;
               if ( fCompare )
               {
                 usFreeKeys = MINFREEKEYS;
@@ -4158,7 +4020,7 @@ SHORT QDAMSplitNode_V3
            else
            {
               pParentKey = QDAMGetszKey_V3( *record,MINFREEKEYS, pBT->usVersion);
-              fCompare = ((*(pBT->compare))(pBTIda, pParentKey, pKey) <= 0 ) ;
+              fCompare = (NTMKeyCompare(pBTIda, pParentKey, pKey) <= 0 ) ;
               if ( fCompare )
               {
                 usFreeKeys = OCCUPIED( *record )/2;
@@ -4230,7 +4092,7 @@ SHORT QDAMSplitNode_V3
          pParentKey = QDAMGetszKey_V3( newRecord, 0, pBT->usVersion );
          if ( pParentKey )
          {
-           if ( (*(pBT->compare))(pBTIda, pParentKey, pKey) <= 0)
+           if ( NTMKeyCompare(pBTIda, pParentKey, pKey) <= 0)
            {
              sRc = pBTIda->QDAMWriteRecord_V3( *record);
              *record = newRecord;                     // add to new record
@@ -4786,7 +4648,8 @@ SHORT QDAMFindChild_V3
       }
       else
       {
-        sResult = (*pBT->compare)(pBTIda, pKey, pKey2);
+        //sResult = (*pBT->compare)(pBTIda, pKey, pKey2);
+        sResult = NTMKeyCompare(pBTIda, pKey, pKey2);
         if ( sResult < 0 )
         {
           sHigh = sMid - 1;                        // Go left
@@ -5030,7 +4893,8 @@ SHORT BTREE::QDAMInsertKey_V3
       pCompKey = QDAMGetszKey_V3( pRecord, (SHORT)(i-1), usVersion );
       if ( pCompKey )
       {
-        if ( (*(compare))(this, pKey, pCompKey)  < 0 )
+        if ( NTMKeyCompare(this, pKey, pCompKey)  < 0 )
+        //if ( (*(compare))(this, pKey, pCompKey)  < 0 )
         {
           *(pusOffset+i) = *(pusOffset+i-1);
           i--;
@@ -5363,7 +5227,7 @@ SHORT  BTREE::QDAMDictOpenLocal
       /*  ignore the version number)                              */
       /************************************************************/
         usVersion = (USHORT) header.chEQF[3];
-        compare =  NTMKeyCompare;
+        //compare =  NTMKeyCompare;
 
         UtlTime( &(lTime) );                             // set open time
         sCurrentIndex = 0;
@@ -5397,27 +5261,7 @@ SHORT  BTREE::QDAMDictOpenLocal
             
           ASDLOG();
 
-          /* Allocate space for AccessCtrTable */
-          usNumberOfLookupEntries = 0;
-          UtlAlloc( (PVOID *)&AccessCtrTable, 0L, (LONG) MIN_NUMBER_OF_LOOKUP_ENTRIES * sizeof(ACCESSCTRTABLEENTRY), NOMSG );
-          if ( !AccessCtrTable )
-          {
-            sRc = BTREE_NO_ROOM;
-          } /* endif */
-
-          /* Allocate space for LookupTable */
-          if ( !sRc )
-          {
-            UtlAlloc( (PVOID *)&LookupTable_V3, 0L,(LONG) MIN_NUMBER_OF_LOOKUP_ENTRIES * sizeof(LOOKUPENTRY_V3), NOMSG );
-            if ( LookupTable_V3 )
-            {
-              usNumberOfLookupEntries = MIN_NUMBER_OF_LOOKUP_ENTRIES;
-            }
-            else
-            {
-              sRc = BTREE_NO_ROOM;
-            } /* endif */
-          } /* endif */
+          initLookupTable();
 
           usNumberOfAllocatedBuffers = 0;
         } /* endif */
