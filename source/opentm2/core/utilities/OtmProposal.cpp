@@ -37,9 +37,11 @@ if(pInputSentence) delete pInputSentence;
 
 /* operations */
 
-void OtmProposal::clear()
+void OtmProposal::clear()//bool clearKeys)
 { 
   if(this->pInputSentence) delete pInputSentence;
+  TMCursor currentKey, nextKey;
+  //if(false == clearKeys){  }
   memset( this, 0, sizeof(OtmProposal) );
   eType = OtmProposal::eptUndefined;
   eMatch = OtmProposal::emtUndefined;

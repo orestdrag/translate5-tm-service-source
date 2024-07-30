@@ -250,7 +250,8 @@ USHORT EqfMemory::TmtXReplace
 
       if(usRc == NO_ERROR)
       {
-        ulNewKey = TmProposal.recordKey;
+        //ulNewKey = TmProposal.recordKey;
+        ulNewKey = TmProposal.currentInternalKey.getRecordKey();
       }
       //if no tm record fitted for update assume new and add to tm
       else if ( usRc == ERROR_ADD_TO_TM )
@@ -281,8 +282,11 @@ USHORT EqfMemory::TmtXReplace
   } /* endif */
 
   if(!usRc){
-    pTmPutOut->ulTmKey = TmProposal.recordKey = ulNewKey;
-    pTmPutOut->usTargetKey = TmProposal.targetKey;
+    //TmProposal.currentInternalKey.setInternalKey(ulNewKeym  TmProposal.targetKey)
+    //pTmPutOut->ulTmKey = TmProposal.recordKey = ulNewKey;
+    //pTmPutOut->usTargetKey = TmProposal.targetKey;
+    pTmPutOut->ulTmKey = TmProposal.currentInternalKey.getRecordKey();
+    pTmPutOut->usTargetKey = TmProposal.currentInternalKey.getTargetKey();
     RewriteCompactTable();
     
     usRc = TmBtree.QDAMDictUpdSignLocal(&stTmSign);
@@ -1014,8 +1018,9 @@ USHORT EqfMemory::AddToTm
                              (PBYTE)pTmRecord,   //pointer to tm record
                              pTmRecord->lRecordLen);     //length
         if(!usRc){
-          TmProposal.recordKey = *pulNewKey;
-          TmProposal.targetKey = 1;
+          TmProposal.currentInternalKey.setInternalKey(*pulNewKey, 1);
+          //TmProposal.recordKey = *pulNewKey;
+          //TmProposal.targetKey = 1;
         }
       } /* endif */
     } /* endif */
@@ -1797,7 +1802,7 @@ USHORT EqfMemory::UpdateTmRecord
           }
           else if ( usRc == NO_ERROR )
           {
-            TmProposal.recordKey = ulKey;
+            //TmProposal.recordKey = ulKey;
             //new target record was added or an existing one was successfully
             //replaced so don't try other sids
             fStop = TRUE;
@@ -2287,8 +2292,9 @@ USHORT EqfMemory::ComparePutData
 
         if ( fStop )
         {
-          TmProposal.recordKey = *pulKey;
-          TmProposal.targetKey = targetKey;          
+          TmProposal.currentInternalKey.setInternalKey(*pulKey, targetKey);
+          //TmProposal.recordKey = *pulKey;
+          //TmProposal.targetKey = targetKey;          
         }else{
           //all target records have been checked but nothing overlapped
           //so add new target record to end of tm record
@@ -2297,8 +2303,9 @@ USHORT EqfMemory::ComparePutData
           
           if(!usRc)
           {
-            TmProposal.recordKey = *pulKey;
-            TmProposal.targetKey = 1;
+            TmProposal.currentInternalKey.setInternalKey(*pulKey, 1);
+            //TmProposal.recordKey = *pulKey;
+            //TmProposal.targetKey = 1;
           }
         } /* endif */
       }
@@ -2630,7 +2637,7 @@ USHORT EqfMemory::TmtXUpdSeg
     LOG_AND_SET_RC(usRc, T5INFO, BTREE_NOT_FOUND);
 
     ulLen = TMX_REC_SIZE;
-    usRc =  TmBtree.EQFNTMGet( pTmPutIn->recordKey, (PCHAR)pTmRecord,
+    usRc =  TmBtree.EQFNTMGet( pTmPutIn->currentInternalKey.getRecordKey(), (PCHAR)pTmRecord,
                       &ulLen );
 
     if ( usRc == BTREE_BUFFER_SMALL)
@@ -2642,7 +2649,7 @@ USHORT EqfMemory::TmtXUpdSeg
         memset( pTmRecord, 0, ulLen );
 
         usRc =  TmBtree.EQFNTMGet(
-                          pTmPutIn->recordKey,  //tm record key
+                          pTmPutIn->currentInternalKey.getRecordKey(),  //tm record key
                           (PCHAR)pTmRecord,   //pointer to tm record data
                           &ulLen );    //length
       }
@@ -2675,7 +2682,8 @@ USHORT EqfMemory::TmtXUpdSeg
           usTarget = 1;           //initialize counter
 
           //loop until correct target is found
-          while ( (usTarget < pTmPutIn->targetKey) && ulLeftTgtLen )
+          while ( (usTarget < pTmPutIn->currentInternalKey.getTargetKey()) //pTmPutIn->targetKey) 
+            && ulLeftTgtLen )
           {
             // position to first target CLB
             pTMXTargetRecord = (PTMX_TARGET_RECORD)(pByte);
@@ -2685,7 +2693,7 @@ USHORT EqfMemory::TmtXUpdSeg
             ulLeftClbLen -= TARGETCLBLEN(pTargetClb); // subtract size of current CLB
 
             // loop over all target CLBs
-            while ( (usTarget < pTmPutIn->targetKey) && ulLeftClbLen )
+            while ( (usTarget < pTmPutIn->currentInternalKey.getTargetKey()) && ulLeftClbLen )
             {
               usTarget++;
               pTargetClb = NEXTTARGETCLB(pTargetClb);
@@ -2693,7 +2701,7 @@ USHORT EqfMemory::TmtXUpdSeg
             } /* endwhile */
 
             // continue with next target if no match yet
-            if ( usTarget < pTmPutIn->targetKey )
+            if ( usTarget < pTmPutIn->currentInternalKey.getTargetKey() )
             {
               // position at next target
               pTMXTargetRecord = (PTMX_TARGET_RECORD)(pByte);
@@ -2713,7 +2721,7 @@ USHORT EqfMemory::TmtXUpdSeg
             } /* endif */
           } /* endwhile */
 
-          if ( usTarget == pTmPutIn->targetKey )
+          if ( usTarget == pTmPutIn->currentInternalKey.getTargetKey())//pTmPutIn->targetKey )
           {
             //position at start of target record
             pTMXTargetRecord = (PTMX_TARGET_RECORD)(pByte);
@@ -2784,7 +2792,7 @@ USHORT EqfMemory::TmtXUpdSeg
               // rewrite TM record
               if ( usRc == NO_ERROR )
               {
-                usRc = TmBtree.EQFNTMUpdate( pTmPutIn->recordKey,
+                usRc = TmBtree.EQFNTMUpdate( pTmPutIn->currentInternalKey.getRecordKey(),
                                      (PBYTE)pTmRecord, RECLEN(pTmRecord) );
               } /* endif */
 

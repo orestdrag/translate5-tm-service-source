@@ -457,8 +457,23 @@ public:
   int iNumOfProposals;
   int iSearchTime;
   wchar_t szSearchString[2050];
-  ulong recordKey{0};
-  ushort targetKey{0};
+  
+
+  // 
+  TMCursor currentInternalKey;
+  TMCursor nextInternalKey;
+
+  int moveInternalKeyToTheNextPosition() {
+          currentInternalKey = nextInternalKey; 
+          nextInternalKey.reset();
+          return 0;
+  }
+  bool nextKeyExists()
+  {
+    return true;
+  }
+
+  int setSequentialAccessKey(  char *pszKey);
 
 //otm_put
   //USHORT    usTranslationFlag;                 /* type of translation, 0 = human, 1 = machine, 2 = GobalMemory */

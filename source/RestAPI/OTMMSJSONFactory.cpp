@@ -1058,8 +1058,22 @@ int JSONFactory::parseJSON
 
           case INT_PARM_TYPE:
           {
-            wchar_t * pEnd;
-            *((int *)pParm->pvValue) = wcstol( value.c_str(), &pEnd, 10 );
+            // Use std::stoi to convert the string to an integer
+            try {
+              *((int *)pParm->pvValue) = std::stoi(value);
+            } catch (const std::invalid_argument& e) {
+                std::string msg = "Invalid argument: ";
+                msg += e.what();
+                T5LOG(T5ERROR) << msg;
+                return -1;
+            } catch (const std::out_of_range& e) {
+                std::string msg = "Out of range: "; 
+                msg += e.what();
+                T5LOG(T5ERROR) << msg;
+                return -1;
+            }
+            //wchar_t * pEnd;
+            //*((int *)pParm->pvValue) = wcstol( value.c_str(), &pEnd, 10 );
             break;
           }
 

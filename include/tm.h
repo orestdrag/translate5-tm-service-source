@@ -1873,8 +1873,8 @@ public:
   static const int UPDATE_TARGLANG = 0x04;           // update target language
   static const int UPDATE_DATE     = 0x08;           // update proposal update time
 
-  void setInternalCursor(ULONG recordKey, USHORT targetKey);
-  void resetInternalCursor();
+  //void setInternalCursor(ULONG recordKey, USHORT targetKey);
+  //void resetInternalCursor();
 
   ushort TmtXDelSegm
 (
@@ -2250,8 +2250,8 @@ USHORT NTMLoadNameTable
   //TMX_EXT_OUT_W TmPutOut;                      // ptr to TMX_EXT_OUT_W structure
   //TMX_GET_W  TmGetIn;                       // ptr to TMX_PUT_W structure
   //TMX_GET_OUT_W TmGetOut;                      // ptr to TMX_EXT_OUT_W structure
-  ULONG ulNextKey = 0;                       // next TM key for GetFirstProposal/GetNextProposal
-  USHORT usNextTarget = 0;                   // next TM target for GetFirstProposal/GetNextProposal
+  //ULONG ulNextKey = 0;                       // next TM key for GetFirstProposal/GetNextProposal
+  //USHORT usNextTarget = 0;                   // next TM target for GetFirstProposal/GetNextProposal
   //char szName[MAX_LONGFILESPEC];                 // memory name
 	std::string strLastError;
 	int iLastError = 0;
@@ -2291,32 +2291,6 @@ int SetProposalKey
   ULONG   ulKey,
   USHORT  usTargetNum,
   OtmProposal *pProposal
-);
-
-/*! \brief Split an internal key into record number and target number
-    \param Proposal reference to the OtmProposal 
-    \param pulKey pointer to record number buffer
-    \param pusTargetNum pointer to buffer for number of target within record 
-  	\returns 0 or error code in case of errors
-*/
-int SplitProposalKeyIntoRecordAndTarget
-(
-  OtmProposal &Proposal,
-  ULONG   *pulKey,
-  USHORT  *pusTargetNum
-);
-
-/*! \brief Split an internal key into record number and target number
-    \param pszKey pointer to the internal key of the OtmProposal 
-    \param pulKey pointer to record number buffer
-    \param pusTargetNum pointer to buffer for number of target within record 
-  	\returns 0 or error code in case of errors
-*/
-int SplitProposalKeyIntoRecordAndTarget
-(
-  char    *pszKey,
-  ULONG   *pulKey,
-  USHORT  *pusTargetNum
 );
 
 

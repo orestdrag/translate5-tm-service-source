@@ -718,11 +718,12 @@ USHORT  MemExportStart( PPROCESSCOMMAREA  pCommArea,
     pExportIDA->numOfRequestedSegmentsForExport = pCommArea->numOfProposalsRequested;
   }
   // set first extract flag        
-  if(pCommArea->startingRecordKey != 0 ){
+  if(pCommArea->startingRecordKey != 0  && pCommArea->startingTargetKey != 0){
     //pExportIDA->pProposal->recordKey = pCommArea->startingRecordKey;
     //pExportIDA->pProposal->targetKey = pCommArea->startingTargetKey;    
-    pExportIDA->pMem->ulNextKey = pCommArea->startingRecordKey;
-    pExportIDA->pMem->usNextTarget = pCommArea->startingTargetKey;
+    //pExportIDA->pMem->ulNextKey = pCommArea->startingRecordKey;
+    //pExportIDA->pMem->usNextTarget = pCommArea->startingTargetKey;
+    pExportIDA->pProposal->nextInternalKey.setInternalKey(pCommArea->startingRecordKey, pCommArea->startingTargetKey);
 
     pExportIDA->fFirstExtract = FALSE;
   }else{                                 
@@ -1768,8 +1769,8 @@ USHORT FCTDATA::MemFuncExportProcess()
   {
     case MEM_START_EXPORT:
       pCommArea->pBufQueue = &bufQueue;
-      pCommArea->startingRecordKey = recordKey;
-      pCommArea->startingTargetKey = targetKey;
+      pCommArea->startingRecordKey = nextInternalKey.getRecordKey();
+      pCommArea->startingTargetKey = nextInternalKey.getTargetKey();
       pCommArea->numOfProposalsRequested = numOfProposalsRequested;
       pCommArea->responseHandler = responseHandler;
 

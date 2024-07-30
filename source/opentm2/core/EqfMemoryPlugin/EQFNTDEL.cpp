@@ -22,15 +22,6 @@
 #include "./EncodingHelper.h"
 
 
-void EqfMemory::resetInternalCursor(){
-  this->setInternalCursor(FIRST_KEY, 1);
-}
-
-void EqfMemory::setInternalCursor(ULONG recordKey, USHORT targetKey){
-  this->ulNextKey = recordKey;
-  this->usNextTarget = targetKey;
-}
-
 //+----------------------------------------------------------------------------+
 //|External function                                                           |
 //+----------------------------------------------------------------------------+
@@ -205,7 +196,7 @@ USHORT EqfMemory::TmtXDelSegmByKey
 )
 {
   PTMX_SENTENCE pSentence = NULL;    // ptr to sentence structure
-  ULONG ulKey=TmDelIn.recordKey;                         // tm record key
+  ULONG ulKey=TmDelIn.nextInternalKey.getRecordKey();                         // tm record key
   BOOL fOK;                            // success indicator
   USHORT usRc = NO_ERROR;              // return code
   USHORT usMatchesFound = 0;           // compact area hits
@@ -515,8 +506,9 @@ USHORT EqfMemory::FindTargetAndDelete(
                                                   pTmExtOut );
                           NTMGetNameFromID( &pTMXSourceRecord->usLangId, (USHORT)LANG_KEY,
                                       pTmExtOut->szOriginalSourceLanguage, NULL );
-                          pTmExtOut->ulRecKey = TmDel.recordKey = *pulKey;
-                          pTmExtOut->usTargetKey = TmDel.targetKey = usTarget;
+                          pTmExtOut->ulRecKey = *pulKey;
+                          TmDel.currentInternalKey.setInternalKey(*pulKey, usTarget);
+                          pTmExtOut->usTargetKey = usTarget;
 
                           TMDelTargetClb( pTmRecord, pTMXTargetRecord, pClb );
                           
@@ -668,7 +660,7 @@ USHORT EqfMemory::FindTargetByKeyAndDelete(
 
 //NEW CODE
      //loop until correct target is found
-        while ( (usTarget < TmDel.targetKey) && (lLeftTgtLen > 0) && !usRc )
+        while ( (usTarget < TmDel.nextInternalKey.getTargetKey()) && (lLeftTgtLen > 0) && !usRc )
         {
           // position to first target CLB
           pTMXTargetRecord = (PTMX_TARGET_RECORD)(pByte);
@@ -689,7 +681,7 @@ USHORT EqfMemory::FindTargetByKeyAndDelete(
           } /* endif */ 
 
           // loop over all target CLBs
-          while ( (usTarget < TmDel.targetKey) && ( lLeftClbLen > 0 ) )
+          while ( (usTarget < TmDel.nextInternalKey.getTargetKey()) && ( lLeftClbLen > 0 ) )
           {
             usTarget++;
             pTargetClb = NEXTTARGETCLB(pTargetClb);
@@ -697,7 +689,7 @@ USHORT EqfMemory::FindTargetByKeyAndDelete(
           } /* endwhile */
 
           // continue with next target if no match yet
-          if ( usTarget < TmDel.targetKey )
+          if ( usTarget < TmDel.nextInternalKey.getTargetKey() )
           {
             // position at next target
             pTMXTargetRecord = (PTMX_TARGET_RECORD)(pByte);
@@ -730,7 +722,7 @@ USHORT EqfMemory::FindTargetByKeyAndDelete(
           } /* endif */
         } /* endwhile */
 
-        if ( !usRc && (usTarget == TmDel.targetKey) )
+        if ( !usRc && (usTarget == TmDel.nextInternalKey.getTargetKey()) )
         {
           //position at start of target record
           pTMXTargetRecord = (PTMX_TARGET_RECORD)(pByte);
@@ -748,8 +740,9 @@ USHORT EqfMemory::FindTargetByKeyAndDelete(
                                      pTmExtOut );
             NTMGetNameFromID( &pTMXSourceRecord->usLangId, (USHORT)LANG_KEY,
                         pTmExtOut->szOriginalSourceLanguage, NULL );
-            pTmExtOut->ulRecKey = TmDel.recordKey = *pulKey;
-            pTmExtOut->usTargetKey = TmDel.targetKey = usTarget;
+            TmDel.currentInternalKey.setInternalKey(*pulKey, usTarget);
+            pTmExtOut->ulRecKey = *pulKey;
+            pTmExtOut->usTargetKey = usTarget;
             
             //if ( !pClb->bMultiple || (BOOL)TmDel.lTargetTime )
             if(pTargetClb->ulSegmId != TmDel.lSegmentId){

@@ -755,6 +755,10 @@ int ImportRequestData::parseJSON(){
   // find the memory to our memory list
   // extract TMX data
   int loggingThreshold = -1; //0-develop(show all logs), 1-debug+, 2-info+, 3-warnings+, 4-errors+, 5-fatals only
+  if(strBody.empty() && false == strTmxData.empty())
+  { 
+    return 0;
+  }
   
   void *parseHandle = json_factory.parseJSONStart( strBody, &_rc_ );
   if ( parseHandle == NULL )
@@ -2533,10 +2537,13 @@ int ExportRequestData::ExportTmx(){
     //if(isStreamingRequest()){
       fctdata.responseHandler = responseHandler;
     //}
-    mem->SplitProposalKeyIntoRecordAndTarget(szKey, &fctdata.startingRecordKey, &fctdata.startingTargetKey);
-    fctdata.recordKey = fctdata.startingRecordKey;
-    fctdata.targetKey = fctdata.startingTargetKey;
-
+    fctdata.startingInternalKey.parseAndSetInternalKey(szKey);
+    if(false == fctdata.startingInternalKey.isValid())
+    {
+      fctdata.startingInternalKey.setFirstInternalKey();
+    }
+    fctdata.nextInternalKey = fctdata.startingInternalKey;
+    
     _rc_ = fctdata.MemFuncPrepExport( (PSZ)strMemName.c_str(), (PSZ)strTempFile.c_str(), TMX_UTF8_OPT | OVERWRITE_OPT | COMPLETE_IN_ONE_CALL_OPT, mem );
   } 
 
@@ -2548,7 +2555,7 @@ int ExportRequestData::ExportTmx(){
     }
   }
 
-  nextInternalKey = std::to_string(mem->ulNextKey) + ":" + std::to_string(mem->usNextTarget);
+  nextInternalKey = fctdata.nextInternalKey.getStr();// std::to_string(mem->ulNextKey) + ":" + std::to_string(mem->usNextTarget);
   
   if(_rc_){
     T5LOG(T5ERROR) <<  "end of function EqfExportMem with error code::  RC = " << _rc_;
@@ -2575,6 +2582,8 @@ int UpdateEntryRequestData::parseJSON(){
   // parse input parameters
   std::wstring strInputParmsW = EncodingHelper::convertToWChar( strBody.c_str() );
   // parse input parameters
+  
+  ulong recordKey = 0, targetKey = 0;
   Data.clear();    
   JSONFactory::JSONPARSECONTROL parseControl[] = { 
   { L"source",         JSONFactory::UTF16_STRING_PARM_TYPE, &( Data.szSource ), sizeof( Data.szSource ) / sizeof( Data.szSource[0] ) },
@@ -2592,8 +2601,8 @@ int UpdateEntryRequestData::parseJSON(){
   { L"addInfo",        JSONFactory::UTF16_STRING_PARM_TYPE, &( Data.szAddInfo ), sizeof( Data.szAddInfo ) / sizeof( Data.szAddInfo[0] ) },
   { L"loggingThreshold",JSONFactory::INT_PARM_TYPE        , &(loggingThreshold), 0},
   { L"save2disk",      JSONFactory::INT_PARM_TYPE         , &(fSave2Disk), 0 },
-  { L"recordKey",      JSONFactory::INT_PARM_TYPE         , &(Data.recordKey), 0 },
-  { L"targetKey",      JSONFactory::INT_PARM_TYPE         , &(Data.targetKey), 0 },
+  { L"recordKey",      JSONFactory::INT_PARM_TYPE         , &(recordKey), 0 },
+  { L"targetKey",      JSONFactory::INT_PARM_TYPE         , &(targetKey), 0 },
   { L"",               JSONFactory::ASCII_STRING_PARM_TYPE, NULL, 0 } };
 
   _rc_ = json_factory.parseJSON( strInputParmsW, parseControl );
@@ -2757,6 +2766,7 @@ int GetEntryRequestData::parseJSON(){
   _rc_ = json_factory.parseJSON( strInputParmsW, parseControl );  
  
   if(loggingThreshold >=0) T5Logger::GetInstance()->SetLogLevel(loggingThreshold);  
+  Data.nextInternalKey.setInternalKey(recordKey, targetKey);
 
   if ( _rc_ )
   {
@@ -2767,11 +2777,11 @@ int GetEntryRequestData::parseJSON(){
 
 int GetEntryRequestData::checkData()
 {
-  if( 0 == recordKey){
+  if( 0 == Data.nextInternalKey.getRecordKey() ){
     return buildErrorReturn( ERROR_INPUT_PARMS_INVALID, 
     "Error: Missing recordKey. Both recordKey and targetKey should be provided", BAD_REQUEST);
   }
-  if( 0 == targetKey ){
+  if( 0 == Data.nextInternalKey.getTargetKey() ){
     return buildErrorReturn( ERROR_INPUT_PARMS_INVALID, 
     "Error: Missing targetKey. Both recordKey and targetKey should be provided", BAD_REQUEST);
   }
@@ -2785,11 +2795,10 @@ int GetEntryRequestData::execute()
     return buildErrorReturn( ERROR_INPUT_PARMS_INVALID, 
     "Error: memptr is null", 500);
   } 
-  _rc_ = mem->getProposal(recordKey, targetKey, Data);
+  _rc_ = mem->getNextProposal(Data);
 
-  if(Data.targetKey != targetKey || Data.recordKey != recordKey){
-    std::string errMsg = "Requested entry not found! Next internalKey after requested is : " + std::to_string(Data.recordKey);
-    errMsg += ";" + std::to_string(Data.targetKey);
+  if(Data.currentInternalKey.getTargetKey() != targetKey || Data.currentInternalKey.getRecordKey() != recordKey){
+    std::string errMsg = "Requested entry not found! Next internalKey after requested is : " + Data.currentInternalKey.getStr();
     return buildErrorReturn(939, errMsg.c_str(), 400);
   }
   // return the entry data
@@ -2815,6 +2824,7 @@ int DeleteEntryRequestData::parseJSON(){
   Data.clear();
 
   auto loggingThreshold = -1;
+  ulong recordKey = 0, targetKey = 0 ;
        
   JSONFactory::JSONPARSECONTROL parseControl[] = { 
   { L"source",         JSONFactory::UTF16_STRING_PARM_TYPE, &( Data.szSource ), sizeof( Data.szSource ) / sizeof( Data.szSource[0] ) },
@@ -2830,13 +2840,13 @@ int DeleteEntryRequestData::parseJSON(){
   { L"timeStamp",      JSONFactory::ASCII_STRING_PARM_TYPE, &( szDateTime ), sizeof( szDateTime ) },
   { L"addInfo",        JSONFactory::UTF16_STRING_PARM_TYPE, &( Data.szAddInfo ), sizeof( Data.szAddInfo ) / sizeof( Data.szAddInfo[0] ) },
   { L"loggingThreshold",JSONFactory::INT_PARM_TYPE        , &(loggingThreshold), 0},
-  { L"recordKey",      JSONFactory::INT_PARM_TYPE         , &(Data.recordKey), 0 },
-  { L"targetKey",      JSONFactory::INT_PARM_TYPE         , &(Data.targetKey), 0 },
+  { L"recordKey",      JSONFactory::INT_PARM_TYPE         , &(recordKey), 0 },
+  { L"targetKey",      JSONFactory::INT_PARM_TYPE         , &(targetKey), 0 },
   { L"save2disk",      JSONFactory::INT_PARM_TYPE         , &(fSave2Disk), 0},
   { L"",               JSONFactory::ASCII_STRING_PARM_TYPE, NULL, 0 } };
 
   _rc_ = json_factory.parseJSON( strInputParmsW, parseControl );  
- 
+  Data.nextInternalKey.setInternalKey(recordKey, targetKey);// next internal key used for sending position, current- for receiving
   if(loggingThreshold >=0) T5Logger::GetInstance()->SetLogLevel(loggingThreshold);  
 
   if ( _rc_ )
@@ -2847,8 +2857,8 @@ int DeleteEntryRequestData::parseJSON(){
 }
 
 int DeleteEntryRequestData::checkData(){
-  if(Data.recordKey || Data.targetKey){
-    if(Data.recordKey && Data.targetKey && Data.lSegmentId){
+  if(Data.nextInternalKey.getRecordKey() || Data.nextInternalKey.getTargetKey()){
+    if(Data.nextInternalKey.getRecordKey() && Data.nextInternalKey.getTargetKey() && Data.lSegmentId){
       return 0;
     }else{
       return buildErrorReturn( ERROR_INPUT_PARMS_INVALID, 
@@ -2891,7 +2901,7 @@ int DeleteEntryRequestData::execute(){
   TMX_EXT_OUT_W TmPutOut;  
   memset( &TmPutOut, 0, sizeof(TmPutOut) );
   
-  if(Data.recordKey && Data.targetKey && Data.lSegmentId){
+  if(Data.nextInternalKey.getRecordKey() && Data.nextInternalKey.getTargetKey() && Data.lSegmentId){
     //internalKey = true;
     _rc_ = mem->TmtXDelSegmByKey(Data, &TmPutOut);
   }else{
@@ -3308,7 +3318,7 @@ int ConcordanceExtendedSearchRequestData::execute()
   int iActualSearchTime = 0; // for the first call run until end of TM or one proposal has been found
 
   auto filters = searchFilterFactory.getListOfFilters();
-  mem->resetInternalCursor();
+  //mem->resetInternalCursor();
 
   do
   {
@@ -3325,7 +3335,8 @@ int ConcordanceExtendedSearchRequestData::execute()
       }
       else
       {
-        mem->setSequentialAccessKey((PSZ) Data.szSearchPos );
+        //mem->setSequentialAccessKey((PSZ) Data.szSearchPos );
+        OProposal.nextInternalKey.parseAndSetInternalKey(Data.szSearchPos);
         _rc_ = mem->getNextProposal( OProposal );
       } /* endif */
 
@@ -3399,7 +3410,8 @@ int ConcordanceExtendedSearchRequestData::execute()
       // search given string in proposal
       if ( fFound || (_rc_ == TIMEOUT_RC) )
       {
-        mem->getSequentialAccessKey( Data.szSearchPos, 20 );
+        strncpy(Data.szSearchPos, OProposal.nextInternalKey.getStr().c_str(), 20);
+        //mem->getSequentialAccessKey( Data.szSearchPos, 20 );
       } /* endif */
       else if ( _rc_ == EqfMemory::INFO_ENDREACHED )
       {
@@ -3418,6 +3430,8 @@ int ConcordanceExtendedSearchRequestData::execute()
       iFoundProposals++;
     }
   } while ( ( _rc_ == 0 ) && ( fCountInsteadOfReturnSegments || iFoundProposals < Data.iNumOfProposals ) );
+
+  //mem->resetInternalCursor();
 
 
   std::string filtersStr, globalOptionsStr;
@@ -3645,7 +3659,8 @@ int ConcordanceSearchRequestData::execute(){
       }
       else
       {
-        mem->setSequentialAccessKey((PSZ) Data.szSearchPos );
+        //mem->setSequentialAccessKey((PSZ) Data.szSearchPos );
+        OProposal.nextInternalKey.parseAndSetInternalKey(Data.szSearchPos);
         _rc_ = mem->getNextProposal( OProposal );
       } /* endif */
 
@@ -3719,7 +3734,8 @@ int ConcordanceSearchRequestData::execute(){
       // search given string in proposal
       if ( fFound || (_rc_ == TIMEOUT_RC) )
       {
-        mem->getSequentialAccessKey( Data.szSearchPos, 20 );
+        strncpy(Data.szSearchPos, OProposal.nextInternalKey.getStr().c_str(), 20);
+        //mem->getSequentialAccessKey( Data.szSearchPos, 20 );
       } /* endif */
       else if ( _rc_ == EqfMemory::INFO_ENDREACHED )
       {

@@ -259,8 +259,9 @@ int EqfMemory::putProposal
     int *piProgress
   )
   {
-    this->resetInternalCursor();
-
+    //this->resetInternalCursor();
+    Proposal.currentInternalKey.reset();
+    Proposal.nextInternalKey.setFirstInternalKey();
     return( this->getNextProposal( Proposal, piProgress ) );
   }
 
@@ -330,10 +331,10 @@ int EqfMemory::getNextProposal
   memset( &TmExtIn, 0, sizeof(TMX_EXT_IN_W) );
   memset( &TmExtOut, 0, sizeof(TMX_EXT_OUT_W) );
 
-  Proposal.clear();
-  TmExtIn.ulTmKey      = this->ulNextKey;
-  TmExtIn.usNextTarget = this->usNextTarget;
+  TmExtIn.ulTmKey      = Proposal.nextInternalKey.getRecordKey();//this->ulNextKey;
+  TmExtIn.usNextTarget = Proposal.nextInternalKey.getTargetKey();//this->usNextTarget;
   TmExtIn.usConvert    = MEM_OUTPUT_ASIS;
+  Proposal.clear();
 
   iRC = (int)TmtXExtract( &TmExtIn,  &TmExtOut);
 
@@ -350,13 +351,16 @@ int EqfMemory::getNextProposal
     ExtOutToOtmProposal( &TmExtOut, Proposal );
 
     // set current proposal internal key ,which is used in updateProposal
-    Proposal.SetProposalKey(  TmExtIn.ulTmKey, TmExtIn.usNextTarget );
+    Proposal.currentInternalKey.setInternalKey(  TmExtIn.ulTmKey, TmExtIn.usNextTarget );
+  }else{
+    Proposal.currentInternalKey.reset();
   } /* endif */       
 
   if ( (iRC == 0) || (iRC == BTREE_CORRUPTED)  || iRC == BTREE_BUFFER_SMALL)
   {
-    this->ulNextKey = TmExtOut.ulTmKey;
-    this->usNextTarget = TmExtOut.usNextTarget;
+    Proposal.nextInternalKey.setInternalKey(TmExtOut.ulTmKey, TmExtOut.usNextTarget); 
+    //this->ulNextKey = TmExtOut.ulTmKey;
+    //this->usNextTarget = TmExtOut.usNextTarget;
   } /* endif */       
 
   if ( iRC == 0 )
@@ -376,45 +380,8 @@ int EqfMemory::getNextProposal
   return( iRC );
 }
 
-  /*! \brief Get the current sequential access key (the key for the next proposal in the memory) 
-  \param pszKeyBuffer pointer to the buffer to store the sequential access key
-  \param iKeyBufferSize size of the key buffer in number of characters
-  \returns 0 or error code in case of errors
-*/
-int EqfMemory::getSequentialAccessKey
-(
-  char *pszKeyBuffer,
-  int  iKeyBufferSize
-)
-{
-  int iRC = 0;
-  char szKey[20];
-
-  sprintf( szKey, "%lu:%u", this->ulNextKey, this->usNextTarget );
-  if ( strlen(szKey)+1 <= iKeyBufferSize )
-  {
-    strcpy( pszKeyBuffer, szKey );
-  }
-  else
-  {
-    iRC = ERROR_BUFFERTOOSMALL;
-  }
-  return( iRC );
-}
 
     
-/*! \brief Set the current sequential access key to resume the sequential access at the given position
-  \param pszKey a sequential access key previously returned by getSequentialAccessKey
-  \returns 0 or error code in case of errors
-*/
-int EqfMemory::setSequentialAccessKey
-(
-  char *pszKey
-)
-{
-  int iRC = this->SplitProposalKeyIntoRecordAndTarget( pszKey, &(this->ulNextKey), &(this->usNextTarget) );
-  return( iRC );
-}
 
 
 /*! \brief Get the the proposal having the supplied key (InternalKey from the OtmProposal)
@@ -434,11 +401,11 @@ int EqfMemory::getProposal
   TMX_EXT_OUT_W TmExtOut;
   memset( &TmExtIn, 0, sizeof(TMX_EXT_IN_W) );
   memset( &TmExtOut, 0, sizeof(TMX_EXT_OUT_W) );
-  Proposal.clear();
-
+  
   TmExtIn.ulTmKey = recordKey;
   TmExtIn.usNextTarget = targetKey;
   TmExtIn.usConvert    = MEM_OUTPUT_ASIS;
+  Proposal.clear();
 
   if ( iRC == 0 )
   {
@@ -449,12 +416,12 @@ int EqfMemory::getProposal
   {
     ExtOutToOtmProposal( &TmExtOut, Proposal );
     // set current proposal internal key ,which is used in updateProposal
-    Proposal.SetProposalKey(  TmExtIn.ulTmKey, TmExtIn.usNextTarget );
-    this->ulNextKey = TmExtOut.ulTmKey;
-    this->usNextTarget = TmExtOut.usNextTarget;
+    Proposal.nextInternalKey.setInternalKey(TmExtOut.ulTmKey, TmExtOut.usNextTarget );
+  }else{
+    Proposal.currentInternalKey.reset();
+    handleError( iRC, this->szName );
   } /* endif */      
 
-  if ( iRC != 0 ) handleError( iRC, this->szName );
 
   return( iRC );
 }
@@ -478,7 +445,9 @@ int EqfMemory::getProposal
   memset( &TmExtOut, 0, sizeof(TMX_EXT_OUT_W) );
   Proposal.clear();
 
-  iRC = this->SplitProposalKeyIntoRecordAndTarget( pszKey, &( TmExtIn.ulTmKey), &( TmExtIn.usNextTarget) );
+  iRC = Proposal.nextInternalKey.parseAndSetInternalKey( pszKey );
+  TmExtIn.ulTmKey = Proposal.nextInternalKey.getRecordKey();
+  TmExtIn.usNextTarget = Proposal.nextInternalKey.getTargetKey();
   TmExtIn.usConvert    = MEM_OUTPUT_ASIS;
 
   if ( iRC == 0 )
@@ -490,12 +459,11 @@ int EqfMemory::getProposal
   {
     ExtOutToOtmProposal( &TmExtOut, Proposal );
     // set current proposal internal key ,which is used in updateProposal
-    Proposal.SetProposalKey(  TmExtIn.ulTmKey, TmExtIn.usNextTarget );
-    this->ulNextKey = TmExtOut.ulTmKey;
-    this->usNextTarget = TmExtOut.usNextTarget;
+    Proposal.nextInternalKey.setInternalKey(TmExtOut.ulTmKey, TmExtOut.usNextTarget );
+  }else{
+    Proposal.currentInternalKey.reset();
+    handleError( iRC, this->szName );
   } /* endif */      
-
-  if ( iRC != 0 ) handleError( iRC, this->szName );
 
   return( iRC );
 }
@@ -608,14 +576,16 @@ int OtmProposal::SetProposalKey
   USHORT  usTargetNum
 )
 {  
-  recordKey = ulKey;
-  targetKey = usTargetNum;
+  currentInternalKey.setInternalKey(ulKey, usTargetNum);
+  //recordKey = ulKey;
+  //targetKey = usTargetNum;
   return( 0 );
 }
 
 std::string OtmProposal::getInternalKey()const{
-  return std::to_string( recordKey) + ":" + std::to_string(targetKey);
+  return currentInternalKey.getStr();
 }
+
 
 /*! \brief Split an internal key into record number and target number
     \param Proposal reference to the OtmProposal 
@@ -623,26 +593,7 @@ std::string OtmProposal::getInternalKey()const{
     \param pusTargetNum pointer to buffer for number of target within record 
   	\returns 0 or error code in case of errors
 */
-int EqfMemory::SplitProposalKeyIntoRecordAndTarget
-(
-  OtmProposal &Proposal,
-  ULONG   *pulKey,
-  USHORT  *pusTargetNum
-)
-{
-  int iRC = 0;
-  char szKey[20]= {0};
-  Proposal.getInternalKey( szKey, sizeof(szKey) );
-  return( this->SplitProposalKeyIntoRecordAndTarget( szKey, pulKey, pusTargetNum ) );
-}
-
-/*! \brief Split an internal key into record number and target number
-    \param Proposal reference to the OtmProposal 
-    \param pulKey pointer to record number buffer
-    \param pusTargetNum pointer to buffer for number of target within record 
-  	\returns 0 or error code in case of errors
-*/
-int EqfMemory::SplitProposalKeyIntoRecordAndTarget
+int TMCursor::SplitProposalKeyIntoRecordAndTarget
 (
   char    *pszKey,
   ULONG   *pulKey,
@@ -696,8 +647,9 @@ int EqfMemory::ExtOutToOtmProposal
   Proposal.setUpdateTime( pExtOut->lTargetTime );
   Proposal.setContextRanking( 0 );
   Proposal.setOriginalSourceLanguage( pExtOut->szOriginalSourceLanguage );
-  Proposal.recordKey = pExtOut->ulRecKey;
-  Proposal.targetKey = pExtOut->usTargetKey;
+  //Proposal.recordKey = pExtOut->ulRecKey;
+  //Proposal.targetKey = pExtOut->usTargetKey
+  Proposal.currentInternalKey.setInternalKey(pExtOut->ulRecKey, pExtOut->usTargetKey);
 
   return( iRC );
 }

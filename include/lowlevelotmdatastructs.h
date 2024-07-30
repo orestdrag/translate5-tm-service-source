@@ -2465,6 +2465,52 @@ struct MEM_LOAD_DLG_IDA
  MEMEXPIMPSEG*  pstSegment;                        // buffer for segment data
  BOOL         fEOF;                           // Indicates end of file
 };
+
+
+class TMCursor
+{
+  ulong _recordKey;
+  ushort _targetKey;
+public:
+
+
+  int SplitProposalKeyIntoRecordAndTarget(char    *pszKey, ulong   *pulKey,  ushort  *pusTargetNum);
+  int parseAndSetInternalKey(char* pszKey){
+    return SplitProposalKeyIntoRecordAndTarget(pszKey, &_recordKey, &_targetKey);
+  }
+  
+  int reset(){ 
+    return setInternalKey(0,0);
+  }
+  
+  int setFirstInternalKey()  { 
+    return setInternalKey(7,1); 
+  }
+
+  int moveToNextRecord() {
+    return setInternalKey(_recordKey+1, 1); 
+  }
+
+  int setInternalKey(ulong recordKey, ushort targetKey){
+    _recordKey = recordKey; 
+    _targetKey = targetKey; 
+  }
+
+
+  bool isValid()const{
+    return _recordKey > 0 && _targetKey > 0;
+  }
+
+  std::string getStr() const { 
+    return std::to_string(_recordKey) + ":" + std::to_string(_targetKey) ; 
+  }
+
+  ulong getRecordKey()const { return _recordKey; }
+  ushort getTargetKey()const { return _targetKey; }
+
+};
+
+
 //using MEM_LOAD_DLG_IDA* = MEM_LOAD_DLG_IDA *;
 // internal session data area
 typedef struct _FCTDATA
@@ -2512,10 +2558,9 @@ typedef struct _FCTDATA
 );
   std::shared_ptr<EqfMemory> mem;
   proxygen::ResponseHandler* responseHandler = nullptr;
-  ulong recordKey = 0;
-  ushort targetKey = 0; 
-  ulong startingRecordKey = 0;
-  ushort startingTargetKey = 0;
+ 
+  TMCursor startingInternalKey;
+  TMCursor nextInternalKey;
   
   ulong numOfProposalsRequested = 0;
   folly::IOBufQueue bufQueue;

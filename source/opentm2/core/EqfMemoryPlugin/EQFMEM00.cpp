@@ -204,8 +204,9 @@ VOID EQFMemOrganizeProcess
   } /* endif */         
   }catch(...)
   {
-    pRIDA->pMem->ulNextKey++;
-    pRIDA->pMem->usNextTarget = 1;
+    pRIDA->pProposal->nextInternalKey.moveToNextRecord();
+    //pRIDA->pMem->ulNextKey++;
+    //pRIDA->pMem->usNextTarget = 1;
     iRC = EqfMemory::ERROR_ENTRYISCORRUPTED;
   }
 
