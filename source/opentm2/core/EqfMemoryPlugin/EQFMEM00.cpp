@@ -192,16 +192,17 @@ VOID EQFMemOrganizeProcess
 
   int iProgress = 0;
   int iRC = 0;
-  try{
   if ( pRIDA->fFirstGet )
   {
-    iRC = pRIDA->pMem->getFirstProposal( *(pRIDA->pProposal), &iProgress );
+    pRIDA->pProposal->nextInternalKey.setFirstInternalKey();
     pRIDA->fFirstGet = FALSE;
   }
-  else
-  {
-    iRC = pRIDA->pMem->getNextProposal( *(pRIDA->pProposal), &iProgress );
-  } /* endif */         
+  if(false == pRIDA->pProposal->nextInternalKey.isValid()){
+    T5LOG(T5ERROR) << "nextInternalKeyIsInvalid";
+  }
+
+  try{
+    iRC = pRIDA->pMem->getNextProposal( *(pRIDA->pProposal), &iProgress );  
   }catch(...)
   {
     pRIDA->pProposal->nextInternalKey.moveToNextRecord();
@@ -213,6 +214,7 @@ VOID EQFMemOrganizeProcess
   if ( iRC == NO_ERROR )
   {
     pCommArea->usComplete = (USHORT)iProgress;
+    pRIDA->pMem->importDetails->usProgress = (USHORT) iProgress;
 
     // do some consistency checking
     pRIDA->pProposal->getMarkup( pRIDA->szTagTable, sizeof(pRIDA->szTagTable) );

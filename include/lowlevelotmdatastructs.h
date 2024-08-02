@@ -408,14 +408,8 @@ typedef _PFN_QDAMCOMPARE *PFN_QDAMCOMPARE;
 typedef struct _LOOKUPENTRY_V3
 {
   PBTREEBUFFER_V3 pBuffer; // Pointer to BTREEBUFFER
-} LOOKUPENTRY_V3, *PLOOKUPENTRY_V3;
-
-
-
-typedef struct _ACCESSCOUNTERTABLEENTRY
-{
   ULONG ulAccessCounter;
-} ACCESSCTRTABLEENTRY, * PACCESSCTRTABLEENTRY;
+} LOOKUPENTRY_V3, *PLOOKUPENTRY_V3;
 
 
 typedef LHANDLE HTM;
@@ -601,7 +595,6 @@ struct BTREE: public BTREEDATA
   std::vector<BYTE>         TempRecord;
 
   std::vector<LOOKUPENTRY_V3> LookupTable_V3;        // Pointer to lookup-table
-  std::vector<ACCESSCTRTABLEENTRY> AccessCtrTable;   // Pointer to access-counter-table
 
 
   BTREE(){
@@ -2494,6 +2487,7 @@ public:
   int setInternalKey(ulong recordKey, ushort targetKey){
     _recordKey = recordKey; 
     _targetKey = targetKey; 
+    return 0;
   }
 
 

@@ -1947,26 +1947,6 @@ USHORT AddTmTarget(
     OtmProposal &Proposal
   ); 
 
-  /*! \brief Get the the first proposal from the memory and prepare sequential access
-    \param Proposal reference to a OtmProposal object which will be filled with the proposal data
-  	\returns handle for usage with GetNextProposal or 0 in case of errors
-*/
-  int getFirstProposal
-  (
-    OtmProposal &Proposal
-  ); 
-
-  /*! \brief Get the the first proposal from the memory and prepare sequential access
-    \param Proposal reference to a OtmProposal object which will be filled with the proposal data
-    \param piProgress pointer to buffer for progress indicator, this indicator goes from 0 up to 100
-  	\returns handle for usage with GetNextProposal or 0 in case of errors
-*/
-  int getFirstProposal
-  (
-    OtmProposal &Proposal,
-    int *piProgress
-  ); 
-
   //fuzzy search
   USHORT TmtXGet
   (
@@ -1992,15 +1972,7 @@ USHORT AddTmTarget(
   USHORT FillExtStructure( PTMX_TARGET_RECORD,
                          PTMX_TARGET_CLB,
                          PSZ_W, PLONG, PTMX_EXT_OUT_W );
-/*! \brief Get the next proposal from the memory 
-    \param lHandle the hande returned by GetFirstProposal
-    \param Proposal reference to a OtmProposal object which will be filled with the proposal data
-  	\returns 0 or error code in case of errors
-*/
-  int getNextProposal
-  (
-    OtmProposal &Proposal
-  ); 
+
 
   int RewriteCompactTable();
   
@@ -2013,7 +1985,7 @@ USHORT AddTmTarget(
   int getNextProposal
   (
     OtmProposal &Proposal,
-    int *piProgress
+    int *piProgress = nullptr
   ); 
 
     /*! \brief Get the current sequential access key (the key for the next proposal in the memory) 
@@ -2053,23 +2025,6 @@ USHORT AddTmTarget(
     TMX_EXT_OUT_W *  pTmExtOut
   );
 
-/*! \brief Get the the proposal having the supplied key (InternalKey from the OtmProposal)
-    \param pszKey internal key of the proposal
-    \param Proposal buffer for the returned proposal data
-  	\returns 0 or error code in case of errors
-*/
-  int getProposal
-  (
-    char *pszKey,
-    OtmProposal &Proposal
-  ); 
-
-  int getProposal
-  (
-    ulong recordKey,
-    ushort targetKey,
-    OtmProposal &Proposal
-  );
 
   USHORT TmtXReplace
   (

@@ -3318,6 +3318,16 @@ int ConcordanceExtendedSearchRequestData::execute()
   int iActualSearchTime = 0; // for the first call run until end of TM or one proposal has been found
 
   auto filters = searchFilterFactory.getListOfFilters();
+  // get first or next proposal
+  if ( *Data.szSearchPos == EOS )
+  {
+    OProposal.nextInternalKey.setFirstInternalKey();
+  }
+  else
+  {
+    //mem->setSequentialAccessKey((PSZ) Data.szSearchPos );
+    _rc_ = OProposal.nextInternalKey.parseAndSetInternalKey(Data.szSearchPos);
+  } /* endif */
   //mem->resetInternalCursor();
 
   do
@@ -3328,17 +3338,9 @@ int ConcordanceExtendedSearchRequestData::execute()
       DWORD dwSearchStartTime = 0;
       if ( iActualSearchTime != 0 ) dwSearchStartTime = GetTickCount();
 
-      // get first or next proposal
-      if ( *Data.szSearchPos == EOS )
-      {
-        _rc_ = mem->getFirstProposal( OProposal );
-      }
-      else
-      {
-        //mem->setSequentialAccessKey((PSZ) Data.szSearchPos );
-        OProposal.nextInternalKey.parseAndSetInternalKey(Data.szSearchPos);
+      if(!_rc_){
         _rc_ = mem->getNextProposal( OProposal );
-      } /* endif */
+      }
 
       // prepare searchstring
       //if ( lOptions & SEARCH_CASEINSENSITIVE_OPT ) wcsupr( Data.szSearchString );
@@ -3637,6 +3639,17 @@ int ConcordanceSearchRequestData::execute(){
   // loop until end reached or enough proposals have been found
   int iFoundProposals = 0;
   int iActualSearchTime = 0; // for the first call run until end of TM or one proposal has been found
+  // get first or next proposal
+  if ( *Data.szSearchPos == EOS )
+  {
+    OProposal.nextInternalKey.setFirstInternalKey();
+  }
+  else
+  {
+    //mem->setSequentialAccessKey((PSZ) Data.szSearchPos );
+    _rc_ = OProposal.nextInternalKey.parseAndSetInternalKey(Data.szSearchPos);
+  } /* endif */ 
+
   do
   {
     {
@@ -3650,19 +3663,11 @@ int ConcordanceSearchRequestData::execute(){
       } /* endif */
 
       DWORD dwSearchStartTime = 0;
-      if ( iActualSearchTime != 0 ) dwSearchStartTime = GetTickCount();
+      if ( iActualSearchTime != 0 ) dwSearchStartTime = GetTickCount();     
 
-      // get first or next proposal
-      if ( *Data.szSearchPos == EOS )
-      {
-        _rc_ = mem->getFirstProposal( OProposal );
-      }
-      else
-      {
-        //mem->setSequentialAccessKey((PSZ) Data.szSearchPos );
-        OProposal.nextInternalKey.parseAndSetInternalKey(Data.szSearchPos);
+      if(!_rc_){
         _rc_ = mem->getNextProposal( OProposal );
-      } /* endif */
+      }
 
       // prepare searchstring
       if ( lOptions & SEARCH_CASEINSENSITIVE_OPT ) wcsupr( Data.szSearchString );

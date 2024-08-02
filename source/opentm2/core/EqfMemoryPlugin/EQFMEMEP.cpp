@@ -874,12 +874,9 @@ USHORT MemExportProcess ( PMEM_EXPORT_IDA  pExportIDA ) // pointer to the export
 
    if ( pExportIDA->fFirstExtract )
    {
-     iTmRC = pExportIDA->pMem->getFirstProposal( *(pExportIDA->pProposal), &(pExportIDA->iComplete) );
+     pExportIDA->pProposal->nextInternalKey.setFirstInternalKey();
    }
-   else
-   {
-     iTmRC = pExportIDA->pMem->getNextProposal( *(pExportIDA->pProposal), &(pExportIDA->iComplete) );
-   } /* endif */
+   iTmRC = pExportIDA->pMem->getNextProposal( *(pExportIDA->pProposal), &(pExportIDA->iComplete) );
 
    if ( (iTmRC == NO_ERROR) || iTmRC == EqfMemory::INFO_ENDREACHED )
    {

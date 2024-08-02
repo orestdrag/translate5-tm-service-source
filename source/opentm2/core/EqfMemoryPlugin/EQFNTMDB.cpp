@@ -486,7 +486,7 @@ int BTREE::initLookupTable(){
   } /* endif */
   #else
   LookupTable_V3.reserve(MIN_NUMBER_OF_LOOKUP_ENTRIES);
-  AccessCtrTable.reserve(MIN_NUMBER_OF_LOOKUP_ENTRIES);
+  //AccessCtrTable.reserve(MIN_NUMBER_OF_LOOKUP_ENTRIES);
 
   #endif
 
@@ -541,7 +541,7 @@ int BTREE::checkLookupTableAndRealocate(int number){
   if ( number >= LookupTable_V3.size() )
   {
     LookupTable_V3.resize(number+10);
-    AccessCtrTable.resize(number+10);
+    //AccessCtrTable.resize(number+10);
   }
 
   #endif
@@ -1626,6 +1626,8 @@ int BTREE::resetLookupTable(){
       (usNumberOfAllocatedBuffers)--;
     } /* endif */
   } /* endfor */
+  LookupTable_V3.resize(0);
+  usNumberOfAllocatedBuffers = 0;
   #endif
   return rc;
 }

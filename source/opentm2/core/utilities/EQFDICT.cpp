@@ -1260,7 +1260,7 @@ SHORT  BTREE::QDAMReadRecord_V3
   SHORT    sRc = 0;                  // return code
   BOOL     fMemOK = FALSE;
   PLOOKUPENTRY_V3  pLEntry;
-  PACCESSCTRTABLEENTRY  pACTEntry;
+  //PACCESSCTRTABLEENTRY  pACTEntry;
   DEBUGEVENT2( QDAMREADRECORD_LOC, FUNCENTRY_EVENT, usNumber, DB_GROUP, "" );
 
   *ppReadBuffer = NULL;
@@ -1296,8 +1296,9 @@ SHORT  BTREE::QDAMReadRecord_V3
     {
       /* Record isn't in memory -> read it from disk */
       sRc =  QDAMReadRecordFromDisk_V3( usNumber, ppReadBuffer, fNewRec );
-      pACTEntry = &AccessCtrTable[usNumber];
-      pACTEntry->ulAccessCounter = 0L;
+      //pACTEntry = &AccessCtrTable[usNumber];
+      //pACTEntry->ulAccessCounter = 0L;
+      pLEntry->ulAccessCounter = 0;
     } /* endif */
   } /* endif */
 
@@ -1315,9 +1316,9 @@ SHORT  BTREE::QDAMReadRecord_V3
       for ( i=0; !sRc && (i < LookupTable_V3.size()); i++ )
       {
         pLEntry = &LookupTable_V3[i];
-        pACTEntry = &AccessCtrTable[i];
+        //pACTEntry = &AccessCtrTable[i];
         if ( pLEntry->pBuffer && !((pLEntry->pBuffer)->fLocked) && (i!=usNumber)
-             && (pACTEntry->ulAccessCounter<MAX_READREC_CALLS) )
+             && (pLEntry->ulAccessCounter<MAX_READREC_CALLS) )
         {
             /* write buffer and free allocated space */
             //if ( (pLEntry->pBuffer)->fNeedToWrite )
@@ -1331,13 +1332,13 @@ SHORT  BTREE::QDAMReadRecord_V3
             } /* endif */
         } /* endif */
 
-        if ( pACTEntry->ulAccessCounter<MAX_READREC_CALLS )
+        if ( pLEntry->ulAccessCounter<MAX_READREC_CALLS )
         {
-          pACTEntry->ulAccessCounter = 0L;
+          pLEntry->ulAccessCounter = 0L;
         }
         else
         {
-          pACTEntry->ulAccessCounter -= MAX_READREC_CALLS;
+          pLEntry->ulAccessCounter -= MAX_READREC_CALLS;
         } /* endif */
       } /* endfor */
       ulReadRecCalls = 0L;
@@ -1351,8 +1352,8 @@ SHORT  BTREE::QDAMReadRecord_V3
   if ( !sRc )
   {
     /* Increase the access counter for the record just read by  ACCESSBONUSPOINTS */
-    pACTEntry = &AccessCtrTable[usNumber];
-    pACTEntry->ulAccessCounter += ACCESSBONUSPOINTS;
+    pLEntry = &LookupTable_V3[usNumber];
+    pLEntry->ulAccessCounter += ACCESSBONUSPOINTS;
   } /* endif */
 
   return ( sRc );
