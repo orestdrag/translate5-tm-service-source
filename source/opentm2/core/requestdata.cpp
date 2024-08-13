@@ -762,7 +762,7 @@ int FlushMemRequestData::execute(){
   if(_rc_){
     return buildErrorReturn( _rc_, "FlushMemRequestData::checkData -> tm flush returned error", 500 );
   }
-  outputMessage = "{\n\t \"msg\": \"Mem " + strMemName + "was flushed to the disk successfully\" \n}";
+  outputMessage = "{\n\t \"msg\": \"Mem " + strMemName + " was flushed to the disk successfully\" \n}";
   
   return 0;
 }

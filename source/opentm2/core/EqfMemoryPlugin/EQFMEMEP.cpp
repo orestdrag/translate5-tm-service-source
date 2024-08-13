@@ -1784,6 +1784,7 @@ USHORT FCTDATA::MemFuncExportProcess()
 
     case MEM_EXPORT_TASK:
       usRC = EQFMemExportProcess( pCommArea, HWND_FUNCIF );
+      if(pIDA && pIDA->pProposal) nextInternalKey = pIDA->pProposal->nextInternalKey;
       if ( usRC != NO_ERROR )
       {
         T5LOG(T5ERROR) << "Error in MemFuncExportProcess::EQFMemExportProcess, RC = " << usRC;
