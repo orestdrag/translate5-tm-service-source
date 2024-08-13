@@ -705,9 +705,9 @@ int EqfMemory::ReloadFromDisk(){
 }
 
 int EqfMemory::FlushFilebuffers(){
-  TmBtree.fb.Flush();
-  InBtree.fb.Flush();
-  return 0;
+  int rc = TmBtree.fb.Flush();
+  rc = rc? rc : InBtree.fb.Flush();
+  return rc;
 }
 
 

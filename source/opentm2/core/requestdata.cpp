@@ -353,6 +353,7 @@ bool RequestData::isWriteRequest(){
       || command == COMMAND::IMPORT_MEM_STREAM
       || command == COMMAND::REORGANIZE_MEM
       || command == COMMAND::IMPORT_LOCAL_MEM
+      || command == COMMAND::FLUSH_MEM
       ;
 }
 
@@ -383,6 +384,15 @@ bool RequestData::isServiceRequest(){
    //?   || COMMAND::CLONE_TM_LOCALY
    //?   || COMMAND::DETELE_MEM
   ;   
+}
+
+const char* searchInCommandToStringsMap(const COMMAND& key) {
+    for (auto&& pair : CommandToStringsMap) {
+        if (pair.first == key) {
+            return pair.second ; // Found the key, no need to continue searching
+        }
+    }
+    return "UNKNOWN";
 }
 
 int RequestData::buildRet(int res){
@@ -434,7 +444,7 @@ int RequestData::run(){
     msg += "\n\t URL: " + strUrl;
     msg += "\n\t id: " + std::to_string(_id_);
     msg += "\n\t command: "; 
-    msg +=  CommandToStringsMap.find(command)->second;
+    msg +=  searchInCommandToStringsMap(command);
     msg += "\n\t rc: " + std::to_string(_rc_);
     msg += "\n\t rest_rc: " + std::to_string(_rest_rc_);
    
@@ -731,6 +741,32 @@ void importMemoryProcess( void *pvData );
 
 // reorganize memory process
 void reorganizeMemoryProcess( void *pvData );
+
+
+
+int FlushMemRequestData::checkData(){
+  if(TMManager::GetInstance()->TMExistsOnDisk(strMemName))// 
+  {
+    return buildErrorReturn( _rc_, "FlushMemRequestData::checkData -> tm is not found", 404 );
+  }
+
+  if(false == TMManager::GetInstance()->IsMemoryLoaded(strMemName))
+  {
+    return buildErrorReturn( _rc_, "FlushMemRequestData::checkData -> tm is not open", 400 );
+  }
+  return _rc_;
+}
+
+int FlushMemRequestData::execute(){
+  _rc_ = mem->FlushFilebuffers();
+  if(_rc_){
+    return buildErrorReturn( _rc_, "FlushMemRequestData::checkData -> tm flush returned error", 500 );
+  }
+  outputMessage = "{\n\t \"msg\": \"Mem " + strMemName + "was flushed to the disk successfully\" \n}";
+  
+  return 0;
+}
+
 
 int ImportRequestData::parseJSON(){
   T5LOG( T5INFO) << "+POST " << strMemName << "/import\n";
@@ -2265,6 +2301,11 @@ int ResourceInfoRequestData::execute(){
       requestCount = pStats->getStatusMemRequestCount();
       sumTime = pStats->getStatusMemSumTime();
       AddRequestDataToJson(ssOutput, "StatusMem", sumTime, requestCount);
+      ssOutput <<",";
+
+      requestCount = pStats->getFlushMemRequestCount();
+      sumTime = pStats->getFlushMemSumTime();
+      AddRequestDataToJson(ssOutput, "FlushMem", sumTime, requestCount);
       ssOutput <<",";
 
       requestCount = pStats->getFuzzyRequestCount();

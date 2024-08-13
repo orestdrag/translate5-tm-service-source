@@ -169,6 +169,13 @@ class ProxygenStats {
   virtual uint64_t getClosedTMCount(){
     return closedTm_;
   }
+  
+  virtual uint64_t getFlushMemRequestCount(){
+    return flushMemReqCount_;
+  }
+  virtual milliseconds getFlushMemSumTime(){
+    return flushMemSumTime_;
+  }
 
  private:
   atomic_uint64_t reqCount_{0};
@@ -181,6 +188,7 @@ class ProxygenStats {
   atomic_uint64_t importMemReqCount_{0};
   atomic_uint64_t importLocalReqCount_{0};
   atomic_uint64_t statusMemReqCount_{0};
+  atomic_uint64_t flushMemReqCount_{0};
   
   atomic_uint64_t fuzzyReqCount_{0};
   atomic_uint64_t concordanceReqCount_{0};
@@ -203,6 +211,7 @@ class ProxygenStats {
   milliseconds exportMemSumTime_{0};
   milliseconds importMemSumTime_{0};
   milliseconds statusMemSumTime_{0};
+  milliseconds flushMemSumTime_{0};
   
   milliseconds fuzzyReqSumTime_{0};
   milliseconds concordanceSumTime_{0};

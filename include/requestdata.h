@@ -142,6 +142,15 @@ public:
   //OtmMemoryServiceWorker::std::shared_ptr<EqfMemory>  pMem = nullptr;
 };
 
+class FlushMemRequestData:public RequestData{
+public: 
+    FlushMemRequestData(): RequestData(COMMAND::FLUSH_MEM) { };
+protected: 
+    int parseJSON() override { return 0; }
+    int checkData() override;
+    int execute()   override;
+};
+
 class ImportRequestData:public RequestData{
 public:
     ImportRequestData(bool Base64TMX = true): RequestData(COMMAND::IMPORT_MEM) { isBase64 = Base64TMX; };

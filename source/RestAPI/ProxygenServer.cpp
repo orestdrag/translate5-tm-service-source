@@ -271,13 +271,14 @@ class ProxygenHandlerFactory : public RequestHandlerFactory {
         }else if(methodStr == "GET"){
           if(urlCommand ==  "status"){ // update 
             requestHandler->pRequest = new StatusMemRequestData();
-
           }else if(urlCommand == "reorganize"){
             requestHandler->pRequest = new ReorganizeRequestData();
           }else if(urlCommand == "download.tm"){
             requestHandler->pRequest = new ExportRequestData(EXPORT_MEM_INTERNAL_FORMAT_STREAM);
           }else if(urlCommand == "download.tmx"){
             requestHandler->pRequest = new ExportRequestData(EXPORT_MEM_TMX_STREAM);
+          }else if(urlCommand == "flush"){
+            requestHandler->pRequest = new FlushMemRequestData();
           }
         }
       }

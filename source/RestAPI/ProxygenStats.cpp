@@ -91,6 +91,10 @@ int ProxygenStats::recordRequest(int command) {
       cloneLocalyCount_++;
       break;
     }
+    case COMMAND::FLUSH_MEM:{
+      flushMemReqCount_ ++;
+      break;
+    }
     case COMMAND::UNKNOWN_COMMAND:{
       unrecognizedRequestCount_++;
       break;
@@ -195,6 +199,10 @@ int ProxygenStats::addRequestTime(int command,milliseconds time) {
       unrecognizedRequestSumTime_ += time;
       break;
     }    
+    case COMMAND::FLUSH_MEM:{
+      flushMemSumTime_ += time;
+      break;
+    }
     default:
     {
       otherSumTime_ += time;

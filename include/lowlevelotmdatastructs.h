@@ -1,3 +1,4 @@
+#pragma once
 #ifndef _LOW_LEVEL_OTM_DATA_STRUCTS_INCLUDED_
 #define _LOW_LEVEL_OTM_DATA_STRUCTS_INCLUDED_
 
@@ -78,6 +79,7 @@ typedef char* PSZ;
         REORGANIZE_MEM,
         STATUS_MEM,
         RESOURCE_INFO,
+        FLUSH_MEM,
 
         START_COMMANDS_WITH_BODY,
         CREATE_MEM = START_COMMANDS_WITH_BODY, 
@@ -92,37 +94,46 @@ typedef char* PSZ;
         IMPORT_MEM,
         IMPORT_MEM_STREAM,
         IMPORT_LOCAL_MEM,
-        CLONE_TM_LOCALY,
+        CLONE_TM_LOCALY
         //IMPORT_MEM_INTERNAL_FORMAT
     };
 
-const std::map<const COMMAND,const char*> CommandToStringsMap {
+
+
+constexpr  std::initializer_list<std::pair<const COMMAND, const char*>> CommandToStringsMap {
         { UNKNOWN_COMMAND, "UNKNOWN_COMMAND" },
         { LIST_OF_MEMORIES, "LIST_OF_MEMORIES" },
         { SAVE_ALL_TM_ON_DISK, "SAVE_ALL_TM_ON_DISK" },
         { SHUTDOWN, "SHUTDOWN" },
         { DELETE_MEM, "DELETE_MEM" },
+
         { EXPORT_MEM_TMX, "EXPORT_MEM_TMX" },
-        { EXPORT_MEM_TMX_STREAM, "EXPORT_MEM_TMX_STREAM" },
         { EXPORT_MEM_INTERNAL_FORMAT, "EXPORT_MEM_INTERNAL_FORMAT" },
+        { EXPORT_MEM_TMX_STREAM, "EXPORT_MEM_TMX_STREAM" },
         { EXPORT_MEM_INTERNAL_FORMAT_STREAM, "EXPORT_MEM_INTERNAL_FORMAT_STREAM" },
         { STATUS_MEM, "STATUS_MEM" },
+        
         { RESOURCE_INFO, "RESOURCE_INFO" },
         { CREATE_MEM, "CREATE_MEM" },
         { FUZZY, "FUZZY" },
         { CONCORDANCE, "CONCORDANCE" },
         { DELETE_ENTRY, "DELETE_ENTRY" },
+        
         { GET_ENTRY, "GET_ENTRY" },
         { DELETE_ENTRIES_REORGANIZE, "DELETE_ENTRIES_REORGANIZE" },
         { UPDATE_ENTRY, "UPDATE_ENTRY" },
         { TAGREPLACEMENTTEST, "TAGREPLACEMENTTEST" } ,
         { IMPORT_MEM, "IMPORT_MEM" },
+        
         { IMPORT_MEM_STREAM, "IMPORT_MEM_STREAM" },
         { IMPORT_LOCAL_MEM, "IMPORT_LOCAL_MEM" },
         { REORGANIZE_MEM, "REORGANIZE_MEM" },
-        { CLONE_TM_LOCALY, "CLONE_MEM"}
+        { CLONE_TM_LOCALY, "CLONE_MEM"},
+        { FLUSH_MEM, "FLUSH_MEM" }
     };
 
+
+const char* searchInCommandToStringsMap(const COMMAND& key);
 
 enum InclosingTagsBehaviour{
   saveAll = 0, skipAll, skipPaired

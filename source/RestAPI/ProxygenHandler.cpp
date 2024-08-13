@@ -17,6 +17,7 @@
 #include "OtmMemoryServiceWorker.h"
 #include <atomic>
 #include "LogWrapper.h"
+#include "lowlevelotmdatastructs.h"
 
 
 using namespace proxygen;
@@ -32,41 +33,6 @@ ProxygenHandler::ProxygenHandler(ProxygenStats* stats) : stats_(stats) {
   TMManager::GetInstance()->fWriteRequestsAllowed = true;
 }
 
-constexpr  std::initializer_list<std::pair<const COMMAND, const char*>> CommandToStringsMap {
-        { UNKNOWN_COMMAND, "UNKNOWN_COMMAND" },
-        { LIST_OF_MEMORIES, "LIST_OF_MEMORIES" },
-        { SAVE_ALL_TM_ON_DISK, "SAVE_ALL_TM_ON_DISK" },
-        { SHUTDOWN, "SHUTDOWN" },
-        { DELETE_MEM, "DELETE_MEM" },
-        { EXPORT_MEM_TMX, "EXPORT_MEM_TMX" },
-        { EXPORT_MEM_INTERNAL_FORMAT, "EXPORT_MEM_INTERNAL_FORMAT" },
-        { EXPORT_MEM_TMX_STREAM, "EXPORT_MEM_TMX_STREAM" },
-        { EXPORT_MEM_INTERNAL_FORMAT_STREAM, "EXPORT_MEM_INTERNAL_FORMAT_STREAM" },
-        { STATUS_MEM, "STATUS_MEM" },
-        { RESOURCE_INFO, "RESOURCE_INFO" },
-        { CREATE_MEM, "CREATE_MEM" },
-        { FUZZY, "FUZZY" },
-        { CONCORDANCE, "CONCORDANCE" },
-        { DELETE_ENTRY, "DELETE_ENTRY" },
-        { GET_ENTRY, "GET_ENTRY" },
-        { DELETE_ENTRIES_REORGANIZE, "DELETE_ENTRIES_REORGANIZE" },
-        { UPDATE_ENTRY, "UPDATE_ENTRY" },
-        { TAGREPLACEMENTTEST, "TAGREPLACEMENTTEST" } ,
-        { IMPORT_MEM, "IMPORT_MEM" },
-        { IMPORT_MEM_STREAM, "IMPORT_MEM_STREAM" },
-        { IMPORT_LOCAL_MEM, "IMPORT_LOCAL_MEM" },
-        { REORGANIZE_MEM, "REORGANIZE_MEM" },
-        { CLONE_TM_LOCALY, "CLONE_MEM"}
-    };
-
-const char* searchInCommandToStringsMap(const COMMAND& key) {
-    for (auto&& pair : CommandToStringsMap) {
-        if (pair.first == key) {
-            return pair.second ; // Found the key, no need to continue searching
-        }
-    }
-    return "UNKNOWN";
-}
 
 
 //#include <proxygen/httpserver/HTTPServer.h>
