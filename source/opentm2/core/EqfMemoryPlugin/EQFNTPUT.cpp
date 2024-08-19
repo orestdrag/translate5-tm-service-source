@@ -2145,7 +2145,7 @@ USHORT EqfMemory::ComparePutData
                 {
                   targetKey++;
                   if ( (//
-                        (pClb->ulSegmId == TmProposal.lSegmentId) &&
+                       // (pClb->ulSegmId == TmProposal.lSegmentId) &&
                         (pClb->usFileId == usPutFile)
                         ) ||
                         pClb->bMultiple )
@@ -3236,7 +3236,7 @@ USHORT TMLoopAndDelTargetClb
 		{
       *pTargetKey++;
 			if ( (pClb->usLangId == usPutLang) &&
-			     (pClb->ulSegmId == TmProposal.lSegmentId) &&
+			     //(pClb->ulSegmId == TmProposal.lSegmentId) &&
 			     (pClb->usFileId == usPutFile) && !pClb->bMultiple )
 			{  	// remove target CLB and target record (if only 1 CLB)
 				// as the segment is putted with a new value
