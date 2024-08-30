@@ -2305,80 +2305,6 @@ BTREE::QDAMDictLockStatus
 //                    position ptr to begin of file
 //                    write update counter to disk
 //------------------------------------------------------------------------------
-SHORT QDAMIncrUpdCounter
-(
-   PBTREE     pBTIda,                  // pointer to btree structure
-   SHORT      sIndex,                  // index of update counter
-   PLONG      plNewValue               // ptr to buffer for new counte value
-)
-{
-  SHORT       sRc=0;
-  USHORT      usNumBytes;              // number of bytes written or read
-  ULONG       ulNewOffset;             // new offset in file
-  PBTREE  pBT = pBTIda;
-  SHORT       sRetries;                // number of retries
-  LONG     lNewUpdCounter;      // buffer for new update counter
-
-  lNewUpdCounter = 0L;
-  sRetries = MAX_RETRY_COUNT;
-  do
-  {
-     // Position to requested update counter
-    sRc = UtlChgFilePtr( pBT->fpDummy, (LONG)(sizeof(LONG)*sIndex),
-                         FILE_BEGIN, &ulNewOffset, FALSE);
-    if (sRc ) sRc = QDAMDosRC2BtreeRC( sRc, BTREE_READ_ERROR, pBT->usOpenFlags );
-
-    // Read current update counter
-     if ( !sRc )
-     {
-      sRc = UtlRead( pBT->fpDummy, (PVOID)&lNewUpdCounter, sizeof(LONG),
-                     &usNumBytes, FALSE);
-      if (sRc ) sRc = QDAMDosRC2BtreeRC( sRc, BTREE_READ_ERROR, pBT->usOpenFlags );
-     } /* endif */
-
-     // Increment update counter
-     if ( !sRc )
-     {
-       lNewUpdCounter++;
-        pBT->alUpdCtr[sIndex] = lNewUpdCounter;;
-        if ( plNewValue )
-        {
-          *plNewValue = pBT->alUpdCtr[sIndex];
-        } /* endif */
-     } /*endif */
-
-     // Position to requested update counter
-     if ( !sRc )
-     {
-      sRc = UtlChgFilePtr( pBT->fpDummy, (LONG)(sizeof(LONG)*sIndex),
-                           FILE_BEGIN, &ulNewOffset, FALSE);
-      if (sRc ) sRc = QDAMDosRC2BtreeRC( sRc, BTREE_READ_ERROR, pBT->usOpenFlags );
-     } /* endif */
-
-     //  Rewrite update counter
-     if ( !sRc )
-     {
-       sRc = UtlWrite( pBT->fpDummy, (PVOID)&lNewUpdCounter,
-                       sizeof(LONG), &usNumBytes, FALSE );
-       if (sRc ) sRc = QDAMDosRC2BtreeRC( sRc, BTREE_WRITE_ERROR, pBT->usOpenFlags );
-     } /* endif */
-
-    if ( sRc == BTREE_IN_USE )
-    {
-      UtlWait( MAX_WAIT_TIME );
-      sRetries--;
-    } /* endif */
-  } while ( (sRc == BTREE_IN_USE) && (sRetries > 0) );
-
-  if ( sRc )
-  {
-    ERREVENT2( QDAMINCRUPDCOUNTER_LOC, INTFUNCFAILED_EVENT, sRc, DB_GROUP, "" );
-  } /* endif */
-
-  return sRc;
-}
-
-
 
 
 //------------------------------------------------------------------------------
@@ -5650,7 +5576,6 @@ SHORT BTREE::QDAMDictInsertLocal
 //                      endif
 //                    endif
 //------------------------------------------------------------------------------
-
 SHORT BTREE::QDAMDictUpdSignLocal
 (
    PTMX_SIGN  pSign                   // pointer to user data

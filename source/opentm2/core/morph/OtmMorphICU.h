@@ -11,16 +11,20 @@
 #pragma comment(lib, "icuuc.lib")
 #include <string>
 #include <stdio.h>
+#include <mutex>
 #include "OtmMorph.h"
 
 #define INCL_EQF_MORPH            // morphologic functions
 #include "EQF.H"
 //#include "EQFSERNO.H"
 
+
+
 using namespace icu;
 /*! \brief class for morphology objects */
 class OtmMorphICU : public OtmMorph
 {
+	std::mutex MorphICUMutex;
 
 public:
 

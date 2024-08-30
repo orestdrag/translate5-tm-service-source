@@ -548,7 +548,7 @@ BOOL TATagTokenizeW
        {
          pToken->sTokenid = TEXT_TOKEN;      // text data
          pToken->pDataStringW = pszDataStart; // set start of data
-         pToken->usLength = (USHORT)(NewToken.pDataStringW - pszDataStart);
+         pToken->iLength = (USHORT)(NewToken.pDataStringW - pszDataStart);
          pToken->sAddInfo = 0;
          pToken->ClassId = CLS_DEFAULT;
          pToken->usOrgId = 0;
@@ -567,7 +567,7 @@ BOOL TATagTokenizeW
          // a valid end character for this tag include all blanks in tag
          if ( (NewToken.sTokenid >= 0) && pTag[NewToken.sTokenid].fAttr && (pTag[NewToken.sTokenid].uEndDelimOffs != 0) )
          {
-           PSZ_W pszTest = NewToken.pDataStringW + (NewToken.usLength - 1);
+           PSZ_W pszTest = NewToken.pDataStringW + (NewToken.iLength - 1);
 
            // only for blank end delimiters...
            if ( *pszTest == L' ')
@@ -592,7 +592,7 @@ BOOL TATagTokenizeW
                if ( *pszEndDelim != 0 )
                {
                  pszData = pszTest + 1;
-                 NewToken.usLength = (USHORT)(pszData - NewToken.pDataStringW);
+                 NewToken.iLength = (USHORT)(pszData - NewToken.pDataStringW);
                } /* endif */
              } /* endif */
            } /* endif */
@@ -630,7 +630,7 @@ BOOL TATagTokenizeW
            /*********************************************************/
            /* Check the last character of the tag                   */
            /*********************************************************/
-           if ( !fWhiteSpace[NewToken.pDataStringW[NewToken.usLength-1]] )
+           if ( !fWhiteSpace[NewToken.pDataStringW[NewToken.iLength-1]] )
            {
              fFound = FALSE;
              fProcessingAttributes = FALSE;  // no more attributes
@@ -692,8 +692,8 @@ BOOL TATagTokenizeW
          /***********************************************************/
          pToken->sTokenid = TEXT_TOKEN;      // text data
          pToken->pDataStringW = pszDataStart; // set start of data
-         pToken->usLength = (USHORT)UTF16strlenCHAR(pszDataStart);
-         pszData = pszDataStart + pToken->usLength;
+         pToken->iLength = (USHORT)UTF16strlenCHAR(pszDataStart);
+         pszData = pszDataStart + pToken->iLength;
          usTokens--;
          pToken++;
        }
@@ -730,7 +730,7 @@ BOOL TATagTokenizeW
         // processing in the next tokenization block (unless this tag
         // is the first token in the token buffer or the remaining data
         // is longer than twice the max segment size )
-        int iRemainLength = UTF16strlenCHAR(pToken[-1].pDataStringW + pToken[-1].usLength);
+        int iRemainLength = UTF16strlenCHAR(pToken[-1].pDataStringW + pToken[-1].iLength);
         if ( ( (pLastTag != pTokBuf) &&                    // more than one tag in buffer
                (iRemainLength < (2*MAX_SEGMENT_SIZE)) ) || // rest is smaller than 2 segments
              (usTokens == 0) )                             // token buffer overflow
@@ -742,7 +742,7 @@ BOOL TATagTokenizeW
         else
         {
           // continue right behind the last recognized token
-          *ppRest = pToken[-1].pDataStringW + pToken[-1].usLength;
+          *ppRest = pToken[-1].pDataStringW + pToken[-1].iLength;
           if ( (*pszData == EOS) && (*ppRest >= pszData) )
           {
             // no more data to follow, segment has been processed completely
@@ -769,7 +769,7 @@ BOOL TATagTokenizeW
         else
         {
            // one token in buffer
-           pszAreaStart = pToken[-1].pDataStringW + pToken[-1].usLength;
+           pszAreaStart = pToken[-1].pDataStringW + pToken[-1].iLength;
         } /* endif */            
 
         while ( pszData > pszAreaStart )
@@ -794,7 +794,7 @@ BOOL TATagTokenizeW
         } /* endif */
         pToken->sTokenid    = TEXT_TOKEN;   // text data
         pToken->pDataStringW = pszAreaStart;     // set start of data
-        pToken->usLength    = (USHORT)(*ppRest - pszAreaStart);
+        pToken->iLength    = (USHORT)(*ppRest - pszAreaStart);
         
         usTokens--;
         pToken++;
@@ -809,7 +809,7 @@ BOOL TATagTokenizeW
    if ( fOK )
    {
      memset( pToken, 0, sizeof(TOKENENTRY) );
-     pToken->usLength = 0;
+     pToken->iLength = 0;
      pToken->sTokenid = ENDOFLIST;
 
      *pusColPos = TokStatus.usColPos;
@@ -1047,7 +1047,7 @@ BOOL TAMatchTag
               pToken->pDataStringW = pszTag;
               pszData--;
               usColPos--;
-              pToken->usLength    = (USHORT)(pszData - pszTag);
+              pToken->iLength    = (int)(pszData - pszTag);
             }
             else
             {
@@ -1094,7 +1094,7 @@ BOOL TAMatchTag
               ProcState           = TAG_MATCH_STATE;
               pToken->sTokenid    = pNode->sTokenID;
               pToken->pDataStringW = pszTag;
-              pToken->usLength    = (USHORT)(pszData - pszTag);
+              pToken->iLength    = (USHORT)(pszData - pszTag);
             } /* endif */
           } /* endif */
         } /* endif */
@@ -1172,7 +1172,7 @@ BOOL TAMatchTag
             pToken->pDataStringW = pszTag;
             pszData--;
             usColPos--;
-            pToken->usLength    = (USHORT)(pszData - pszTag);
+            pToken->iLength    = (USHORT)(pszData - pszTag);
           }
           else
           {
@@ -1209,7 +1209,7 @@ BOOL TAMatchTag
             ProcState = TAG_MATCH_STATE;
             pToken->sTokenid    = pNode->sTokenID;
             pToken->pDataStringW = pszTag;
-            pToken->usLength    = (USHORT)(pszData - pszTag);
+            pToken->iLength    = (USHORT)(pszData - pszTag);
           }
           else
           {
@@ -1372,12 +1372,12 @@ BOOL TAMatchTag
     /******************************************************************/
     /* Avoid split of CRLF combination at end of tags                 */
     /******************************************************************/
-    if ( (pToken->pDataStringW[pToken->usLength-1] == CR ) &&
+    if ( (pToken->pDataStringW[pToken->iLength-1] == CR ) &&
          (*pszData == LF) )
     {
       pszData++;
       usColPos = 0;
-      pToken->usLength++;
+      pToken->iLength++;
     } /* endif */
 
     /******************************************************************/
@@ -2351,7 +2351,7 @@ USHORT TACreateProtectTableWEx
             /* start/stop entry                                         */
             /************************************************************/
             pszTemp = pTok->pDataStringW;
-            for ( usI = 0; usI < pTok->usLength; usI++, pszTemp++ )
+            for ( usI = 0; usI < pTok->iLength; usI++, pszTemp++ )
             {
               if ( (*pszTemp == QUOTE) || (*pszTemp == DBLQUOTE) )
               {
@@ -2424,7 +2424,7 @@ USHORT TACreateProtectTableWEx
             /**************************************************************/
             /* Process quoted strings if any                              */
             /**************************************************************/
-            while ( pTok->usLength && (usRC == NO_ERROR) )
+            while ( pTok->iLength && (usRC == NO_ERROR) )
 			{ // P016238: check whether quoted text contains protected parts!
 			  if (!pAttrTokBuffer)
 			  {
@@ -2454,13 +2454,13 @@ USHORT TACreateProtectTableWEx
 			  /* Add entry for protected data up to next quote or up to   */
 			  /* end of token                                             */
 			  /************************************************************/
-			  if ( pTok->usLength && (usRC == NO_ERROR))
+			  if ( pTok->iLength && (usRC == NO_ERROR))
 			  {
 				pCurrent->usStart = (USHORT)(pTok->pDataStringW - pszSegment);
 				pCurrent->usType  = PROTECTED_CHAR;
 
 				pTok->pDataStringW++;          // assure quote is in pCurrent
-				pTok->usLength--;
+				pTok->iLength--;
 				pCurrent->usStop = TAFindQuote( pTok, (USHORT) (pCurrent->usStart), &chQuote);
 
 				usRC = TAGotoNextStartStopEntry( &pStartStop, &pCurrent,
@@ -2505,14 +2505,14 @@ USHORT TACreateProtectTableWEx
                 else
                 {
                   if (memicmp((PBYTE)&pTagTable->chTrnote1TextW[0],
-                              (PBYTE)(pTok->pDataStringW+pTok->usLength),
+                              (PBYTE)(pTok->pDataStringW+pTok->iLength),
                               pTagTable->ulTRNote1Len) == 0 )
                   {
                     pCurrent->usType = TRNOTE_CHAR;
                     fTRNoteFound = TRUE;
                   }
                   else if (memicmp((PBYTE)&pTagTable->chTrnote2TextW[0],
-                                   (PBYTE)(pTok->pDataStringW+pTok->usLength),
+                                   (PBYTE)(pTok->pDataStringW+pTok->iLength),
                                    pTagTable->ulTRNote2Len) == 0 )
                   {
                     pCurrent->usType = TRNOTE_CHAR;
@@ -2521,7 +2521,7 @@ USHORT TACreateProtectTableWEx
                 } /* endif */
               } /* endif */
             } /* endif */
-            pCurrent->usStop  = pCurrent->usStart + pTok->usLength - 1;
+            pCurrent->usStop  = pCurrent->usStart + pTok->iLength - 1;
             usRC = TAGotoNextStartStopEntry( &pStartStop, &pCurrent,
 		                                     &ulTableUsed, &ulTableAlloc);
 
@@ -2758,20 +2758,20 @@ USHORT TAFindQuote
 )
 {
   USHORT  usStop = usStartSearch;
-  while ( pTok->usLength &&
+  while ( pTok->iLength &&
           (pTok->pDataStringW[0] != QUOTE) &&
           (pTok->pDataStringW[0] != DBLQUOTE) )
   {
     pTok->pDataStringW++;
-    pTok->usLength--;
+    pTok->iLength--;
     usStop++;
   } /* endwhile */
 
-  if ( pTok->usLength )
+  if ( pTok->iLength )
   {
     *pchQuote = pTok->pDataStringW[0];
     pTok->pDataStringW++;
-    pTok->usLength--;
+    pTok->iLength--;
     usStop++;
   } /* endif */
   return(usStop);
@@ -2902,7 +2902,7 @@ USHORT  TAProtectedPartsInQuotedText
             {
               pCurrent->usType |= 0x8000;
             } /* endif */
-            pCurrent->usStop = pCurrent->usStart + pAttrTok->usLength - 1;
+            pCurrent->usStop = pCurrent->usStart + pAttrTok->iLength - 1;
 
             usRC = TAGotoNextStartStopEntry( &pStartStop, &pCurrent,
 	                                      pulTableUsed, pulTableAlloc);
@@ -2914,10 +2914,10 @@ USHORT  TAProtectedPartsInQuotedText
       /**********************************************************/
       /* Add data up to first quote                             */
       /**********************************************************/
-      while ( pTok->usLength && (pTok->pDataStringW[0] != chQuote) )
+      while ( pTok->iLength && (pTok->pDataStringW[0] != chQuote) )
       {
         pTok->pDataStringW++;
-        pTok->usLength--;
+        pTok->iLength--;
         usAttrLength --;
       } /* endwhile */
       // CHECK: does this loop run as far as pTemp in chTempBuf?
@@ -3212,9 +3212,9 @@ bool iswspace(wchar_t ch){
 			  { // if there are whitespace between pTok and pNextTok, add them to pTok
 				 usStart = (USHORT)(pTok->pDataStringW - pszSegment);
 				 usNextStart = (USHORT)(pNextTok->pDataStringW - pszSegment);
-				 usI = usStart + pTok->usLength ;
-				 pTmp = pTok->pDataStringW + pTok->usLength;
-				 usNewLen = pTok->usLength;
+				 usI = usStart + pTok->iLength ;
+				 pTmp = pTok->pDataStringW + pTok->iLength;
+				 usNewLen = pTok->iLength;
 				 while ( usI < usNextStart && iswspace(*pTmp))
 				 {
 					 usI++;
@@ -3223,7 +3223,7 @@ bool iswspace(wchar_t ch){
 				 }
 				 if (usI == usNextStart)
 				 { // add the whitespaces to the length of pTok!
-					pTok->usLength = usNewLen;
+					pTok->iLength = usNewLen;
 				 }
 			  }
 		   } /* endif */

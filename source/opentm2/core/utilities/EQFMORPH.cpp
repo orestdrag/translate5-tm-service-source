@@ -74,7 +74,7 @@ USHORT TokenizeW
  PSZ_W    pszInData,                  // IN : ptr to data being tokenized
  PULONG   pulTermListSize,            // IN/OUT:  address of variable
                                       //    containing size of term list buffer
- PVOID    *ppTermList,                // IN/OUT: address of term list pointer
+ TERMLENOFFS**ppTermList,                // IN/OUT: address of term list pointer
  USHORT   usListType                  // IN: type of term list MORPH_ZTERMLIST,
                                      //    MORPH_OFFSLIST, MORPH_FLAG_OFFSLIST,
                                      //    or MORPH_FLAG_ZTERMLIST
@@ -246,7 +246,7 @@ USHORT TokenizeW
  PSZ_W    pszInData,                  // IN : ptr to data being tokenized
  PULONG   pulTermListSize,            // IN/OUT:  address of variable
                                       //    containing size of term list buffer
- PVOID    *ppTermList,                // IN/OUT: address of term list pointer
+ TERMLENOFFS** ppTermList,                // IN/OUT: address of term list pointer
  USHORT   usListType                  // IN: type of term list MORPH_ZTERMLIST,
                                      //    MORPH_OFFSLIST, MORPH_FLAG_OFFSLIST,
                                      //    or MORPH_FLAG_ZTERMLIST
@@ -304,7 +304,7 @@ USHORT TokenizeW
   }
 #endif
 
-
+  std::string ps_In = EncodingHelper::convertToUTF8(pszInData);
   for (size_t j = 0; j < vSentenceList.size(); j++)
   {
     if (!usReturn)
@@ -318,10 +318,13 @@ USHORT TokenizeW
 
     // split segment/sentences into words
     OtmMorph::TERMLIST vTermList;
+    T5LOG(T5TRANSACTION) << "pszInData = " << pszInData <<"; ps_In =" <<ps_In << "; vSentenceList[j].iLength = " << vSentenceList[j].iLength << "; j = " << j <<"; offset = " << vSentenceList[j].iStartOffset;
     PSZ_W pszStartOfSegment = pszInData + vSentenceList[j].iStartOffset;
     wchar_t chTemp = pszStartOfSegment[vSentenceList[j].iLength];
     pszStartOfSegment[vSentenceList[j].iLength] = 0;
+
     int tRet = tMorphInstance->tokenizeByTerm( pszStartOfSegment, vTermList );
+    
 #ifdef LOG_TOKENIZEW
     if(T5Logger::GetInstance()->CheckLogLevel(T5DEVELOP)){
       auto str = EncodingHelper::convertToUTF8(pszStartOfSegment);
@@ -655,7 +658,7 @@ USHORT MorphTokenizeW
    PSZ_W    pszInData,                 // pointer to input segment
    PUSHORT  pusBufferSize,             // address of variable containing size of
                                        //    term list buffer
-   PVOID    *ppTermList,               // address of caller's term list pointer
+   TERMLENOFFS** ppTermList,               // address of caller's term list pointer
    USHORT   usListType,                 // type of term list MORPH_ZTERMLIST or
                                        //    MORPH_OFFSLIST
    ULONG    ulOemCP                    // CP of language of sLangID!!
@@ -728,8 +731,8 @@ USHORT MorphTokenizeW
         if(T5Logger::GetInstance()->CheckLogLevel(T5DEVELOP)){
           if ( usListType == MORPH_FLAG_OFFSLIST )
           {
-            PSHORT psData = (PSHORT)*ppTermList;
-            SHORT sStart, sLen;
+            PINT psData = (PINT)*ppTermList;
+            INT sStart, sLen;
             LONG lFlag;
             do
             {
@@ -744,8 +747,10 @@ USHORT MorphTokenizeW
           }
           else if ( usListType == MORPH_OFFSLIST )
           {
-            PSHORT psData = (PSHORT)*ppTermList;
-            SHORT sStart, sLen;
+            //PINT psData = (PINT)*ppTermList;
+            //INT sStart, sLen;
+            PUSHORT psData = (PUSHORT)*ppTermList;
+            USHORT sStart, sLen;
               do
               {
                 sLen   = *psData++;
@@ -1158,6 +1163,7 @@ USHORT MorphAddTermToList2W
       /******************************************************************/
       //ulDataLenBytes = 4 * sizeof(CHAR_W);
       ulDataLenBytes = 4 * sizeof(USHORT);
+      //ulDataLenBytes = 4 * sizeof(int);
       break;
 
     case MORPH_ZTERMLIST :

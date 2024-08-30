@@ -97,29 +97,33 @@ int OtmMorphICU::tokenizeByTerm(const wchar_t* pText, TERMLIST& vResult)
 		return OtmMorph::ERROR_PARAMETAR;
 	}
 
-#ifdef TOKENIZELOG 
-  T5LOG(T5DEBUG) << "tokenizeByTerm, input is \""<<pText <<"\"";
-#endif
-
-    std::u16string vSection_u16 = EncodingHelper::toUtf16(pText);
-    UnicodeString text(vSection_u16.c_str());
-
-	pWordBoundary->setText(text);
-	getResultFromIterator(pWordBoundary, vResult);
-
-    /* Force maximum length to 511, since temp buffers are 512  10-6-16 */
-    for (auto it = begin (vResult); it != end (vResult); ++it) 
     {
-      if ( it->iLength > 511 ) it->iLength=511;
-    }
+        std::lock_guard<std::mutex> guard(this->MorphICUMutex);
+    
+#ifdef TOKENIZELOG 
+        T5LOG(T5DEBUG) << "tokenizeByTerm, input is \""<<pText <<"\"";
+#endif
+
+        std::u16string vSection_u16 = EncodingHelper::toUtf16(pText);
+        UnicodeString text(vSection_u16.c_str());
+
+        pWordBoundary->setText(text);
+        getResultFromIterator(pWordBoundary, vResult);
+
+        /* Force maximum length to 511, since temp buffers are 512  10-6-16 */
+        for (auto it = begin (vResult); it != end (vResult); ++it) 
+        {
+        if ( it->iLength > 511 ) it->iLength=511;
+        }
 
 #ifdef TOKENIZELOG 
-  T5LOG(T5DEBUG) << "results:" ;
-  for (auto it = begin (vResult); it != end (vResult); ++it) 
-  {
-    T5LOG(T5DEBUG) << "   Offset="<<it->iStartOffset <<" Len="<<it->iLength<<" Flag=" << it->iTermType  ;
-  }
+        T5LOG(T5DEBUG) << "results:" ;
+        for (auto it = begin (vResult); it != end (vResult); ++it) 
+        {
+            T5LOG(T5DEBUG) << "   Offset="<<it->iStartOffset <<" Len="<<it->iLength<<" Flag=" << it->iTermType  ;
+        }
 #endif
+    }
 	return OtmMorph::SUCCESS_RETURN;
 }
 
@@ -187,20 +191,23 @@ int OtmMorphICU::tokenizeByTerm( const char* pszSection, STRINGLIST& vResult )
 		return OtmMorph::ERROR_PARAMETAR;
 	}
 
+    {
+        std::lock_guard<std::mutex> guard(this->MorphICUMutex);
 #ifdef TOKENIZELOG 
-  T5LOG(T5DEBUG) << "tokenizeByTerm, input is \""<<pszSection <<"\"";
+        T5LOG(T5DEBUG) << "tokenizeByTerm, input is \""<<pszSection <<"\"";
 #endif
 
-	pWordBoundary->setText(UnicodeString(pszSection));
-	getResultFromIterator(pWordBoundary, vResult);
+	    pWordBoundary->setText(UnicodeString(pszSection));
+	    getResultFromIterator(pWordBoundary, vResult);
 
 #ifdef TOKENIZELOG 
-  T5LOG(T5DEBUG) << "results:" ;
-  for (auto it = begin (vResult); it != end (vResult); ++it) 
-  {
-    T5LOG(T5DEBUG) << "\"" << it->c_str()<< "\"";
-  }
+        T5LOG(T5DEBUG) << "results:" ;
+        for (auto it = begin (vResult); it != end (vResult); ++it) 
+        {
+            T5LOG(T5DEBUG) << "\"" << it->c_str()<< "\"";
+        }
 #endif
+    }
   return OtmMorph::SUCCESS_RETURN;
 }
 
@@ -209,6 +216,8 @@ int OtmMorphICU::tokenizeByTerm( const char* pszSection, STRINGLIST& vResult )
  */
 bool OtmMorphICU::init()
 {
+    
+    //std::lock_guard<std::mutex> guard(this->MorphICUMutex);
 	UErrorCode tStatus = U_ZERO_ERROR;
 //	pWordBoundary = BreakIterator::createWordInstance(Locale::getUS(), tStatus);
 	pWordBoundary = BreakIterator::createWordInstance(Locale::getJapanese(), tStatus);
@@ -378,24 +387,26 @@ int OtmMorphICU::tokenizeBySentence( const char* vSection, STRINGLIST& vResult )
     {
         return OtmMorph::ERROR_PARAMETAR;
     }
-
+    {
+        std::lock_guard<std::mutex> guard(this->MorphICUMutex);
+    
 #ifdef TOKENIZELOG 
-  T5LOG(T5DEBUG) << "tokenizeBySentence, input is \""<< vSection << "\"";
+        T5LOG(T5DEBUG) << "tokenizeBySentence, input is \""<< vSection << "\"";
 #endif
 
-    pSentenceBoundary->setText(UnicodeString(vSection));
-    pWordBoundaryForSentence->setText(UnicodeString(vSection));
+        pSentenceBoundary->setText(UnicodeString(vSection));
+        pWordBoundaryForSentence->setText(UnicodeString(vSection));
 
-    getResultFromIterator(pSentenceBoundary, vResult, TRUE);
+        getResultFromIterator(pSentenceBoundary, vResult, TRUE);
 
 #ifdef TOKENIZELOG 
-  T5LOG(T5DEBUG) << "results:";
-  for (auto it = begin (vResult); it != end (vResult); ++it) 
-  {
-    T5LOG(T5DEBUG) << "\""<<it->c_str()<<"\"" ;
-  }
+        T5LOG(T5DEBUG) << "results:";
+        for (auto it = begin (vResult); it != end (vResult); ++it) 
+        {
+            T5LOG(T5DEBUG) << "\""<<it->c_str()<<"\"" ;
+        }
 #endif
-
+    }
     return OtmMorph::SUCCESS_RETURN;
 }
 
@@ -416,19 +427,22 @@ int OtmMorphICU::tokenizeBySentence( const wchar_t* vSection, TERMLIST& vResult 
 #endif
     std::u16string vSection_u16 = EncodingHelper::toUtf16(vSection);
     UnicodeString text(vSection_u16.c_str());
-    pSentenceBoundary->setText( text );
-    pWordBoundaryForSentence->setText( text );
+    
+   {
+        std::lock_guard<std::mutex> guard(this->MorphICUMutex);
+        pSentenceBoundary->setText( text );
+        pWordBoundaryForSentence->setText( text );
 
-    getResultFromIterator(pSentenceBoundary, vResult, TRUE);
+        getResultFromIterator(pSentenceBoundary, vResult, TRUE);
 
 #ifdef TOKENIZELOG 
-  T5LOG(T5DEBUG) << "results:" ;
-  for (auto it = begin (vResult); it != end (vResult); ++it) 
-  {
-    T5LOG(T5DEBUG) << "   Offset="<<it->iStartOffset<<" Len="<<it->iLength<<" Flag="<<it->iTermType  ;
-  }
+        T5LOG(T5DEBUG) << "results:" ;
+        for (auto it = begin (vResult); it != end (vResult); ++it) 
+        {
+            T5LOG(T5DEBUG) << "   Offset="<<it->iStartOffset<<" Len="<<it->iLength<<" Flag="<<it->iTermType  ;
+        }
 #endif
-
+    }
     return OtmMorph::SUCCESS_RETURN;
 }
 

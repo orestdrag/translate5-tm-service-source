@@ -54,9 +54,8 @@ VOID  TransferSource( PSZ_W, PSZ_W, PSZ_W );
 //static 
 SHORT TokStrCompare ( PFUZZYTOK, PFUZZYTOK);
 //static 
-PFUZZYTOK SplitTokens (PFUZZYTOK, USHORT, SHORT, USHORT, PSZ_W);
+PFUZZYTOK SplitTokens (PFUZZYTOK, USHORT, SHORT, int, PSZ_W);
 //static  
-ULONG  ulRandom[MAX_RANDOM];   // random sequence
 //static 
 SHORT Snake ( PFUZZYTOK, PFUZZYTOK, SHORT, SHORT, SHORT, SHORT, BOOL);
 //static 

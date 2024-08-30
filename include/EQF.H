@@ -5395,11 +5395,14 @@ ULONG GetOrgLangCP( PSZ pLanguage, BOOL  fASCII );
 //------------------------------------------------------------------------------
 //   Layout of term entries stored in term length and term offset format
 //------------------------------------------------------------------------------
-typedef struct _TERMLENOFFS
+struct TERMLENOFFS
 {
-   USHORT  usLength;                   // length of term
-   USHORT  usOffset;                   // offset of term data in buffer
-} TERMLENOFFS, *PTERMLENOFFS;
+ //  int  iLength;                   // length of term
+ //  int  iOffset;                   // offset of term data in buffer
+   USHORT  iLength;                   // length of term
+   USHORT  iOffset;                   // offset of term data in buffer
+   TERMLENOFFS(){iLength = iOffset = 0;}
+};
 
 /**********************************************************************/
 /* Log file functions                                                 */

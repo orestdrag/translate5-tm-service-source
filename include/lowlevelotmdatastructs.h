@@ -889,11 +889,7 @@ struct BTREE: public BTREEDATA
     //                    position ptr to begin of file
     //                    write update counter to disk
     //+----------------------------------------------------------------------------+
-    SHORT EQFNTMIncrUpdCounter
-    (
-    SHORT      sIndex,                  // index of update counter
-    PLONG                         plNewValue                                               // ptr to buffer for new counte value
-    );
+   
 
     //+----------------------------------------------------------------------------+
     // Internal function
@@ -1441,7 +1437,7 @@ typedef struct _TOKENENTRY     // entry in tokenlist :
 {
   // !!!! Attention: below has to match TOKENENTRYSEG definition ....  !!!!
   SHORT     sTokenid;          // Tokenid
-  USHORT    usLength;          // Length of data string
+  int        iLength;          // Length of data string
   SHORT     sAddInfo;          // additional information from tag table
   CHAR    * pDataString;       // pointer to data string
   USHORT    usOrgId;           // original id
@@ -1821,6 +1817,7 @@ typedef enum _PROCWINSTYLE
 #define  MEM_DB_CANCEL         MEM_PROCESS_OK+8  // load process was canceled /*@47*/
 #define  MEM_DB_EXTRACT_ERROR  MEM_PROCESS_OK+9  // retuned from function MemReadWriteSegment when TmExtract fails /*@47*/
 #define  MEM_DB_REPLACE_ERROR  MEM_PROCESS_OK+10 // retuned from function MemReadWriteSegment when TmReplace fails /*@47*/
+#define  MEM_PROCESS_REACHED_REQUESTED_LIMIT MEM_PROCESS_END+11
 
 
 enum statusCodes {

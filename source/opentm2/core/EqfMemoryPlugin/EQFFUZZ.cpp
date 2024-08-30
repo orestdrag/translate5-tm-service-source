@@ -90,6 +90,39 @@
 //|                   return success indicator                                 |
 //+----------------------------------------------------------------------------+
 
+
+
+#include <mutex>
+
+std::once_flag randomInitFlag;
+struct random{
+
+  ULONG  ulRandom[MAX_RANDOM];   // random sequence
+  void initializeRandom()
+  {
+      std::call_once(randomInitFlag, [this]() {
+          ulRandom[0] = 0xABCDEF01;
+          for (USHORT usRandomIndex = 1; usRandomIndex < MAX_RANDOM; usRandomIndex++)
+          {
+              ulRandom[usRandomIndex] = ulRandom[usRandomIndex - 1] * 5 + 0xABCDEF01;
+          }
+      });
+  }
+
+  random(){
+    ulRandom[0] = 0xABCDEF01;
+    for (USHORT usRandomIndex = 1; usRandomIndex < MAX_RANDOM; usRandomIndex++)
+    {
+        ulRandom[usRandomIndex] = ulRandom[usRandomIndex - 1] * 5 + 0xABCDEF01;
+    }
+  }
+
+  static PULONG getRandomVec(){
+    static random instance;
+    return instance.ulRandom;
+  }
+};
+
 //+----------------------------------------------------------------------------+
 //|Internal function                                                           |
 //+----------------------------------------------------------------------------+
@@ -137,32 +170,22 @@ PrepareTokens
   PCHAR_W     pRest;                   // ptr to start of not-processed bytes
   USHORT      usColPos = 0;            // column pos used by EQFTagTokenize
   PTOKENENTRY pTok;                    // ptr for token table processing
-  USHORT      usCurOffs;               // current offset into segment
+  int         iCurOffs = 0;            // current offset into segment
   ULONG       ulLength;                // length of start/stop table
   PFUZZYTOK   pstCurrent;              // ptr to entries of start/stop table
   CHAR_W      chTemp;                  // temp character
   BOOL        fOK = TRUE;              // success indicator
   USHORT      usRandomIndex;           // index in random sequence
   USHORT      usListSize;              // size of buffer
-  PTERMLENOFFS  pTermList;             // ptr to created term list
-  PTERMLENOFFS  pActTerm;              // actual term
+  TERMLENOFFS*  pTermList;             // ptr to created term list
+  TERMLENOFFS*  pActTerm;              // actual term
   USHORT       usRC;                   // return code
   SHORT        sNumTags;               // number of tags       /* KIT0857A    */
   BOOL         fTag;                   // currently in tagging /* KIT0857A    */
   PFUZZYTOK    pstAct;                 // ptr start/stop table /* KIT0857A    */
   PSZ_W        pStart;
 
-   if ( !ulRandom[0] )
-   {
-     /********************************************************************/
-     /* random sequences, see e.g. the book of Wirth...                  */
-     /********************************************************************/
-     ulRandom[0] = 0xABCDEF01;
-     for (usRandomIndex = 1; usRandomIndex < MAX_RANDOM; usRandomIndex++)
-     {
-         ulRandom[usRandomIndex] = ulRandom[usRandomIndex - 1] * 5 + 0xABCDEF01;
-     }
-   } /* endif */
+  //initializeRandom();
   /********************************************************************/
   /* run TATagTokenize to find tokens ....                            */
   /********************************************************************/
@@ -183,7 +206,6 @@ PrepareTokens
   /********************************************************************/
   pstCurrent = (PFUZZYTOK) pInBuf;  // use input buffer for table
   pTok = (PTOKENENTRY) pTokBuf;
-  usCurOffs = 0;
   pStart = pTok->pDataStringW;
   while ( (pTok->sTokenid != ENDOFLIST) )
   {
@@ -192,32 +214,32 @@ PrepareTokens
       usListSize = 0;
       pTermList = NULL;
 
-      chTemp = *(pTok->pDataStringW+pTok->usLength);
-      *(pTok->pDataStringW+pTok->usLength) = EOS;
+      chTemp = *(pTok->pDataStringW+pTok->iLength);
+      *(pTok->pDataStringW+pTok->iLength) = EOS;
 
         usRC = MorphTokenizeW( sLanguageId, pTok->pDataStringW,
-                            &usListSize, (PVOID *)&pTermList,
+                            &usListSize, &pTermList,
                             MORPH_OFFSLIST, ulOemCP );
 
-      *(pTok->pDataStringW+pTok->usLength) = chTemp;
+      *(pTok->pDataStringW+pTok->iLength) = chTemp;
 
       if ( pTermList )
       {
         pActTerm = pTermList;
-        if ( pTermList->usLength )
+        if ( pTermList->iLength )
         {
-          while ( pActTerm->usLength )
+          while ( pActTerm->iLength )
           {
-            pString = pTok->pDataStringW + pActTerm->usOffset;
+            pString = pTok->pDataStringW + pActTerm->iOffset;
             /**********************************************************/
             /* ignore the linefeeds and tabs in the matching          */
             /**********************************************************/
             if ( (*pString != LF) && (*pString != 0x09))
             {
               pstCurrent = SplitTokens(pstCurrent,
-                                       (USHORT)(usCurOffs + pActTerm->usOffset),
+                                       (iCurOffs + pActTerm->iOffset),
                                        TEXT_TOKEN,
-                                       pActTerm->usLength,
+                                       pActTerm->iLength,
                                        pString);
             } /* endif */
             pActTerm++;
@@ -226,9 +248,9 @@ PrepareTokens
         else
         {
           pstCurrent = SplitTokens(pstCurrent,
-                                   usCurOffs,
+                                   iCurOffs,
                                    pTok->sTokenid,
-                                   pTok->usLength,
+                                   pTok->iLength,
                                    pTok->pDataStringW);
 
         } /* endif */
@@ -241,16 +263,16 @@ PrepareTokens
     else
     {
       pstCurrent =  SplitTokens(pstCurrent,
-                               usCurOffs,
+                               iCurOffs,
                                pTok->sTokenid,
-                               pTok->usLength,
+                               pTok->iLength,
                                pTok->pDataStringW);
     } /* endif */
     /****************************************************************/
     /* adjust current offset to point to new offset in string...    */
     /****************************************************************/
     pTok++;
-    usCurOffs = (USHORT)(pTok->pDataStringW - pStart);
+    iCurOffs = (USHORT)(pTok->pDataStringW - pStart);
   } /* endwhile */
 
   // terminate start/stop table
@@ -356,7 +378,7 @@ PFUZZYTOK SplitTokens
   PFUZZYTOK  pstCurrent,
   USHORT     usStart,
   SHORT      sType,
-  USHORT     usLength,
+  int        usLength,
   PSZ_W      pString
  )
 {
@@ -366,9 +388,10 @@ PFUZZYTOK SplitTokens
   pstCurrent->sType   = sType;
   pstCurrent->usStop  = usStart + usLength - 1;
   pstCurrent->fConnected = FALSE;
+  T5LOG(T5TRANSACTION) << "pstring = " << pString << ";usLen = " << usLength;
   chTemp = *(pString + usLength);
   *(pString + usLength) = EOS;
-  MakeHashValue ( ulRandom, MAX_RANDOM,
+  MakeHashValue ( random::getRandomVec(), MAX_RANDOM,
                   pString , &pstCurrent->ulHash );
   *(pString + usLength) = chTemp;
   pstCurrent++;

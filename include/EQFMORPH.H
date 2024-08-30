@@ -192,7 +192,7 @@ USHORT MorphTokenizeW
    PSZ_W    pszInData,                 // pointer to input segment
    PUSHORT  pusBufferSize,             // address of variable containing size of
                                        //    term list buffer
-   PVOID    *ppTermList,               // address of caller's term list pointer
+   TERMLENOFFS** ppTermList,               // address of caller's term list pointer
    USHORT   usListType,                 // type of term list MORPH_ZTERMLIST or
                                        //    MORPH_OFFSLIST
    ULONG    ulOemCP

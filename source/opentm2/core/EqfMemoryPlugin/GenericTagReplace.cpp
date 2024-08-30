@@ -972,8 +972,8 @@ NTMSplitAndAddTokens
 {
   CHAR_W        chTemp;
   USHORT        usListSize = 0;
-  PTERMLENOFFS  pTermList = NULL;      // ptr to created term list
-  PTERMLENOFFS  pActTerm;              // actual term
+  TERMLENOFFS*  pTermList = NULL;      // ptr to created term list
+  TERMLENOFFS*  pActTerm;              // actual term
   PSZ_W         pCurWord;
   USHORT        usCurStart;
   ULONG         ulCurStop;
@@ -990,7 +990,7 @@ NTMSplitAndAddTokens
       *(pString + (usStop+(USHORT)1)) = EOS;
       
       usRC = MorphTokenizeW( sLangID, pString+usStart,
-                            &usListSize, (PVOID *)&pTermList,
+                            &usListSize, &pTermList,
                             MORPH_OFFSLIST, ulOemCP );
 
       *(pString + (usStop+(USHORT)1)) = chTemp;
@@ -998,18 +998,18 @@ NTMSplitAndAddTokens
       if ( pTermList )
       {
         pActTerm = pTermList;
-        if ( pTermList->usLength && (*pusMaxFreeToksInBuffer > 0))
+        if ( pTermList->iLength>0 && (*pusMaxFreeToksInBuffer > 0))
         {
-          while ( pActTerm->usLength && (*pusMaxFreeToksInBuffer > 0))
+          while ( pActTerm->iLength>0 && (*pusMaxFreeToksInBuffer > 0))
           {
-            pCurWord = pString + usStart + pActTerm->usOffset;
+            pCurWord = pString + usStart + pActTerm->iOffset;
             /**********************************************************/
             /* ignore the linefeeds in the matching                   */
             /**********************************************************/
             if ( *pCurWord != LF )
             {
-              usCurStart = (USHORT)(usStart + pActTerm->usOffset);
-              ulCurStop = usCurStart + pActTerm->usLength - 1;
+              usCurStart = (USHORT)(usStart + pActTerm->iOffset);
+              ulCurStop = usCurStart + pActTerm->iLength - 1;
 
               pstCurrent->pData = pCurWord;
               pstCurrent->usStart = usCurStart;

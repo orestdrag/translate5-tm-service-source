@@ -1,47 +1,37 @@
 cmake_minimum_required(VERSION 3.10)
 SET(APP_VERSION_GLOBAL 0)
 SET(APP_VERSION_MAJOR 6)
-SET(APP_VERSION_MINOR 35)
+SET(APP_VERSION_MINOR 36)
 
 SET(APP_VERSION  "${APP_VERSION_GLOBAL}.${APP_VERSION_MAJOR}.${APP_VERSION_MINOR}")
 
 project(T5MEMORY VERSION ${APP_VERSION})
 
+# Optional: Add a flag to enable/disable TSan
+option(ENABLE_TSAN "Enable ThreadSanitizer (TSan)" OFF)
 
-#set (CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -pthread -g")
-#set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS}  -pthread -g")
-#set (CMAKE_LINKER_FLAGS "${CMAKE_LINKER_FLAGS} -pthread")
-#set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -O2")
-
-#use cmake .. -DASAN_IS_ON=True to build with asan
-message("ASAN_IS_ON=${ASAN_IS_ON}")
-SET(STR_ASAN_IS_ON "Asan is off")
-
-#if( ASAN_IS_ON  ) 
-    message("ASAN_IS_ON evaluates to True")
-    SET(STR_ASAN_IS_ON "Asan is ON")
-    set (CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -pthread -fno-omit-frame-pointer -fsanitize=address -fsanitize-recover=address")
-    set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -pthread -fno-omit-frame-pointer -fsanitize=address -fsanitize-recover=address")
-    set (CMAKE_LINKER_FLAGS "${CMAKE_LINKER_FLAGS} -pthread -fno-omit-frame-pointer -fsanitize=address -fsanitize-recover=address")
+# Handle TSan configuration
+#if(ENABLE_TSAN)
+    #message("ThreadSanitizer is enabled")
+    #set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -pthread -fno-omit-frame-pointer -fsanitize=address")# -fsanitize-recover=address")
+    #set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -pthread -fno-omit-frame-pointer -fsanitize=address")#thread -fsanitize-recover=address")
+    #set(CMAKE_LINKER_FLAGS "${CMAKE_LINKER_FLAGS} -pthread -fno-omit-frame-pointer -fsanitize=address")#thread -fsanitize-recover=address")
+#else()
+#    message("ThreadSanitizer is disabled")
+     set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -pthread -fno-omit-frame-pointer -fsanitize=address -fsanitize-recover=address")
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -pthread -fno-omit-frame-pointer -fsanitize=address -fsanitize-recover=address")
+    set(CMAKE_LINKER_FLAGS "${CMAKE_LINKER_FLAGS} -pthread -fno-omit-frame-pointer -fsanitize=address -fsanitize-recover=address")
 #endif()
 
-
-#tsan
-#set (CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -pthread -fno-omit-frame-pointer -fsanitize=thread")
-#set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -pthread -fno-omit-frame-pointer -fsanitize=thread")
-#set (CMAKE_LINKER_FLAGS "${CMAKE_LINKER_FLAGS} -pthread -fno-omit-frame-pointer -fsanitize=thread")
-
 set(CMAKE_BUILD_TYPE Debug)
-#set(CMAKE_BUILD_TYPE RelWithDebInfo)
-#set(CMAKE_BUILD_TYPE Release)
-
-include(GNUInstallDirs)
+#include(GNUInstallDirs)
 
 message(STATUS "T5MEMORY CMAKE_CURRENT_SOURCE_DIR=${CMAKE_CURRENT_SOURCE_DIR}")
 set(ROOT "${CMAKE_CURRENT_SOURCE_DIR}/..")
 message(STATUS "T5MEMORY ROOT is ${ROOT}")
 set(OPENTM2_INCLUDE_DIR "${ROOT}/include")
 set(CMAKE_SOURCE_DIR    "${ROOT}/source")
+set(TSAN_OPTIONS "suppressions=${ROOT}/tsan.supp")
 
 set (lib_cmake_DIR "/home/libs/proxygen/_build/deps/lib/cmake")
 #set(lib_cmake_DIR "/opt/local/lib/cmake/" )
@@ -59,7 +49,6 @@ set (gflags_DIR "${lib_cmake_DIR}/gflags")
 set (mvfst_DIR "${lib_cmake_DIR}/mvfst")
 set (Sodium_DIR "${lib_cmake_DIR}/sodium")
 
-
 find_package(PkgConfig REQUIRED)
 pkg_check_modules(LIBSODIUM libsodium)
 
@@ -69,7 +58,6 @@ include("${ROOT}/source/cmake/CheckGit.cmake")
 CheckGitSetup()
 set(T5MEMORY_SOURCE_ROOT "${ROOT}/source")
 set(CORE_DIR "opentm2/core")
-
 
 set(OPENTM2_MRI_DIR     "${ROOT}/mri")
 
@@ -156,6 +144,15 @@ set(T5MEMORY_Source_Files
        
 )
 
+link_directories(/usr/lib/gcc/x86_64-linux-gnu/9/)
+
+
+
+set_source_files_properties(
+    /home/or/workspace/translate5/translate5-tm-service-source/source/RestAPI/ProxygenServer.cpp
+    PROPERTIES COMPILE_FLAGS "-fno-sanitize=thread"
+)
+
 set_source_files_properties(${T5MEMORY_Source_Files} PROPERTIES LANGUAGE CXX )
 
 add_definitions( -DT5GLOBVERSION=${APP_VERSION_GLOBAL} )
@@ -190,13 +187,6 @@ find_package(proxygen REQUIRED)
 
 target_compile_definitions(T5MEMORY PRIVATE BOOST_STACKTRACE_USE_ADDR2LINE)
 
-
-#target_compile_options(${PROJECT_NAME} PRIVATE
-#  -Wall -Wextra -Wpedantic -Werror
-#    -Wno
-#    -w
-#)
-#suppress warnings
 add_definitions(-w)
 
 if(TARGET Threads::Threads)
@@ -206,7 +196,6 @@ endif()
 find_package(ICU 66.0 COMPONENTS uc i18n REQUIRED)
 
 set(OPENTM2_FOLDER "${ROOT}/source/opentm2")
-#add_subdirectory("${OPENTM2_FOLDER}/core")
 
 set(LIBS_DIRECTORY "/opt/local/lib")
 set(SHARED_LIBS_DIR "/lib")
@@ -266,4 +255,3 @@ set(CPACK_GENERATOR                        "TXZ")
 #set(CPACK_RESOURCE_FILE_LICENSE           "${CMAKE_CURRENT_SOURCE_DIR}/License.txt")
 #set(CPACK_RESOURCE_FILE_README            "${CMAKE_CURRENT_SOURCE_DIR}/ReadMe.txt")
 include(CPack)
-

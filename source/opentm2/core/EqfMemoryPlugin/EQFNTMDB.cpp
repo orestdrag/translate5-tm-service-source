@@ -2033,12 +2033,5 @@ SHORT BTREE::EQFNTMPhysLock
 //|                   position ptr to begin of file                            |
 //|                   write update counter to disk                             |
 // ----------------------------------------------------------------------------+
-SHORT BTREE::EQFNTMIncrUpdCounter
-(
-   SHORT      sIndex,                  // index of update counter
-   PLONG                         plNewValue                                               // ptr to buffer for new counte value|
-)
-{
-  return QDAMIncrUpdCounter( this, sIndex, plNewValue );
-}
+
 

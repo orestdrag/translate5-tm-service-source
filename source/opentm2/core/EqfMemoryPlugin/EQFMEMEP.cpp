@@ -252,6 +252,7 @@ USHORT EQFMemExportProcess ( PPROCESSCOMMAREA  pCommArea,
        break;
     //--------------------------------------------------------------------
     case MEM_PROCESS_END:
+    case MEM_PROCESS_REACHED_REQUESTED_LIMIT:
        //--- Close the exported file
        //--- If ulSegmentCounter = ZERO issue the message box
        //--- "No segments have been exported to %1." otherwise
@@ -945,7 +946,7 @@ USHORT MemExportProcess ( PMEM_EXPORT_IDA  pExportIDA ) // pointer to the export
               if(pExportIDA->numOfRequestedSegmentsForExport > 0 &&
                 pExportIDA->segmentsExported >= pExportIDA->numOfRequestedSegmentsForExport){
                 pExportIDA->fEOF = TRUE;
-                LOG_AND_SET_RC(usRc, T5INFO, MEM_PROCESS_END);
+                LOG_AND_SET_RC(usRc, T5INFO, MEM_PROCESS_REACHED_REQUESTED_LIMIT);
               }
             }
           }else{
@@ -966,6 +967,8 @@ USHORT MemExportProcess ( PMEM_EXPORT_IDA  pExportIDA ) // pointer to the export
            case 0 :
              LOG_AND_SET_RC(usRc, T5INFO, MEM_PROCESS_OK);
              break;
+            case MEM_PROCESS_REACHED_REQUESTED_LIMIT: 
+              break;
            default:
               LOG_AND_SET_RC(usRc, T5INFO, MEM_WRITE_ERR);
               break;
