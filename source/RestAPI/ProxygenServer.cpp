@@ -125,6 +125,7 @@ class ProxygenHandlerFactory : public RequestHandlerFactory {
       std::string msg = "SERVER RECEIVED REQUEST:";
       msg += "\n\t URL: " + url;
       msg += "\n\t method: " + methodStr;
+      //msg += "\n\t body";
       
       if(stats_){
         msg += "\n\t reqCount: " + std::to_string(stats_->getRequestCount());

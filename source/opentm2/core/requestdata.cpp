@@ -18,6 +18,7 @@
 #include "EQFFUNCI.H"
 
 DECLARE_bool(log_every_request_end);
+DECLARE_bool(flush_tm_to_disk_with_every_update);
 
 
 enum InternalErrorRC
@@ -418,21 +419,40 @@ int RequestData::buildRet(int res){
   return 0;
 }
 
-int RequestData::run(){   
+bool RequestData::isLockingRequest()
+{
+  return nullptr != mem.get() 
+    && !isServiceRequest();
+}
+
+int RequestData::run(){ 
+  bool logRequests = false;  
+  if(logRequests){
+    T5LOG(T5TRANSACTION)<<"Received "<< _id_<<"; url: " << strUrl <<"; body = "<<strBody;
+  }
   int res = OtmMemoryServiceWorker::getInstance()->verifyAPISession();
   if(!res) res = parseJSON();
   if(!res) res = checkData();
 
   if(!res) res = requestTM();
-  
-  if(!res && fValid) res = execute();
+
+  if(!res && fValid)
+  {
+    if(isLockingRequest())
+    {
+      std::lock_guard<std::recursive_mutex> l(mem->tmMutex) ; 
+      res = execute();
+    }else{
+      res = execute();
+    }
+  }  
 
   buildRet(res);
 
   //reset pointers
   if(mem != nullptr){
     mem->tmMutex.unlock();
-    //T5LOG(T5TRANSACTION) << "Unclocking mem \'" << mem->szName << "\' returned ";
+    //T5LOG(T5TRANSACTION) << "Unlocking mutex for \'" << mem->szName  << "; thread :" << std::this_thread::get_id();
     mem.reset();
   }
   if(memRef != nullptr){
@@ -450,6 +470,9 @@ int RequestData::run(){
    
 
     T5LOG(T5TRANSACTION)  << msg;
+  }
+  if(logRequests){
+    T5LOG(T5TRANSACTION)<< _id_ << " done";
   }
   return res;
 }
@@ -1059,7 +1082,7 @@ int SaveAllTMsToDiskRequestData::execute(){
   
   //std::lock_guard<std::mutex> l{TMManager::GetInstance()->mutex_requestTM};
   {// lock tms
-    std::lock_guard<std::mutex> l{TMManager::GetInstance()->mutex_access_tms};// lock tms list
+    std::lock_guard<std::recursive_mutex> l{TMManager::GetInstance()->mutex_access_tms};// lock tms list
     for(const auto& tm: TMManager::GetInstance()->tms){
       if(count++)
         tms += ", ";
@@ -1982,7 +2005,9 @@ void AddRequestDataToJson(std::stringstream& ss, std::string reqType, millisecon
 
 int StatusMemRequestData::execute() {
   // check if memory is contained in our list
-  if (  TMManager::GetInstance()->IsMemoryLoaded(strMemName) )
+  {
+  std::lock_guard<std::recursive_mutex> l{TMManager::GetInstance()->mutex_requestTM};
+  if (  TMManager::GetInstance()->IsMemoryLoadedUnsafe(strMemName) )
   {
     mem = TMManager::GetInstance()->requestServicePointer(strMemName, command);
     // set status value
@@ -2044,6 +2069,7 @@ int StatusMemRequestData::execute() {
     json_factory.terminateJSON( outputMessage );
     return( OK );
   } /* endif */
+  }// endif tm is open
 
   // check if memory exists
   if(int res = TMManager::GetInstance()->TMExistsOnDisk(strMemName))
@@ -2210,7 +2236,7 @@ int ResourceInfoRequestData::execute(){
   std::string fName;
   ssOutput << "\"tms\": [\n";
   {// lock tms
-    std::lock_guard<std::mutex> l{TMManager::GetInstance()->mutex_access_tms};// lock tms list
+    std::lock_guard<std::recursive_mutex> l{TMManager::GetInstance()->mutex_access_tms};// lock tms list
     for ( auto& tm : TMManager::GetInstance()->tms)
     {
       if(count){
@@ -2745,7 +2771,7 @@ int UpdateEntryRequestData::execute(){
   if ( _rc_ != 0 ){
       return buildErrorReturn(_rc_, "EqfMemory::putProposal result is error ", INTERNAL_SERVER_ERROR);   
       //handleError( _rc_, this->szName, TmPutIn.stTmPut.szTagTable );
-  }else if(fSave2Disk){
+  }else if(fSave2Disk || FLAGS_flush_tm_to_disk_with_every_update){
     mem->FlushFilebuffers();
   }
 

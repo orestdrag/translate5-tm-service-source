@@ -101,6 +101,9 @@ const char* OtmMorphICUPlugin::getSupplier()
 	return strSupplier.c_str();
 }
 
+
+#include <mutex>
+std::mutex mMorphMapMutex;
 /*! \brief open the morphology object of the specified language
 	\param vLanguage pointer to the language
 	\returns pointer to the morphology object or NULL if failed
@@ -108,6 +111,7 @@ const char* OtmMorphICUPlugin::getSupplier()
 OtmMorph* OtmMorphICUPlugin::openMorph( const char* pszLanguage )
 {
 	string strLanguage = string(pszLanguage);
+	std::lock_guard<std::mutex> l(mMorphMapMutex);
 	map<string, OtmMorph*>::iterator tIter = mMorphMap.find(strLanguage);
 	if (tIter != mMorphMap.end())
 	{

@@ -2978,15 +2978,21 @@ ULONG EQFUnicode2Compress( PBYTE pTarget, PSZ_W pInput, ULONG ulLenChar )
 }
 
 
-ULONG EQFCompress2Unicode( PSZ_W pOutput, PBYTE pTarget, ULONG ulLenComp )
+LONG EQFCompress2Unicode( PSZ_W pOutput, PBYTE pTarget, ULONG ulLenComp )
 {
-    ULONG  ulLen = ulLenComp-1;
+    LONG  lLen = ulLenComp-1;
+
+  //T5LOG(T5TRANSACTION) <<"; lLen = " << lLen;
+    if(lLen <= 0 ) 
+      return 0;
+    
     BYTE b = *pTarget++;
+    //T5LOG(T5TRANSACTION) << "b = " << b <<"; lLen = " << lLen;
     if ( b == 0 )  // no compression
     {
-        memcpy( pOutput, pTarget, ulLen );
-        ulLen = ulLenComp / sizeof(CHAR_W);
-        pOutput[ ulLen ] = EOS;
+        memcpy( pOutput, pTarget, lLen );
+        lLen = ulLenComp / sizeof(CHAR_W);
+        pOutput[ lLen ] = EOS;
     }
     //*
     else if (b == BOCU_COMPRESS)
@@ -2997,7 +3003,7 @@ ULONG EQFCompress2Unicode( PSZ_W pOutput, PBYTE pTarget, ULONG ulLenComp )
       int  oldCodePoint = 0x80;
       int  i, bCount;
 
-      for ( iLen = 0; iLen < ulLen; iLen++ )
+      for ( iLen = 0; iLen < lLen; iLen++ )
       {
         delta = (unsigned char)*pTarget++;
 
@@ -3023,7 +3029,7 @@ ULONG EQFCompress2Unicode( PSZ_W pOutput, PBYTE pTarget, ULONG ulLenComp )
         }
       }
       *pOutput = 0;
-      ulLen = (pOutput - pTemp);
+      lLen = (pOutput - pTemp);
     }
     else
     {
@@ -3031,7 +3037,7 @@ ULONG EQFCompress2Unicode( PSZ_W pOutput, PBYTE pTarget, ULONG ulLenComp )
         assert( 0 == 1);
     }
     //*/
-    return ulLen;
+    return lLen;
 }
 #endif 
 

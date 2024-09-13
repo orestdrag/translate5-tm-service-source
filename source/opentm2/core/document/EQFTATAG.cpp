@@ -52,6 +52,8 @@ USHORT TALoadTagTableHwnd
 }
 
 
+#include <mutex>
+std::mutex mutexLoadTagTable;
 USHORT TALoadTagTableExHwnd            // loads/accesses a tag table
 (
   PSZ              pszTableName,       // name of tag table (w/o path and ext.)
@@ -62,6 +64,7 @@ USHORT TALoadTagTableExHwnd            // loads/accesses a tag table
   HWND             hwnd                // owner handle for error messages
 )
 {
+  std::lock_guard <std::mutex> l(mutexLoadTagTable);
   CHAR             szTagTableFileName[MAX_EQF_PATH]; // buffer for file name
   szTagTableFileName[0]='\0';
   PLOADEDTABLE     pTable = NULL;            // ptr for processing of loaded tables

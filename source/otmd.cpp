@@ -62,6 +62,9 @@ DEFINE_validator(timeout, &ValidateTimeout);
 DEFINE_bool(log_every_request_start, false, "Sets log for every request call with it's url, method etc...");
 DEFINE_bool(log_every_request_end  , false, "Sets log for every request end  with it's url, method etc...");
 
+DEFINE_bool(flush_tm_to_disk_with_every_update, false, "If set to true, flushes tm to disk with every successfull update request");
+
+
 static bool ValidateThreads(const char* flagname, int32_t value) {
    if (value >= 1 && value <= 100)   // value is ok
      return true;

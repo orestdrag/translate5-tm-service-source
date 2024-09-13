@@ -1078,7 +1078,8 @@ USHORT ExactTest
 
       //source strings are identical so loop through target records
       while ( (usRc == NO_ERROR) && //(ulLeftTgtLen && ( RECLEN(pTMXTargetRecord) != 0)) )
-                              ( lLeftTgtLen >= RECLEN(pTMXTargetRecord) ) && ( RECLEN(pTMXTargetRecord) > 0))
+                              
+                               ( lLeftTgtLen > 0 ) &&  ( lLeftTgtLen >= RECLEN(pTMXTargetRecord) ) && ( RECLEN(pTMXTargetRecord) > 0))
       {
         BOOL fTestCLB = TRUE;
         BOOL fMatchingDocName = FALSE;
@@ -1200,7 +1201,7 @@ USHORT ExactTest
                              pTMXTargetRecord->usClb;
               while ( ( lLeftClbLen > 0 ) && (sCurMatch < SAME_SEG_AND_DOC_MATCH) )
               {
-                T5LOG( T5DEBUG) << ":: lLeftClbLen = " << lLeftClbLen << "; sCurMatch = " << sCurMatch;
+                //T5LOG(T5TRANSACTION) << ":: lLeftClbLen = " << lLeftClbLen << "; sCurMatch = " << sCurMatch;
                 USHORT usTranslationFlag = pClb->bTranslationFlag;
                 USHORT usCurContextRanking = 0;       // context ranking of this match
                 BOOL fIgnoreProposal = FALSE;
@@ -2690,6 +2691,7 @@ USHORT FuzzyTest ( EqfMemory* pTmClb,           //ptr to control block
                            sizeof(TMX_SOURCE_RECORD));
 
     //copy source string for fill matchtable
+    //T5LOG(T5TRANSACTION) << "pTmRecord: lRecordLen="<< pTmRecord->lRecordLen <<"; usFirstTargetRecord=" << pTmRecord->usFirstTargetRecord <<"; usSourceRecord=" << pTmRecord->usSourceRecord;
     ulSourceLen = EQFCompress2Unicode( pString, pSource, ulSourceLen );
     if(pSentence->pPropString) delete pSentence->pPropString;
     pSentence->pPropString = new StringTagVariants(pString);//std::make_unique<StringTagVariants>(pString);
@@ -2735,7 +2737,7 @@ USHORT FuzzyTest ( EqfMemory* pTmClb,           //ptr to control block
     if ( !fStringEqual && !usRc )
     {
       USHORT  usTgtNum = 0;            // first target number
-      ULONG   ulLeftTgtLen;            // target length record...
+      LONG    lLeftTgtLen;            // target length record...
       USHORT  usTagId;                 // tag table id
       USHORT  usTargetId;              // target language id
       BOOL    fTagTableEqual;          // TRUE if TagTable of prop == current
@@ -2768,10 +2770,10 @@ USHORT FuzzyTest ( EqfMemory* pTmClb,           //ptr to control block
       pStartTarget = (PBYTE)pTMXTargetRecord;
 
       //loop through target records
-      ulLeftTgtLen = RECLEN(pTmRecord) - pTmRecord->usFirstTargetRecord;
+      lLeftTgtLen = RECLEN(pTmRecord) - pTmRecord->usFirstTargetRecord;
 
-      T5LOG( T5INFO) << "FuzzyTest: Checking targets, ulLeftTgtLen = "<<ulLeftTgtLen;
-      while ( ( ulLeftTgtLen >= RECLEN(pTMXTargetRecord) ) && (ulLeftTgtLen > 0) && (RECLEN(pTMXTargetRecord) != 0) )
+      T5LOG( T5INFO) << "FuzzyTest: Checking targets, lLeftTgtLen = "<<lLeftTgtLen;
+      while ((lLeftTgtLen > 0) && ( lLeftTgtLen >= RECLEN(pTMXTargetRecord) ) &&  (RECLEN(pTMXTargetRecord) != 0) )
       {
         BOOL fTestCLB = TRUE;
         USHORT usModifiedTranslationFlag = 0;
@@ -2783,7 +2785,7 @@ USHORT FuzzyTest ( EqfMemory* pTmClb,           //ptr to control block
 
         //assert( ulLeftTgtLen >= RECLEN(pTMXTargetRecord) );
 
-        ulLeftTgtLen -= RECLEN(pTMXTargetRecord);
+        lLeftTgtLen -= RECLEN(pTMXTargetRecord);
 
         //check the target language
         //position at target control block
@@ -2792,6 +2794,7 @@ USHORT FuzzyTest ( EqfMemory* pTmClb,           //ptr to control block
 
         //compare target language group IDs
         if(pGetIn->fTargetLangIsPrefered){
+          //T5LOG(T5TRANSACTION) << "pTMXTargetClb->usLangId=" << pTMXTargetClb->usLangId <<"; usTargetId=" << usTargetId;
           if ( pTmClb->psLangIdToGroupTable[pTMXTargetClb->usLangId] != pTmClb->psLangIdToGroupTable[usTargetId] )
           {
             T5LOG( T5INFO) <<"FuzzyTest: Wrong target language!" ;

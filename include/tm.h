@@ -1736,7 +1736,7 @@ class EqfMemory //: public TMX_CLB
 {
   
 public:
-  std::mutex tmMutex;
+  std::recursive_mutex tmMutex;
   bool fOpen = false;
   BTREE TmBtree;
   BTREE InBtree;
@@ -3787,7 +3787,7 @@ BOOL TMDelTargetClb
 );
 
 ULONG EQFUnicode2Compress( PBYTE pTarget, PSZ_W pInput, ULONG usLenChar );
-ULONG EQFCompress2Unicode( PSZ_W pOutput, PBYTE pTarget, ULONG usLenComp );
+LONG EQFCompress2Unicode( PSZ_W pOutput, PBYTE pTarget, ULONG usLenComp );
 
 #include "EncodingHelper.h"
 
@@ -4036,8 +4036,8 @@ class TMManager{
   typedef std::map <std::string, std::shared_ptr<EqfMemory>> TMMap;
   TMMap tms;
 
-  std::mutex mutex_requestTM;
-  std::mutex mutex_access_tms;
+  std::recursive_mutex mutex_requestTM;
+  std::recursive_mutex mutex_access_tms;
 
   enum TMManagerCodes{
     TMM_NO_ERROR = 0,

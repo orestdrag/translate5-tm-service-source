@@ -388,7 +388,7 @@ PFUZZYTOK SplitTokens
   pstCurrent->sType   = sType;
   pstCurrent->usStop  = usStart + usLength - 1;
   pstCurrent->fConnected = FALSE;
-  T5LOG(T5TRANSACTION) << "pstring = " << pString << ";usLen = " << usLength;
+  T5LOG(T5DEVELOP) << "pstring = " << pString << ";usLen = " << usLength;
   chTemp = *(pString + usLength);
   *(pString + usLength) = EOS;
   MakeHashValue ( random::getRandomVec(), MAX_RANDOM,

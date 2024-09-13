@@ -540,6 +540,7 @@ int BTREE::checkLookupTableAndRealocate(int number){
   #else
   if ( number >= LookupTable_V3.size() )
   {
+    T5LOG(T5DEBUG) << "resizing LookupTable number = " << number;
     LookupTable_V3.resize(number+10);
     //AccessCtrTable.resize(number+10);
   }

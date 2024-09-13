@@ -17,7 +17,7 @@
 int TMManager::GetMemImportInProcessCount(){
   int count = 0;
   // lock tms list
-  std::lock_guard<std::mutex> l{mutex_access_tms};// lock tms list
+  std::lock_guard<std::recursive_mutex> l{mutex_access_tms};// lock tms list
   for(auto& tm: tms)
   {
     ImportStatusDetails* pImportDetails = tm.second->importDetails;
@@ -50,7 +50,7 @@ size_t TMManager::CalculateOccupiedRAM(){
   }
   #else
   {
-    std::lock_guard<std::mutex> l{mutex_access_tms};// lock tms list
+    std::lock_guard<std::recursive_mutex> l{mutex_access_tms};// lock tms list
     for(const auto& mem: tms){
       UsedMemory += mem.second->GetRAMSize();
     }
@@ -85,7 +85,7 @@ size_t TMManager::CleanupMemoryList(size_t memoryRequested)
   std::multimap <time_t, std::weak_ptr<EqfMemory>>  openedMemoriesSortedByLastAccess;
   
   {
-    std::lock_guard<std::mutex> l{mutex_access_tms};// lock tms list
+    std::lock_guard<std::recursive_mutex> l{mutex_access_tms};// lock tms list
     for(const auto& tm: tms){
       openedMemoriesSortedByLastAccess.insert({tm.second->tLastAccessTime, tm.second});
     }
@@ -97,7 +97,7 @@ size_t TMManager::CleanupMemoryList(size_t memoryRequested)
   {
     std::string tmName;
     {
-      std::lock_guard<std::mutex> l{mutex_access_tms};// lock tms list
+      std::lock_guard<std::recursive_mutex> l{mutex_access_tms};// lock tms list
       if(!it->second.expired())
       {
         auto tm = it->second.lock();
@@ -929,7 +929,7 @@ int TMManager::ReplaceMemory
     return iRC;
   } /* endif */
   {
-    std::lock_guard<std::mutex> l{TMManager::GetInstance()->mutex_access_tms};// lock tms list
+    std::lock_guard<std::recursive_mutex> l{TMManager::GetInstance()->mutex_access_tms};// lock tms list
     iRC = TMManager::GetInstance()->DeleteTM( strReplace, outputMsg );
     if(!iRC){
       T5LOG(T5INFO)<<"Original files was deleted, renaming organize files...";
@@ -1230,7 +1230,7 @@ int TMManager::TMExistsOnDisk(const std::string& tmName, bool logErrorIfNotExist
 
 
 bool TMManager::IsMemoryLoaded(const std::string& strMemName){
-  std::lock_guard<std::mutex> l{mutex_access_tms};
+  std::lock_guard<std::recursive_mutex> l{mutex_access_tms};
   return IsMemoryLoadedUnsafe(strMemName);
 }
 
@@ -1279,14 +1279,14 @@ int TMManager::OpenTM(const std::string& strMemName){
   }
   
   {
-    std::lock_guard<std::mutex> l{mutex_access_tms};// lock tms list
+    std::lock_guard<std::recursive_mutex> l{mutex_access_tms};// lock tms list
     tms[strMemName] = pMem;
   }
   return 0; 
 }
 
 int TMManager::AddMem(const std::shared_ptr<EqfMemory> NewMem){
-  std::lock_guard<std::mutex> l{mutex_access_tms};
+  std::lock_guard<std::recursive_mutex> l{mutex_access_tms};
   if(NewMem == nullptr || NewMem->szName == "\0"){
     return -1;
   }
@@ -1300,7 +1300,7 @@ int TMManager::AddMem(const std::shared_ptr<EqfMemory> NewMem){
 }
 
 int TMManager::CloseTM(const std::string& strMemName){
-  std::lock_guard<std::mutex> l{mutex_access_tms};
+  std::lock_guard<std::recursive_mutex> l{mutex_access_tms};
   return CloseTMUnsafe(strMemName);
 }
 
@@ -1315,11 +1315,11 @@ int TMManager::CloseTMUnsafe(const std::string& strMemName){
 }
 
 std::shared_ptr<EqfMemory> TMManager::requestServicePointer(const std::string& strMemName, COMMAND command){
-  std::lock_guard<std::mutex> l{mutex_requestTM};
+  std::lock_guard<std::recursive_mutex> l{mutex_requestTM};
   std::shared_ptr<EqfMemory> mem;
-  if(IsMemoryLoaded(strMemName)){
+  if(IsMemoryLoadedUnsafe(strMemName)){
     if(command == STATUS_MEM){
-      std::lock_guard<std::mutex> l{mutex_access_tms};//lock tms list
+      std::lock_guard<std::recursive_mutex> l{mutex_access_tms};//lock tms list
       return tms[strMemName];
     }
   }
@@ -1328,7 +1328,7 @@ std::shared_ptr<EqfMemory> TMManager::requestServicePointer(const std::string& s
 
 std::shared_ptr<EqfMemory> TMManager::requestReadOnlyTMPointer(const std::string& strMemName, std::shared_ptr<int>& refBack){
   int rc = 0;
-  std::lock_guard<std::mutex> l{mutex_requestTM};
+  std::lock_guard<std::recursive_mutex> l{mutex_requestTM};
   if(!IsMemoryLoaded(strMemName)){
     rc = OpenTM(strMemName);
   }
@@ -1336,7 +1336,7 @@ std::shared_ptr<EqfMemory> TMManager::requestReadOnlyTMPointer(const std::string
   
   if(!rc)
   {//lock tms list
-    std::lock_guard<std::mutex> l{mutex_access_tms}; 
+    std::lock_guard<std::recursive_mutex> l{mutex_access_tms}; 
     if(IsMemoryLoadedUnsafe(strMemName)){    
       mem = tms[strMemName];
     } 
@@ -1350,7 +1350,7 @@ std::shared_ptr<EqfMemory> TMManager::requestReadOnlyTMPointer(const std::string
     if(rc){
       mem.reset();
     }else{
-      //T5LOG(T5TRANSACTION) << "locking mutex for \'" << mem->szName ;
+      //T5LOG(T5TRANSACTION) << "locking mutex for \'" << mem->szName  << "; thread :" << std::this_thread::get_id();
       mem->tmMutex.lock();
       refBack = mem->readOnlyCnt;
       T5LOG(T5DEBUG) <<"readOnlyCnt = " << mem->readOnlyCnt.use_count();
@@ -1362,7 +1362,7 @@ std::shared_ptr<EqfMemory> TMManager::requestReadOnlyTMPointer(const std::string
 
 std::shared_ptr<EqfMemory> TMManager::requestWriteTMPointer(const std::string& strMemName, std::shared_ptr<int>& refBack){
   int rc = 0;
-  std::lock_guard<std::mutex> l{mutex_requestTM};
+  std::lock_guard<std::recursive_mutex> l{mutex_requestTM};
   if(!IsMemoryLoaded(strMemName)){
     rc = OpenTM(strMemName);
   }
@@ -1371,7 +1371,7 @@ std::shared_ptr<EqfMemory> TMManager::requestWriteTMPointer(const std::string& s
   
   if(!rc)
   {// lock tms list
-    std::lock_guard<std::mutex> l{mutex_access_tms};
+    std::lock_guard<std::recursive_mutex> l{mutex_access_tms};
   
     if(IsMemoryLoadedUnsafe(strMemName)){
       mem = tms[strMemName];
@@ -1392,7 +1392,7 @@ std::shared_ptr<EqfMemory> TMManager::requestWriteTMPointer(const std::string& s
   }
 
   if(!rc){
-    //T5LOG(T5TRANSACTION) << "locking mutex for \'" << mem->szName ;
+    //T5LOG(T5TRANSACTION) << "locking mutex for \'" << mem->szName  << "; thread :" << std::this_thread::get_id();
     mem->tmMutex.lock();
     return mem;
   }

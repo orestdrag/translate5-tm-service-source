@@ -109,8 +109,10 @@ USHORT MorphWStrings2TermList( vector<std::wstring> &vStrings, PVOID *ppTermList
 //0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
 //};
 //static char chDummy2[1024] = "abcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyz";
+#include <mutex>
 PLCB* ppIdToLCB = 0;
 BOOL bLCBTableAllocated = FALSE;
+std::mutex LCBTableMutex;
 
 // array with names of languages with specific types
 
@@ -318,7 +320,7 @@ USHORT TokenizeW
 
     // split segment/sentences into words
     OtmMorph::TERMLIST vTermList;
-    T5LOG(T5TRANSACTION) << "pszInData = " << pszInData <<"; ps_In =" <<ps_In << "; vSentenceList[j].iLength = " << vSentenceList[j].iLength << "; j = " << j <<"; offset = " << vSentenceList[j].iStartOffset;
+    T5LOG(T5DEBUG) << "pszInData = " << pszInData <<"; ps_In =" <<ps_In << "; vSentenceList[j].iLength = " << vSentenceList[j].iLength << "; j = " << j <<"; offset = " << vSentenceList[j].iStartOffset;
     PSZ_W pszStartOfSegment = pszInData + vSentenceList[j].iStartOffset;
     wchar_t chTemp = pszStartOfSegment[vSentenceList[j].iLength];
     pszStartOfSegment[vSentenceList[j].iLength] = 0;
@@ -870,21 +872,24 @@ USHORT MorphGetLanguageID
     
   usTid = _getpid();
    
-
+  std::lock_guard<std::mutex> guard(LCBTableMutex);
   /********************************************************************/
   /* Allocate LCB table if necessary                                  */
   /********************************************************************/
-  if (bLCBTableAllocated == FALSE)
   {
-    if ( !UtlAlloc( (PVOID *)&ppIdToLCB, 0L, (LONG) (sizeof(PLCB) * 256), NOMSG ) )
+    //std::lock_guard<std::mutex> guard(LCBTableMutex);
+    if (bLCBTableAllocated == FALSE)
     {
-      LOG_AND_SET_RC(usRC, T5INFO, MORPH_NO_MEMORY);
-	}
-	else
-	{
-	  bLCBTableAllocated = TRUE;
-	  memset(ppIdToLCB, 0, sizeof(PLCB) * 256);
-    } /* endif */
+      if ( !UtlAlloc( (PVOID *)&ppIdToLCB, 0L, (LONG) (sizeof(PLCB) * 256), NOMSG ) )
+      {
+        LOG_AND_SET_RC(usRC, T5INFO, MORPH_NO_MEMORY);
+      }
+      else
+      {
+        bLCBTableAllocated = TRUE;
+        memset(ppIdToLCB, 0, sizeof(PLCB) * 256);
+      } /* endif */
+    }
   }
   
   /********************************************************************/

@@ -417,6 +417,8 @@ USHORT EqfGetLastErrorW
   return( usRC );
 } /* end of function EqfGetLastErrorW */
 
+#include <mutex>
+std::mutex mutex_validate_ssession;
 // FctValidateSession: check and convert a session handle to a FCTDATA pointer
 USHORT FctValidateSession
 (
@@ -424,6 +426,7 @@ USHORT FctValidateSession
   PFCTDATA   *ppData                   // address of caller's FCTDATA pointer
 )
 {
+  std::lock_guard<std::mutex> l{mutex_validate_ssession};
   // convert handle to pointer
   PFCTDATA    pData = (PFCTDATA)hSession;;                   // pointer to FCTDATA area
   USHORT      usRC = NO_ERROR;         // function return code

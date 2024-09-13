@@ -76,6 +76,7 @@ protected:
     int requestTM();
 
     bool isWriteRequest();
+    bool isLockingRequest();
     bool isReadOnlyRequest();
     bool isServiceRequest();
 };
