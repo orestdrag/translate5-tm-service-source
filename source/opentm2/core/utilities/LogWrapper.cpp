@@ -21,12 +21,15 @@ T5Logger* T5Logger::GetInstance(){
 }
 
 std::ostringstream& T5Logger::__getLogBuffer(){
-    static std::ostringstream __logBuff;
+    //static std::ostringstream __logBuff;
+    thread_local std::ostringstream __logBuff;
     return __logBuff;
 }
 
 std::ostringstream& T5Logger::__getBodyBuffer(){
-    static std::ostringstream __logBuff;
+    //static std::ostringstream __logBuff;
+
+    thread_local std::ostringstream __logBuff;
     return __logBuff;
 }
 
