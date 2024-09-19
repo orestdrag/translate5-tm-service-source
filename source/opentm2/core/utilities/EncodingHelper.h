@@ -18,7 +18,7 @@ class EncodingHelper{
     std::wstring static toWChar(std::u16string u16str);
     std::string static toChar(std::u16string u16str);
     
-    std::wstring static convertToUTF32(std::string str);
+    std::wstring static convertToUTF32BOM(std::string str);
 
     /*! \brief convert a UTF8 std::string to a UTF16 std::wstring
     \param strUTF8String string in UTF8 encoding
