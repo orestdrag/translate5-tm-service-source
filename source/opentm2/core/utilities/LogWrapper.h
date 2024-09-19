@@ -75,8 +75,7 @@ enum LOGCODES{
 class T5Logger{
     T5Logger(){
         fFilterLogs = false;
-        logLevelTreshold = T5DEVELOP;
-        
+        logLevelTreshold = T5DEVELOP; 
     }
 public:
     bool fFilterLogs; // during init should be set to false to print init messages

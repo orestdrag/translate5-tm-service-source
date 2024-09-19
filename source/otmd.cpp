@@ -202,6 +202,8 @@ int main(int argc, char* argv[]) {
    //     FilesystemHelper::CreateDir(FLAGS_log_dir, 0700);
    //}
    FLAGS_colorlogtostderr = true;
+   //FLAGS_log_every_request_start = 1;
+   //FLAGS_flush_tm_to_disk_with_every_update = 1;
    //FLAGS_logtostderr = true;
    //FLAGS_localhostonly = true;
    //FLAGS_port = 4045;
@@ -209,12 +211,16 @@ int main(int argc, char* argv[]) {
    //#endif
    //#ifdef GFLAGS_ENABLED
    FLAGS_alsologtostderr = true;
-  // FLAGS_t5loglevel = T5DEVELOP;
+   //FLAGS_servicethreads = 5;
+   //FLAGS_t5loglevel = T5DEVELOP;
+   //FLAGS_t5loglevel = T5WARNING;
+   //FLAGS_t5loglevel = T5WARNING;
    //google::InstallFailureSignalHandler();
    // google::InstallFailureWriter(FailureWriter);
    google::ParseCommandLineFlags(&argc, &argv, true);
    //gflags::ParseCommandLineFlags(&argc, &argv, false);
    //#endif//GFLAGS_ENABLED
+   //FLAGS_servicethreads = 10;
 
    //#ifdef GLOGGING_ENABLED
    google::InitGoogleLogging(argv[0]);//, &CustomPrefix); 
