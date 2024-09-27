@@ -21,6 +21,122 @@
 #include <EQFEVENT.H>             // event logging
 #include "LogWrapper.h"
 
+#include "requestdata.h"
+
+
+int EqfMemory::getErrorCode()const{
+  return lastErrorCode;
+}
+
+int EqfMemory::setErrorCode(int rc){
+  return lastErrorCode = rc;
+}
+
+void EqfMemory::reserErrorCode(){
+  lastErrorCode = 0;
+}
+
+std::string StatusToString(int eStatus)
+{
+  switch(eStatus){
+    case OPEN_STATUS:{
+      return "OPEN_STATUS";
+      break;
+    }
+    case WAITING_FOR_LOADING_STATUS:{
+      return "WATING_FOR_LOADING_STATUS";
+      break;
+    }
+    case FAILED_TO_OPEN_STATUS:{
+      return "FAILED_TO_LOAD_STATUS";
+      break;
+    }    
+    case OPENNING_STATUS:{
+      return "LOADING_STATUS";
+      break;
+    }
+
+    case IMPORT_FAILED_STATUS:{
+      return "IMPORT_FAILED_STATUS";
+      break;
+    }
+    case IMPORT_RUNNING_STATUS:{
+      return "IMPORT_RUNNING_STATUS";
+      break;
+    }
+
+    case REORGANIZE_FAILED_STATUS:{
+      return "REORGANIZE_FAILED_STATUS";
+      break;
+    }
+    case REORGANIZE_RUNNING_STATUS:{
+      return "REORGANIZE_RUNNING_STATUS";
+      break;
+    }
+
+    case AVAILABLE_STATUS:{
+      return "AVAILABLE_STATUS";
+      break;
+    }
+    default:{
+      return "UNKNOWN" + toStr(eStatus);
+      break;
+    }
+  }
+}
+
+
+COMMAND EqfMemory::getActiveRequestCommand()
+{
+  //auto r = pActiveRequest.lock();
+  //r = pActiveRequest;
+  //if(r){
+  //  return r->command;
+  //}
+  return activeCommand;
+  //return COMMAND::UNKNOWN_COMMAND;
+}
+
+
+void EqfMemory::setActiveRequestCommand(COMMAND command)
+{
+  activeCommand = command;
+}
+
+void EqfMemory::resetActiveRequestCommand()
+{
+  activeCommand = UNKNOWN_COMMAND;
+}
+
+/*
+//void EqfMemory::setActiveRequestCommand(std::weak_ptr<RequestData> request)
+void EqfMemory::setActiveRequest(RequestData* request)
+{
+  pActiveRequest = request;
+}
+
+void EqfMemory::resetActiveRequest()
+{
+  //pActiveRequest.reset();
+  pActiveRequest = nullptr;
+}//*/
+
+std::string EqfMemory::getStatusString()const
+{
+  return StatusToString(eStatus);
+}
+
+std::string commandToString(){
+
+}
+std::string EqfMemory::getActiveRequestString()const
+{
+  //if (auto request = pActiveRequest.lock()) {
+  //  return searchInCommandToStringsMap(request->command);
+  //}
+  if(activeCommand)  return searchInCommandToStringsMap(activeCommand);
+  return "";    
+}
 
 //+----------------------------------------------------------------------------+
 //|External function                                                           |
@@ -53,9 +169,34 @@
 //| return open out structure                                                  |
 // ----------------------------------------------------------------------------+
 
+USHORT EqfMemory::Load(){
+  USHORT usRC = LoadMem();
+  // create memory object if create function completed successfully
+  if ( (usRC != 0) && (usRC != BTREE_CORRUPTED) /*&& (usAccessMode == FOR_ORGANIZE)*/){
+    T5LOG(T5ERROR) << "EqfMemoryPlugin::openMemory:: TmOpen fails, fName = "<< szName<< "; error = "<< this->strLastError<<"; iLastError = "<< 
+        this->iLastError << "; rc = " << usRC;
+  }
+  return usRC;
+}
 
-USHORT EqfMemory::OpenX()
+USHORT EqfMemory::LoadMem()
 {
+  std::lock_guard<std::recursive_mutex> l(tmMutex);
+  if(isLoaded())
+  {
+    return 0;
+  }
+
+  if(isLoading())
+  {
+    return 0;
+  }
+
+  //if(isFailedToLoad()){
+  //  T5LOG()
+ // }
+  eStatus = OPENNING_STATUS;
+
   BOOL fOK;                      //success indicator
   USHORT usRc = NO_ERROR;        //return value
   USHORT usRc1 = NO_ERROR;       //return value
@@ -339,6 +480,7 @@ USHORT EqfMemory::OpenX()
 
     NTMDestroyLongNameTable( );
     T5LOG(T5ERROR) << "Failed to open tm \""<< this->szName << "\" with rc = " << usRc;
+    setErrorCode(usRc);
     eStatus = FAILED_TO_OPEN_STATUS;
   }else{
     eStatus = OPEN_STATUS;

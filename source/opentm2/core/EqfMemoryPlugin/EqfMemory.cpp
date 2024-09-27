@@ -705,6 +705,7 @@ int EqfMemory::ReloadFromDisk(){
 }
 
 int EqfMemory::FlushFilebuffers(){
+  std::lock_guard<std::recursive_mutex> l(tmMutex);
   int rc = TmBtree.fb.Flush();
   rc = rc? rc : InBtree.fb.Flush();
   return rc;

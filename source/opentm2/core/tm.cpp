@@ -52,7 +52,11 @@ size_t TMManager::CalculateOccupiedRAM(){
   {
     std::lock_guard<std::recursive_mutex> l{mutex_access_tms};// lock tms list
     for(const auto& mem: tms){
-      UsedMemory += mem.second->GetRAMSize();
+      if(mem.second->isLoaded()){
+        UsedMemory += mem.second->GetRAMSize();
+      }else if(mem.second->isLoading() || mem.second->isWaitingToBeLoaded()){
+        UsedMemory += mem.second->getExpectedSizeInRAM();
+      }
     }
   }
   //UsedMemory += FilesystemHelper::GetTotalFilebuffersSize();
@@ -177,7 +181,6 @@ void EqfMemory::reorganizeDone(int iRC, char *pszError )
     strError =  pszError;
     T5LOG(T5ERROR) << ":: memName = " << szName <<", reorganize failed: " << pszError << " import details = " << importDetails->toString() ;
   }
-  tmMutex.unlock();
 }
 
 /*! \brief Close all open memories
@@ -463,7 +466,7 @@ int TMManager::MoveTM(
   }
 
 
-  TMManager::GetInstance()->CloseTMUnsafe(oldMemoryName);
+  TMManager::GetInstance()->CloseTM(oldMemoryName);
 
   // move/rename the memory
   if( !_rc_){
@@ -503,7 +506,7 @@ int TMManager::RenameTM(
   }
 
 
-  TMManager::GetInstance()->CloseTMUnsafe(oldMemoryName);
+  TMManager::GetInstance()->CloseTM(oldMemoryName);
 
   // move/rename the memory
   if( !_rc_){
@@ -937,7 +940,7 @@ int TMManager::ReplaceMemory
     }
     if(!iRC){
       T5LOG(T5INFO)<<"Reorganize files was renamed, checking if mem is loaded...";
-      iRC = !TMManager::GetInstance()->IsMemoryLoadedUnsafe(strReplace);
+      iRC = !TMManager::GetInstance()->IsMemoryLoaded(strReplace);
     }
     if(!iRC){
       T5LOG(T5INFO)<<"Mem is loaded, reloading filebuffers  from disk...";
@@ -1231,10 +1234,35 @@ int TMManager::TMExistsOnDisk(const std::string& tmName, bool logErrorIfNotExist
 
 bool TMManager::IsMemoryLoaded(const std::string& strMemName){
   std::lock_guard<std::recursive_mutex> l{mutex_access_tms};
-  return IsMemoryLoadedUnsafe(strMemName);
+  if(IsMemoryInList(strMemName) 
+    && tms[strMemName]->isLoaded())
+  {
+    return true;  
+  }
+  return false;
 }
 
-bool TMManager::IsMemoryLoadedUnsafe(const std::string& strMemName){
+bool TMManager::IsMemoryLoading(const std::string& strMemName){
+  std::lock_guard<std::recursive_mutex> l{mutex_access_tms};
+  if(IsMemoryInList(strMemName) 
+    && (tms[strMemName]->isLoading() || tms[strMemName]->isWaitingToBeLoaded()))
+  {
+    return true;  
+  }
+  return false;
+}
+
+bool TMManager::IsMemoryFailedToLoad(const std::string& strMemName){
+  std::lock_guard<std::recursive_mutex> l{mutex_access_tms};
+  if(IsMemoryInList(strMemName) 
+    && tms[strMemName]->isFailedToLoad())
+  {
+    return true;  
+  }
+  return false;
+}
+
+bool TMManager::IsMemoryInList(const std::string& strMemName){
   return TMManager::GetInstance()->tms.find(strMemName) != TMManager::GetInstance()->tms.end();
 }
 
@@ -1243,7 +1271,12 @@ int TMManager::OpenTM(const std::string& strMemName){
     return 0;
   }
   size_t requiredMemory = 0;
-  if(int res = TMExistsOnDisk(strMemName)){
+  
+  if(IsMemoryLoading(strMemName)){
+
+  //}else if(IsMemoryFailedToLoad(strMemName)){
+
+  }else if(int res = TMExistsOnDisk(strMemName)){
     T5LOG(T5ERROR) << "TM is not found, name = " << strMemName <<"; res = " << res;
     return 404;
   }else{
@@ -1272,13 +1305,11 @@ int TMManager::OpenTM(const std::string& strMemName){
     //buildErrorReturn( _rc_, "OtmMemoryServiceWorker::import::Error: too many open translation memory databases" );
     return( INTERNAL_SERVER_ERROR );
   } /* endif */
-  std::shared_ptr<EqfMemory> pMem( EqfMemoryPlugin::GetInstance()->openMemoryNew(strMemName));
+  std::shared_ptr<EqfMemory> pMem( EqfMemoryPlugin::GetInstance()->initTM(strMemName, requiredMemory, 0));
   if(!pMem){
     T5LOG(T5ERROR) << "::Can't open the file \'"<< strMemName<<"\'";
     return 1;
-  }
-  
-  {
+  }else{
     std::lock_guard<std::recursive_mutex> l{mutex_access_tms};// lock tms list
     tms[strMemName] = pMem;
   }
@@ -1290,7 +1321,7 @@ int TMManager::AddMem(const std::shared_ptr<EqfMemory> NewMem){
   if(NewMem == nullptr || NewMem->szName == "\0"){
     return -1;
   }
-  if(IsMemoryLoadedUnsafe(NewMem->szName)){
+  if(IsMemoryInList(NewMem->szName)){
     return -2;
   }
   {
@@ -1299,25 +1330,24 @@ int TMManager::AddMem(const std::shared_ptr<EqfMemory> NewMem){
   return 0;
 }
 
+
 int TMManager::CloseTM(const std::string& strMemName){
   std::lock_guard<std::recursive_mutex> l{mutex_access_tms};
-  return CloseTMUnsafe(strMemName);
-}
-
-int TMManager::CloseTMUnsafe(const std::string& strMemName){
-  if(!IsMemoryLoadedUnsafe(strMemName)){
+  if(!IsMemoryInList(strMemName)){
     return 404;
-  }
-  {
+  }else if(!IsMemoryLoaded(strMemName)){
+    return 404;
+  }else{
     tms.erase(strMemName);
   }
   return 0;
 }
 
-std::shared_ptr<EqfMemory> TMManager::requestServicePointer(const std::string& strMemName, COMMAND command){
+std::shared_ptr<EqfMemory> TMManager::requestServicePointer(const std::string& strMemName, COMMAND command)
+{
   std::lock_guard<std::recursive_mutex> l{mutex_requestTM};
   std::shared_ptr<EqfMemory> mem;
-  if(IsMemoryLoadedUnsafe(strMemName)){
+  if(IsMemoryInList(strMemName)){
     if(command == STATUS_MEM){
       std::lock_guard<std::recursive_mutex> l{mutex_access_tms};//lock tms list
       return tms[strMemName];
@@ -1326,10 +1356,12 @@ std::shared_ptr<EqfMemory> TMManager::requestServicePointer(const std::string& s
   return nullptr;
 }
 
-std::shared_ptr<EqfMemory> TMManager::requestReadOnlyTMPointer(const std::string& strMemName, std::shared_ptr<int>& refBack){
+std::shared_ptr<EqfMemory> TMManager::requestReadOnlyTMPointer(const std::string& strMemName, std::shared_ptr<int>& refBack)
+{
   int rc = 0;
+  
   std::lock_guard<std::recursive_mutex> l{mutex_requestTM};
-  if(!IsMemoryLoaded(strMemName)){
+  if(!IsMemoryInList(strMemName)){
     rc = OpenTM(strMemName);
   }
   std::shared_ptr<EqfMemory>  mem;
@@ -1337,21 +1369,19 @@ std::shared_ptr<EqfMemory> TMManager::requestReadOnlyTMPointer(const std::string
   if(!rc)
   {//lock tms list
     std::lock_guard<std::recursive_mutex> l{mutex_access_tms}; 
-    if(IsMemoryLoadedUnsafe(strMemName)){    
+    if(IsMemoryInList(strMemName)){    
       mem = tms[strMemName];
     } 
   }// unlock
 
   if(mem){
     //check if there are any Write pointers
-    rc = rc || (mem->writeCnt.use_count()>1);
+    //rc = rc || (mem->writeCnt.use_count()>1);
 
     T5LOG(T5DEBUG) <<"writeCnt = " << mem->writeCnt.use_count();
     if(rc){
       mem.reset();
     }else{
-      //T5LOG(T5TRANSACTION) << "locking mutex for \'" << mem->szName  << "; thread :" << std::this_thread::get_id();
-      mem->tmMutex.lock();
       refBack = mem->readOnlyCnt;
       T5LOG(T5DEBUG) <<"readOnlyCnt = " << mem->readOnlyCnt.use_count();
       return mem;
@@ -1363,7 +1393,7 @@ std::shared_ptr<EqfMemory> TMManager::requestReadOnlyTMPointer(const std::string
 std::shared_ptr<EqfMemory> TMManager::requestWriteTMPointer(const std::string& strMemName, std::shared_ptr<int>& refBack){
   int rc = 0;
   std::lock_guard<std::recursive_mutex> l{mutex_requestTM};
-  if(!IsMemoryLoaded(strMemName)){
+  if(!IsMemoryInList(strMemName)){
     rc = OpenTM(strMemName);
   }
 
@@ -1373,12 +1403,10 @@ std::shared_ptr<EqfMemory> TMManager::requestWriteTMPointer(const std::string& s
   {// lock tms list
     std::lock_guard<std::recursive_mutex> l{mutex_access_tms};
   
-    if(IsMemoryLoadedUnsafe(strMemName)){
+    if(IsMemoryInList(strMemName)){
       mem = tms[strMemName];
-      //rc = mem->tmMutex.try_lock();
-      //T5LOG(T5TRANSACTION) << "locking mutex for \'" << mem->szName <<"\' returned rc = " << rc;
       //check if there are any Write pointers
-      rc = rc? rc : (mem->writeCnt.use_count() > 1);
+      //rc = rc? rc : (mem->writeCnt.use_count() > 1);
       refBack = mem->writeCnt;
     }else{
       rc = rc? rc : 2;// if rc is set- keep rc, 
@@ -1388,12 +1416,10 @@ std::shared_ptr<EqfMemory> TMManager::requestWriteTMPointer(const std::string& s
 
   if(!rc){ // we have some Write process;
     //mem.reset();
-    rc = mem->readOnlyCnt.use_count() > 1? 3 : 0;
+    //rc = mem->readOnlyCnt.use_count() > 1? 3 : 0;
   }
 
   if(!rc){
-    //T5LOG(T5TRANSACTION) << "locking mutex for \'" << mem->szName  << "; thread :" << std::this_thread::get_id();
-    mem->tmMutex.lock();
     return mem;
   }
 

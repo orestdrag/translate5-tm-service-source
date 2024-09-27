@@ -254,7 +254,10 @@ bool memIsAvailableToOperate(EqfMemory* mem){
     && eStatus != IMPORT_RUNNING_STATUS 
     && eStatus != REORGANIZE_RUNNING_STATUS 
     && eStatus != AVAILABLE_STATUS 
-    && eStatus != FAILED_TO_OPEN_STATUS){
+    && eStatus != FAILED_TO_OPEN_STATUS
+    && eStatus != WAITING_FOR_LOADING_STATUS 
+    && eStatus != OPENNING_STATUS
+    ){
       T5LOG(T5ERROR) << "Memory "<< mem->szName << " status is set to not allowed value: " << eStatus<<"; you can ignore this message but please report about it;"; 
     }
 
@@ -264,46 +267,6 @@ bool memIsAvailableToOperate(EqfMemory* mem){
   return true;
 }
 
-std::string StatusToString(int eStatus)
-{
-  switch(eStatus){
-    case OPEN_STATUS:
-    {
-      return "OPEN_STATUS";
-      break;
-    }
-    case IMPORT_FAILED_STATUS:{
-      return "IMPORT_FAILED_STATUS";
-      break;
-    }
-    case IMPORT_RUNNING_STATUS:{
-      return "IMPORT_RUNNING_STATUS";
-      break;
-
-    }
-    case REORGANIZE_FAILED_STATUS:{
-      return "REORGANIZE_FAILED_STATUS";
-      break;
-
-    }
-    case REORGANIZE_RUNNING_STATUS:{
-      return "REORGANIZE_RUNNING_STATUS";
-      break;
-    }
-    case FAILED_TO_OPEN_STATUS:{
-      return "FAILED_TO_OPEN_STATUS";
-      break;
-    }
-    case AVAILABLE_STATUS:{
-      return "AVAILABLE_STATUS";
-      break;
-    }
-    default:{
-      return "UNKNOWN" + toStr(eStatus);
-      break;
-    }
-  }
-}
 
 int RequestData::requestTM(){
   //check if memory is loaded to tmmanager
@@ -313,15 +276,25 @@ int RequestData::requestTM(){
   }else if(isWriteRequest())
   {
     mem = TMManager::GetInstance()->requestWriteTMPointer(strMemName, memRef);
+  }else if(STATUS_MEM == command){
+    mem = TMManager::GetInstance()->requestServicePointer(strMemName, command);
+    fValid = true;//for status we don't care about tm pointer here
+    return 0;
   }
 
-  if(mem.get()== nullptr)
-  {
-  //  buildErrorReturn( _rc_, Data.szError );
+  if(mem.get()== nullptr){
     fValid = isServiceRequest();
-  }else{
+    return 0;
+  }else if(mem->isWaitingToBeLoaded()){
+    _rc_ = mem->Load();
+    if(_rc_){
+      T5LOG(T5ERROR) << "Failed to open tm, rc = " << _rc_;
+    }
+  }
+  
+  if(mem->isLoaded())
+  {
     fValid = true;
-    mem->tLastAccessTime = time(0);
     
     if(  command == EXPORT_MEM_TMX 
       || command == EXPORT_MEM_INTERNAL_FORMAT
@@ -333,6 +306,11 @@ int RequestData::requestTM(){
       )
     {
       mem->FlushFilebuffers();
+    }
+    
+    if(command != STATUS_MEM)
+    {
+      mem->updateLastUseTime();
     }
   }  
   
@@ -441,7 +419,9 @@ int RequestData::run(){
     if(isLockingRequest())
     {
       std::lock_guard<std::recursive_mutex> l(mem->tmMutex) ; 
+      mem->setActiveRequestCommand(command);
       res = execute();
+      mem->resetActiveRequestCommand();
     }else{
       res = execute();
     }
@@ -451,8 +431,6 @@ int RequestData::run(){
 
   //reset pointers
   if(mem != nullptr){
-    mem->tmMutex.unlock();
-    //T5LOG(T5TRANSACTION) << "Unlocking mutex for \'" << mem->szName  << "; thread :" << std::this_thread::get_id();
     mem.reset();
   }
   if(memRef != nullptr){
@@ -1038,7 +1016,7 @@ int ImportStreamRequestData::execute(){
   // close the memory - when open
   if ( false == memIsAvailableToOperate(mem.get()) )
   {
-    std::string msg = "mem is not available to operate, status= " + StatusToString(mem->eStatus);
+    std::string msg = "mem is not available to operate, status= " + mem->getStatusString();
     return buildErrorReturn( 500, msg.c_str() );
   }
   mem->eStatus = IMPORT_RUNNING_STATUS;
@@ -1080,7 +1058,6 @@ int SaveAllTMsToDiskRequestData::execute(){
   
   int count = 0;
   
-  //std::lock_guard<std::mutex> l{TMManager::GetInstance()->mutex_requestTM};
   {// lock tms
     std::lock_guard<std::recursive_mutex> l{TMManager::GetInstance()->mutex_access_tms};// lock tms list
     for(const auto& tm: TMManager::GetInstance()->tms){
@@ -1103,7 +1080,7 @@ int ImportRequestData::execute(){
   // close the memory - when open
   if ( false == memIsAvailableToOperate(mem.get()) )
   {
-    std::string msg = "mem is not available to operate, status= " + StatusToString(mem->eStatus);
+    std::string msg = "mem is not available to operate, status= " + mem->getStatusString();
     return buildErrorReturn( 500, msg.c_str() );
   }
   //lastStatus =       mem->eStatus;
@@ -1220,7 +1197,7 @@ int ImportLocalRequestData::execute(){
 
   if ( false == memIsAvailableToOperate(mem.get()) )
   {
-    std::string msg = "mem is not available to operate, status= " + StatusToString(mem->eStatus);
+    std::string msg = "mem is not available to operate, status= " + mem->getStatusString();
     return buildErrorReturn( 500, msg.c_str() );
   }
 
@@ -1503,7 +1480,7 @@ int ReorganizeRequestData::execute(){
   // close the memory - when open
   if ( false == memIsAvailableToOperate(mem.get()) )
   {
-    std::string msg = "mem is not available to operate, status= " + StatusToString(mem->eStatus);
+    std::string msg = "mem is not available to operate, status= " + mem->getStatusString();
     return buildErrorReturn( 500, msg.c_str() );
   }
   
@@ -1643,7 +1620,7 @@ int DeleteEntriesReorganizeRequestData::execute(){
   
   if ( false == memIsAvailableToOperate(mem.get()) )
   {
-    std::string msg = "mem is not available to operate, status= " + StatusToString(mem->eStatus);
+    std::string msg = "mem is not available to operate, status= " + mem->getStatusString();
     return buildErrorReturn( 500, msg.c_str() );
   }
 
@@ -1895,7 +1872,7 @@ int CloneTMRequestData::checkData(){
            std::string msg = "src tm \'" + strMemName +"\' is in reorganize running status. Repeat request later; for request for mem " 
             + strMemName + "; with body = " + strBody ;
           return buildErrorReturn(-1, msg.c_str());
-      }else if ( mem->eStatus == OPEN_STATUS )
+      }else if ( mem->isLoaded() )
       {
 
       }else if(mem->eStatus != AVAILABLE_STATUS ){
@@ -2005,11 +1982,9 @@ void AddRequestDataToJson(std::stringstream& ss, std::string reqType, millisecon
 
 int StatusMemRequestData::execute() {
   // check if memory is contained in our list
+  if ( mem != nullptr)// TMManager::GetInstance()->IsMemoryLoaded(strMemName) )
   {
-  std::lock_guard<std::recursive_mutex> l{TMManager::GetInstance()->mutex_requestTM};
-  if (  TMManager::GetInstance()->IsMemoryLoadedUnsafe(strMemName) )
-  {
-    mem = TMManager::GetInstance()->requestServicePointer(strMemName, command);
+    //mem = TMManager::GetInstance()->requestServicePointer(strMemName, command);
     // set status value
     std::string pszStatus = "";
     switch ( mem->eImportStatus )
@@ -2022,7 +1997,11 @@ int StatusMemRequestData::execute() {
     }
     // return the status of the memory
     json_factory.startJSON( outputMessage );
+    //json_factory.addParmToJSON( outputMessage, "status", mem->getStatusString() );
     json_factory.addParmToJSON( outputMessage, "status", "open" );
+    json_factory.addParmToJSON( outputMessage, "sizeInRAM", mem->GetRAMSize());
+    json_factory.addParmToJSON( outputMessage, "activeRequest", mem->getActiveRequestString());
+
     if(mem->importDetails != nullptr){
       
       json_factory.addParmToJSON( outputMessage, mem->importDetails->fReorganize? "reorganizeStatus":"tmxImportStatus", pszStatus );
@@ -2069,7 +2048,7 @@ int StatusMemRequestData::execute() {
     json_factory.terminateJSON( outputMessage );
     return( OK );
   } /* endif */
-  }// endif tm is open
+  // endif tm is open
 
   // check if memory exists
   if(int res = TMManager::GetInstance()->TMExistsOnDisk(strMemName))
@@ -2232,8 +2211,8 @@ int ResourceInfoRequestData::execute(){
     AddToJson(ssOutput, "totalOccupiedByFilebuffersRAM", total, true );
   }
   
-  size_t total = 0, fSize = 0, count = 0;
-  std::string fName;
+  size_t total = 0, fSize = 0, count = 0, expectedSize = 0;
+  std::string fName, status, request;
   ssOutput << "\"tms\": [\n";
   {// lock tms
     std::lock_guard<std::recursive_mutex> l{TMManager::GetInstance()->mutex_access_tms};// lock tms list
@@ -2243,11 +2222,17 @@ int ResourceInfoRequestData::execute(){
         ssOutput << ",";
       }
       fSize = tm.second->GetRAMSize();
+      expectedSize = tm.second->getExpectedSizeInRAM();
+      status = tm.second->getStatusString();
+      request = tm.second->getActiveRequestString();
       fName = tm.first;
 
       ssOutput << "\n{ ";
       AddToJson(ssOutput, "name", tm.first, true );
-      AddToJson(ssOutput, "size", fSize, false );
+      AddToJson(ssOutput, "status", status, true );
+      AddToJson(ssOutput, "size", fSize, true );
+      AddToJson(ssOutput, "activeRequest", request, true);
+      AddToJson(ssOutput, "expectedSize", expectedSize, false );
       ssOutput << " }";
 
       total += fSize;

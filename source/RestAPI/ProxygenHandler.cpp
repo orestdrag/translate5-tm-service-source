@@ -207,6 +207,7 @@ void ProxygenHandler::onUpgrade(UpgradeProtocol /*protocol*/) noexcept {
 void ProxygenHandler::requestComplete() noexcept {
   //ResetLogBuffer();
   if(pRequest){
+    //std::lock_guard<std::recursive_mutex> l(pRequest->request_mutex);
     //while(pRequest->fRunning){};
     delete pRequest;
     pRequest = nullptr;
@@ -217,6 +218,7 @@ void ProxygenHandler::requestComplete() noexcept {
 void ProxygenHandler::onError(ProxygenError /*err*/) noexcept { 
   if(pRequest){
     //while(pRequest->fRunning){};
+    //std::lock_guard<std::recursive_mutex> l(pRequest->request_mutex);
     delete pRequest;
     pRequest = nullptr;
   }

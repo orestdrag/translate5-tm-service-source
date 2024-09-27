@@ -333,6 +333,15 @@ void importMemoryProcess( void* pvData )
   milliseconds start_ms = duration_cast< milliseconds >( system_clock::now().time_since_epoch() );
   #endif 
   // call the OpenTM2 API function
+  if(pData || !pData->mem){
+    T5LOG(T5ERROR) << "pData or pMem is null";
+    return;
+  }
+
+  std::lock_guard<std::recursive_mutex> l(pData->mem->tmMutex);
+
+  pData->mem->setActiveRequestCommand(COMMAND::IMPORT_MEM);
+
   pData->szError[0] = 0;
   if(!pData->mem->importDetails){
     pData->mem->importDetails = new ImportStatusDetails;
@@ -364,6 +373,7 @@ void importMemoryProcess( void* pvData )
   pData->stats_->addRequestTime(ProxygenService::ProxygenHandler::COMMAND::IMPORT_MEM, time);
   #endif
 
+  pData->mem->resetActiveRequestCommand();
   delete( pData );
 
   return;
@@ -382,6 +392,13 @@ void reorganizeMemoryProcess( void* pvData )
   #endif 
   // call the OpenTM2 API function
   pData->szError[0] = 0;
+  if(pRIDA || !pRIDA->pMem){
+    T5LOG(T5ERROR) << "pRIDA or pMem is null";
+    return;
+  }  
+
+  std::lock_guard<std::recursive_mutex> l(pRIDA->pMem->tmMutex);
+  pRIDA->pMem->setActiveRequestCommand(COMMAND::REORGANIZE_MEM);
 
   int _rc_ = 0;
   pRIDA->pMem->usAccessMode |= ASD_ORGANIZE;
@@ -432,6 +449,7 @@ void reorganizeMemoryProcess( void* pvData )
   pData->stats_->addRequestTime(ProxygenService::ProxygenHandler::COMMAND::IMPORT_MEM, time);
   #endif
   
+  pRIDA->pMem->resetActiveRequestCommand();
   if(pCommArea) delete( pCommArea );
   if(pRIDA) delete( pRIDA );
   if(pData) delete( pData );

@@ -84,26 +84,23 @@ const char* EqfMemoryPlugin::getSupplier()
 /**********************************************************************/
 
 
-EqfMemory* EqfMemoryPlugin::openMemoryNew(
-  const std::string& memName			 
-  //,unsigned short usAccessMode
+EqfMemory* EqfMemoryPlugin::initTM(
+  const std::string& memName,	
+  size_t requiredMemory,	 
+  unsigned short usAccessMode
 ){
   USHORT usRC = 0;
   // use old memory open code
   //std::string path = FilesystemHelper::GetMemDir() + memName + EXT_OF_TMDATA;
   EqfMemory* pMemory = new EqfMemory(memName);
   if(pMemory){
-    usRC = pMemory->OpenX();
+  //  usRC = pMemory->Load();
+    pMemory->setExpecedSizeInRAM(requiredMemory);
+    pMemory->updateLastUseTime();
+    pMemory->eStatus = WAITING_FOR_LOADING_STATUS;
   }else{
     LOG_AND_SET_RC(usRC, T5WARNING, ERROR_NOT_ENOUGH_MEMORY);
-  } 
-  // create memory object if create function completed successfully
-  if ( (usRC != 0) && (usRC != BTREE_CORRUPTED) /*&& (usAccessMode == FOR_ORGANIZE)*/){
-    T5LOG(T5ERROR) << "EqfMemoryPlugin::openMemory:: TmOpen fails, fName = "<< memName<< "; error = "<< this->strLastError<<"; iLastError = "<< 
-        this->iLastError << "; rc = " << usRC;
-    //if ( pMemory != 0 ) 
-    //  TmClose( pMemory, NULL,  FALSE,  NULL );
-  } /* end */       
+  }  
   return pMemory;
 } /* end */     
 

@@ -1726,7 +1726,11 @@ typedef TMX_EXT_IN TMX_EXT_IN_W, *PTMX_EXT_IN_W;
 
 class EqfMemoryPlugin;
 class Dummy{};
+class RequestData;
 
+
+
+std::string StatusToString(int eStatus);
 
 #include <mutex>
 class EqfMemory //: public TMX_CLB
@@ -1735,6 +1739,8 @@ class EqfMemory //: public TMX_CLB
 
 {
   
+  USHORT LoadMem();
+
 public:
   std::recursive_mutex tmMutex;
   bool fOpen = false;
@@ -1795,6 +1801,56 @@ public:
   std::shared_ptr<int> readOnlyCnt;
   std::shared_ptr<int> writeCnt;
 
+  //std::weak_ptr<RequestData> pActiveRequest;
+  RequestData* pActiveRequest;
+  int lastErrorCode = 0;
+
+  size_t expectedSizeInRam = 0;
+
+  int getErrorCode()const;
+  int setErrorCode(int rc);
+  void reserErrorCode();
+
+  COMMAND getActiveRequestCommand();
+  void setActiveRequest(std::weak_ptr<RequestData> request);
+  void setActiveRequest(RequestData* request);
+  void resetActiveRequest();
+  
+  COMMAND activeCommand = UNKNOWN_COMMAND;
+  void setActiveRequestCommand(COMMAND command);
+  void resetActiveRequestCommand();
+
+  void setExpecedSizeInRAM(size_t newSize){
+    expectedSizeInRam = newSize;
+  }
+
+  size_t getExpectedSizeInRAM()const{
+    return expectedSizeInRam;
+  }
+  
+  std::string getStatusString()const;
+  std::string getActiveRequestString()const;
+
+  bool isWaitingToBeLoaded()const{
+    return WAITING_FOR_LOADING_STATUS == eStatus;
+  }
+
+  bool isLoading()const{
+    return OPENNING_STATUS == eStatus;
+  }
+
+  bool isLoaded()const{
+    return OPEN_STATUS == eStatus;
+  }
+
+  bool isFailedToLoad()const{
+    return FAILED_TO_OPEN_STATUS == eStatus;
+  }
+
+  void updateLastUseTime(){
+    tLastAccessTime = time(0);
+  }
+
 /*! \brief OtmMemory related return codes
 
 */
@@ -1833,7 +1889,8 @@ public:
 */
 	~EqfMemory();
 
-  USHORT OpenX();
+  USHORT Load();
+  
 /*! \brief Info structure for an open translation memory
 */
   //typedef struct _OPENEDMEMORY
@@ -3943,7 +4000,9 @@ static const int IMPORTFROMMEMFILES_COMPLETEINONECALL_OPT = 1;  // complete the 
 */
 	const char* getSupplier();
 
-  EqfMemory* openMemoryNew(const std::string& memName);
+  EqfMemory* initTM(const std::string& memName, 
+    size_t requiredMemory,	 
+    unsigned short usAccessMode);
 
 /*! \brief Close a memory
   \param pMemory pointer to memory object
@@ -4050,13 +4109,14 @@ class TMManager{
   };
 
   bool IsMemoryLoaded(const std::string& strMemName);
-  bool IsMemoryLoadedUnsafe(const std::string& strMemName);
+  bool IsMemoryInList(const std::string& strMemName);
+  bool IsMemoryLoading(const std::string& strMemName);
+  bool IsMemoryFailedToLoad(const std::string& strMemName);
   int TMExistsOnDisk(const std::string& tmName, bool logErrorIfNotExists = true);
 
   int AddMem(const std::shared_ptr<EqfMemory> NewMem);
   int OpenTM(const std::string& strMemName);
   int CloseTM(const std::string& strMemName);
-  int CloseTMUnsafe(const std::string& strMemName);
   int DeleteTM(const std::string& strMemName, std::string& outputMsg);
 
   int RenameTM(const std::string& oldMemName, const std::string& newMemName, std::string& outputMsg);

@@ -68,7 +68,7 @@ typedef char* PSZ;
 #define TRANSL_SOURCE_GLOBMEMORY 2
 
   enum COMMAND {
-        UNKNOWN_COMMAND,
+        UNKNOWN_COMMAND = 0,
         LIST_OF_MEMORIES,
         SAVE_ALL_TM_ON_DISK,
         SHUTDOWN,    
@@ -143,13 +143,15 @@ enum InclosingTagsBehaviour{
   */
   typedef enum 
   {
+    WAITING_FOR_LOADING_STATUS,//memory is waiting to be loaded
     OPEN_STATUS,            // memory is available and open
     AVAILABLE_STATUS,       // memory has been imported but is not open yet
     IMPORT_RUNNING_STATUS,  // memory import is running
     IMPORT_FAILED_STATUS,   // memory import failed
     REORGANIZE_RUNNING_STATUS, // memory organize is running
     REORGANIZE_FAILED_STATUS,   // memory organize is failed
-    FAILED_TO_OPEN_STATUS
+    FAILED_TO_OPEN_STATUS, 
+    OPENNING_STATUS           //memory is openning in anaother process
   } MEMORY_STATUS;
 
 /**********************************************************************/

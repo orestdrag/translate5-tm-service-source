@@ -4,6 +4,7 @@
 #include <string>
 #include <memory>
 #include <atomic>
+#include <mutex>
 #include <proxygen/httpserver/RequestHandler.h>
 #include <proxygen/httpserver/ExMessageHandler.h>
 
@@ -25,6 +26,7 @@ protected:
     static JSONFactory json_factory;
     //RequestData(); // json was parsed in sub class
 public:
+    //std::recursive_mutex request_mutex;
     ProxygenStats* stats = nullptr;
     proxygen::ResponseHandler* responseHandler = nullptr;
     //proxygen::HTTPMessage response;
