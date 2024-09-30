@@ -157,6 +157,7 @@ void EqfMemory::importDone(int iRC, char *pszError )
     strError =  pszError;
     T5LOG(T5ERROR) << "OtmMemoryServiceWorker::importDone:: memName = " << szName <<", import failed: " << strError << " import details = " << importDetails->toString() ;
   }
+  resetActiveRequestCommand();
 }
 
 
@@ -181,6 +182,8 @@ void EqfMemory::reorganizeDone(int iRC, char *pszError )
     strError =  pszError;
     T5LOG(T5ERROR) << ":: memName = " << szName <<", reorganize failed: " << pszError << " import details = " << importDetails->toString() ;
   }
+
+  resetActiveRequestCommand();
 }
 
 /*! \brief Close all open memories

@@ -151,7 +151,7 @@ enum InclosingTagsBehaviour{
     REORGANIZE_RUNNING_STATUS, // memory organize is running
     REORGANIZE_FAILED_STATUS,   // memory organize is failed
     FAILED_TO_OPEN_STATUS, 
-    OPENNING_STATUS           //memory is openning in anaother process
+    LOADING_STATUS           //memory is openning in anaother process
   } MEMORY_STATUS;
 
 /**********************************************************************/

@@ -40,46 +40,46 @@ std::string StatusToString(int eStatus)
 {
   switch(eStatus){
     case OPEN_STATUS:{
-      return "OPEN_STATUS";
+      return "open";
       break;
     }
     case WAITING_FOR_LOADING_STATUS:{
-      return "WATING_FOR_LOADING_STATUS";
+      return "waiting for loading";
       break;
     }
     case FAILED_TO_OPEN_STATUS:{
-      return "FAILED_TO_LOAD_STATUS";
+      return "failed to open";
       break;
     }    
-    case OPENNING_STATUS:{
-      return "LOADING_STATUS";
+    case LOADING_STATUS:{
+      return "loading";
       break;
     }
 
     case IMPORT_FAILED_STATUS:{
-      return "IMPORT_FAILED_STATUS";
+      return "import failed";
       break;
     }
     case IMPORT_RUNNING_STATUS:{
-      return "IMPORT_RUNNING_STATUS";
+      return "import running";
       break;
     }
 
     case REORGANIZE_FAILED_STATUS:{
-      return "REORGANIZE_FAILED_STATUS";
+      return "reorganize failed";
       break;
     }
     case REORGANIZE_RUNNING_STATUS:{
-      return "REORGANIZE_RUNNING_STATUS";
+      return "reorganize running";
       break;
     }
 
     case AVAILABLE_STATUS:{
-      return "AVAILABLE_STATUS";
+      return "available";
       break;
     }
     default:{
-      return "UNKNOWN" + toStr(eStatus);
+      return "unknown " + toStr(eStatus) + " status";
       break;
     }
   }
@@ -181,7 +181,7 @@ USHORT EqfMemory::Load(){
 
 USHORT EqfMemory::LoadMem()
 {
-  std::lock_guard<std::recursive_mutex> l(tmMutex);
+  //std::lock_guard<std::recursive_mutex> l(tmMutex);
   if(isLoaded())
   {
     return 0;
@@ -195,12 +195,15 @@ USHORT EqfMemory::LoadMem()
   //if(isFailedToLoad()){
   //  T5LOG()
  // }
-  eStatus = OPENNING_STATUS;
+ 
+  eStatus = LOADING_STATUS;
 
   BOOL fOK;                      //success indicator
   USHORT usRc = NO_ERROR;        //return value
   USHORT usRc1 = NO_ERROR;       //return value
   ULONG  ulLen;                  //length indicator
+ 
+  //if(!usRc)
   {
     //TmBtree.fb.fileName = pTmOpenIn->stTmOpen.szDataName;
     //InBtree.fb.fileName = pTmOpenIn->stTmOpen.szIndexName;

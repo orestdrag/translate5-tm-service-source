@@ -256,7 +256,7 @@ bool memIsAvailableToOperate(EqfMemory* mem){
     && eStatus != AVAILABLE_STATUS 
     && eStatus != FAILED_TO_OPEN_STATUS
     && eStatus != WAITING_FOR_LOADING_STATUS 
-    && eStatus != OPENNING_STATUS
+    && eStatus != LOADING_STATUS
     ){
       T5LOG(T5ERROR) << "Memory "<< mem->szName << " status is set to not allowed value: " << eStatus<<"; you can ignore this message but please report about it;"; 
     }
@@ -285,10 +285,16 @@ int RequestData::requestTM(){
   if(mem.get()== nullptr){
     fValid = isServiceRequest();
     return 0;
-  }else if(mem->isWaitingToBeLoaded()){
-    _rc_ = mem->Load();
-    if(_rc_){
-      T5LOG(T5ERROR) << "Failed to open tm, rc = " << _rc_;
+  }
+
+  {  
+    std::lock_guard<std::recursive_mutex> l(mem->tmMutex);
+    if(mem->isWaitingToBeLoaded() || mem->isFailedToLoad()){
+      _rc_ = mem->Load();
+      if(_rc_){
+        T5LOG(T5ERROR) << "Failed to open tm, rc = " << _rc_;
+        return buildErrorReturn(504, "Failed to load tm", _rc_);
+      }
     }
   }
   
@@ -313,6 +319,15 @@ int RequestData::requestTM(){
       mem->updateLastUseTime();
     }
   }  
+
+  //if(mem)
+  {
+    if(mem->isReorganizeRunning()){
+      return buildErrorReturn(505, "Reorganize is running for requested tm", _rc_);
+    }else if(mem->isImportRunning()){
+      return buildErrorReturn(505, "Import is running for requested tm", _rc_);
+    }
+  }
   
   if(false == fValid){
     return buildErrorReturn(404, "Memory not found", 404);
@@ -484,9 +499,9 @@ int CreateMemRequestData::createNewEmptyMemory(){
   if(!_rc_){
     TMManager::GetInstance()->AddMem(mem);
   }
-  if(mem != nullptr){
-    mem.reset();
-  }
+  //if(mem != nullptr){
+  //  mem.reset();
+  //}
   return 0;
 }
 
@@ -1525,8 +1540,8 @@ int ReorganizeRequestData::execute(){
     pRIDA->pMem->importDetails->lImportStartTime = lCurTime;
     mem->importDetails->fReorganize = true;
 
-    mem.reset();
-    memRef.reset();
+    //mem.reset();
+    //memRef.reset();
   } 
 
   //worker thread 
@@ -1664,8 +1679,8 @@ int DeleteEntriesReorganizeRequestData::execute(){
     pRIDA->pMem->importDetails->lImportStartTime = lCurTime;
     mem->importDetails->fReorganize = true;
 
-    mem.reset();
-    memRef.reset();
+    //mem.reset();
+    //memRef.reset();
 
     pRIDA->m_reorganizeFilters = searchFilterFactory.getListOfFilters();
     
@@ -1997,8 +2012,8 @@ int StatusMemRequestData::execute() {
     }
     // return the status of the memory
     json_factory.startJSON( outputMessage );
-    //json_factory.addParmToJSON( outputMessage, "status", mem->getStatusString() );
-    json_factory.addParmToJSON( outputMessage, "status", "open" );
+    json_factory.addParmToJSON( outputMessage, "status", mem->getStatusString() );
+    //json_factory.addParmToJSON( outputMessage, "status", "open" );
     json_factory.addParmToJSON( outputMessage, "sizeInRAM", mem->GetRAMSize());
     json_factory.addParmToJSON( outputMessage, "activeRequest", mem->getActiveRequestString());
 

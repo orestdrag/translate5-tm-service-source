@@ -1836,7 +1836,7 @@ public:
   }
 
   bool isLoading()const{
-    return OPENNING_STATUS == eStatus;
+    return LOADING_STATUS == eStatus;
   }
 
   bool isLoaded()const{
@@ -1846,6 +1846,15 @@ public:
   bool isFailedToLoad()const{
     return FAILED_TO_OPEN_STATUS == eStatus;
   }
+
+  bool isReorganizeRunning()const{
+    return REORGANIZE_RUNNING_STATUS == eStatus;
+  }
+
+  bool isImportRunning()const{
+    return IMPORT_RUNNING_STATUS == eStatus;
+  }
+
 
   void updateLastUseTime(){
     tLastAccessTime = time(0);
