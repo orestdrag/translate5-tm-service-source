@@ -13,6 +13,7 @@
 #include <folly/io/IOBufQueue.h>
 
 #include <proxygen/httpserver/ResponseHandler.h>
+#include "ThreadingWrapper.h"
 
 class ChunkBuffer{
   //long m_bytesCollecedInChunk = 0;
@@ -1710,6 +1711,9 @@ typedef enum _PROCWINSTYLE
 #define BTREE_NOT_SUPPORTED           BTREE_BASE+36 //
 #define SEGMENT_ID_NOT_EQUAL          BTREE_BASE+81 // segment and requested id is not equal
 
+#define TM_REQUEST_MUTEX_TIMEOUT_FAILED BTREE_BASE + 501
+#define TM_LIST_MUTEX_TIMEOUT_FAILED    BTREE_BASE + 502
+#define TM_MUTEX_TIMEOUT_FAILED         BTREE_BASE + 503
 
 #define MAX_NUM_DICTS      1900        // max. number of dict concurrently open
 
@@ -2568,6 +2572,7 @@ typedef struct _FCTDATA
   
   ulong numOfProposalsRequested = 0;
   folly::IOBufQueue bufQueue;
+  MutexTimeout tmLockTimeout;
 } FCTDATA, *PFCTDATA;
 
 

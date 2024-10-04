@@ -3,6 +3,7 @@
 #include <thread>
 #include "tm.h"
 #include "LogWrapper.h"
+#include "ThreadingWrapper.h"
 #include "Property.h"
 #include "EQFMSG.H"
 #include "EQF.H"
@@ -14,10 +15,16 @@
 /*! \brief Checks if there is opened memory in import process
   \returns index if import process for any memory is going on, -1 if no
   */
-int TMManager::GetMemImportInProcessCount(){
+int TMManager::GetMemImportInProcessCount(MutexTimeout& tmListTimeout){
   int count = 0;
   // lock tms list
-  std::lock_guard<std::recursive_mutex> l{mutex_access_tms};// lock tms list
+  TimedMutexGuard l{mutex_access_tms, tmListTimeout,  "tmListMutex", __func__, __LINE__};// lock tms list
+
+  if(tmListTimeout.failed()){
+    tmListTimeout.addToErrMsg(".Failed to lock tm list:", __func__, __LINE__);
+    return TM_LIST_MUTEX_TIMEOUT_FAILED;
+  }
+
   for(auto& tm: tms)
   {
     ImportStatusDetails* pImportDetails = tm.second->importDetails;
@@ -33,7 +40,7 @@ int TMManager::GetMemImportInProcessCount(){
   return count;
 }
 
-size_t TMManager::CalculateOccupiedRAM(){
+size_t TMManager::CalculateOccupiedRAM(MutexTimeout& tmListTimeout){
   char memFolder[260];
   size_t UsedMemory = 0;
   #ifdef CALCULATE_ONLY_MEM_FILES
@@ -50,7 +57,12 @@ size_t TMManager::CalculateOccupiedRAM(){
   }
   #else
   {
-    std::lock_guard<std::recursive_mutex> l{mutex_access_tms};// lock tms list
+    TimedMutexGuard l{mutex_access_tms, tmListTimeout,  "tmListMutex", __func__, __LINE__};// lock tms list
+    if(tmListTimeout.failed()){
+      tmListTimeout.addToErrMsg(".Failed to lock tm list:", __func__, __LINE__);
+      return 0;
+    }
+
     for(const auto& mem: tms){
       if(mem.second->isLoaded()){
         UsedMemory += mem.second->GetRAMSize();
@@ -70,12 +82,16 @@ size_t TMManager::CalculateOccupiedRAM(){
 /*! \brief close any memories which haven't been used for a long time
   \returns 0
 */
-size_t TMManager::CleanupMemoryList(size_t memoryRequested)
+size_t TMManager::CleanupMemoryList(size_t memoryRequested, MutexTimeout& tmListTimeout)
 {  
   int AllowedMBMemory = 500;
   Properties::GetInstance()->get_value(KEY_ALLOWED_RAM, AllowedMBMemory);
   size_t AllowedMemory = (size_t)AllowedMBMemory * 1000000;    
-  size_t memoryNeed = memoryRequested + CalculateOccupiedRAM();
+  size_t memoryNeed = memoryRequested + CalculateOccupiedRAM(tmListTimeout);
+  if(tmListTimeout.failed()){
+    tmListTimeout.addToErrMsg(".Failed to lock tm list:", __func__, __LINE__);
+    return 0;
+  }
   T5LOG(T5DEBUG) << "CleanupMemoryList was called, memory need = "<< memoryNeed <<"; Memory requested = " << memoryRequested<<"; memoryAllowed = " << AllowedMemory;
   
   if(memoryNeed < AllowedMemory){
@@ -89,7 +105,11 @@ size_t TMManager::CleanupMemoryList(size_t memoryRequested)
   std::multimap <time_t, std::weak_ptr<EqfMemory>>  openedMemoriesSortedByLastAccess;
   
   {
-    std::lock_guard<std::recursive_mutex> l{mutex_access_tms};// lock tms list
+    TimedMutexGuard l{mutex_access_tms, tmListTimeout, "tmListMutex", __func__, __LINE__};// lock tms list
+    if(tmListTimeout.failed()){
+      tmListTimeout.addToErrMsg(".Failed to lock tm list:", __func__, __LINE__);
+      return 0;
+    }
     for(const auto& tm: tms){
       openedMemoriesSortedByLastAccess.insert({tm.second->tLastAccessTime, tm.second});
     }
@@ -101,7 +121,12 @@ size_t TMManager::CleanupMemoryList(size_t memoryRequested)
   {
     std::string tmName;
     {
-      std::lock_guard<std::recursive_mutex> l{mutex_access_tms};// lock tms list
+      TimedMutexGuard l{mutex_access_tms, tmListTimeout, "tmListMutex", __func__, __LINE__};// lock tms list
+      if(tmListTimeout.failed()){
+        tmListTimeout.addToErrMsg(".Failed to lock tm list:", __func__, __LINE__);
+        return 0;
+      }
+
       if(!it->second.expired())
       {
         auto tm = it->second.lock();
@@ -114,6 +139,10 @@ size_t TMManager::CleanupMemoryList(size_t memoryRequested)
           tms.erase(tmName);
           T5LOG(T5DEBUG) <<"erasing mem with name " <<tm->szName <<"; use count = " << tm.use_count();
           //memoryNeed = memoryRequested + CalculateOccupiedRAM();
+          //if(tmListTimeout.failed()){
+          //  tmListTimeout.addToErrMsg(".Failed to lock tm list:", __func__, __LINE__);
+          //  return 0;
+          //}
         }
       }
     }
@@ -132,7 +161,11 @@ size_t TMManager::CleanupMemoryList(size_t memoryRequested)
       T5LOG(T5INFO) << "TM with name \'" << tmName << " was stil not unloaded from RAM after 500 miliseconds after deleting it from TMManager!";
     }
 
-    memoryNeed = memoryRequested + CalculateOccupiedRAM();
+    memoryNeed = memoryRequested + CalculateOccupiedRAM(tmListTimeout);
+    if(tmListTimeout.failed()){
+      tmListTimeout.addToErrMsg(".Failed to lock tm list:", __func__, __LINE__);
+      return 0;
+    }
   }
 
   return AllowedMemory > memoryNeed ? AllowedMemory - memoryNeed : 0;
@@ -448,7 +481,7 @@ int TMManager::DeleteTM(
 int TMManager::MoveTM(
   const std::string& oldMemoryName,
   const std::string& newMemoryName,
-  std::string &strError
+  std::string &strError, MutexTimeout& tmListTimeout
 )
 {
   int _rc_ = 0;
@@ -469,7 +502,11 @@ int TMManager::MoveTM(
   }
 
 
-  TMManager::GetInstance()->CloseTM(oldMemoryName);
+  TMManager::GetInstance()->CloseTM(oldMemoryName, tmListTimeout);
+  if(tmListTimeout.failed()){
+    tmListTimeout.addToErrMsg(".Failed to lock tm list:", __func__, __LINE__);
+    return TM_LIST_MUTEX_TIMEOUT_FAILED;
+  }
 
   // move/rename the memory
   if( !_rc_){
@@ -488,7 +525,8 @@ int TMManager::MoveTM(
 int TMManager::RenameTM(
   const std::string& oldMemoryName,
   const std::string& newMemoryName,
-  std::string &strError
+  std::string &strError,
+  MutexTimeout& tmListTimeout
 )
 {
   int _rc_ = 0;
@@ -509,7 +547,11 @@ int TMManager::RenameTM(
   }
 
 
-  TMManager::GetInstance()->CloseTM(oldMemoryName);
+  TMManager::GetInstance()->CloseTM(oldMemoryName, tmListTimeout);
+  if(tmListTimeout.failed()){
+    tmListTimeout.addToErrMsg(".Failed to lock tm list:", __func__, __LINE__);
+    return TM_LIST_MUTEX_TIMEOUT_FAILED;
+  }
 
   // move/rename the memory
   if( !_rc_){
@@ -921,7 +963,8 @@ int TMManager::ReplaceMemory
 (
   const std::string& strReplace,
   const std::string& strReplaceWith,
-  std::string& outputMsg
+  std::string& outputMsg,
+  MutexTimeout& tmListTimeout
 )
 {
   int iRC = EqfMemoryPlugin::eSuccess;
@@ -935,18 +978,38 @@ int TMManager::ReplaceMemory
     return iRC;
   } /* endif */
   {
-    std::lock_guard<std::recursive_mutex> l{TMManager::GetInstance()->mutex_access_tms};// lock tms list
+    TimedMutexGuard l{TMManager::GetInstance()->mutex_access_tms, tmListTimeout, "tmListMutex", __func__, __LINE__};// lock tms list
+    if(tmListTimeout.failed()){
+      tmListTimeout.addToErrMsg(".Failed to lock tm list:", __func__, __LINE__);
+      return TM_LIST_MUTEX_TIMEOUT_FAILED;
+    }
+
     iRC = TMManager::GetInstance()->DeleteTM( strReplace, outputMsg );
     if(!iRC){
       T5LOG(T5INFO)<<"Original files was deleted, renaming organize files...";
-      iRC = TMManager::GetInstance()->RenameTM( strReplaceWith, strReplace, outputMsg );
+      iRC = TMManager::GetInstance()->RenameTM( strReplaceWith, strReplace, outputMsg, tmListTimeout );
+      if(tmListTimeout.failed()){
+        tmListTimeout.addToErrMsg(".Failed to lock tm list:", __func__, __LINE__);
+        return TM_LIST_MUTEX_TIMEOUT_FAILED;
+      }
     }
+
     if(!iRC){
       T5LOG(T5INFO)<<"Reorganize files was renamed, checking if mem is loaded...";
-      iRC = !TMManager::GetInstance()->IsMemoryLoaded(strReplace);
+      iRC = !TMManager::GetInstance()->IsMemoryLoaded(strReplace, tmListTimeout);
+      if(tmListTimeout.failed()){
+        tmListTimeout.addToErrMsg(".Failed to lock tm list:", __func__, __LINE__);
+        return TM_LIST_MUTEX_TIMEOUT_FAILED;
+      }
     }
     if(!iRC){
+      TimedMutexGuard l{TMManager::GetInstance()->mutex_access_tms, tmListTimeout, "tmListMutex", __func__, __LINE__};// lock tms list
+      if(tmListTimeout.failed()){
+        tmListTimeout.addToErrMsg(".Failed to lock tm list:", __func__, __LINE__);
+        return TM_LIST_MUTEX_TIMEOUT_FAILED;
+      }
       T5LOG(T5INFO)<<"Mem is loaded, reloading filebuffers  from disk...";
+      
       iRC = TMManager::GetInstance()->tms[strReplace]->ReloadFromDisk();
     }
   }
@@ -1235,50 +1298,97 @@ int TMManager::TMExistsOnDisk(const std::string& tmName, bool logErrorIfNotExist
 }
 
 
-bool TMManager::IsMemoryLoaded(const std::string& strMemName){
-  std::lock_guard<std::recursive_mutex> l{mutex_access_tms};
-  if(IsMemoryInList(strMemName) 
+bool TMManager::IsMemoryLoaded(const std::string& strMemName, MutexTimeout& tmListTimeout){
+  TimedMutexGuard l{mutex_access_tms, tmListTimeout, "tmListMutex", __func__, __LINE__};
+  
+  if(tmListTimeout.failed()){
+    tmListTimeout.addToErrMsg(".Failed to lock tm list:", __func__, __LINE__);
+    return false;
+  }
+
+  if(IsMemoryInList(strMemName, tmListTimeout) 
     && tms[strMemName]->isLoaded())
   {
     return true;  
   }
+
+  if(tmListTimeout.failed()){
+    tmListTimeout.addToErrMsg(".Failed to lock tm list:", __func__, __LINE__);
+    return false;
+  }
   return false;
 }
 
-bool TMManager::IsMemoryLoading(const std::string& strMemName){
-  std::lock_guard<std::recursive_mutex> l{mutex_access_tms};
-  if(IsMemoryInList(strMemName) 
+bool TMManager::IsMemoryLoading(const std::string& strMemName, MutexTimeout& tmListTimeout){
+  TimedMutexGuard l{mutex_access_tms, tmListTimeout, "tmListMutex", __func__, __LINE__};
+  bool res = false;
+  if(tmListTimeout.failed()){
+    tmListTimeout.addToErrMsg(".Failed to lock tm list:", __func__, __LINE__);
+    return false;
+  }
+
+  if(IsMemoryInList(strMemName, tmListTimeout) 
     && (tms[strMemName]->isLoading() || tms[strMemName]->isWaitingToBeLoaded()))
   {
-    return true;  
+    res = true;  
   }
-  return false;
+
+  if(tmListTimeout.failed()){
+    tmListTimeout.addToErrMsg(".Failed to lock tm list:", __func__, __LINE__);
+    return false;
+  }
+
+  return res;
 }
 
-bool TMManager::IsMemoryFailedToLoad(const std::string& strMemName){
-  std::lock_guard<std::recursive_mutex> l{mutex_access_tms};
-  if(IsMemoryInList(strMemName) 
+bool TMManager::IsMemoryFailedToLoad(const std::string& strMemName, MutexTimeout& tmListTimeout){
+  TimedMutexGuard l{mutex_access_tms, tmListTimeout, "tmListMutex", __func__, __LINE__};
+  bool res = false;
+  if(tmListTimeout.failed()){
+    tmListTimeout.addToErrMsg(".Failed to lock tm list:", __func__, __LINE__);
+    return false;
+  }
+
+  if(IsMemoryInList(strMemName, tmListTimeout)  
     && tms[strMemName]->isFailedToLoad())
   {
-    return true;  
+    res = true;  
   }
-  return false;
+
+  if(tmListTimeout.failed()){
+    tmListTimeout.addToErrMsg(".Failed to lock tm list:", __func__, __LINE__);
+    return false;
+  }
+
+  return res;
 }
 
-bool TMManager::IsMemoryInList(const std::string& strMemName){
+bool TMManager::IsMemoryInList(const std::string& strMemName, MutexTimeout& tmListTimeout){
+  TimedMutexGuard l{mutex_access_tms, tmListTimeout, "tmListMutex", __func__, __LINE__};// lock tms list
+  if(tmListTimeout.failed()){
+    tmListTimeout.addToErrMsg(".Failed to lock tm list:", __func__, __LINE__);
+    return false;
+  }
   return TMManager::GetInstance()->tms.find(strMemName) != TMManager::GetInstance()->tms.end();
 }
 
-int TMManager::OpenTM(const std::string& strMemName){
-  if(IsMemoryLoaded(strMemName)){
+int TMManager::OpenTM(const std::string& strMemName, MutexTimeout& tmListTimeout){
+  if(IsMemoryLoaded(strMemName, tmListTimeout)){
     return 0;
   }
+  
+  if(tmListTimeout.failed()){
+    tmListTimeout.addToErrMsg(".Failed to lock tm list:", __func__, __LINE__);
+    return TM_LIST_MUTEX_TIMEOUT_FAILED;
+  }
+  
   size_t requiredMemory = 0;
   
-  if(IsMemoryLoading(strMemName)){
-
+  if(IsMemoryLoading(strMemName, tmListTimeout)){
   //}else if(IsMemoryFailedToLoad(strMemName)){
-
+  }else if(tmListTimeout.failed()){
+    tmListTimeout.addToErrMsg(".Failed to lock tm list:", __func__, __LINE__);
+    return TM_LIST_MUTEX_TIMEOUT_FAILED;
   }else if(int res = TMExistsOnDisk(strMemName)){
     T5LOG(T5ERROR) << "TM is not found, name = " << strMemName <<"; res = " << res;
     return 404;
@@ -1292,7 +1402,7 @@ int TMManager::OpenTM(const std::string& strMemName){
   //TODO: add to requiredMemory value that would present changes in mem files sizes after import done 
 
   // cleanup the memory list (close memories not used for a longer time)
-  size_t memLeftAfterOpening = CleanupMemoryList(requiredMemory);
+  size_t memLeftAfterOpening = CleanupMemoryList(requiredMemory, tmListTimeout);
   if(VLOG_IS_ON(1)){
     T5LOG( T5INFO) << ":: memory: " << strMemName << "; required RAM:" 
         << requiredMemory << "; RAM left after opening mem: " << memLeftAfterOpening;
@@ -1313,32 +1423,57 @@ int TMManager::OpenTM(const std::string& strMemName){
     T5LOG(T5ERROR) << "::Can't open the file \'"<< strMemName<<"\'";
     return 1;
   }else{
-    std::lock_guard<std::recursive_mutex> l{mutex_access_tms};// lock tms list
+    TimedMutexGuard l{mutex_access_tms, tmListTimeout, "tmListMutex", __func__, __LINE__};// lock tms list
+    if(tmListTimeout.failed()){
+      tmListTimeout.addToErrMsg(".Failed to lock tm list:", __func__, __LINE__);
+      return TM_LIST_MUTEX_TIMEOUT_FAILED;
+    }
     tms[strMemName] = pMem;
   }
   return 0; 
 }
 
-int TMManager::AddMem(const std::shared_ptr<EqfMemory> NewMem){
-  std::lock_guard<std::recursive_mutex> l{mutex_access_tms};
+int TMManager::AddMem(const std::shared_ptr<EqfMemory> NewMem, MutexTimeout& tmListTimeout){
+  TimedMutexGuard l{mutex_access_tms, tmListTimeout, "tmListMutex", __func__, __LINE__};
+  if(tmListTimeout.failed()){
+    tmListTimeout.addToErrMsg(".Failed to lock tm list:", __func__, __LINE__);
+    return TM_LIST_MUTEX_TIMEOUT_FAILED;
+  }
   if(NewMem == nullptr || NewMem->szName == "\0"){
     return -1;
   }
-  if(IsMemoryInList(NewMem->szName)){
+  if(IsMemoryInList(NewMem->szName, tmListTimeout)){
     return -2;
   }
-  {
-    tms[NewMem->szName] = NewMem;
+  
+  if(tmListTimeout.failed()){
+    tmListTimeout.addToErrMsg(".Failed to lock tm list:", __func__, __LINE__);
+    return TM_LIST_MUTEX_TIMEOUT_FAILED;
   }
+  
+  tms[NewMem->szName] = NewMem;
   return 0;
 }
 
 
-int TMManager::CloseTM(const std::string& strMemName){
-  std::lock_guard<std::recursive_mutex> l{mutex_access_tms};
-  if(!IsMemoryInList(strMemName)){
+int TMManager::CloseTM(const std::string& strMemName, MutexTimeout& tmListTimeout){
+  TimedMutexGuard l{mutex_access_tms, tmListTimeout, "tmListMutex", __func__, __LINE__};
+  if(tmListTimeout.failed()){
+    tmListTimeout.addToErrMsg(".Failed to lock tm list:", __func__, __LINE__);
+    return TM_LIST_MUTEX_TIMEOUT_FAILED;
+  }
+
+  if(!IsMemoryInList(strMemName, tmListTimeout)){
+    if(tmListTimeout.failed()){
+      tmListTimeout.addToErrMsg(".Failed to lock tm list:", __func__, __LINE__);
+      return TM_LIST_MUTEX_TIMEOUT_FAILED;
+    }
     return 404;
-  }else if(!IsMemoryLoaded(strMemName)){
+  }else if(!IsMemoryLoaded(strMemName, tmListTimeout)){
+    if(tmListTimeout.failed()){
+      tmListTimeout.addToErrMsg(".Failed to lock tm list:", __func__, __LINE__);
+      return TM_LIST_MUTEX_TIMEOUT_FAILED;
+    }
     return 404;
   }else{
     tms.erase(strMemName);
@@ -1346,33 +1481,67 @@ int TMManager::CloseTM(const std::string& strMemName){
   return 0;
 }
 
-std::shared_ptr<EqfMemory> TMManager::requestServicePointer(const std::string& strMemName, COMMAND command)
+std::shared_ptr<EqfMemory> TMManager::requestServicePointer(const std::string& strMemName, COMMAND command, MutexTimeout& requestTMTimeout,  MutexTimeout& tmListTimeout )
 {
-  std::lock_guard<std::recursive_mutex> l{mutex_requestTM};
+  TimedMutexGuard l{mutex_requestTM, requestTMTimeout, "requestTMMutex", __func__, __LINE__};
+  if(requestTMTimeout.failed()){
+    requestTMTimeout.addToErrMsg(".Failed to lock tm list:", __func__, __LINE__);
+    return nullptr;
+  }
   std::shared_ptr<EqfMemory> mem;
-  if(IsMemoryInList(strMemName)){
+  if(IsMemoryInList(strMemName, tmListTimeout)){
     if(command == STATUS_MEM){
-      std::lock_guard<std::recursive_mutex> l{mutex_access_tms};//lock tms list
+      TimedMutexGuard l{mutex_access_tms, tmListTimeout, "tmListMutex", __func__, __LINE__};//lock tms list
+      if(tmListTimeout.failed()){
+        tmListTimeout.addToErrMsg(".Failed to lock tm list:", __func__, __LINE__);
+        return nullptr;
+      }
       return tms[strMemName];
+    }
+  }else{
+    if(tmListTimeout.failed()){
+      tmListTimeout.addToErrMsg(".Failed to lock tm list:", __func__, __LINE__);
+      return nullptr;
     }
   }
   return nullptr;
 }
 
-std::shared_ptr<EqfMemory> TMManager::requestReadOnlyTMPointer(const std::string& strMemName, std::shared_ptr<int>& refBack)
+std::shared_ptr<EqfMemory> TMManager::requestReadOnlyTMPointer(const std::string& strMemName, std::shared_ptr<int>& refBack,  MutexTimeout& requestTMTimeout,  MutexTimeout& tmListTimeout)
 {
   int rc = 0;
   
-  std::lock_guard<std::recursive_mutex> l{mutex_requestTM};
-  if(!IsMemoryInList(strMemName)){
-    rc = OpenTM(strMemName);
+  TimedMutexGuard l{mutex_requestTM, requestTMTimeout, "requestTMMutex", __func__, __LINE__};
+  if(requestTMTimeout.failed()){
+    requestTMTimeout.addToErrMsg(".Failed to lock tm list:", __func__, __LINE__);
+    return nullptr;
+  }
+  if(!IsMemoryInList(strMemName, tmListTimeout)){
+    if(tmListTimeout.failed()){
+      tmListTimeout.addToErrMsg(".Failed to lock tm list:", __func__, __LINE__);
+      return nullptr;
+    }
+    rc = OpenTM(strMemName, tmListTimeout);
+    if(tmListTimeout.failed()){
+      tmListTimeout.addToErrMsg(".Failed to lock tm list:", __func__, __LINE__);
+      return nullptr;
+    }
   }
   std::shared_ptr<EqfMemory>  mem;
   
   if(!rc)
   {//lock tms list
-    std::lock_guard<std::recursive_mutex> l{mutex_access_tms}; 
-    if(IsMemoryInList(strMemName)){    
+    TimedMutexGuard l{mutex_access_tms, tmListTimeout, "tmListMutex", __func__, __LINE__}; 
+    if(tmListTimeout.failed()){
+      tmListTimeout.addToErrMsg(".Failed to lock tm list:", __func__, __LINE__);
+      return nullptr;
+    }
+
+    if(IsMemoryInList(strMemName, tmListTimeout)){    
+      if(tmListTimeout.failed()){
+        tmListTimeout.addToErrMsg(".Failed to lock tm list:", __func__, __LINE__);
+        return nullptr;
+      }
       mem = tms[strMemName];
     } 
   }// unlock
@@ -1393,25 +1562,47 @@ std::shared_ptr<EqfMemory> TMManager::requestReadOnlyTMPointer(const std::string
   return nullptr;
 }
 
-std::shared_ptr<EqfMemory> TMManager::requestWriteTMPointer(const std::string& strMemName, std::shared_ptr<int>& refBack){
+std::shared_ptr<EqfMemory> TMManager::requestWriteTMPointer(const std::string& strMemName, std::shared_ptr<int>& refBack, MutexTimeout& requestTMTimeout,  MutexTimeout& tmListTimeout){
   int rc = 0;
-  std::lock_guard<std::recursive_mutex> l{mutex_requestTM};
-  if(!IsMemoryInList(strMemName)){
-    rc = OpenTM(strMemName);
+  TimedMutexGuard l{mutex_requestTM, requestTMTimeout, "requestTMMutex", __func__, __LINE__};
+  if(requestTMTimeout.failed()){
+    requestTMTimeout.addToErrMsg(".Failed to lock request tm function:", __func__, __LINE__);
+    return nullptr;
+  }
+
+  if(!IsMemoryInList(strMemName, tmListTimeout)){
+    if(tmListTimeout.failed()){
+      tmListTimeout.addToErrMsg(".Failed to lock tm list:", __func__, __LINE__);
+      return nullptr;
+    }
+
+    rc = OpenTM(strMemName, tmListTimeout);
+    if(tmListTimeout.failed()){
+      tmListTimeout.addToErrMsg(".Failed to lock tm list:", __func__, __LINE__);
+      return nullptr;
+    }
   }
 
   std::shared_ptr<EqfMemory>  mem; 
   
   if(!rc)
   {// lock tms list
-    std::lock_guard<std::recursive_mutex> l{mutex_access_tms};
+    TimedMutexGuard l{mutex_access_tms, tmListTimeout, "tmListMutex", __func__, __LINE__};
+    if(tmListTimeout.failed()){
+      tmListTimeout.addToErrMsg(".Failed to lock tm list:", __func__, __LINE__);
+      return nullptr;
+    }
   
-    if(IsMemoryInList(strMemName)){
+    if(IsMemoryInList(strMemName, tmListTimeout)){
       mem = tms[strMemName];
       //check if there are any Write pointers
       //rc = rc? rc : (mem->writeCnt.use_count() > 1);
       refBack = mem->writeCnt;
     }else{
+      if(tmListTimeout.failed()){
+        tmListTimeout.addToErrMsg(".Failed to lock tm list:", __func__, __LINE__);
+        return nullptr;
+      }
       rc = rc? rc : 2;// if rc is set- keep rc, 
     }
   }// unlock tms

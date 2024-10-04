@@ -163,7 +163,7 @@ NTMCloseOrganize ( PMEM_ORGANIZE_IDA pRIDA,           //pointer to organize IDA
     //pRIDA->pMem = nullptr;
 
     // replace original memory with the organized one
-    usURc = TMManager::GetInstance()->ReplaceMemory( strMemName, strTempMemName, outputMessage );
+    usURc = TMManager::GetInstance()->ReplaceMemory( strMemName, strTempMemName, outputMessage, pRIDA->tmListTimeout );
 
  } /* endif */
 

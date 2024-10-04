@@ -181,7 +181,7 @@ USHORT EqfMemory::Load(){
 
 USHORT EqfMemory::LoadMem()
 {
-  //std::lock_guard<std::recursive_mutex> l(tmMutex);
+  //TimedMutexGuard l(tmMutex);
   if(isLoaded())
   {
     return 0;

@@ -1,6 +1,8 @@
 
 #include <thread>
 #include "requestdata.h"
+
+#include "ThreadingWrapper.h"
 #include "tm.h"
 #include "otm.h"
 #include "../../RestAPI/OTMMSJSONFactory.h"
@@ -267,17 +269,59 @@ bool memIsAvailableToOperate(EqfMemory* mem){
   return true;
 }
 
+int64_t TimedMutexGuard::_id_ = 0;
+DECLARE_int64(tmRequestLockDefaultTimeout);
+DECLARE_int64(tmListLockDefaultTimeout);
+DECLARE_int64(tmLockDefaultTimeout);
+
+int RequestData::setMutexTimeouts(){
+  //set default timeouts if they were not set in request
+  tmLockTimeout.setTimeout_ms(tmMutexTimeoutMs == -1? FLAGS_tmRequestLockDefaultTimeout : tmMutexTimeoutMs); 
+  tmListTimeout.setTimeout_ms(tmListMutexTimeoutMs == -1? FLAGS_tmListLockDefaultTimeout : tmListMutexTimeoutMs); 
+  requestTMTimeout.setTimeout_ms(requestTMMutexTimeoutMs == -1? FLAGS_tmRequestLockDefaultTimeout : requestTMMutexTimeoutMs); 
+  
+  return _rc_;
+}
+
+int RequestData::prepareData(){
+  _rc_ = setMutexTimeouts();
+  return _rc_;
+}
 
 int RequestData::requestTM(){
   //check if memory is loaded to tmmanager
   if(isReadOnlyRequest())
   {
-    mem = TMManager::GetInstance()->requestReadOnlyTMPointer(strMemName, memRef);
+    mem = TMManager::GetInstance()->requestReadOnlyTMPointer(strMemName, memRef, requestTMTimeout, tmListTimeout);
+    if(tmLockTimeout.failed()){
+      tmLockTimeout.addToErrMsg("Failed to lock tm:", __func__, __LINE__);
+      return buildErrorReturn(506, tmLockTimeout.getErrMsg().c_str(), _rc_);
+    }
+    if(requestTMTimeout.failed()){
+      requestTMTimeout.addToErrMsg("Failed to lock tm:", __func__, __LINE__);
+      return buildErrorReturn(506, requestTMTimeout.getErrMsg().c_str(), _rc_);
+    }
   }else if(isWriteRequest())
   {
-    mem = TMManager::GetInstance()->requestWriteTMPointer(strMemName, memRef);
+    mem = TMManager::GetInstance()->requestWriteTMPointer(strMemName, memRef, requestTMTimeout, tmListTimeout);
+    if(tmLockTimeout.failed()){
+      tmLockTimeout.addToErrMsg("Failed to lock tm:", __func__, __LINE__);
+      return buildErrorReturn(506, tmLockTimeout.getErrMsg().c_str(), _rc_);
+    }
+    if(requestTMTimeout.failed()){
+      requestTMTimeout.addToErrMsg("Failed to lock tm:", __func__, __LINE__);
+      return buildErrorReturn(506, requestTMTimeout.getErrMsg().c_str(), _rc_);
+    }
   }else if(STATUS_MEM == command){
-    mem = TMManager::GetInstance()->requestServicePointer(strMemName, command);
+    mem = TMManager::GetInstance()->requestServicePointer(strMemName, command, requestTMTimeout, tmListTimeout);
+    if(tmLockTimeout.failed()){
+      tmLockTimeout.addToErrMsg("Failed to lock tm:", __func__, __LINE__);
+      return buildErrorReturn(506, tmLockTimeout.getErrMsg().c_str(), _rc_);
+    }
+    if(requestTMTimeout.failed()){
+      requestTMTimeout.addToErrMsg("Failed to lock tm:", __func__, __LINE__);
+      return buildErrorReturn(506, requestTMTimeout.getErrMsg().c_str(), _rc_);
+    }
     fValid = true;//for status we don't care about tm pointer here
     return 0;
   }
@@ -285,18 +329,28 @@ int RequestData::requestTM(){
   if(mem.get()== nullptr){
     fValid = isServiceRequest();
     return 0;
+  }else if(mem->isReorganizeRunning()){
+    return buildErrorReturn(505, "Reorganize is running for requested tm", _rc_);
+  }else if(mem->isImportRunning()){
+    return buildErrorReturn(505, "Import is running for requested tm", _rc_);
   }
 
   {  
-    std::lock_guard<std::recursive_mutex> l(mem->tmMutex);
+    TimedMutexGuard l(mem->tmMutex, tmLockTimeout, "tmMutex", __func__, __LINE__);
+    
+    if(tmLockTimeout.failed()){
+      tmLockTimeout.addToErrMsg("Failed to lock tm:", __func__, __LINE__);
+      return buildErrorReturn(506, tmLockTimeout.getErrMsg().c_str(), _rc_);
+    }
+
     if(mem->isWaitingToBeLoaded() || mem->isFailedToLoad()){
       _rc_ = mem->Load();
       if(_rc_){
-        T5LOG(T5ERROR) << "Failed to open tm, rc = " << _rc_;
+        //T5LOG(T5ERROR) << "Failed to open tm, rc = " << _rc_;
         return buildErrorReturn(504, "Failed to load tm", _rc_);
       }
     }
-  }
+  }  
   
   if(mem->isLoaded())
   {
@@ -311,24 +365,19 @@ int RequestData::requestTM(){
       || command == DELETE_ENTRIES_REORGANIZE
       )
     {
-      mem->FlushFilebuffers();
+      mem->FlushFilebuffers(tmLockTimeout);
+      if(tmLockTimeout.failed()){
+        tmLockTimeout.addToErrMsg("Failed to lock tm:", __func__, __LINE__);
+        return buildErrorReturn(506, tmLockTimeout.getErrMsg().c_str(), _rc_);
+      }
     }
     
     if(command != STATUS_MEM)
     {
       mem->updateLastUseTime();
     }
-  }  
-
-  //if(mem)
-  {
-    if(mem->isReorganizeRunning()){
-      return buildErrorReturn(505, "Reorganize is running for requested tm", _rc_);
-    }else if(mem->isImportRunning()){
-      return buildErrorReturn(505, "Import is running for requested tm", _rc_);
-    }
   }
-  
+
   if(false == fValid){
     return buildErrorReturn(404, "Memory not found", 404);
   }
@@ -426,6 +475,7 @@ int RequestData::run(){
   int res = OtmMemoryServiceWorker::getInstance()->verifyAPISession();
   if(!res) res = parseJSON();
   if(!res) res = checkData();
+  if(!res) res = prepareData();
 
   if(!res) res = requestTM();
 
@@ -433,7 +483,12 @@ int RequestData::run(){
   {
     if(isLockingRequest())
     {
-      std::lock_guard<std::recursive_mutex> l(mem->tmMutex) ; 
+      TimedMutexGuard l(mem->tmMutex, tmLockTimeout, "tmMutex", __func__, __LINE__) ; 
+      if(tmLockTimeout.failed()){
+        tmLockTimeout.addToErrMsg("Failed to lock tm:", __func__, __LINE__);
+        return buildErrorReturn(506, tmLockTimeout.getErrMsg().c_str(), _rc_);
+      }
+      
       mem->setActiveRequestCommand(command);
       res = execute();
       mem->resetActiveRequestCommand();
@@ -497,7 +552,11 @@ int CreateMemRequestData::createNewEmptyMemory(){
   }
   T5LOG( T5INFO) << " done, usRC = " << _rc_ ;
   if(!_rc_){
-    TMManager::GetInstance()->AddMem(mem);
+    TMManager::GetInstance()->AddMem(mem, tmListTimeout);
+    if(tmListTimeout.failed()){
+      tmListTimeout.addToErrMsg(".Failed to lock tm list:", __func__, __LINE__);
+      return TM_LIST_MUTEX_TIMEOUT_FAILED;
+    }
   }
   //if(mem != nullptr){
   //  mem.reset();
@@ -766,15 +825,23 @@ int FlushMemRequestData::checkData(){
     return buildErrorReturn( _rc_, "FlushMemRequestData::checkData -> tm is not found", 404 );
   }
 
-  if(false == TMManager::GetInstance()->IsMemoryLoaded(strMemName))
+  if(false == TMManager::GetInstance()->IsMemoryLoaded(strMemName, tmListTimeout))
   {
+    if(tmListTimeout.failed()){
+      tmListTimeout.addToErrMsg(".Failed to lock tm list:", __func__, __LINE__);
+      return buildErrorReturn( _rc_, tmListTimeout.getErrMsg().c_str(), 508 );
+    }
     return buildErrorReturn( _rc_, "FlushMemRequestData::checkData -> tm is not open", 400 );
   }
   return _rc_;
 }
 
 int FlushMemRequestData::execute(){
-  _rc_ = mem->FlushFilebuffers();
+  _rc_ = mem->FlushFilebuffers(tmLockTimeout);
+  if(tmLockTimeout.failed()){
+    tmLockTimeout.addToErrMsg("Failed to lock tm:", __func__, __LINE__);
+    return buildErrorReturn(506, tmLockTimeout.getErrMsg().c_str(), _rc_);
+  }
   if(_rc_){
     return buildErrorReturn( _rc_, "FlushMemRequestData::checkData -> tm flush returned error", 500 );
   }
@@ -1055,6 +1122,7 @@ int ImportStreamRequestData::execute(){
   mem->importDetails->lImportStartTime = lCurTime;
   mem->importDetails->lImportTimeoutSec = timeout;
   pData->mem = mem;
+  pData->tmLockTimeout = tmLockTimeout;
 
   //importMemoryProcess(pData);//to do in same thread
   std::thread worker_thread(importMemoryProcess, pData);
@@ -1074,11 +1142,21 @@ int SaveAllTMsToDiskRequestData::execute(){
   int count = 0;
   
   {// lock tms
-    std::lock_guard<std::recursive_mutex> l{TMManager::GetInstance()->mutex_access_tms};// lock tms list
+    TimedMutexGuard l{TMManager::GetInstance()->mutex_access_tms, tmListTimeout, "tmListMutex", __func__, __LINE__};// lock tms list
+    
+    if(tmListTimeout.failed()){
+      tmListTimeout.addToErrMsg(".Failed to lock tm list:", __func__, __LINE__);
+      return buildErrorReturn(506, tmListTimeout.getErrMsg().c_str(), TM_LIST_MUTEX_TIMEOUT_FAILED);
+    }
+
     for(const auto& tm: TMManager::GetInstance()->tms){
       if(count++)
         tms += ", ";
-      tm.second->FlushFilebuffers();
+      tm.second->FlushFilebuffers(tmLockTimeout);
+      if(tmLockTimeout.failed()){
+        tmLockTimeout.addToErrMsg("Failed to lock tm:", __func__, __LINE__);
+        return buildErrorReturn(506, tmLockTimeout.getErrMsg().c_str(), _rc_);
+      }
       tms += tm.first;
     }
   }// unlock tms
@@ -1235,6 +1313,7 @@ int ImportLocalRequestData::execute(){
   time( &lCurTime );                  
   mem->importDetails->lImportStartTime = lCurTime;
   pData->mem = mem;
+  pData->tmLockTimeout = tmLockTimeout;
 
   //importMemoryProcess(pData);//to do in same thread
   std::thread worker_thread(importMemoryProcess, pData);
@@ -1539,6 +1618,7 @@ int ReorganizeRequestData::execute(){
                   
     pRIDA->pMem->importDetails->lImportStartTime = lCurTime;
     mem->importDetails->fReorganize = true;
+    pRIDA->tmLockTimeout = tmLockTimeout;
 
     //mem.reset();
     //memRef.reset();
@@ -1683,6 +1763,7 @@ int DeleteEntriesReorganizeRequestData::execute(){
     //memRef.reset();
 
     pRIDA->m_reorganizeFilters = searchFilterFactory.getListOfFilters();
+    pRIDA->tmLockTimeout = tmLockTimeout;
     
   } 
 
@@ -1719,7 +1800,11 @@ int DeleteMemRequestData::execute(){
   } /* endif */
   
   if(!_rc_){
-    _rc_ = TMManager::GetInstance()->CloseTM(strMemName);
+    _rc_ = TMManager::GetInstance()->CloseTM(strMemName, tmListTimeout);
+    if(tmListTimeout.failed()){
+      tmListTimeout.addToErrMsg(".Failed to lock tm list:", __func__, __LINE__);
+      return TM_LIST_MUTEX_TIMEOUT_FAILED;
+    }
     if(_rc_ == 404) _rc_ = 0;
   }
   
@@ -1999,7 +2084,6 @@ int StatusMemRequestData::execute() {
   // check if memory is contained in our list
   if ( mem != nullptr)// TMManager::GetInstance()->IsMemoryLoaded(strMemName) )
   {
-    //mem = TMManager::GetInstance()->requestServicePointer(strMemName, command);
     // set status value
     std::string pszStatus = "";
     switch ( mem->eImportStatus )
@@ -2081,14 +2165,24 @@ int StatusMemRequestData::execute() {
   return( OK );
 };
 
-void ShutdownRequestData::CheckImportFlushTmsAndShutdown(int signal)
+void ShutdownRequestData::CheckImportFlushTmsAndShutdown2(int signal, size_t tmListTimeout)
+{
+  MutexTimeout mt{tmListTimeout};
+  CheckImportFlushTmsAndShutdown(signal, mt);
+}
+
+void ShutdownRequestData::CheckImportFlushTmsAndShutdown(int signal, MutexTimeout& tmListTimeout)
 {
   TMManager::GetInstance()->fWriteRequestsAllowed = false;
   TMManager::GetInstance()->fServiceIsRunning = true;
   //pMemService->closeAll();
   T5Logger::GetInstance()->LogStop();  
   int j= 3;
-  while(int i = TMManager::GetInstance()->GetMemImportInProcessCount()){
+  while(int i = TMManager::GetInstance()->GetMemImportInProcessCount(tmListTimeout)){
+     if(tmListTimeout.failed()){
+        tmListTimeout.addToErrMsg(".Failed to lock tm list:", __func__, __LINE__);
+        return ;
+      }
     if( ++j % 15 == 0){
       T5LOG(T5WARNING) << "SHUTDOWN:: memory still in import..waiting 15 sec more...  shutdown request was = "<< j* 15;
     }
@@ -2115,7 +2209,7 @@ void ShutdownRequestData::CheckImportFlushTmsAndShutdown(int signal)
 
 int ShutdownRequestData::execute()
 {
-  std::thread(& ShutdownRequestData::CheckImportFlushTmsAndShutdown, this->sig).detach();
+  std::thread(& ShutdownRequestData::CheckImportFlushTmsAndShutdown2, this->sig, tmListTimeout.getTimeout_ms()).detach();
   return 200;
 }
 
@@ -2230,7 +2324,13 @@ int ResourceInfoRequestData::execute(){
   std::string fName, status, request;
   ssOutput << "\"tms\": [\n";
   {// lock tms
-    std::lock_guard<std::recursive_mutex> l{TMManager::GetInstance()->mutex_access_tms};// lock tms list
+    TimedMutexGuard l{TMManager::GetInstance()->mutex_access_tms, tmListTimeout, "tmListMutex", __func__, __LINE__};// lock tms list
+
+    if(tmListTimeout.failed()){
+      tmListTimeout.addToErrMsg(".Failed to lock tm list:", __func__, __LINE__);
+      return buildErrorReturn(506, tmListTimeout.getErrMsg().c_str(), TM_LIST_MUTEX_TIMEOUT_FAILED);
+    }
+
     for ( auto& tm : TMManager::GetInstance()->tms)
     {
       if(count){
@@ -2772,7 +2872,11 @@ int UpdateEntryRequestData::execute(){
       return buildErrorReturn(_rc_, "EqfMemory::putProposal result is error ", INTERNAL_SERVER_ERROR);   
       //handleError( _rc_, this->szName, TmPutIn.stTmPut.szTagTable );
   }else if(fSave2Disk || FLAGS_flush_tm_to_disk_with_every_update){
-    mem->FlushFilebuffers();
+    mem->FlushFilebuffers(tmLockTimeout);
+    if(tmLockTimeout.failed()){
+      tmLockTimeout.addToErrMsg("Failed to lock tm:", __func__, __LINE__);
+      return buildErrorReturn(506, tmLockTimeout.getErrMsg().c_str(), _rc_);
+    }
   }
 
   //if ( ( _rc_ == 0 ) &&
@@ -3011,7 +3115,11 @@ int DeleteEntryRequestData::execute(){
     return buildErrorReturn( _rc_, errorStr.c_str(), INTERNAL_SERVER_ERROR);
   } else{ 
     if(fSave2Disk){
-      mem->FlushFilebuffers();
+      mem->FlushFilebuffers(tmLockTimeout);
+      if(tmLockTimeout.failed()){
+        tmLockTimeout.addToErrMsg("Failed to lock tm:", __func__, __LINE__);
+        return buildErrorReturn(506, tmLockTimeout.getErrMsg().c_str(), _rc_);
+      }
     }
     // return the entry data
 

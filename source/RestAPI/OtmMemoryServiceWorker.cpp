@@ -18,6 +18,8 @@
 #include <cstring>
 #include <strings.h>
 #include <linux/limits.h>
+
+#include "ThreadingWrapper.h"
 //#include <restbed>
 #include "OtmMemoryServiceWorker.h"
 #include "OTMMSJSONFactory.h"
@@ -337,8 +339,17 @@ void importMemoryProcess( void* pvData )
     T5LOG(T5ERROR) << "pData or pMem is null";
     return;
   }
+  
+  bool fUseNonTimedMutexesForReorganizeAndImport = true;
+  if(fUseNonTimedMutexesForReorganizeAndImport){
+    pData->tmLockTimeout.setTimeout_ms(0);
+  }
 
-  std::lock_guard<std::recursive_mutex> l(pData->mem->tmMutex);
+  TimedMutexGuard l(pData->mem->tmMutex, pData->tmLockTimeout, "tmMutex import", __func__, __LINE__);
+  if(pData->tmLockTimeout.failed()){
+    pData->tmLockTimeout.addToErrMsg(".Failed to lock tm list:", __func__, __LINE__);
+    return; 
+  }
 
   pData->mem->setActiveRequestCommand(COMMAND::IMPORT_MEM);
 
@@ -395,9 +406,19 @@ void reorganizeMemoryProcess( void* pvData )
   if(!pRIDA || !pRIDA->pMem){
     T5LOG(T5ERROR) << "pRIDA or pMem is null";
     return;
-  }  
+  }
+  
+  bool fUseNonTimedMutexesForReorganizeAndImport = true;
+  if(fUseNonTimedMutexesForReorganizeAndImport){
+    pData->tmLockTimeout.setTimeout_ms(0);
+  }
 
-  std::lock_guard<std::recursive_mutex> l(pRIDA->pMem->tmMutex);
+  TimedMutexGuard l(pRIDA->pMem->tmMutex, pData->tmLockTimeout, "tmMutex reorganize", __func__, __LINE__);
+  if(pData->tmLockTimeout.failed()){
+    pData->tmLockTimeout.addToErrMsg(".Failed to lock tm list:", __func__, __LINE__);
+    return; 
+  }
+
   pRIDA->pMem->setActiveRequestCommand(COMMAND::REORGANIZE_MEM);
 
   int _rc_ = 0;

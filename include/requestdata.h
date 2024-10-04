@@ -13,6 +13,7 @@
 #include "lowlevelotmdatastructs.h"
 #include "RestAPI/ProxygenStats.h"
     
+#include "ThreadingWrapper.h"
 
 class EqfMemory;
 class JSONFactory;
@@ -26,7 +27,7 @@ protected:
     static JSONFactory json_factory;
     //RequestData(); // json was parsed in sub class
 public:
-    //std::recursive_mutex request_mutex;
+    //std::recursive_timed_mutex request_mutex;
     ProxygenStats* stats = nullptr;
     proxygen::ResponseHandler* responseHandler = nullptr;
     //proxygen::HTTPMessage response;
@@ -70,17 +71,28 @@ public:
     bool isSuccessful() const{
         return _rest_rc_ == 200 || _rest_rc_ == 0;
     }
+
+
 protected:
     virtual int parseJSON() = 0;
     virtual int checkData() = 0;
     virtual int execute() = 0;
     bool getValue( char *pszString, int iLen, int *piResult );
     int requestTM();
+    int setMutexTimeouts();
+    int prepareData();
 
     bool isWriteRequest();
     bool isLockingRequest();
     bool isReadOnlyRequest();
     bool isServiceRequest();
+
+    MutexTimeout tmLockTimeout;
+    MutexTimeout tmListTimeout;
+    MutexTimeout requestTMTimeout;
+    int64_t tmMutexTimeoutMs = -1;
+    int64_t tmListMutexTimeoutMs = -1;
+    int64_t requestTMMutexTimeoutMs = -1;
 };
 
 
@@ -140,6 +152,7 @@ public:
   std::string fileData;
   ProxygenStats* stats_ = nullptr;
   InclosingTagsBehaviour inclosingTagsBehaviour = InclosingTagsBehaviour::saveAll;
+  MutexTimeout tmLockTimeout;
   //ushort * pusImportPersent = nullptr;
   //ImportStatusDetails* importDetails = nullptr;
   //OtmMemoryServiceWorker::std::shared_ptr<EqfMemory>  pMem = nullptr;
@@ -219,7 +232,8 @@ public:
     ShutdownRequestData(): RequestData(COMMAND::SHUTDOWN) {};
     int sig = 0;
 
-    static void CheckImportFlushTmsAndShutdown(int signal);
+    static void CheckImportFlushTmsAndShutdown(int signal, MutexTimeout& tmListTimeout);
+    static void CheckImportFlushTmsAndShutdown2(int signal, size_t tmListTimeout);
 protected:
     int parseJSON() override { return 0;};
     int checkData() override { return 0;};

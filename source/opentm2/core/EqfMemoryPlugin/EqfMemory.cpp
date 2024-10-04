@@ -15,6 +15,7 @@ Copyright Notice:
 #define INCL_EQF_DAM
 //#define INCL_EQF_ANALYSIS         // analysis functions
 //#include <eqf.h>                  // General Translation Manager include file
+#include "ThreadingWrapper.h"
 #include "tm.h"
 #include "../../core/pluginmanager/PluginManager.h"
 #include "../../core/utilities/LogWrapper.h"
@@ -704,8 +705,8 @@ int EqfMemory::ReloadFromDisk(){
   return rc;
 }
 
-int EqfMemory::FlushFilebuffers(){
-  std::lock_guard<std::recursive_mutex> l(tmMutex);
+int EqfMemory::FlushFilebuffers(MutexTimeout& tmLockTimeout){
+  TimedMutexGuard l(tmMutex, tmLockTimeout, "tmMutex", __func__, __LINE__);
   int rc = TmBtree.fb.Flush();
   rc = rc? rc : InBtree.fb.Flush();
   return rc;

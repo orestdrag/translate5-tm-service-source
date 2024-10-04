@@ -15,6 +15,8 @@
 #include "otm.h"
 #include "Proposal.h"
 
+#include "ThreadingWrapper.h"
+
 #define INCL_EQF_TAGTABLE         // tag table and format functions
 #define INCL_EQF_TP
 #define INCL_EQF_TM
@@ -1742,7 +1744,7 @@ class EqfMemory //: public TMX_CLB
   USHORT LoadMem();
 
 public:
-  std::recursive_mutex tmMutex;
+  std::recursive_timed_mutex tmMutex;
   bool fOpen = false;
   BTREE TmBtree;
   BTREE InBtree;
@@ -2371,7 +2373,7 @@ public:
   bool IsLoadedInRAM();
   int ReloadFromDisk();
   int UnloadFromRAM();
-  int FlushFilebuffers();
+  int FlushFilebuffers(MutexTimeout& tmLockTimeout);
 
 private:   
 };
@@ -3932,6 +3934,8 @@ typedef struct _MEM_ORGANIZE_IDA
  CHAR          szBuffer[2048];         // general purpose buffer
  BOOL          fFirstGet;              // TRUE = this is the first get access
  std::vector<ProposalFilter> m_reorganizeFilters;
+ MutexTimeout tmListTimeout ;
+ MutexTimeout tmLockTimeout ;
 }MEM_ORGANIZE_IDA, * PMEM_ORGANIZE_IDA;
 
 USHORT  TmCloseOrganize( PMEM_ORGANIZE_IDA, USHORT );
@@ -4092,9 +4096,16 @@ private:
 
 };
 
+//enum TIMED_BOOL{
+//    FALSE = 0,
+//    TRUE = 1,
+//    TIMEOUT = -2
+//};
+
 class TMManager{
 
   public:
+  
   
   std::atomic_bool fWriteRequestsAllowed{0};
   std::atomic_bool fServiceIsRunning{1};
@@ -4104,8 +4115,8 @@ class TMManager{
   typedef std::map <std::string, std::shared_ptr<EqfMemory>> TMMap;
   TMMap tms;
 
-  std::recursive_mutex mutex_requestTM;
-  std::recursive_mutex mutex_access_tms;
+  std::recursive_timed_mutex mutex_requestTM;
+  std::recursive_timed_mutex mutex_access_tms;
 
   enum TMManagerCodes{
     TMM_NO_ERROR = 0,
@@ -4117,28 +4128,29 @@ class TMManager{
 
   };
 
-  bool IsMemoryLoaded(const std::string& strMemName);
-  bool IsMemoryInList(const std::string& strMemName);
-  bool IsMemoryLoading(const std::string& strMemName);
-  bool IsMemoryFailedToLoad(const std::string& strMemName);
+  bool IsMemoryLoaded(const std::string& strMemName, MutexTimeout& tmListTimeout);
+  bool IsMemoryInList(const std::string& strMemName, MutexTimeout& tmListTimeout);
+  bool IsMemoryLoading(const std::string& strMemName, MutexTimeout& tmListTimeout);
+  bool IsMemoryFailedToLoad(const std::string& strMemName, MutexTimeout& tmListTimeout);
   int TMExistsOnDisk(const std::string& tmName, bool logErrorIfNotExists = true);
 
-  int AddMem(const std::shared_ptr<EqfMemory> NewMem);
-  int OpenTM(const std::string& strMemName);
-  int CloseTM(const std::string& strMemName);
+  int AddMem(const std::shared_ptr<EqfMemory> NewMem, MutexTimeout& tmListTimeout);
+  int OpenTM(const std::string& strMemName, MutexTimeout& tmListTimeout);
+  int CloseTM(const std::string& strMemName, MutexTimeout& tmListTimeout);
   int DeleteTM(const std::string& strMemName, std::string& outputMsg);
 
-  int RenameTM(const std::string& oldMemName, const std::string& newMemName, std::string& outputMsg);
+  int RenameTM(const std::string& oldMemName, const std::string& newMemName, std::string& outputMsg,MutexTimeout& tmListTimeout);
 
   int MoveTM(
     const std::string& oldMemoryName,
     const std::string& newMemoryName,
-    std::string &strError
+    std::string &strError,
+    MutexTimeout& tmListTimeout
   );
   
-  std::shared_ptr<EqfMemory> requestServicePointer(const std::string& strMemName, COMMAND command);
-  std::shared_ptr<EqfMemory> requestReadOnlyTMPointer(const std::string& strMemName, std::shared_ptr<int>& refBack);
-  std::shared_ptr<EqfMemory> requestWriteTMPointer(const std::string& strMemName, std::shared_ptr<int>& refBack);
+  std::shared_ptr<EqfMemory> requestServicePointer(const std::string& strMemName, COMMAND command, MutexTimeout& requestTMTimeout,  MutexTimeout& tmListTimeout);
+  std::shared_ptr<EqfMemory> requestReadOnlyTMPointer(const std::string& strMemName, std::shared_ptr<int>& refBack, MutexTimeout& requestTMTimeout,  MutexTimeout& tmListTimeout);
+  std::shared_ptr<EqfMemory> requestWriteTMPointer(const std::string& strMemName, std::shared_ptr<int>& refBack, MutexTimeout& requestTMTimeout,  MutexTimeout& tmListTimeout);
 
   std::shared_ptr<EqfMemory> CreateNewEmptyTM(const std::string& strMemName, const std::string& strSrcLang, 
       const std::string& strMemDescription, int& _rc_, bool keepInRamOnly = false);
@@ -4161,16 +4173,16 @@ class TMManager{
     /*! \brief close any memories which haven't been used for a long time
         \returns 0
     */
-    size_t CleanupMemoryList(size_t memoryRequested);
+    size_t CleanupMemoryList(size_t memoryRequested, MutexTimeout& tmListTimeout);
 
     /*! \brief calcuate total amount of RAM occupied by opened memory files
         \returns 0
     */
-    size_t CalculateOccupiedRAM();
+    size_t CalculateOccupiedRAM(MutexTimeout& tmListTimeout);
 
     std::shared_ptr<EqfMemory>  findOpenedMemory( const std::string& memName);
 
-    int GetMemImportInProcessCount();
+    int GetMemImportInProcessCount(MutexTimeout& tmListTimeout);
     
     /*! \brief Close all open memories
     \returns http return code0 if successful or an error code in case of failures
@@ -4364,7 +4376,8 @@ int getProposalSortKey(  OtmProposal::eMatchType MatchType, OtmProposal::ePropos
   (
     const std::string& strReplace,
     const std::string& strReplaceWith, 
-    std::string& outputMsg
+    std::string& outputMsg, 
+    MutexTimeout& tmListTimeout
   );
 
 
