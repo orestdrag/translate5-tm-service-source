@@ -44,6 +44,10 @@ DECLARE_int64(allowedram);
 DECLARE_int32(t5loglevel);
 DECLARE_bool(log_every_request_start);
 DECLARE_bool(log_every_request_end);
+DECLARE_int64(tmRequestLockDefaultTimeout);
+DECLARE_int64(tmListLockDefaultTimeout);
+DECLARE_int64(tmLockDefaultTimeout);
+DECLARE_bool(UseTimedMutexesForReorganizeAndImport);
 
 using namespace ProxygenService;
 using namespace proxygen;
@@ -421,6 +425,10 @@ class ProxygenHandlerFactory : public RequestHandlerFactory {
       "\n  Triples threshold: " << uiThreshold <<
       "\n  Localhost only: " << fLocalHostOnly << 
       "\n  Allowed ram = " << uiAllowedRAM << " MB" <<
+      "\n  tmRequestLockDefaultTimeout = " << FLAGS_tmRequestLockDefaultTimeout << "ms" <<
+      "\n  tmListLockDefaultTimeout = " << FLAGS_tmListLockDefaultTimeout << "ms" <<
+      "\n  tmLockDefaultTimeout = " << FLAGS_tmLockDefaultTimeout<< "ms" << 
+      "\n  UseTimedMutexesForReorganizeAndImport = " << FLAGS_UseTimedMutexesForReorganizeAndImport <<
       "\n\n\n\
                   |==================================================================|\n\
                   |-------------Setup is done -> waiting for requests...-------------|\n\

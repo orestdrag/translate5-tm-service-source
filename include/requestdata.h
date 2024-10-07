@@ -73,6 +73,9 @@ public:
     }
 
 
+    int64_t tmMutexTimeoutMs = -1;
+    int64_t tmListMutexTimeoutMs = -1;
+    int64_t requestTMMutexTimeoutMs = -1;
 protected:
     virtual int parseJSON() = 0;
     virtual int checkData() = 0;
@@ -90,9 +93,6 @@ protected:
     MutexTimeout tmLockTimeout;
     MutexTimeout tmListTimeout;
     MutexTimeout requestTMTimeout;
-    int64_t tmMutexTimeoutMs = -1;
-    int64_t tmListMutexTimeoutMs = -1;
-    int64_t requestTMMutexTimeoutMs = -1;
 };
 
 

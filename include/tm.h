@@ -2293,7 +2293,7 @@ public:
   unsigned long ulSize = 0;                        // size of the memory  
   BOOL fEnabled = 0;                               // memory-is-enabled flag  
 
-
+  std::string getName()const { return szName; }
   // functions dealing with long document tables
   USHORT NTMCreateLongNameTable();
   USHORT NTMReadLongNameTable();

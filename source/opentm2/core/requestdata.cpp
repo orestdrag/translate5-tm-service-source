@@ -276,7 +276,7 @@ DECLARE_int64(tmLockDefaultTimeout);
 
 int RequestData::setMutexTimeouts(){
   //set default timeouts if they were not set in request
-  tmLockTimeout.setTimeout_ms(tmMutexTimeoutMs == -1? FLAGS_tmRequestLockDefaultTimeout : tmMutexTimeoutMs); 
+  tmLockTimeout.setTimeout_ms(tmMutexTimeoutMs == -1? FLAGS_tmLockDefaultTimeout : tmMutexTimeoutMs); 
   tmListTimeout.setTimeout_ms(tmListMutexTimeoutMs == -1? FLAGS_tmListLockDefaultTimeout : tmListMutexTimeoutMs); 
   requestTMTimeout.setTimeout_ms(requestTMMutexTimeoutMs == -1? FLAGS_tmRequestLockDefaultTimeout : requestTMMutexTimeoutMs); 
   
@@ -1140,6 +1140,8 @@ int SaveAllTMsToDiskRequestData::execute(){
   std::string tms; 
   
   int count = 0;
+  std::string errMsg;
+  size_t tmLockTimeoutms = tmLockTimeout.getTimeout_ms();
   
   {// lock tms
     TimedMutexGuard l{TMManager::GetInstance()->mutex_access_tms, tmListTimeout, "tmListMutex", __func__, __LINE__};// lock tms list
@@ -1155,13 +1157,16 @@ int SaveAllTMsToDiskRequestData::execute(){
       tm.second->FlushFilebuffers(tmLockTimeout);
       if(tmLockTimeout.failed()){
         tmLockTimeout.addToErrMsg("Failed to lock tm:", __func__, __LINE__);
-        return buildErrorReturn(506, tmLockTimeout.getErrMsg().c_str(), _rc_);
+        errMsg += tm.second->getName() + ":" + tmLockTimeout.getErrMsg() + "; ";
+        tmLockTimeout.reset();
+        tmLockTimeout.setTimeout_ms(tmLockTimeoutms);
+        //return buildErrorReturn(506, tmLockTimeout.getErrMsg().c_str(), _rc_);
       }
       tms += tm.first;
     }
   }// unlock tms
 
-  outputMessage = "{\n   \'saved " + std::to_string(count) +" tms\': \'" + tms + "\' \n}";
+  outputMessage = "{\n   \"saved " + std::to_string(count) +" tms\": \"" + tms + "\",\n \"errMsg\" : \""  + errMsg + "\"\n}";
   return OK;
 }
 
@@ -2192,6 +2197,7 @@ void ShutdownRequestData::CheckImportFlushTmsAndShutdown(int signal, MutexTimeou
   }
 
   auto saveTmRD = SaveAllTMsToDiskRequestData();
+  saveTmRD.tmMutexTimeoutMs = saveTmRD.tmListMutexTimeoutMs = 0;// should be non timed
   saveTmRD.run();
   //check tms is in import status
   //close log file
@@ -2328,31 +2334,32 @@ int ResourceInfoRequestData::execute(){
 
     if(tmListTimeout.failed()){
       tmListTimeout.addToErrMsg(".Failed to lock tm list:", __func__, __LINE__);
-      return buildErrorReturn(506, tmListTimeout.getErrMsg().c_str(), TM_LIST_MUTEX_TIMEOUT_FAILED);
+      AddToJson(ssOutput, "mutex_msg", tmListTimeout.getErrMsg(), false );
+      //return buildErrorReturn(506, tmListTimeout.getErrMsg().c_str(), TM_LIST_MUTEX_TIMEOUT_FAILED);
+    }else{
+      for ( auto& tm : TMManager::GetInstance()->tms)
+      {
+        if(count){
+          ssOutput << ",";
+        }
+        fSize = tm.second->GetRAMSize();
+        expectedSize = tm.second->getExpectedSizeInRAM();
+        status = tm.second->getStatusString();
+        request = tm.second->getActiveRequestString();
+        fName = tm.first;
+
+        ssOutput << "\n{ ";
+        AddToJson(ssOutput, "name", tm.first, true );
+        AddToJson(ssOutput, "status", status, true );
+        AddToJson(ssOutput, "size", fSize, true );
+        AddToJson(ssOutput, "activeRequest", request, true);
+        AddToJson(ssOutput, "expectedSize", expectedSize, false );
+        ssOutput << " }";
+
+        total += fSize;
+        count++;
+      }   
     }
-
-    for ( auto& tm : TMManager::GetInstance()->tms)
-    {
-      if(count){
-        ssOutput << ",";
-      }
-      fSize = tm.second->GetRAMSize();
-      expectedSize = tm.second->getExpectedSizeInRAM();
-      status = tm.second->getStatusString();
-      request = tm.second->getActiveRequestString();
-      fName = tm.first;
-
-      ssOutput << "\n{ ";
-      AddToJson(ssOutput, "name", tm.first, true );
-      AddToJson(ssOutput, "status", status, true );
-      AddToJson(ssOutput, "size", fSize, true );
-      AddToJson(ssOutput, "activeRequest", request, true);
-      AddToJson(ssOutput, "expectedSize", expectedSize, false );
-      ssOutput << " }";
-
-      total += fSize;
-      count++;
-    }   
   }
 
   ssOutput << "\n ],\n"; 

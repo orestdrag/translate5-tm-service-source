@@ -327,6 +327,7 @@ int FilesystemHelper::WriteToFile( const std::string& pszFile, const std::string
 }
 //*/
 
+DECLARE_bool(UseTimedMutexesForReorganizeAndImport);
 
 void importMemoryProcess( void* pvData )
 {
@@ -340,8 +341,7 @@ void importMemoryProcess( void* pvData )
     return;
   }
   
-  bool fUseNonTimedMutexesForReorganizeAndImport = true;
-  if(fUseNonTimedMutexesForReorganizeAndImport){
+  if(!FLAGS_UseTimedMutexesForReorganizeAndImport){
     pData->tmLockTimeout.setTimeout_ms(0);
   }
 
@@ -408,8 +408,7 @@ void reorganizeMemoryProcess( void* pvData )
     return;
   }
   
-  bool fUseNonTimedMutexesForReorganizeAndImport = true;
-  if(fUseNonTimedMutexesForReorganizeAndImport){
+  if(!FLAGS_UseTimedMutexesForReorganizeAndImport){
     pData->tmLockTimeout.setTimeout_ms(0);
   }
 

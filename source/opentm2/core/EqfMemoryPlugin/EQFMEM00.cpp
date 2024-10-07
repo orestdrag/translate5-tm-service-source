@@ -386,7 +386,7 @@ VOID EQFMemOrganizeEnd
   PMEM_ORGANIZE_IDA pRIDA = (PMEM_ORGANIZE_IDA)pCommArea->pUserIDA;
 
   if(nullptr != pRIDA->pMemTemp){
-    FilesystemHelper::DeleteFile(FilesystemHelper::GetTmdPath(pRIDA->pMem->szName));
+    //FilesystemHelper::DeleteFile(FilesystemHelper::GetTmdPath(pRIDA->pMem->szName));
     pRIDA->pMem->TmBtree.fb.data = std::move(pRIDA->pMemTemp->TmBtree.fb.data);
     //get signature record and add to control block
     pRIDA->pMem->TmBtree.resetLookupTable();
@@ -395,7 +395,7 @@ VOID EQFMemOrganizeEnd
     pRIDA->pMem->TmBtree.fb.Flush(true);
 
     
-    FilesystemHelper::DeleteFile(FilesystemHelper::GetTmiPath(pRIDA->pMem->szName));
+    //FilesystemHelper::DeleteFile(FilesystemHelper::GetTmiPath(pRIDA->pMem->szName));
     pRIDA->pMem->InBtree.fb.data = std::move(pRIDA->pMemTemp->InBtree.fb.data);
     pRIDA->pMem->InBtree.resetLookupTable();
     usLen = sizeof( TMX_SIGN );

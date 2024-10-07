@@ -38,7 +38,7 @@ public:
     void addToErrMsg(const char* msg, const char* func, int line) {
         m_timeout_failed = true;
         m_errMsg += msg; 
-        m_errMsg += "(location: " + std::string(func) +":"+ std::to_string(line) + ")\n";
+        m_errMsg += "(location: " + std::string(func) +":"+ std::to_string(line) + "); ";
     }
 
     size_t getTimeout_ms()const {return m_timeout_ms; }
@@ -56,6 +56,7 @@ public:
 };
 
 #define LOG_MUTEXES
+#define MUTEX_LOG T5LOG(T5INFO)
 
 class TimedMutexGuard {
     int64_t m_id = 0;
@@ -77,18 +78,18 @@ public:
         }
         else if (0 == timeout.getTimeout_ms()) {
             #ifdef LOG_MUTEXES
-                T5LOG(T5TRANSACTION) << "Requesting non-timed mutex " << addInfo <<", id =" << m_id << " from " << func<<":" <<line;
+                MUTEX_LOG << "Requesting non-timed mutex " << addInfo <<", id =" << m_id << " from " << func<<":" <<line;
             #endif
             // If timeout is 0, just lock the mutex immediately (blocking)
             m_mtx.lock();
             #ifdef LOG_MUTEXES
-                T5LOG(T5TRANSACTION) << "non-timed mutex locked " << addInfo <<", id =" << m_id <<  " from " << func<<":" <<line;
+                MUTEX_LOG << "non-timed mutex locked " << addInfo <<", id =" << m_id <<  " from " << func<<":" <<line;
             #endif
             m_owns_lock = true;
             m_timed = false;
         } else {
             #ifdef LOG_MUTEXES
-                T5LOG(T5TRANSACTION) << "Requesting timed mutex " << addInfo <<", id =" << m_id <<  " from " << func<<":" <<line << "; with timeout = "<< timeout.getTimeout_ms();
+               MUTEX_LOG << "Requesting timed mutex " << addInfo <<", id =" << m_id <<  " from " << func<<":" <<line << "; with timeout = "<< timeout.getTimeout_ms();
             #endif
             // Try to lock the mutex within the specified timeout duration
             m_owns_lock = m_mtx.try_lock_for(std::chrono::milliseconds(timeout.getTimeout_ms()));
@@ -96,7 +97,7 @@ public:
     
             if (!m_owns_lock) {
                 mutexInfo = "Failed to acquire the lock("+ std::string(addInfo) 
-                    +") within the timeout(" + std::to_string(timeout.getTimeout_ms())+"ms)";
+                    +":"+ std::to_string(m_id)+") within the timeout(" + std::to_string(timeout.getTimeout_ms())+"ms)";
                     
                 timeout.addToErrMsg(mutexInfo.c_str(), func, line);
                 mutexInfo += ", position:"  + std::string(func) +":", std::to_string(line); 
@@ -109,7 +110,11 @@ public:
     ~TimedMutexGuard() {
         if (m_owns_lock) {
             #ifdef LOG_MUTEXES
-                T5LOG(T5TRANSACTION) << "Unlocking non-timed mutex, id = " << m_id;
+            if(m_timed){
+                MUTEX_LOG << "Unlocking timed mutex, id = " << m_id;
+            }else{
+                MUTEX_LOG << "Unlocking non-timed mutex, id = " << m_id;
+            }
             #endif
             m_mtx.unlock();
         }
