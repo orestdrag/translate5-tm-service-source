@@ -293,30 +293,30 @@ int RequestData::requestTM(){
   if(isReadOnlyRequest())
   {
     mem = TMManager::GetInstance()->requestReadOnlyTMPointer(strMemName, memRef, requestTMTimeout, tmListTimeout);
-    if(tmLockTimeout.failed()){
-      tmLockTimeout.addToErrMsg("Failed to lock tm:", __func__, __LINE__);
+    if(tmListTimeout.failed()){
+      tmListTimeout.addToErrMsg("Failed to lock tm list:", __func__, __LINE__);
       return buildErrorReturn(506, tmLockTimeout.getErrMsg().c_str(), _rc_);
     }
     if(requestTMTimeout.failed()){
-      requestTMTimeout.addToErrMsg("Failed to lock tm:", __func__, __LINE__);
+      requestTMTimeout.addToErrMsg("Failed to requestTm:", __func__, __LINE__);
       return buildErrorReturn(506, requestTMTimeout.getErrMsg().c_str(), _rc_);
     }
   }else if(isWriteRequest())
   {
     mem = TMManager::GetInstance()->requestWriteTMPointer(strMemName, memRef, requestTMTimeout, tmListTimeout);
-    if(tmLockTimeout.failed()){
-      tmLockTimeout.addToErrMsg("Failed to lock tm:", __func__, __LINE__);
-      return buildErrorReturn(506, tmLockTimeout.getErrMsg().c_str(), _rc_);
+    if(tmListTimeout.failed()){
+      tmListTimeout.addToErrMsg("Failed to lock tm list:", __func__, __LINE__);
+      return buildErrorReturn(506, tmListTimeout.getErrMsg().c_str(), _rc_);
     }
     if(requestTMTimeout.failed()){
-      requestTMTimeout.addToErrMsg("Failed to lock tm:", __func__, __LINE__);
+      requestTMTimeout.addToErrMsg("Failed to lock requestTm:", __func__, __LINE__);
       return buildErrorReturn(506, requestTMTimeout.getErrMsg().c_str(), _rc_);
     }
   }else if(STATUS_MEM == command){
     mem = TMManager::GetInstance()->requestServicePointer(strMemName, command, requestTMTimeout, tmListTimeout);
-    if(tmLockTimeout.failed()){
-      tmLockTimeout.addToErrMsg("Failed to lock tm:", __func__, __LINE__);
-      return buildErrorReturn(506, tmLockTimeout.getErrMsg().c_str(), _rc_);
+    if(tmListTimeout.failed()){
+      tmListTimeout.addToErrMsg("Failed to lock tm list:", __func__, __LINE__);
+      return buildErrorReturn(506, tmListTimeout.getErrMsg().c_str(), _rc_);
     }
     if(requestTMTimeout.failed()){
       requestTMTimeout.addToErrMsg("Failed to lock tm:", __func__, __LINE__);
@@ -738,9 +738,17 @@ int CreateMemRequestData::parseJSON(){
       else
       {
         T5LOG( T5DEBUG) << "JSON parsed name = " << name << "; value = " << value;
-        if ( strcasecmp( name.c_str(), "name" ) == 0 )
+        if ( strcasecmp( name.c_str(), "tmMutexTimeout" ) == 0 )
         {
-          strMemName = value;
+          tmMutexTimeoutMs =  std::stoll(value.c_str());
+        }
+        else if ( strcasecmp( name.c_str(), "tmListMutexTimeout" ) == 0 )
+        {
+          tmListMutexTimeoutMs =  std::stoll(value.c_str());
+        }
+        else if ( strcasecmp( name.c_str(), "requestTMMutexTimeout" ) == 0 )
+        {
+          requestTMMutexTimeoutMs = std::stoll(value.c_str());
         }
         else if ( strcasecmp( name.c_str(), "sourceLang" ) == 0 )
         {
@@ -897,7 +905,19 @@ int ImportRequestData::parseJSON(){
         {
           strTmxData = value;
           //break;
-        }else if(strcasecmp(name.c_str(), "timeout") == 0){
+        }else if ( strcasecmp( name.c_str(), "tmMutexTimeout" ) == 0 )
+        {
+          tmMutexTimeoutMs =  std::stoll(value.c_str());
+        }
+        else if ( strcasecmp( name.c_str(), "tmListMutexTimeout" ) == 0 )
+        {
+          tmListMutexTimeoutMs =  std::stoll(value.c_str());
+        }
+        else if ( strcasecmp( name.c_str(), "requestTMMutexTimeout" ) == 0 )
+        {
+          requestTMMutexTimeoutMs = std::stoll(value.c_str());
+        }
+        else if(strcasecmp(name.c_str(), "timeout") == 0){
           timeout = std::stol(value);
         }else if(strcasecmp(name.c_str(), "loggingThreshold") == 0){
           loggingThreshold = std::stoi(value);
@@ -1058,7 +1078,19 @@ int ImportStreamRequestData::parseJSON(){
           loggingThreshold = std::stoi(value);
           T5LOG( T5WARNING) <<"OtmMemoryServiceWorker::import::set new threshold for logging" << loggingThreshold;
           T5Logger::GetInstance()->SetLogLevel(loggingThreshold);        
-        }else if(strcasecmp(name.c_str(), "framingTags") == 0){
+        }else if ( strcasecmp( name.c_str(), "tmMutexTimeout" ) == 0 )
+        {
+          tmMutexTimeoutMs =  std::stoll(value.c_str());
+        }
+        else if ( strcasecmp( name.c_str(), "tmListMutexTimeout" ) == 0 )
+        {
+          tmListMutexTimeoutMs =  std::stoll(value.c_str());
+        }
+        else if ( strcasecmp( name.c_str(), "requestTMMutexTimeout" ) == 0 )
+        {
+          requestTMMutexTimeoutMs = std::stoll(value.c_str());
+        }
+        else if(strcasecmp(name.c_str(), "framingTags") == 0){
           std::string strInclosingTagsBehaviour = value;
           if(strcasecmp(value.c_str(), "saveAll") == 0){
             inclosingTagsBehaviour = InclosingTagsBehaviour::saveAll;
@@ -1256,7 +1288,19 @@ int ImportLocalRequestData::parseJSON(){
       {
         strInputFile = value;
         //break;
-      }else if(strcasecmp(name.c_str(), "loggingThreshold") == 0){
+      }else if ( strcasecmp( name.c_str(), "tmMutexTimeout" ) == 0 )
+        {
+          tmMutexTimeoutMs =  std::stoll(value.c_str());
+        }
+        else if ( strcasecmp( name.c_str(), "tmListMutexTimeout" ) == 0 )
+        {
+          tmListMutexTimeoutMs =  std::stoll(value.c_str());
+        }
+        else if ( strcasecmp( name.c_str(), "requestTMMutexTimeout" ) == 0 )
+        {
+          requestTMMutexTimeoutMs = std::stoll(value.c_str());
+        }
+        else  if(strcasecmp(name.c_str(), "loggingThreshold") == 0){
         loggingThreshold = std::stoi(value);
         T5LOG( T5WARNING) <<"OtmMemoryServiceWorker::import::set new threshold for logging" << loggingThreshold;
         T5Logger::GetInstance()->SetLogLevel(loggingThreshold);        
@@ -1676,6 +1720,9 @@ int DeleteEntriesReorganizeRequestData::parseJSON(){
     { L"context",     JSONFactory::UTF8_STRING_CLASS_PARM_TYPE, &(  searchFilterFactory.context ), 0 },
     { L"author",     JSONFactory::UTF8_STRING_CLASS_PARM_TYPE, &(  searchFilterFactory.author ), 0 },
     { L"document",     JSONFactory::UTF8_STRING_CLASS_PARM_TYPE, &(  searchFilterFactory.document ), 0 },
+                                                   { L"tmMutexTimeout", JSONFactory::INT_PARM_TYPE, &tmMutexTimeoutMs, -1},
+                                                   { L"tmListMutexTimeout", JSONFactory::INT_PARM_TYPE, &tmListMutexTimeoutMs, -1},
+                                                   { L"requestTMMutexTimeout", JSONFactory::INT_PARM_TYPE, &requestTMMutexTimeoutMs, -1},
 
     //{ L"timestampSpanStart",     JSONFactory::TIMESTAMP_PARM_TYPE, &(  searchFilterFactory.timestampSpanStart ), 0 },
     //{ L"timestampSpanEnd",     JSONFactory::TIMESTAMP_PARM_TYPE, &(  searchFilterFactory.timestampSpanEnd ), 0 },
@@ -2327,14 +2374,18 @@ int ResourceInfoRequestData::execute(){
   }
   
   size_t total = 0, fSize = 0, count = 0, expectedSize = 0;
+  size_t tmListMutexMs = tmListTimeout.getTimeout_ms();
   std::string fName, status, request;
   ssOutput << "\"tms\": [\n";
   {// lock tms
     TimedMutexGuard l{TMManager::GetInstance()->mutex_access_tms, tmListTimeout, "tmListMutex", __func__, __LINE__};// lock tms list
 
     if(tmListTimeout.failed()){
-      tmListTimeout.addToErrMsg(".Failed to lock tm list:", __func__, __LINE__);
+      tmListTimeout.addToErrMsg("Failed to lock tm list:", __func__, __LINE__);
       AddToJson(ssOutput, "mutex_msg", tmListTimeout.getErrMsg(), false );
+      tmListTimeout.reset();
+      tmListTimeout.setTimeout_ms(tmListMutexMs);
+
       //return buildErrorReturn(506, tmListTimeout.getErrMsg().c_str(), TM_LIST_MUTEX_TIMEOUT_FAILED);
     }else{
       for ( auto& tm : TMManager::GetInstance()->tms)
@@ -2529,6 +2580,9 @@ int ExportRequestData::parseJSON(){
     { L"startFromInternalKey",         JSONFactory::ASCII_STRING_PARM_TYPE, &( szKey ), sizeof( szKey ) / sizeof( szKey[0] ) },
     { L"limit",          JSONFactory::INT_PARM_TYPE, &(numberOfRequestedProposals), 0},
     { L"loggingThreshold",JSONFactory::INT_PARM_TYPE        , &(loggingThreshold), 0}, 
+                                                   { L"tmMutexTimeout", JSONFactory::INT_PARM_TYPE, &tmMutexTimeoutMs, -1},
+                                                   { L"tmListMutexTimeout", JSONFactory::INT_PARM_TYPE, &tmListMutexTimeoutMs, -1},
+                                                   { L"requestTMMutexTimeout", JSONFactory::INT_PARM_TYPE, &requestTMMutexTimeoutMs, -1},
     { L"",               JSONFactory::ASCII_STRING_PARM_TYPE, NULL, 0 } 
   };
 
@@ -2777,6 +2831,9 @@ int UpdateEntryRequestData::parseJSON(){
   { L"save2disk",      JSONFactory::INT_PARM_TYPE         , &(fSave2Disk), 0 },
   { L"recordKey",      JSONFactory::INT_PARM_TYPE         , &(recordKey), 0 },
   { L"targetKey",      JSONFactory::INT_PARM_TYPE         , &(targetKey), 0 },
+                                                   { L"tmMutexTimeout", JSONFactory::INT_PARM_TYPE, &tmMutexTimeoutMs, -1},
+                                                   { L"tmListMutexTimeout", JSONFactory::INT_PARM_TYPE, &tmListMutexTimeoutMs, -1},
+                                                   { L"requestTMMutexTimeout", JSONFactory::INT_PARM_TYPE, &requestTMMutexTimeoutMs, -1},
   { L"",               JSONFactory::ASCII_STRING_PARM_TYPE, NULL, 0 } };
 
   _rc_ = json_factory.parseJSON( strInputParmsW, parseControl );
@@ -2939,6 +2996,9 @@ int GetEntryRequestData::parseJSON(){
   { L"loggingThreshold",JSONFactory::INT_PARM_TYPE        , &(loggingThreshold), 0},
   { L"recordKey",      JSONFactory::INT_PARM_TYPE         , &(recordKey), 0 },
   { L"targetKey",      JSONFactory::INT_PARM_TYPE         , &(targetKey), 0 },
+                                                   { L"tmMutexTimeout", JSONFactory::INT_PARM_TYPE, &tmMutexTimeoutMs, -1},
+                                                   { L"tmListMutexTimeout", JSONFactory::INT_PARM_TYPE, &tmListMutexTimeoutMs, -1},
+                                                   { L"requestTMMutexTimeout", JSONFactory::INT_PARM_TYPE, &requestTMMutexTimeoutMs, -1},
   { L"",               JSONFactory::ASCII_STRING_PARM_TYPE, NULL, 0 } };
 
   _rc_ = json_factory.parseJSON( strInputParmsW, parseControl );  
@@ -3021,6 +3081,9 @@ int DeleteEntryRequestData::parseJSON(){
   { L"recordKey",      JSONFactory::INT_PARM_TYPE         , &(recordKey), 0 },
   { L"targetKey",      JSONFactory::INT_PARM_TYPE         , &(targetKey), 0 },
   { L"save2disk",      JSONFactory::INT_PARM_TYPE         , &(fSave2Disk), 0},
+                                                   { L"tmMutexTimeout", JSONFactory::INT_PARM_TYPE, &tmMutexTimeoutMs, -1},
+                                                   { L"tmListMutexTimeout", JSONFactory::INT_PARM_TYPE, &tmListMutexTimeoutMs, -1},
+                                                   { L"requestTMMutexTimeout", JSONFactory::INT_PARM_TYPE, &requestTMMutexTimeoutMs, -1},
   { L"",               JSONFactory::ASCII_STRING_PARM_TYPE, NULL, 0 } };
 
   _rc_ = json_factory.parseJSON( strInputParmsW, parseControl );  
@@ -3175,6 +3238,12 @@ int FuzzySearchRequestData::parseJSON(){
                                                    { L"context",        JSONFactory::UTF16_STRING_PARM_TYPE, &( Data.szContext ), sizeof( Data.szContext ) / sizeof( Data.szContext[0] ) },
                                                    { L"numOfProposals", JSONFactory::INT_PARM_TYPE,          &( Data.iNumOfProposals ), 0 },
                                                    { L"loggingThreshold", JSONFactory::INT_PARM_TYPE,        &loggingThreshold, 0 },
+                                                   { L"tmMutexTimeout", JSONFactory::INT_PARM_TYPE, &tmMutexTimeoutMs, -1},
+                                                   { L"tmListMutexTimeout", JSONFactory::INT_PARM_TYPE, &tmListMutexTimeoutMs, -1},
+                                                   { L"requestTMMutexTimeout", JSONFactory::INT_PARM_TYPE, &requestTMMutexTimeoutMs, -1},
+                                                   { L"tmMutexTimeout", JSONFactory::INT_PARM_TYPE, &tmMutexTimeoutMs, -1},
+                                                   { L"tmListMutexTimeout", JSONFactory::INT_PARM_TYPE, &tmListMutexTimeoutMs, -1},
+                                                   { L"requestTMMutexTimeout", JSONFactory::INT_PARM_TYPE, &requestTMMutexTimeoutMs, -1},
                                                    { L"",               JSONFactory::ASCII_STRING_PARM_TYPE, NULL, 0 } };
 
   _rc_ = json_factory.parseJSON( strInputParmsW, parseControl );
@@ -3392,6 +3461,9 @@ int ConcordanceExtendedSearchRequestData::parseJSON(){
     { L"context",     JSONFactory::UTF8_STRING_CLASS_PARM_TYPE, &(  searchFilterFactory.context ), 0 },
     { L"author",     JSONFactory::UTF8_STRING_CLASS_PARM_TYPE, &(  searchFilterFactory.author ), 0 },
     { L"document",     JSONFactory::UTF8_STRING_CLASS_PARM_TYPE, &(  searchFilterFactory.document ), 0 },
+                                                   { L"tmMutexTimeout", JSONFactory::INT_PARM_TYPE, &tmMutexTimeoutMs, -1},
+                                                   { L"tmListMutexTimeout", JSONFactory::INT_PARM_TYPE, &tmListMutexTimeoutMs, -1},
+                                                   { L"requestTMMutexTimeout", JSONFactory::INT_PARM_TYPE, &requestTMMutexTimeoutMs, -1},
 
     //{ L"timestampSpanStart",     JSONFactory::TIMESTAMP_PARM_TYPE, &(  searchFilterFactory.timestampSpanStart ), 0 },
     //{ L"timestampSpanEnd",     JSONFactory::TIMESTAMP_PARM_TYPE, &(  searchFilterFactory.timestampSpanEnd ), 0 },
@@ -3723,6 +3795,9 @@ int ConcordanceSearchRequestData::parseJSON(){
   { L"numOfProposals", JSONFactory::INT_PARM_TYPE,          &( Data.iNumOfProposals ), 0 },
   { L"msSearchAfterNumResults", JSONFactory::INT_PARM_TYPE, &( Data.iSearchTime ), 0 },
   { L"loggingThreshold", JSONFactory::INT_PARM_TYPE,        &loggingThreshold, 0 },
+                                                   { L"tmMutexTimeout", JSONFactory::INT_PARM_TYPE, &tmMutexTimeoutMs, -1},
+                                                   { L"tmListMutexTimeout", JSONFactory::INT_PARM_TYPE, &tmListMutexTimeoutMs, -1},
+                                                   { L"requestTMMutexTimeout", JSONFactory::INT_PARM_TYPE, &requestTMMutexTimeoutMs, -1},
   { L"",               JSONFactory::ASCII_STRING_PARM_TYPE, NULL, 0 } };
 
   if(loggingThreshold >=0) T5Logger::GetInstance()->SetLogLevel(loggingThreshold); 
