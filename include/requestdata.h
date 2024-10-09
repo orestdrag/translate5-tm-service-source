@@ -232,12 +232,13 @@ public:
     ShutdownRequestData(): RequestData(COMMAND::SHUTDOWN) {};
     int sig = 0;
 
-    static void CheckImportFlushTmsAndShutdown(int signal, MutexTimeout& tmListTimeout);
-    static void CheckImportFlushTmsAndShutdown2(int signal, size_t tmListTimeout);
+    static void CheckImportFlushTmsAndShutdown(int signal, MutexTimeout& tmListTimeout, bool flushTmsToDisk, bool waitForImportAndReorganizeProcesses);
+    static void CheckImportFlushTmsAndShutdown2(int signal, size_t tmListTimeout, bool flushTmsToDisk, bool waitForImportAndReorganizeProcesses);
 protected:
     int parseJSON() override { return 0;};
     int checkData() override { return 0;};
     int execute()   override   ;
+    bool fWaitForImportAndReorganize = true, fFlushTmToDisk = true;
 };
 
 

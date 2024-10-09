@@ -2217,52 +2217,57 @@ int StatusMemRequestData::execute() {
   return( OK );
 };
 
-void ShutdownRequestData::CheckImportFlushTmsAndShutdown2(int signal, size_t tmListTimeout)
+void ShutdownRequestData::CheckImportFlushTmsAndShutdown2(int signal, size_t tmListTimeout, bool flushTmsToDisk, bool waitForImportAndReorganizeProcesses)
 {
   MutexTimeout mt{tmListTimeout};
-  CheckImportFlushTmsAndShutdown(signal, mt);
+  CheckImportFlushTmsAndShutdown(signal, mt, flushTmsToDisk, waitForImportAndReorganizeProcesses);
 }
 
-void ShutdownRequestData::CheckImportFlushTmsAndShutdown(int signal, MutexTimeout& tmListTimeout)
+void ShutdownRequestData::CheckImportFlushTmsAndShutdown(int signal, MutexTimeout& tmListTimeout, bool flushTmsToDisk, bool waitForImportAndReorganizeProcesses)
 {
   TMManager::GetInstance()->fWriteRequestsAllowed = false;
   TMManager::GetInstance()->fServiceIsRunning = true;
   //pMemService->closeAll();
-  T5Logger::GetInstance()->LogStop();  
-  int j= 3;
-  while(int i = TMManager::GetInstance()->GetMemImportInProcessCount(tmListTimeout)){
-     if(tmListTimeout.failed()){
-        tmListTimeout.addToErrMsg(".Failed to lock tm list:", __func__, __LINE__);
-        return ;
+  T5Logger::GetInstance()->LogStop(); 
+
+  if(waitForImportAndReorganizeProcesses){
+    int j= 3;
+    while(int i = TMManager::GetInstance()->GetMemImportInProcessCount(tmListTimeout)){
+      if(tmListTimeout.failed()){
+          tmListTimeout.addToErrMsg(".Failed to lock tm list:", __func__, __LINE__);
+          return ;
+        }
+      if( ++j % 15 == 0){
+        T5LOG(T5WARNING) << "SHUTDOWN:: memory still in import..waiting 15 sec more...  shutdown request was = "<< j* 15;
       }
-    if( ++j % 15 == 0){
-      T5LOG(T5WARNING) << "SHUTDOWN:: memory still in import..waiting 15 sec more...  shutdown request was = "<< j* 15;
+      T5LOG(T5DEBUG) << "SHUTDOWN:: memory still in import..waiting 1 sec more...  mem in import = "<< i; 
+    
+      //sleep(1);
     }
-    T5LOG(T5DEBUG) << "SHUTDOWN:: memory still in import..waiting 1 sec more...  mem in import = "<< i; 
-  
-    sleep(1);
   }
 
-  auto saveTmRD = SaveAllTMsToDiskRequestData();
-  saveTmRD.tmMutexTimeoutMs = saveTmRD.tmListMutexTimeoutMs = 0;// should be non timed
-  saveTmRD.run();
-  //check tms is in import status
-  //close log file
-  if(saveTmRD._rest_rc_ == 200){
-    T5Logger::GetInstance()->LogStop();
-  }else{
-    T5LOG(T5ERROR) << "saveTm returned rest code not 200, but " << saveTmRD._rest_rc_ << "; rc = " << saveTmRD._rc_;
+  if(flushTmsToDisk){
+    auto saveTmRD = SaveAllTMsToDiskRequestData();
+    saveTmRD.tmMutexTimeoutMs = saveTmRD.tmListMutexTimeoutMs = 0;// should be non timed
+    saveTmRD.run();
+    //check tms is in import status
+    //close log file
+    if(saveTmRD._rest_rc_ == 200){
+      T5Logger::GetInstance()->LogStop();
+    }else{
+      T5LOG(T5ERROR) << "saveTm returned rest code not 200, but " << saveTmRD._rest_rc_ << "; rc = " << saveTmRD._rc_;
+    }
   }
   if(signal != SHUTDOWN_CALLED_FROM_MAIN){
     TMManager::GetInstance()->fServiceIsRunning = false;
-    sleep(1);
+    //sleep(1);
     exit(signal);
   }
 }
 
 int ShutdownRequestData::execute()
 {
-  std::thread(& ShutdownRequestData::CheckImportFlushTmsAndShutdown2, this->sig, tmListTimeout.getTimeout_ms()).detach();
+  std::thread(& ShutdownRequestData::CheckImportFlushTmsAndShutdown2, this->sig, tmListTimeout.getTimeout_ms(),fWaitForImportAndReorganize, fFlushTmToDisk).detach();
   return 200;
 }
 

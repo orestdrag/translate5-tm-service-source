@@ -59,6 +59,10 @@ DEFINE_int32(timeout, 180000, "Sets timeout for service request handling");
 DEFINE_validator(timeout, &ValidateTimeout);
 
 
+DEFINE_bool(flush_tm_at_shutdown, false, "If set to true, flushes tm when shutting down the app not using shutdown request");
+DEFINE_bool(wait_for_import_and_reorganize_requests, false, "If set to true, waiting for all import and reorganize processes to be done at shutdown when not using shutdown request");
+
+
 DEFINE_bool(log_every_request_start, false, "Sets log for every request call with it's url, method etc...");
 DEFINE_bool(log_every_request_end  , false, "Sets log for every request end  with it's url, method etc...");
 
@@ -149,12 +153,14 @@ namespace
   volatile std::sig_atomic_t gSignalStatus;
 }
  
+
 void signal_handler(int signal)
 {
   gSignalStatus = signal;
   T5LOG(T5TRANSACTION) << " Received signal "<< signal<< "; Saving TM's and Shutting down :";
   MutexTimeout mt{0};
-  ShutdownRequestData::CheckImportFlushTmsAndShutdown(signal, mt);
+
+  ShutdownRequestData::CheckImportFlushTmsAndShutdown(signal, mt, FLAGS_flush_tm_at_shutdown, FLAGS_wait_for_import_and_reorganize_requests);
 
   //ShutdownRequestData srd;
   //srd.sig = SHUTDOWN_CALLED_FROM_MAIN;
