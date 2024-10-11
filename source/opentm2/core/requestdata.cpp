@@ -424,6 +424,7 @@ bool RequestData::isServiceRequest(){
       || COMMAND::SHUTDOWN
       || COMMAND::RESOURCE_INFO
       || COMMAND::CREATE_MEM
+      || COMMAND::FLAGS_INFO
    //?   || COMMAND::CLONE_TM_LOCALY
    //?   || COMMAND::DETELE_MEM
   ;   
@@ -2132,71 +2133,82 @@ void AddRequestDataToJson(std::stringstream& ss, std::string reqType, millisecon
 }
 
 
+
+std::string StatusMemRequestData::prepareStatusString(std::shared_ptr<EqfMemory> mem)
+{
+  std::string outputMessage;
+  // set status value
+  std::string pszStatus = "";
+  switch ( mem->eImportStatus )
+  {
+    case IMPORT_RUNNING_STATUS: pszStatus = "import"; break;
+    case REORGANIZE_RUNNING_STATUS: pszStatus = "reorganize"; break;
+    case IMPORT_FAILED_STATUS: pszStatus = "failed"; break;
+    case REORGANIZE_FAILED_STATUS: pszStatus = "reorganize failed"; break;
+    default: pszStatus = "available"; break;
+  }
+  // return the status of the memory
+  json_factory.startJSON( outputMessage );
+  json_factory.addParmToJSON( outputMessage, "status", mem->getStatusString() );
+  //json_factory.addParmToJSON( outputMessage, "status", "open" );
+  json_factory.addParmToJSON( outputMessage, "sizeInRAM", mem->GetRAMSize());
+  json_factory.addParmToJSON( outputMessage, "activeRequest", mem->getActiveRequestString());
+
+  if(mem->importDetails != nullptr){
+    
+    json_factory.addParmToJSON( outputMessage, mem->importDetails->fReorganize? "reorganizeStatus":"tmxImportStatus", pszStatus );
+    json_factory.addParmToJSON( outputMessage, mem->importDetails->fReorganize? "reorganizeProgress":"importProgress", mem->importDetails->usProgress );
+    json_factory.addParmToJSON( outputMessage, mem->importDetails->fReorganize? "reorganizeTime":"importTime", mem->importDetails->importTimestamp );
+    json_factory.addParmToJSON( outputMessage, mem->importDetails->fReorganize? "segmentsReorganized":"segmentsImported", mem->importDetails->segmentsImported );
+    if(mem->importDetails->fReorganize) json_factory.addParmToJSON( outputMessage, "segmentsFilteredOut", mem->importDetails->filteredSegments );
+    json_factory.addParmToJSON( outputMessage, "invalidSegments", mem->importDetails->invalidSegments );
+    json_factory.addParmToJSON( outputMessage, "tmxSegmentCount", mem->importDetails->segmentsCount );
+    json_factory.addParmToJSON( outputMessage, "importRuntimeSec", mem->importDetails->lImportRunTimeSec );
+    json_factory.addParmToJSON( outputMessage, "importTimeoutSec", mem->importDetails->lImportTimeoutSec );
+    std::string invalidSegmRCs;
+    for(auto [errCode, errCount]: mem->importDetails->invalidSegmentsRCs){
+      invalidSegmRCs += std::to_string(errCode) + ":" + std::to_string(errCount) +"; ";
+    }
+
+
+    std::string firstInvalidSegments;
+    int i=0;
+    for(auto [segNum, invSegErrCode] : mem->importDetails->firstInvalidSegmentsSegNums){
+      firstInvalidSegments += std::to_string(++i) + ":" + std::to_string(segNum) + ":" + std::to_string(invSegErrCode) + "; ";
+    }
+    json_factory.addParmToJSON( outputMessage, "invalidSegmentsRCs", invalidSegmRCs);
+    json_factory.addParmToJSON( outputMessage, "firstInvalidSegments", firstInvalidSegments);
+    json_factory.addParmToJSON( outputMessage, "invalidSymbolErrors", mem->importDetails->invalidSymbolErrors );
+    json_factory.addParmToJSON( outputMessage, "errorMsg", mem->importDetails->importMsg.str() );
+    json_factory.addParmToJSON( outputMessage, "rc", mem->importDetails->importRc);
+  }
+  json_factory.addParmToJSON( outputMessage, "lastAccessTime", printTime(mem->tLastAccessTime) );
+  json_factory.addParmToJSON( outputMessage, "creationTime", printTime(mem->stTmSign.creationTime) );
+  std::string creationT5MVersion = std::to_string(mem->stTmSign.bGlobVersion) 
+                            + ":"+ std::to_string(mem->stTmSign.bMajorVersion) 
+                            + ":" + std::to_string(mem->stTmSign.bMinorVersion);
+  json_factory.addParmToJSON( outputMessage, "tmCreatedInT5M_version", creationT5MVersion.c_str() );
+  json_factory.addParmToJSON( outputMessage, "segmentIndex", mem->stTmSign.segmentIndex );
+  json_factory.addParmToJSON( outputMessage, "sourceLang", mem->stTmSign.szSourceLanguage );
+  json_factory.addParmToJSON( outputMessage, "internalDescription", mem->stTmSign.szDescription );
+  json_factory.addParmToJSON( outputMessage, "tmd fbuffer was modified", mem->TmBtree.wasModified());
+  json_factory.addParmToJSON( outputMessage, "tmi fbuffer was modified", mem->InBtree.wasModified());
+  //json_factory.addParmToJSON( outputMessage, "internalName", mem->stTmSign.szName );
+  if ( ( (mem->eImportStatus == IMPORT_FAILED_STATUS) 
+      || (mem->eImportStatus == REORGANIZE_FAILED_STATUS)) && ( !mem->strError.empty() ) )
+  {
+    json_factory.addParmToJSON( outputMessage, "ErrorMsg", mem->strError.c_str() );
+  }
+  json_factory.terminateJSON( outputMessage );
+  return outputMessage;
+
+}
+
 int StatusMemRequestData::execute() {
   // check if memory is contained in our list
   if ( mem != nullptr)// TMManager::GetInstance()->IsMemoryLoaded(strMemName) )
   {
-    // set status value
-    std::string pszStatus = "";
-    switch ( mem->eImportStatus )
-    {
-      case IMPORT_RUNNING_STATUS: pszStatus = "import"; break;
-      case REORGANIZE_RUNNING_STATUS: pszStatus = "reorganize"; break;
-      case IMPORT_FAILED_STATUS: pszStatus = "failed"; break;
-      case REORGANIZE_FAILED_STATUS: pszStatus = "reorganize failed"; break;
-      default: pszStatus = "available"; break;
-    }
-    // return the status of the memory
-    json_factory.startJSON( outputMessage );
-    json_factory.addParmToJSON( outputMessage, "status", mem->getStatusString() );
-    //json_factory.addParmToJSON( outputMessage, "status", "open" );
-    json_factory.addParmToJSON( outputMessage, "sizeInRAM", mem->GetRAMSize());
-    json_factory.addParmToJSON( outputMessage, "activeRequest", mem->getActiveRequestString());
-
-    if(mem->importDetails != nullptr){
-      
-      json_factory.addParmToJSON( outputMessage, mem->importDetails->fReorganize? "reorganizeStatus":"tmxImportStatus", pszStatus );
-      json_factory.addParmToJSON( outputMessage, mem->importDetails->fReorganize? "reorganizeProgress":"importProgress", mem->importDetails->usProgress );
-      json_factory.addParmToJSON( outputMessage, mem->importDetails->fReorganize? "reorganizeTime":"importTime", mem->importDetails->importTimestamp );
-      json_factory.addParmToJSON( outputMessage, mem->importDetails->fReorganize? "segmentsReorganized":"segmentsImported", mem->importDetails->segmentsImported );
-      if(mem->importDetails->fReorganize) json_factory.addParmToJSON( outputMessage, "segmentsFilteredOut", mem->importDetails->filteredSegments );
-      json_factory.addParmToJSON( outputMessage, "invalidSegments", mem->importDetails->invalidSegments );
-      json_factory.addParmToJSON( outputMessage, "tmxSegmentCount", mem->importDetails->segmentsCount );
-      json_factory.addParmToJSON( outputMessage, "importRuntimeSec", mem->importDetails->lImportRunTimeSec );
-      json_factory.addParmToJSON( outputMessage, "importTimeoutSec", mem->importDetails->lImportTimeoutSec );
-      std::string invalidSegmRCs;
-      for(auto [errCode, errCount]: mem->importDetails->invalidSegmentsRCs){
-        invalidSegmRCs += std::to_string(errCode) + ":" + std::to_string(errCount) +"; ";
-      }
-
-
-      std::string firstInvalidSegments;
-      int i=0;
-      for(auto [segNum, invSegErrCode] : mem->importDetails->firstInvalidSegmentsSegNums){
-        firstInvalidSegments += std::to_string(++i) + ":" + std::to_string(segNum) + ":" + std::to_string(invSegErrCode) + "; ";
-      }
-      json_factory.addParmToJSON( outputMessage, "invalidSegmentsRCs", invalidSegmRCs);
-      json_factory.addParmToJSON( outputMessage, "firstInvalidSegments", firstInvalidSegments);
-      json_factory.addParmToJSON( outputMessage, "invalidSymbolErrors", mem->importDetails->invalidSymbolErrors );
-      json_factory.addParmToJSON( outputMessage, "errorMsg", mem->importDetails->importMsg.str() );
-      json_factory.addParmToJSON( outputMessage, "rc", mem->importDetails->importRc);
-    }
-    json_factory.addParmToJSON( outputMessage, "lastAccessTime", printTime(mem->tLastAccessTime) );
-    json_factory.addParmToJSON( outputMessage, "creationTime", printTime(mem->stTmSign.creationTime) );
-    std::string creationT5MVersion = std::to_string(mem->stTmSign.bGlobVersion) 
-                              + ":"+ std::to_string(mem->stTmSign.bMajorVersion) 
-                              + ":" + std::to_string(mem->stTmSign.bMinorVersion);
-    json_factory.addParmToJSON( outputMessage, "tmCreatedInT5M_version", creationT5MVersion.c_str() );
-    json_factory.addParmToJSON( outputMessage, "segmentIndex", mem->stTmSign.segmentIndex );
-    json_factory.addParmToJSON( outputMessage, "sourceLang", mem->stTmSign.szSourceLanguage );
-    json_factory.addParmToJSON( outputMessage, "internalDescription", mem->stTmSign.szDescription );
-    //json_factory.addParmToJSON( outputMessage, "internalName", mem->stTmSign.szName );
-    if ( ( (mem->eImportStatus == IMPORT_FAILED_STATUS) 
-        || (mem->eImportStatus == REORGANIZE_FAILED_STATUS)) && ( !mem->strError.empty() ) )
-    {
-      json_factory.addParmToJSON( outputMessage, "ErrorMsg", mem->strError.c_str() );
-    }
-    json_factory.terminateJSON( outputMessage );
+    outputMessage = prepareStatusString(mem);
     return( OK );
   } /* endif */
   // endif tm is open
@@ -2216,6 +2228,154 @@ int StatusMemRequestData::execute() {
   json_factory.terminateJSON( outputMessage );
   return( OK );
 };
+
+
+#include <folly/portability/GFlags.h>
+//#include <flags/flags.h> // Include the flags library
+#ifdef TEMPORARY_COMMENTED // code to set flags
+void SetFlagValue(const std::string& variable_name, const std::string& variable_value) {
+    // Map for accessing flags
+    static const std::unordered_map<std::string, std::function<void(const std::string&)>> flag_setters = { };
+
+    // Find the flag and set its value
+    auto it = flag_setters.find(variable_name);
+    if (it != flag_setters.end()) {
+        it->second(variable_value);
+    } else {
+        std::cerr << "Flag " << variable_name << " not found!" << std::endl;
+    }
+}
+#endif // temporary_commented
+
+#include <iostream>
+#include <string>
+#include <unordered_map>
+#include <functional>
+#include <type_traits>
+
+
+#ifdef TEMPORARY_COMMENTED // code to set flags
+// Flag setter structure
+template<typename T>
+struct FlagSetter;
+
+// Specializations for different types
+template<>
+struct FlagSetter<std::string> {
+    static void Set(const std::string& value) { FLAGS_my_string_flag = value; }
+};
+
+template<>
+struct FlagSetter<int32_t> {
+    static void Set(const std::string& value) { FLAGS_my_int32_flag = std::stoi(value); }
+};
+
+template<>
+struct FlagSetter<int64_t> {
+    static void Set(const std::string& value) { FLAGS_my_int64_flag = std::stoll(value); }
+};
+
+template<>
+struct FlagSetter<bool> {
+    static void Set(const std::string& value) { FLAGS_my_bool_flag = (value == "true"); }
+};
+
+// Map of flags (will be populated automatically)
+template<typename... Flags>
+struct FlagMap;
+
+// Specialization to initialize the map
+template<typename Flag, typename... Rest>
+struct FlagMap<Flag, Rest...> {
+    static std::unordered_map<std::string, std::function<void(const std::string&)>>& Get() {
+        static std::unordered_map<std::string, std::function<void(const std::string&)>> map = [] {
+            std::unordered_map<std::string, std::function<void(const std::string&)>> m;
+            m["my_string_flag"] = FlagSetter<std::string>::Set;
+            m["my_int32_flag"] = FlagSetter<int32_t>::Set;
+            m["my_int64_flag"] = FlagSetter<int64_t>::Set;
+            m["my_bool_flag"] = FlagSetter<bool>::Set;
+            return m;
+        }();
+        return map;
+    }
+};
+
+// Function to set flag values
+void SetFlagValue(const std::string& variable_name, const std::string& variable_value) {
+    auto& flag_map = FlagMap<std::string, int32_t, int64_t, bool>::Get();
+    auto it = flag_map.find(variable_name);
+    if (it != flag_map.end()) {
+        it->second(variable_value);
+    } else {
+        std::cerr << "Flag " << variable_name << " not found!" << std::endl;
+    }
+}
+
+// Function to populate the flag map
+std::unordered_map<std::string, FlagSetter> CreateFlagMap() {
+    std::unordered_map<std::string, FlagSetter> flag_map;
+
+    // Retrieve all flags and add them to the map
+    std::vector<google::CommandLineFlagInfo> flag_info;
+    google::GetAllFlags(&flag_info);
+
+    for (const auto& flag : flag_info) {
+        // You could extend this to set a flag's value dynamically
+        if (flag.type == google::GFLAG_STRING) {
+            flag_map[flag.name] = [](const std::string& value) { 
+                *reinterpret_cast<std::string*>(flag.flag_ptr) = value; 
+            };
+        } else if (flag.type == google::GFLAG_INT32) {
+            flag_map[flag.name] = [](const std::string& value) { 
+                *reinterpret_cast<int32_t*>(flag.flag_ptr) = std::stoi(value); 
+            };
+        } else if (flag.type == google::GFLAG_INT64) {
+            flag_map[flag.name] = [](const std::string& value) { 
+                *reinterpret_cast<int64_t*>(flag.flag_ptr) = std::stoll(value); 
+            };
+        } else if (flag.type == google::GFLAG_BOOL) {
+            flag_map[flag.name] = [](const std::string& value) { 
+                *reinterpret_cast<bool*>(flag.flag_ptr) = (value == "true"); 
+            };
+        }
+    }
+
+    return flag_map;
+}
+#endif
+
+void jsonAddFlagToList(std::stringstream& ss, const google::CommandLineFlagInfo& flag ){
+  ss << "{\n\"name\": \"" <<flag.name <<"\",\n";
+  ss << "\"type\": \"" <<flag.type <<"\",\n";
+  ss << "\"description\": \"" <<flag.description <<"\",\n";
+  ss << "\"value\": \"" <<flag.current_value <<"\",\n";
+  ss << "\"default\": \"" <<flag.default_value <<"\",\n";
+  ss << "\"from\": \"" <<flag.filename <<"\"\n}";
+}
+
+int FlagsRequestData::execute(){
+  std::vector<google::CommandLineFlagInfo> flags_info;
+  google::GetAllFlags(&flags_info);
+  std::stringstream ss;
+
+  ss << "{\n";
+  bool firstFlag = true;
+  // Print each flag and its information
+  for (const auto& flag : flags_info) {
+    if(firstFlag){
+      firstFlag = false;
+    }else{
+      ss <<",\n";
+    }
+    jsonAddFlagToList(ss, flag);
+  }
+  ss <<"\n}";
+  outputMessage = ss.str();
+  return 0;
+  //std::vector<CommandLineFlagInfo> flags;
+  //google::GetAllFlags(flags);
+  //google::PrintUsage();
+}
 
 void ShutdownRequestData::CheckImportFlushTmsAndShutdown2(int signal, size_t tmListTimeout, bool flushTmsToDisk, bool waitForImportAndReorganizeProcesses)
 {
@@ -2409,7 +2569,11 @@ int ResourceInfoRequestData::execute(){
         AddToJson(ssOutput, "status", status, true );
         AddToJson(ssOutput, "size", fSize, true );
         AddToJson(ssOutput, "activeRequest", request, true);
-        AddToJson(ssOutput, "expectedSize", expectedSize, false );
+        AddToJson(ssOutput, "expectedSize", expectedSize, true );  
+        std::string memInfo = StatusMemRequestData::prepareStatusString(tm.second);        
+        ssOutput << "\"StatusInfo\": " << memInfo << "\n"; 
+        //AddToJson(ssOutput, "StatusInfo", memInfo, false ); 
+        
         ssOutput << " }";
 
         total += fSize;
@@ -2540,6 +2704,11 @@ int ResourceInfoRequestData::execute(){
       requestCount = pStats->getResourcesRequestCount();
       sumTime = pStats->getResourcesSumTime();
       AddRequestDataToJson(ssOutput, "Resources", sumTime, requestCount);
+      ssOutput <<",";
+
+      requestCount = pStats->getFlagsRequestCount();
+      sumTime = pStats->getFlagstSumTime();
+      AddRequestDataToJson(ssOutput, "Flags", sumTime, requestCount);
       ssOutput <<",";
 
       requestCount = pStats->getOtherRequestCount();

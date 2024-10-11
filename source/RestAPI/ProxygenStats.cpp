@@ -86,6 +86,11 @@ int ProxygenStats::recordRequest(int command) {
       resourcesReqCount_++;
       break;
     }
+    case COMMAND::FLAGS_INFO: 
+    {        
+      flagsReqCount_++;
+      break;
+    }
     case COMMAND::CLONE_TM_LOCALY:
     {
       cloneLocalyCount_++;

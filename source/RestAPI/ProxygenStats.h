@@ -135,6 +135,13 @@ class ProxygenStats {
     return resourcesSumTime_;
   }
 
+  virtual uint64_t getFlagsRequestCount(){
+    return flagsReqCount_;
+  }
+  virtual milliseconds getFlagstSumTime(){
+    return flagsSumTime_;
+  }
+
   virtual milliseconds getUnrecognizedSumTime(){
     return unrecognizedRequestSumTime_;
   }
@@ -199,6 +206,7 @@ class ProxygenStats {
   atomic_uint64_t saveAllTmsReqCount_{0};
   atomic_uint64_t getListOfMemoriesReqCount_{0};
   atomic_uint64_t resourcesReqCount_{0};
+  atomic_uint64_t flagsReqCount_{0};
   atomic_uint64_t cloneLocalyCount_{0};
   atomic_uint64_t reorganizeMemRequestCount_{0};
 
@@ -223,6 +231,7 @@ class ProxygenStats {
   milliseconds saveAllTmsSumTime_{0};
   milliseconds getListOfMemoriesSumTime_{0};
   milliseconds resourcesSumTime_{0};
+  milliseconds flagsSumTime_{0};
   milliseconds cloneLocalySumTime_{0};
   milliseconds reorganizeMemSumTime_{0};
 

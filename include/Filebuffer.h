@@ -34,6 +34,7 @@ struct FileBuffer{
     int Write(const void* buff, size_t buffSize);
     int Read(void* buff, size_t buffSize, size_t startingPosition);
     int Read(void* buff, size_t buffSize);
+    bool wasModified() const;
 
     bool isTMDFilebuffer();
 

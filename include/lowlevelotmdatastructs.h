@@ -80,6 +80,7 @@ typedef char* PSZ;
         REORGANIZE_MEM,
         STATUS_MEM,
         RESOURCE_INFO,
+        FLAGS_INFO,
         FLUSH_MEM,
 
         START_COMMANDS_WITH_BODY,
@@ -115,6 +116,7 @@ constexpr  std::initializer_list<std::pair<const COMMAND, const char*>> CommandT
         { STATUS_MEM, "STATUS_MEM" },
         
         { RESOURCE_INFO, "RESOURCE_INFO" },
+        { FLAGS_INFO, "FLAGS_INFO" },
         { CREATE_MEM, "CREATE_MEM" },
         { FUZZY, "FUZZY" },
         { CONCORDANCE, "CONCORDANCE" },
@@ -610,7 +612,6 @@ struct BTREE: public BTREEDATA
 
   std::vector<LOOKUPENTRY_V3> LookupTable_V3;        // Pointer to lookup-table
 
-
   BTREE(){
     AllocateMem();
     /*
@@ -641,6 +642,9 @@ struct BTREE: public BTREEDATA
   void freeMem(){
     freeLookupTable();
   }
+
+
+  bool wasModified() const{ return fb.wasModified(); }
 
   int initLookupTable();
   int resetLookupTable();

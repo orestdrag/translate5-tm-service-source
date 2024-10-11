@@ -173,6 +173,9 @@ public:
 
     std::string strTmxData;
     bool isBase64;
+
+    std::string reserveName();
+    
 protected:
     int parseJSON() override ;
     int checkData() override ;
@@ -370,6 +373,18 @@ class StatusMemRequestData: public RequestData{
     int parseJSON() override {return 0;};
     int checkData() override ;
     int execute()   override ;
+
+    static std::string prepareStatusString(std::shared_ptr<EqfMemory> mem);
+};
+
+class FlagsRequestData: public RequestData{
+    public:
+    FlagsRequestData(): RequestData(FLAGS_INFO){};
+    int parseJSON() override {return 0; };
+    int checkData() override  {return 0; };
+    
+    int execute() override;
+
 };
 
 class DeleteMemRequestData: public RequestData{

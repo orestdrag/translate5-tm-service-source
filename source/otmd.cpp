@@ -60,7 +60,7 @@ DEFINE_validator(timeout, &ValidateTimeout);
 
 
 DEFINE_bool(flush_tm_at_shutdown, false, "If set to true, flushes tm when shutting down the app not using shutdown request");
-DEFINE_bool(wait_for_import_and_reorganize_requests, false, "If set to true, waiting for all import and reorganize processes to be done at shutdown when not using shutdown request");
+DEFINE_bool(wait_for_import_and_reorganize_requests, true, "If set to true, waiting for all import and reorganize processes to be done at shutdown when not using shutdown request");
 
 
 DEFINE_bool(log_every_request_start, false, "Sets log for every request call with it's url, method etc...");
