@@ -739,7 +739,11 @@ int CreateMemRequestData::parseJSON(){
       else
       {
         T5LOG( T5DEBUG) << "JSON parsed name = " << name << "; value = " << value;
-        if ( strcasecmp( name.c_str(), "tmMutexTimeout" ) == 0 )
+        if ( strcasecmp( name.c_str(), "name" ) == 0 )
+        {
+          strMemName =  value.c_str();
+        }
+        else if ( strcasecmp( name.c_str(), "tmMutexTimeout" ) == 0 )
         {
           tmMutexTimeoutMs =  std::stoll(value.c_str());
         }
