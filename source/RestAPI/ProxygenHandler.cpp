@@ -57,13 +57,51 @@ void ProxygenHandler::onRequest(std::unique_ptr<HTTPMessage> req) noexcept {
   auto headers = req->getHeaders();
   pMemService = OtmMemoryServiceWorker::getInstance();
   auto command = pRequest->command;
+  headers_ = std::move(req);
 
   T5LOG(T5DEBUG) << "received request url:\"" << pRequest->strUrl <<"\"; type " << searchInCommandToStringsMap(pRequest->command);  
  
   std::string requestAcceptHeader = headers.getSingleOrEmpty("Accept");
+  const auto& contentType = headers.getSingleOrEmpty("Content-Type");
+
   pRequest->responseHandler = downstream_;   
 
-  if(pRequest->isStreamingRequest()){ 
+  //if(IMPORT_MEM_STREAM == pRequest->command)
+  if(IMPORT_MEM == pRequest->command)
+  {
+
+    #ifdef v_1
+    auto contentType = msg->getHeaders().getSingleOrEmpty("Content-Type");
+    
+    if (contentType.find("multipart/form-data") != std::string::npos) {
+        boundary = getBoundaryFromHeaders(msg->getHeaders());//extractBoundaryFromHeaders(msg->getHeaders());
+    }
+    // Store headers for later use
+    requestHeaders_ = msg->getHeaders();
+    #endif
+    if (headers_) {
+      boundary = getBoundaryFromHeaders(*headers_);
+      
+      if (boundary.empty()) {
+        proxygen::ResponseBuilder(downstream_)
+          .status(400, "Bad Request")
+          .sendWithEOM();
+        return;
+      }
+  }
+    // reserve filename
+    if (contentType.find("multipart/form-data") == std::string::npos) {
+      pRequest->buildErrorReturn(400, "Invalid Content-Type", 400);
+    }else{
+      auto pImportRequest = (ImportRequestData*) pRequest;
+
+      std::string reservedName = pImportRequest->reserveName();
+      // Open a file to store the uploaded file data
+      fileStream.open(reservedName, std::ios::binary | std::ios::app);
+      if (!fileStream.is_open()) {
+        pRequest->buildErrorReturn(500, "Failed to open file", 500);
+      }
+    }
   }else if(EXPORT_MEM_TMX == pRequest->command){
     if(requestAcceptHeader == "application/xml"){
       pRequest->command = COMMAND::EXPORT_MEM_TMX;   
@@ -90,23 +128,9 @@ void ProxygenHandler::onRequest(std::unique_ptr<HTTPMessage> req) noexcept {
     pRequest->run();
     sendResponse();
   }
-  headers_ = std::move(req);
 }
 
-void ProxygenHandler::onBody(std::unique_ptr<folly::IOBuf> body) noexcept {
-  //ss_body << (char* ) body->data();
-  if(COMMAND::IMPORT_MEM_STREAM == pRequest->command){
-    //getUpload
-    //((ImportStreamRequestData*) pRequest)->fileData.appendToChain(body.get());//std::move(body));
-  }
-  bodyQueue_.append(std::move(body));
-  //if(body_ == nullptr){
-  //  body_ = std::move(body);
-  //}else{
-  //  body_->appendToChain(std::move(body));
-  //}
-  
-}
+
 // Function to convert folly::IOBuf to std::vector<unsigned char>
 std::vector<unsigned char> iobufToVector(const std::unique_ptr<folly::IOBuf>& buf) {
   std::vector<unsigned char> data;
@@ -116,14 +140,7 @@ std::vector<unsigned char> iobufToVector(const std::unique_ptr<folly::IOBuf>& bu
   return data;
 }
 
-// Function to convert folly::IOBuf to std::string
-std::string iobufToString(const std::unique_ptr<folly::IOBuf>& buf) {
-  std::string data;
-  for (auto range = buf->begin(); range != buf->end(); range++) {
-    data.append(reinterpret_cast<const char*>(range->begin()), range->size());
-  }
-  return data;
-}
+
 
 std::unique_ptr<folly::IOBuf> vectorToIobuf(const std::vector<unsigned char>& data) {
     // Create an IOBuf with the data from the vector
@@ -131,52 +148,257 @@ std::unique_ptr<folly::IOBuf> vectorToIobuf(const std::vector<unsigned char>& da
     return buf;
 }
 
+size_t ProxygenHandler::processBodyChunk(folly::ByteRange& cursor, size_t pos) {
+    // Check for boundary
+    std::string boundaryLine = "--" + boundary;
+    auto boundaryRange = folly::StringPiece(boundaryLine);  // Convert std::string to StringPiece
+    size_t boundaryPos = cursor.find(boundaryRange, pos);   // Use the find method
+    //size_t boundaryPos = cursor.find(boundaryLine, pos);
+    
+    if (boundaryPos != std::string::npos) {
+        // We've reached the boundary, stop processing the body
+        size_t bodySize = boundaryPos - pos;
+        fileStream.write(reinterpret_cast<const char*>(cursor.subpiece(pos, bodySize).data()), bodySize);
+        
+        // Reset state to parse the next part
+        isProcessingBody = false;
+        currentPart = MultipartPart();
+        return boundaryPos + boundaryLine.length();
+    }
+
+    // No boundary yet, stream the remaining content
+    fileStream.write(reinterpret_cast<const char*>(cursor.subpiece(pos).data()), cursor.size() - pos);
+    return cursor.size();
+}
+
+void ProxygenHandler::parseHeaders(folly::ByteRange& cursor, size_t& pos) {
+    std::string line;
+    while (pos < cursor.size()) {
+        char c = cursor[pos++];
+        if (c == '\n' || c == '\r') {
+            if (line.empty()) {
+                // End of headers
+                isProcessingBody = true;
+                return;
+            }
+
+            auto delimiterPos = line.find(": ");
+            if (delimiterPos != std::string::npos) {
+                std::string headerName = line.substr(0, delimiterPos);
+                std::string headerValue = line.substr(delimiterPos + 2);
+                currentPart.headers[headerName] = headerValue;
+            }
+
+            line.clear();  // Prepare for the next line
+        } else {
+            line += c;  // Continue reading header line
+        }
+    }
+}
+
+void ProxygenHandler::processMultipartChunks(std::unique_ptr<folly::IOBuf>& body) {
+    std::string boundaryLine = "--" + boundary;
+    std::string endBoundaryLine = boundaryLine + "--";
+    
+    auto cursor = body->coalesce();
+    size_t pos = 0;
+
+    while (pos < cursor.size()) {
+        if (!isProcessingBody) {
+            // Searching for boundary
+            auto boundaryRange = folly::StringPiece(boundaryLine);  // Convert std::string to StringPiece
+            size_t boundaryPos = cursor.find(boundaryRange, pos);   // Use the find method
+            //size_t boundaryPos = cursor.find(boundaryLine, pos);
+            if (boundaryPos == std::string::npos) {
+                // Boundary not found, store in leftoverBuffer and exit
+                leftoverBuffer = folly::IOBuf::copyBuffer(cursor.subpiece(pos).data(), cursor.size() - pos);
+                return;
+            }
+            
+            // Parse headers after boundary
+            pos = boundaryPos + boundaryLine.length();
+            parseHeaders(cursor, pos);
+        }
+
+        // Process body
+        if (isProcessingBody) {
+            pos = processBodyChunk(cursor, pos);
+        }
+    }
+}
+
+/*
+void ProxygenHandler::onHeadersComplete(std::unique_ptr<proxygen::HTTPMessage> msg) noexcept {
+    auto contentType = msg->getHeaders().getSingleOrEmpty("Content-Type");
+    
+    if (contentType.find("multipart/form-data") != std::string::npos) {
+        boundary = getBoundaryFromHeaders(msg->getHeaders());//extractBoundaryFromHeaders(msg->getHeaders());
+    }
+    // Store headers for later use
+    requestHeaders_ = msg->getHeaders();
+}
+
+//*/
+
+
+std::string iobufToString(const std::unique_ptr<folly::IOBuf>& buf){
+  std::string data;
+  for (auto range = buf->begin(); range != buf->end(); range++) {
+    data.append(reinterpret_cast<const char*>(range->begin()), range->size());
+  }
+  return data;
+}
+
+std::unordered_map<std::string, std::string> parseMultipartHeaders(const std::unique_ptr<folly::IOBuf>& body) {
+    std::unordered_map<std::string, std::string> headers;
+
+    // Convert IOBuf to string for easier processing
+    std::string bodyString = iobufToString(body);//folly::IOBufToString(body.get());
+
+    // Split the body into lines
+    std::istringstream stream(bodyString);
+    std::string line;
+    
+    while (std::getline(stream, line)) {
+        // Check for the end of headers (typically a blank line)
+        if (line.empty()) {
+            break;
+        }
+
+        // Find the colon that separates the header name and value
+        auto pos = line.find(':');
+        if (pos != std::string::npos) {
+            std::string name = line.substr(0, pos);
+            std::string value = line.substr(pos + 1);
+            headers[name] = value; // Store the header name and value
+        }
+    }
+
+    return headers;
+}
+
+
+void ProxygenHandler::onBody(std::unique_ptr<folly::IOBuf> body) noexcept {
+
+#ifdef ver1
+  if(COMMAND::IMPORT_MEM == pRequest->command)
+  {
+    auto parts = parseMultipart(body, boundary);
+    for (auto& part : parts) {
+      if (part.headers.empty()) {
+        continue; // Skip if headers are empty
+      }
+      if (part.headers.at("Content-Disposition").find("filename=") != std::string::npos) {
+        auto data = iobufToVector(part.body);
+        fileStream.write(reinterpret_cast<const char*>(data.data()), data.size());
+      } else if (part.headers.at("Content-Disposition").find("name=\"json_data\"") != std::string::npos) {
+        // Handle JSON part
+        pRequest->strBody += iobufToString(part.body);
+      }else{
+        int a= 0;
+      }
+    }
+    body = body->pop();
+  }else{
+    bodyQueue_.append(std::move(body));
+  }  
+#elseifdef ver2
+  if (COMMAND::IMPORT_MEM == pRequest->command) {
+      if (leftoverBuffer) {
+          // Append new data to leftover buffer
+          leftoverBuffer->prependChain(std::move(body));
+          body = std::move(leftoverBuffer);
+      }
+
+      // Process the body in chunks as it comes in
+      processMultipartChunks(body);
+
+  } else {
+      bodyQueue_.append(std::move(body));  // Default case for other commands
+  }
+#else 
+
+  if(COMMAND::IMPORT_MEM == pRequest->command){
+  BodyPart prevProcessedBodyPart = processedBodyPart;
+
+  //auto headers = parseMultipartHeaders(body);  // Parse just the headers
+  auto parts = parseMultipart(body, boundary);
+  /*
+  if (headers.count("Content-Disposition")) {
+    if (headers.at("Content-Disposition").find("filename=") != std::string::npos) {
+      processedBodyPart = FILE;  // We are processing a file part
+    } else if (headers.at("Content-Disposition").find("name=\"json_data\"") != std::string::npos) {
+      processedBodyPart = JSON;  // We are processing JSON data
+    }
+  }//*/
+
+// for (auto& part : parts) {
+    //if (part.headers.empty()) {
+    //  continue; // Skip if headers are empty
+    //}
+    //if (part.headers.count("Content-Disposition")) {
+    //  if (part.headers.at("Content-Disposition").find("filename=") != std::string::npos) {
+ //   if(FILE == part.bodyPart){
+ //   //    processedBodyPart = FILE;
+ //       auto data = iobufToVector(part.body);
+ //       fileStream.write(reinterpret_cast<const char*>(data.data()), data.size());
+ //   //  } else if (part.headers.at("Content-Disposition").find("name=\"json_data\"") != std::string::npos) {
+ //   }else if(JSON == part.bodyPart){
+        // Handle JSON part
+//        processedBodyPart = JSON;
+ //       pRequest->strBody += iobufToString(part.body);
+ //     }else{
+    //    processedBodyPart = OTHER;
+ //       int a= 0;
+//     }
+    //}
+    /*else{
+      // Handle the body based on the flag
+      if (FILE == processedBodyPart) {
+        // Write file data to the file stream
+        auto data = iobufToVector(body);  // Convert IOBuf to vector
+        fileStream.write(reinterpret_cast<const char*>(data.data()), data.size());
+      } else if(JSON == processedBodyPart) {
+        // Append the body to the JSON string
+        pRequest->strBody += iobufToString(part.body);  // Convert IOBuf to string and append
+      }
+    }//*/
+  //}
+  //if(processedBodyPart != prevProce)
+  
+/*
+  // Handle the body based on the flag
+  if (FILE == processedBodyPart) {
+    // Write file data to the file stream
+    auto data = iobufToVector(body);  // Convert IOBuf to vector
+    fileStream.write(reinterpret_cast<const char*>(data.data()), data.size());
+  } else if(JSON == processedBodyPart) {
+    // Append the body to the JSON string
+    pRequest->strBody += iobufToString(body);  // Convert IOBuf to string and append
+ // }
+  //*/
+  }else{
+    bodyQueue_.append(std::move(body));  // Default case for other commands
+  }
+#endif
+
+}
+
 void ProxygenHandler::onEOM() noexcept {  
   if(pRequest && pRequest->command >= COMMAND::START_COMMANDS_WITH_BODY)
   {
     auto body = bodyQueue_.move();
-    if(
-          (COMMAND::IMPORT_MEM == pRequest->command 
-          &&  (false == ((ImportRequestData*)pRequest)->isBase64))
-        || 
-          (COMMAND::CREATE_MEM == pRequest->command 
-          &&  (false == ((CreateMemRequestData*)pRequest)->isBase64))
-        )
-      {
-      if (nullptr == body) 
-      {
-        pRequest->buildErrorReturn(400, "Requests body not found!", 400);
-      }else{
-        std::string boundary;
-        if (headers_) {
-          boundary = getBoundaryFromHeaders(*headers_);
-          if (boundary.empty()) {
-            proxygen::ResponseBuilder(downstream_)
-              .status(400, "Bad Request")
-              .sendWithEOM();
-            return;
-          }
-        }
-        auto parts = parseMultipart(body, boundary);
-        for (auto& part : parts) {
-          if (part.headers.at("Content-Disposition").find("filename=") != std::string::npos) {
-            // Handle file part
-            //((ImportStreamRequestData*) pRequest)->fileData = part.body;
-            if(COMMAND::IMPORT_MEM  == pRequest->command){
-              ((ImportRequestData*) pRequest)->strTmxData = iobufToString(part.body);
-            }else if (COMMAND::CREATE_MEM  == pRequest->command){
-              ((CreateMemRequestData*) pRequest)->binTmData = iobufToVector(part.body);
-            }
-          } else if (part.headers.at("Content-Disposition").find("name=\"json_data\"") != std::string::npos) {
-            // Handle JSON part
-            pRequest->strBody = iobufToString(part.body);
-          }
-        }        
-      }
-    }else{// not import stream 
+    {// not import stream 
       if(body){
         pRequest->strBody = body->moveToFbString().toStdString();
-      }else if(COMMAND::EXPORT_MEM_TMX_STREAM != pRequest->command){
+      }else if(COMMAND::EXPORT_MEM_TMX_STREAM == pRequest->command 
+       || COMMAND::IMPORT_MEM == pRequest->command){
+        // After processing, reset any state if necessary
+        processedBodyPart = OTHER;  // Reset flag after finishing file part
+        if (fileStream.is_open()) {
+            fileStream.close();
+        }
+       } else{
         pRequest->buildErrorReturn(400, "Missing body", 400);
       }
     }

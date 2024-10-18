@@ -419,11 +419,11 @@ static USHORT  MemLoadStart( MEM_LOAD_DLG_IDA* pLIDA,
        char szMemSourceLang[MAX_LANG_LENGTH];
 
        // close input file (if open) as external import process will open the file itself...
-       if ( pLIDA->hFile ) 
-       {
-         UtlClose( pLIDA->hFile, FALSE );
-         pLIDA->hFile = NULL; 
-       } /* endif */
+       //if ( pLIDA->hFile ) 
+       //{
+       //  UtlClose( pLIDA->hFile, FALSE );
+       //  pLIDA->hFile = NULL; 
+       //} /* endif */
 
        memset( pLIDA->pstMemInfo, 0, sizeof(MEMEXPIMPINFO) );
        strcpy( pLIDA->pstMemInfo->szName, pLIDA->szMemName );
@@ -811,18 +811,18 @@ USHORT MemFuncPrepImport
    /*******************************************************************/
    if ( fOK )
    {
-     //USHORT      usDosRc;              // Return code from Dos functions
-     USHORT      usAction;             // Action for DosOpen
-     if(pData->fileData.empty()){
+    //USHORT      usDosRc;              // Return code from Dos functions
+    USHORT      usAction;             // Action for DosOpen
+    if(pData->fileData.empty()){
       strcpy( pLoadIDA->szFilePath, pszInFile );
       pLoadIDA->hFile = FilesystemHelper::OpenFile(pszInFile, "r", false);
       if( pLoadIDA->hFile == NULLHANDLE )
       {
-          fOK = FALSE;
+        fOK = FALSE;
       }
-     }else{
+    }else{
       pLoadIDA->hFile = nullptr;
-     }
+    }
      //if ( usDosRc )  //--- error from open
      //{
      //   //--- Reset file handle to NULL and set fOk to FALSE

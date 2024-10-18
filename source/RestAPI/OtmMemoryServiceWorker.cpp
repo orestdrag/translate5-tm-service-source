@@ -374,7 +374,10 @@ void importMemoryProcess( void* pvData )
  
   // cleanup
   if(pData->fDeleteTmx && T5Logger::GetInstance()->CheckLogLevel(T5DEBUG) == false){ //for DEBUG and DEVELOP modes leave file in fs
-    DeleteFile( pData->szInFile );
+    std::string tempFile =  pData->szInFile;
+    FilesystemHelper::DeleteFile( tempFile.c_str(), true );
+    tempFile += ".Temp";
+    FilesystemHelper::DeleteFile(tempFile.c_str(), true);
   }
 
   #ifdef TIME_MEASURES

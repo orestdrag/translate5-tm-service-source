@@ -887,7 +887,7 @@ int ImportRequestData::parseJSON(){
   // find the memory to our memory list
   // extract TMX data
   int loggingThreshold = -1; //0-develop(show all logs), 1-debug+, 2-info+, 3-warnings+, 4-errors+, 5-fatals only
-  if(strBody.empty() && false == strTmxData.empty())
+  if(strBody.empty())// && false == strTmxData.empty())
   { 
     return 0;
   }
@@ -940,7 +940,7 @@ int ImportRequestData::parseJSON(){
         }else{
           T5LOG( T5WARNING) << "JSON parsed unexpected name, " << name;
         }
-      }else if(_rc_ != 2002){// _rc_ != INFO_ENDOFPARAMETERLISTREACHED
+      }else if(_rc_ != JSONFactory::INFO_ENDOFPARAMETERLISTREACHED){// _rc_ != INFO_ENDOFPARAMETERLISTREACHED
         std::string msg = "failed to parse JSON, _rc_ = " + std::to_string(_rc_);
         return buildErrorReturn(_rc_, msg.c_str(), BAD_REQUEST);
       }
@@ -1009,17 +1009,11 @@ int ListTMRequestData::execute(){
 }
 
 int ImportRequestData::checkData(){
-  if ( strTmxData.empty() )
+  //if ( strTmxData.empty()  )
+  if(strTempFile.empty() || !FilesystemHelper::FileExists(strTempFile) || 0 == FilesystemHelper::GetFileSize(strTempFile))
   {
     return buildErrorReturn( _rc_, "import::Missing TMX data", BAD_REQUEST );
   } /* endif */
-
-  // setup temp file name for TMX file 
-  strTempFile =  FilesystemHelper::BuildTempFileName();
-  if (strTempFile.empty()  )
-  {
-    return buildErrorReturn( InternalErrorRC::CANT_CREATE_FILE, "import::Could not create file name for temporary data", INTERNAL_SERVER_ERROR);
-  }
 
   T5LOG( T5INFO) << "import::+   Temp TMX File is " << strTempFile;
 
@@ -1028,7 +1022,7 @@ int ImportRequestData::checkData(){
   if( isBase64 ){
     _rc_ = FilesystemHelper::DecodeBase64ToFile( strTmxData.c_str(), strTempFile.c_str(), strError ) ;
   }else{
-    _rc_ = FilesystemHelper::WriteToFile( strTempFile, strTmxData, strError);
+    //_rc_ = FilesystemHelper::WriteToFile( strTempFile, strTmxData, strError);
   }
   if ( _rc_ != 0 )
   {
@@ -1138,6 +1132,7 @@ int ImportStreamRequestData::execute(){
     std::string msg = "mem is not available to operate, status= " + mem->getStatusString();
     return buildErrorReturn( 500, msg.c_str() );
   }
+  
   mem->eStatus = IMPORT_RUNNING_STATUS;
   mem->eImportStatus = IMPORT_RUNNING_STATUS;
 
@@ -1207,6 +1202,19 @@ int SaveAllTMsToDiskRequestData::execute(){
   return OK;
 }
 
+std::string ImportRequestData::reserveName(){
+
+  // setup temp file name for TMX file 
+  strTempFile =  FilesystemHelper::BuildTempFileName();
+  if (strTempFile.empty()  )
+  {
+    buildErrorReturn( 510, "import::Could not create file name for temporary data");
+    return "";
+  }
+
+  return strTempFile;
+}
+
 int ImportRequestData::execute(){
   if ( mem == nullptr )
   {
@@ -1217,6 +1225,10 @@ int ImportRequestData::execute(){
   {
     std::string msg = "mem is not available to operate, status= " + mem->getStatusString();
     return buildErrorReturn( 500, msg.c_str() );
+  }
+
+  if(strTempFile.empty()){
+    reserveName();
   }
   //lastStatus =       mem->eStatus;
   //lastImportStatus = mem->eImportStatus;
@@ -1312,7 +1324,7 @@ int ImportLocalRequestData::parseJSON(){
       }else{
         T5LOG( T5WARNING) << "JSON parsed unexpected name, " << name;
       }
-    }else if(_rc_ != 2002){// _rc_ != INFO_ENDOFPARAMETERLISTREACHED
+    }else if(_rc_ != 2002){// _rc_ != INFO_ENDOFPARAMETERLISTREACHEDgdslgds
       std::string msg = "failed to parse JSON, _rc_ = " + std::to_string(_rc_);
       return buildErrorReturn(_rc_, msg.c_str());
     }
@@ -2866,7 +2878,7 @@ int ExportRequestData::execute(){
     if(T5Logger::GetInstance()->CheckLogLevel(T5DEBUG) == false 
       && COMMAND::EXPORT_MEM_TMX != command
       && COMMAND::EXPORT_MEM_TMX_STREAM != command ){ //for DEBUG and DEVELOP modes leave file in fs
-      FilesystemHelper::DeleteFile( strTempFile );
+      FilesystemHelper::DeleteFile( strTempFile, true );
     }
   //}
   

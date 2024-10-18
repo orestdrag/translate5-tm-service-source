@@ -1171,20 +1171,10 @@ USHORT CTMXExportImport::StartImport
   // preprocess TMX file
   if ( !usRC )
   {
-    // setup tempory file name
-    Properties::GetInstance()->get_value(KEY_MEM_DIR, this->m_TempFile, sizeof(this->m_TempFile));
-    //UtlMakeEQFPath( this->m_TempFile, NULC, MEM_PATH, NULL );
-    strcat( this->m_TempFile, BACKSLASH_STR );
-    if ( strchr( (PSZ)pszInFile, '/' ) == NULL )
-    {
-      strcat( this->m_TempFile, (PSZ)pszInFile );
-    }
-    else
-    {
-      strcat( this->m_TempFile, UtlGetFnameFromPath( (PSZ)pszInFile ) );
-    } /* endif */
+    strcpy(this->m_TempFile, pszInFile);
     strcat( this->m_TempFile, ".Temp" );
 
+    FilesystemHelper::DeleteFile(this->m_TempFile, true);
     // call preprocess method
     usRC = this->PreProcessInFile( pszInFile, this->m_TempFile );
   } /* endif */
@@ -1214,7 +1204,8 @@ USHORT CTMXExportImport::StartImport
       m_parser->setExitOnFirstFatalError( FALSE );
       //m_parser->setExitOnFirstFatalError( TRUE );
       
-      strcpy( m_szInFile, pszInFile );
+      //strcpy( m_szInFile, pszInFile );
+      strcpy( m_szInFile, this->m_TempFile );
 
     try
     {

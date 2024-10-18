@@ -370,7 +370,7 @@ std::string FilesystemHelper::GetFileName(HFILE ptr){
 }
 
 DECLARE_bool(forbiddeletefiles);
-int FilesystemHelper::DeleteFile(const std::string& path){
+int FilesystemHelper::DeleteFile(const std::string& path, bool suppressLogs){
     //std::lock_guard<std::mutex> l{FilesystemHelper::fsLock};// lock fs
     if(FLAGS_forbiddeletefiles){
         T5LOG( T5WARNING) << ":: file deletion is forbidden, service tried to delete this file: "<<path;
@@ -381,7 +381,12 @@ int FilesystemHelper::DeleteFile(const std::string& path){
     fixedPath = "\'" + FixPath(fixedPath) + "\'";
 
     if(int errCode = remove(path.c_str())){
-        T5LOG(T5ERROR) << "FilesystemHelper::DeleteFile("<<fixedPath<< ") ERROR res = "<<errCode;
+        if(suppressLogs){
+            T5LOG(T5DEBUG) << "FilesystemHelper::DeleteFile("<<fixedPath<< ") ERROR res = "<<errCode;
+        }
+        else{
+            T5LOG(T5ERROR) << "FilesystemHelper::DeleteFile("<<fixedPath<< ") ERROR res = "<<errCode;
+        }
         return errCode;
     }else{
         if(VLOG_IS_ON(1)){

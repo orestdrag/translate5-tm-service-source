@@ -58,7 +58,7 @@ public:
     static int ReadFile(FILE*& ptr, void* buff, const int buffSize, int& bytesRead, const int startingPos);
 
     static bool FileExists(const std::string& fName);
-    static int DeleteFile(const std::string& path);
+    static int DeleteFile(const std::string& path, bool suppressLogs = false);
     static int RenameFile(std::string oldPath, std::string newPath);
     static int RemoveDirWithFiles(const std::string& path);
     static size_t GetFileSize(const std::string& path);
