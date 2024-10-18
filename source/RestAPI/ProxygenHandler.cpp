@@ -148,97 +148,6 @@ std::unique_ptr<folly::IOBuf> vectorToIobuf(const std::vector<unsigned char>& da
     return buf;
 }
 
-size_t ProxygenHandler::processBodyChunk(folly::ByteRange& cursor, size_t pos) {
-    // Check for boundary
-    std::string boundaryLine = "--" + boundary;
-    auto boundaryRange = folly::StringPiece(boundaryLine);  // Convert std::string to StringPiece
-    size_t boundaryPos = cursor.find(boundaryRange, pos);   // Use the find method
-    //size_t boundaryPos = cursor.find(boundaryLine, pos);
-    
-    if (boundaryPos != std::string::npos) {
-        // We've reached the boundary, stop processing the body
-        size_t bodySize = boundaryPos - pos;
-        fileStream.write(reinterpret_cast<const char*>(cursor.subpiece(pos, bodySize).data()), bodySize);
-        
-        // Reset state to parse the next part
-        isProcessingBody = false;
-        currentPart = MultipartPart();
-        return boundaryPos + boundaryLine.length();
-    }
-
-    // No boundary yet, stream the remaining content
-    fileStream.write(reinterpret_cast<const char*>(cursor.subpiece(pos).data()), cursor.size() - pos);
-    return cursor.size();
-}
-
-void ProxygenHandler::parseHeaders(folly::ByteRange& cursor, size_t& pos) {
-    std::string line;
-    while (pos < cursor.size()) {
-        char c = cursor[pos++];
-        if (c == '\n' || c == '\r') {
-            if (line.empty()) {
-                // End of headers
-                isProcessingBody = true;
-                return;
-            }
-
-            auto delimiterPos = line.find(": ");
-            if (delimiterPos != std::string::npos) {
-                std::string headerName = line.substr(0, delimiterPos);
-                std::string headerValue = line.substr(delimiterPos + 2);
-                currentPart.headers[headerName] = headerValue;
-            }
-
-            line.clear();  // Prepare for the next line
-        } else {
-            line += c;  // Continue reading header line
-        }
-    }
-}
-
-void ProxygenHandler::processMultipartChunks(std::unique_ptr<folly::IOBuf>& body) {
-    std::string boundaryLine = "--" + boundary;
-    std::string endBoundaryLine = boundaryLine + "--";
-    
-    auto cursor = body->coalesce();
-    size_t pos = 0;
-
-    while (pos < cursor.size()) {
-        if (!isProcessingBody) {
-            // Searching for boundary
-            auto boundaryRange = folly::StringPiece(boundaryLine);  // Convert std::string to StringPiece
-            size_t boundaryPos = cursor.find(boundaryRange, pos);   // Use the find method
-            //size_t boundaryPos = cursor.find(boundaryLine, pos);
-            if (boundaryPos == std::string::npos) {
-                // Boundary not found, store in leftoverBuffer and exit
-                leftoverBuffer = folly::IOBuf::copyBuffer(cursor.subpiece(pos).data(), cursor.size() - pos);
-                return;
-            }
-            
-            // Parse headers after boundary
-            pos = boundaryPos + boundaryLine.length();
-            parseHeaders(cursor, pos);
-        }
-
-        // Process body
-        if (isProcessingBody) {
-            pos = processBodyChunk(cursor, pos);
-        }
-    }
-}
-
-/*
-void ProxygenHandler::onHeadersComplete(std::unique_ptr<proxygen::HTTPMessage> msg) noexcept {
-    auto contentType = msg->getHeaders().getSingleOrEmpty("Content-Type");
-    
-    if (contentType.find("multipart/form-data") != std::string::npos) {
-        boundary = getBoundaryFromHeaders(msg->getHeaders());//extractBoundaryFromHeaders(msg->getHeaders());
-    }
-    // Store headers for later use
-    requestHeaders_ = msg->getHeaders();
-}
-
-//*/
 
 
 std::string iobufToString(const std::unique_ptr<folly::IOBuf>& buf){
@@ -279,108 +188,11 @@ std::unordered_map<std::string, std::string> parseMultipartHeaders(const std::un
 
 
 void ProxygenHandler::onBody(std::unique_ptr<folly::IOBuf> body) noexcept {
-
-#ifdef ver1
-  if(COMMAND::IMPORT_MEM == pRequest->command)
-  {
-    auto parts = parseMultipart(body, boundary);
-    for (auto& part : parts) {
-      if (part.headers.empty()) {
-        continue; // Skip if headers are empty
-      }
-      if (part.headers.at("Content-Disposition").find("filename=") != std::string::npos) {
-        auto data = iobufToVector(part.body);
-        fileStream.write(reinterpret_cast<const char*>(data.data()), data.size());
-      } else if (part.headers.at("Content-Disposition").find("name=\"json_data\"") != std::string::npos) {
-        // Handle JSON part
-        pRequest->strBody += iobufToString(part.body);
-      }else{
-        int a= 0;
-      }
-    }
-    body = body->pop();
-  }else{
-    bodyQueue_.append(std::move(body));
-  }  
-#elseifdef ver2
-  if (COMMAND::IMPORT_MEM == pRequest->command) {
-      if (leftoverBuffer) {
-          // Append new data to leftover buffer
-          leftoverBuffer->prependChain(std::move(body));
-          body = std::move(leftoverBuffer);
-      }
-
-      // Process the body in chunks as it comes in
-      processMultipartChunks(body);
-
-  } else {
-      bodyQueue_.append(std::move(body));  // Default case for other commands
-  }
-#else 
-
   if(COMMAND::IMPORT_MEM == pRequest->command){
-  BodyPart prevProcessedBodyPart = processedBodyPart;
-
-  //auto headers = parseMultipartHeaders(body);  // Parse just the headers
-  auto parts = parseMultipart(body, boundary);
-  /*
-  if (headers.count("Content-Disposition")) {
-    if (headers.at("Content-Disposition").find("filename=") != std::string::npos) {
-      processedBodyPart = FILE;  // We are processing a file part
-    } else if (headers.at("Content-Disposition").find("name=\"json_data\"") != std::string::npos) {
-      processedBodyPart = JSON;  // We are processing JSON data
-    }
-  }//*/
-
-// for (auto& part : parts) {
-    //if (part.headers.empty()) {
-    //  continue; // Skip if headers are empty
-    //}
-    //if (part.headers.count("Content-Disposition")) {
-    //  if (part.headers.at("Content-Disposition").find("filename=") != std::string::npos) {
- //   if(FILE == part.bodyPart){
- //   //    processedBodyPart = FILE;
- //       auto data = iobufToVector(part.body);
- //       fileStream.write(reinterpret_cast<const char*>(data.data()), data.size());
- //   //  } else if (part.headers.at("Content-Disposition").find("name=\"json_data\"") != std::string::npos) {
- //   }else if(JSON == part.bodyPart){
-        // Handle JSON part
-//        processedBodyPart = JSON;
- //       pRequest->strBody += iobufToString(part.body);
- //     }else{
-    //    processedBodyPart = OTHER;
- //       int a= 0;
-//     }
-    //}
-    /*else{
-      // Handle the body based on the flag
-      if (FILE == processedBodyPart) {
-        // Write file data to the file stream
-        auto data = iobufToVector(body);  // Convert IOBuf to vector
-        fileStream.write(reinterpret_cast<const char*>(data.data()), data.size());
-      } else if(JSON == processedBodyPart) {
-        // Append the body to the JSON string
-        pRequest->strBody += iobufToString(part.body);  // Convert IOBuf to string and append
-      }
-    }//*/
-  //}
-  //if(processedBodyPart != prevProce)
-  
-/*
-  // Handle the body based on the flag
-  if (FILE == processedBodyPart) {
-    // Write file data to the file stream
-    auto data = iobufToVector(body);  // Convert IOBuf to vector
-    fileStream.write(reinterpret_cast<const char*>(data.data()), data.size());
-  } else if(JSON == processedBodyPart) {
-    // Append the body to the JSON string
-    pRequest->strBody += iobufToString(body);  // Convert IOBuf to string and append
- // }
-  //*/
+    parseMultipart(body, boundary);
   }else{
     bodyQueue_.append(std::move(body));  // Default case for other commands
   }
-#endif
 
 }
 
@@ -447,33 +259,9 @@ void ProxygenHandler::onError(ProxygenError /*err*/) noexcept {
   delete this;
 }
 
-void ProxygenHandler::parseRequestBody() {
-  // Parse JSON body from requestBody_
-  //cursor.clone(&requestBody_.);
-  //jsonBody_ = cursor.clone()->moveToFbString().toStdString();
-}
 
-void ProxygenHandler::processRequest(){
-  // Process the JSON body (jsonBody_) and any attached file
-  // Example: Log or handle the JSON data
-  T5LOG(T5INFO) << "Received JSON body: " << jsonBody_;
 
-  // Example: Handle the attached file if present
-  handleAttachedFile();
-}
 
-void ProxygenHandler::handleAttachedFile() {
-    // Access and process the attached file if available
-    //auto uploadStream = downstream_->getRequestBody();
-    //if (uploadStream) {
-    //    folly::io::Cursor cursor(uploadStream);
-    //    while (!cursor.isAtEnd()) {
-            //auto buf = cursor.read();
-            // Example: Process 'buf' (e.g., save to file, analyze data)
-            // saveToFile(buf);
-    //    }
-   // }
-}
 
 //#define LOG_SEND_RESPONSE 1
 void ProxygenHandler::sendResponse()noexcept{
