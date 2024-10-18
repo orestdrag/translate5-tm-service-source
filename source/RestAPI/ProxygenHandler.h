@@ -132,13 +132,10 @@ class ProxygenHandler : public proxygen::RequestHandler {
         std::unique_ptr<folly::IOBuf> partBody = folly::IOBuf::create(0);
 
         nextPos = bodyStr.find(boundaryLine, pos);
-        if(std::string::npos == nextPos)
-        {
-          break;
-        }
+        
 
         size_t nextEndPos = bodyStr.find(endBoundaryLine, pos);
-
+        /*
         if(FILE == processedBodyPart && endBoundaryLineWasUsed){
           endBoundaryLineWasUsed = false;
           //isBody = true;
@@ -156,21 +153,27 @@ class ProxygenHandler : public proxygen::RequestHandler {
           pRequest->strBody += bodyContent;
           //processedBodyPart = OTHER;
           continue;
-        }
+        }//*/
         
+        if(std::string::npos == nextPos)
+        {
+          //isBody = true;
+          nextPos = bodyStr.length();
+          //break;
+        }else{
+          pos = nextPos + boundaryLine.length();
 
-        pos = nextPos + boundaryLine.length();
+          // Skip any leading CRLF or whitespace
+          while (pos < bodyStr.size() && (bodyStr[pos] == '\r' || bodyStr[pos] == '\n')) {
+              pos++;
+          }
 
-        // Skip any leading CRLF or whitespace
-        while (pos < bodyStr.size() && (bodyStr[pos] == '\r' || bodyStr[pos] == '\n')) {
-            pos++;
-        }
-
-        nextPos = bodyStr.find(boundaryLine, pos);
-  
-        if (nextPos == std::string::npos) {
-            nextPos = bodyStr.find(endBoundaryLine, pos);
-            endBoundaryLineWasUsed = true;
+          nextPos = bodyStr.find(boundaryLine, pos);
+    
+          if (nextPos == std::string::npos) {
+              nextPos = bodyStr.find(endBoundaryLine, pos);
+              endBoundaryLineWasUsed = true;
+          }
         }
 
         std::string partStr = bodyStr.substr(pos, nextPos - pos);
@@ -204,7 +207,6 @@ class ProxygenHandler : public proxygen::RequestHandler {
                         processedBodyPart = OTHER;
                       }
                     }
-                    //part.headers[headerName] = headerValue;
                 }
             } else {
                 // Handle body as a block of data, not line by line
