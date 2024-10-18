@@ -188,12 +188,15 @@ std::unordered_map<std::string, std::string> parseMultipartHeaders(const std::un
 
 
 void ProxygenHandler::onBody(std::unique_ptr<folly::IOBuf> body) noexcept {
-  if(COMMAND::IMPORT_MEM == pRequest->command){
-    parseMultipart(body, boundary);
-  }else{
-    bodyQueue_.append(std::move(body));  // Default case for other commands
+  if(body){
+    ++bodyPartsReceived;
+  
+    if(COMMAND::IMPORT_MEM == pRequest->command){
+      processMultipartChunk(body);
+    }else{
+      bodyQueue_.append(std::move(body));  // Default case for other commands
+    }
   }
-
 }
 
 void ProxygenHandler::onEOM() noexcept {  
@@ -203,8 +206,8 @@ void ProxygenHandler::onEOM() noexcept {
     {// not import stream 
       if(body){
         pRequest->strBody = body->moveToFbString().toStdString();
-      }else if(COMMAND::EXPORT_MEM_TMX_STREAM == pRequest->command 
-       || COMMAND::IMPORT_MEM == pRequest->command){
+      }else if(//COMMAND::EXPORT_MEM_TMX_STREAM == pRequest->command  ||
+        COMMAND::IMPORT_MEM == pRequest->command){
         // After processing, reset any state if necessary
         processedBodyPart = OTHER;  // Reset flag after finishing file part
         if (fileStream.is_open()) {
