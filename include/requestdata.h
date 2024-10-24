@@ -7,6 +7,7 @@
 #include <mutex>
 #include <proxygen/httpserver/RequestHandler.h>
 #include <proxygen/httpserver/ExMessageHandler.h>
+#include <proxygen/httpserver/ResponseBuilder.h>
 
 #include "tm.h"
 
@@ -14,6 +15,7 @@
 #include "RestAPI/ProxygenStats.h"
     
 #include "ThreadingWrapper.h"
+#include "FilesystemHelper.h"
 
 class EqfMemory;
 class JSONFactory;
@@ -25,6 +27,9 @@ protected:
     std::shared_ptr<EqfMemory> mem;
     int requestType = 0;
     static JSONFactory json_factory;
+
+
+    std::string strTempFile;
     //RequestData(); // json was parsed in sub class
 public:
     //std::recursive_timed_mutex request_mutex;
@@ -53,7 +58,17 @@ public:
 
     RequestData(COMMAND cmnd, const std::string& json, const std::string& memName): strBody(json), strMemName(memName), command(cmnd) {}
     RequestData(COMMAND cmnd): command(cmnd){}
-    virtual ~RequestData() = default;
+    virtual ~RequestData(){
+        if(T5Logger::GetInstance()->CheckLogLevel(T5DEBUG) == false 
+            && (COMMAND::EXPORT_MEM_TMX == command
+                || COMMAND::EXPORT_MEM_TMX_STREAM == command
+                || COMMAND::IMPORT_MEM == command 
+                || COMMAND::IMPORT_MEM_STREAM == command
+                )
+            ){ //for DEBUG and DEVELOP modes leave file in fs
+                FilesystemHelper::DeleteFile( strTempFile, true );
+            }
+    }
     //std::weak_ptr <EqfMemory> memory;
 
     int buildErrorReturn(int iRC, const wchar_t *pszErrorMsg, int rest_rc = INTERNAL_SERVER_ERROR);
@@ -71,6 +86,10 @@ public:
     bool isSuccessful() const{
         return _rest_rc_ == 200 || _rest_rc_ == 0;
     }
+
+
+    std::string reserveFilename();
+    int sendStreamFile(proxygen::ResponseBuilder* builder);
 
 
     int64_t tmMutexTimeoutMs = -1;
@@ -96,7 +115,6 @@ protected:
 };
 
 
-
 class CreateMemRequestData: public RequestData{
     int importInInternalFomat();
     int createNewEmptyMemory();
@@ -107,7 +125,6 @@ class CreateMemRequestData: public RequestData{
     std::string strMemDescription;
     std::vector<unsigned char> binTmData; // for import in internal format
     std::string strTmData;
-    std::string strTempFile;
     bool isBase64;
     
     CreateMemRequestData(const std::string& json): RequestData(COMMAND::CREATE_MEM,json, ""){}
@@ -174,7 +191,6 @@ public:
     std::string strTmxData;
     bool isBase64;
 
-    std::string reserveName();
     
 protected:
     int parseJSON() override ;
@@ -186,7 +202,6 @@ protected:
     //MEMORY_STATUS lastStatus = AVAILABLE_STATUS;
     InclosingTagsBehaviour inclosingTagsBehaviour;
     IMPORTMEMORYDATA* pData = nullptr;
-    std::string strTempFile;
     long timeout = 0;
 };
 
@@ -533,7 +548,6 @@ private:
 
     USHORT PrepExport();
     USHORT ExportProc();
-    std::string strTempFile;
 public:
 
     //std::string requestFormat;//application/xml or application/binary

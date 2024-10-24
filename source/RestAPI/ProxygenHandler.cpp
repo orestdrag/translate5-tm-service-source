@@ -66,6 +66,19 @@ void ProxygenHandler::onRequest(std::unique_ptr<HTTPMessage> req) noexcept {
 
   pRequest->responseHandler = downstream_;   
 
+  if(IMPORT_MEM == pRequest->command
+    || IMPORT_MEM_STREAM == pRequest->command
+    || EXPORT_MEM_TMX_STREAM == pRequest->command
+    || EXPORT_MEM_INTERNAL_FORMAT_STREAM == pRequest->command)
+    {
+      std::string reservedName = pRequest->reserveFilename();
+      // Open a file to store the uploaded file data
+      fileStream.open(reservedName, std::ios::binary | std::ios::app);
+      if (!fileStream.is_open()) {
+        pRequest->buildErrorReturn(500, "Failed to open file", 500);
+      }
+    }
+
   //if(IMPORT_MEM_STREAM == pRequest->command)
   if(IMPORT_MEM == pRequest->command)
   {
@@ -92,15 +105,6 @@ void ProxygenHandler::onRequest(std::unique_ptr<HTTPMessage> req) noexcept {
     // reserve filename
     if (contentType.find("multipart/form-data") == std::string::npos) {
       pRequest->buildErrorReturn(400, "Invalid Content-Type", 400);
-    }else{
-      auto pImportRequest = (ImportRequestData*) pRequest;
-
-      std::string reservedName = pImportRequest->reserveName();
-      // Open a file to store the uploaded file data
-      fileStream.open(reservedName, std::ios::binary | std::ios::app);
-      if (!fileStream.is_open()) {
-        pRequest->buildErrorReturn(500, "Failed to open file", 500);
-      }
     }
   }else if(EXPORT_MEM_TMX == pRequest->command){
     if(requestAcceptHeader == "application/xml"){
@@ -200,31 +204,37 @@ void ProxygenHandler::onBody(std::unique_ptr<folly::IOBuf> body) noexcept {
 }
 
 void ProxygenHandler::onEOM() noexcept {  
+  if (fileStream.is_open()) {
+    fileStream.close();
+  }
+
   if(pRequest && pRequest->command >= COMMAND::START_COMMANDS_WITH_BODY)
   {
     auto body = bodyQueue_.move();
-    {// not import stream 
-      if(body){
-        pRequest->strBody = body->moveToFbString().toStdString();
-      }else if(//COMMAND::EXPORT_MEM_TMX_STREAM == pRequest->command  ||
+    { 
+     if(COMMAND::IMPORT_MEM_STREAM == pRequest->command  ||
         COMMAND::IMPORT_MEM == pRequest->command){
         // After processing, reset any state if necessary
         processedBodyPart = OTHER;  // Reset flag after finishing file part
-        if (fileStream.is_open()) {
-            fileStream.close();
-        }
-       } else{
-        pRequest->buildErrorReturn(400, "Missing body", 400);
       }
-    }
 
-    if(pRequest && !pRequest->_rest_rc_){
-      size_t json_end = pRequest->strBody.find("\n}") ;
-      if(json_end > 0 && json_end != std::string::npos){
-        pRequest->strBody = pRequest->strBody.substr(0, json_end + 2);
-      }else if(false == pRequest->strBody.empty()){
-        pRequest->buildErrorReturn(117, "Request canceled:: Json body should be send in pretty format only", 400);
-        T5LOG(T5ERROR) << "received json in non pretty format - canceling request;";
+      if(body){
+        pRequest->strBody = body->moveToFbString().toStdString();
+        size_t json_end = pRequest->strBody.find("\n}") ;
+        if(json_end > 0 && json_end != std::string::npos){
+          pRequest->strBody = pRequest->strBody.substr(0, json_end + 2);
+        }else if(false == pRequest->strBody.empty()){
+          pRequest->buildErrorReturn(117, "Request canceled:: Json body should be send in pretty format only", 400);
+          T5LOG(T5ERROR) << "received json in non pretty format - canceling request;";
+        }
+      }else if(//body is optional for this requests
+           COMMAND::IMPORT_MEM
+        || COMMAND::IMPORT_MEM_STREAM
+        || COMMAND::EXPORT_MEM_TMX_STREAM
+      ){
+        //do nothing
+      }else{
+        pRequest->buildErrorReturn(400, "Missing body", 400);
       }
     }
 
@@ -363,25 +373,29 @@ void ProxygenHandler::sendResponse()noexcept{
       
       //T5LOG( T5DEBUG) <<  ":: command = ", 
       //            CommandToStringsMap.find(this->command)->second, ", pRequest->strMemName = ", pRequest->strMemName.c_str());
-      if ( COMMAND::EXPORT_MEM_INTERNAL_FORMAT_STREAM == pRequest->command 
-       && (( (ExportRequestData*) pRequest)->vMemData.size())
-      )
-      {
-        ExportRequestData* pExpReqData = (ExportRequestData*)pRequest;
-        builder->body(vectorToIobuf(pExpReqData->vMemData));
+      if( pRequest->isSuccessful() && (
+          COMMAND::EXPORT_MEM_TMX == pRequest->command
+        || COMMAND::EXPORT_MEM_TMX_STREAM == pRequest->command
+        || COMMAND::EXPORT_MEM_INTERNAL_FORMAT == pRequest->command
+        || COMMAND::EXPORT_MEM_INTERNAL_FORMAT_STREAM == pRequest->command
+        )
+      ){
+        // Respond with OK status
+        pRequest->sendStreamFile(builder);
       }else if(pRequest->outputMessage.size()){
         builder->body(pRequest->outputMessage);
+        builder->sendWithEOM();
       } else{
         builder->body("{}");
+        builder->sendWithEOM();
       }
       //builder->send();
       //delete pRequest;
       //pRequest = nullptr;
-      builder->sendWithEOM();
+      //builder->sendWithEOM();
     }
     pRequest->fRunning = false;
     T5Logger::GetInstance()->ResetLogBuffer();
-  
 
 }
 

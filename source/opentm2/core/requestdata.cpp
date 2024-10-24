@@ -526,6 +526,44 @@ int RequestData::run(){
   return res;
 }
 
+#include <unistd.h>  // For read()
+#include <folly/File.h>
+#include <folly/io/IOBuf.h>
+#include <sys/types.h>
+
+#include "folly/File.h"
+
+int RequestData::sendStreamFile(proxygen::ResponseBuilder* builder){
+  constexpr size_t chunkSize = 4096; // Define chunk size
+  
+  // Open the file using Folly
+  folly::File file(strTempFile);    // Check if the file is valid
+  if (!file) {
+    buildErrorReturn(500, "File not found", 500);
+    builder->body(outputMessage);
+    builder->sendWithEOM();
+    return -1;
+  } 
+  
+  std::vector<uint8_t> buffer(chunkSize);
+  ssize_t bytesRead;    // Read from file in chunks
+  builder->send();
+  
+  while ((bytesRead = ::read(file.fd(), buffer.data(), buffer.size())) > 0) {
+      //if (bytesRead < 0) {
+      //    // Handle read error
+      //    downstream_->sendError(proxygen::k500InternalServerError, "File read error");
+      //    return -1;
+      //}        // Send the buffer chunk as HTTP body
+      //builder->sendBody(folly::IOBuf::copyBuffer(buffer.data(), bytesRead));
+  }    
+  
+  // Close the file
+  file.close();
+  builder->sendWithEOM(); // End of message
+  return 0;
+}
+
 
 
 template<typename T>
@@ -578,11 +616,7 @@ int CreateMemRequestData::importInInternalFomat(){
   T5LOG( T5INFO) << ":: strData is not empty -> setup temp file name for ZIP package file ";
   // setup temp file name for ZIP package file 
 
-  strTempFile =  FilesystemHelper::BuildTempFileName();
-  if (strTempFile.empty()  )
-  {
-    return buildErrorReturn( InternalErrorRC::CANT_CREATE_FILE, "Could not create file name for temporary data", INTERNAL_SERVER_ERROR );
-  }
+  strTempFile =  reserveFilename();
 
   T5LOG( T5INFO) << "+   Temp binary file is " << strTempFile ;
 
@@ -1202,12 +1236,13 @@ int SaveAllTMsToDiskRequestData::execute(){
   return OK;
 }
 
-std::string ImportRequestData::reserveName(){
+std::string RequestData::reserveFilename(){
+  if(strTempFile.empty()){
+    // setup temp file name for TMX file 
+    strTempFile =  FilesystemHelper::BuildTempFileName();
+  }
 
-  // setup temp file name for TMX file 
-  strTempFile =  FilesystemHelper::BuildTempFileName();
-  if (strTempFile.empty()  )
-  {
+  if (strTempFile.empty()){
     buildErrorReturn( 510, "import::Could not create file name for temporary data");
     return "";
   }
@@ -1228,7 +1263,7 @@ int ImportRequestData::execute(){
   }
 
   if(strTempFile.empty()){
-    reserveName();
+    reserveFilename();
   }
   //lastStatus =       mem->eStatus;
   //lastImportStatus = mem->eImportStatus;
@@ -2818,7 +2853,7 @@ int ExportRequestData::checkData(){
 int ExportRequestData::execute(){
   if(command != EXPORT_MEM_TMX_STREAM && command != EXPORT_MEM_TMX){
     // get a temporary file name for the memory package file or TMX file
-    strTempFile = FilesystemHelper::BuildTempFileName();
+    strTempFile = reserveFilename();
     if ( _rc_ != 0 )
     {
       return buildErrorReturn(_rc_, "::getMem:: Error: creation of temporary file for memory data failed", INTERNAL_SERVER_ERROR);
@@ -2878,7 +2913,7 @@ int ExportRequestData::execute(){
     if(T5Logger::GetInstance()->CheckLogLevel(T5DEBUG) == false 
       && COMMAND::EXPORT_MEM_TMX != command
       && COMMAND::EXPORT_MEM_TMX_STREAM != command ){ //for DEBUG and DEVELOP modes leave file in fs
-      FilesystemHelper::DeleteFile( strTempFile, true );
+      //FilesystemHelper::DeleteFile( strTempFile, true );
     }
   //}
   
@@ -2922,7 +2957,7 @@ int ExportRequestData::PrepareTMZip()
 int ExportRequestData::ExportZipStream(){
   _rc_ = PrepareTMZip();
   if(!_rc_){    
-    _rc_ = FilesystemHelper::LoadFileIntoByteVector( strTempFile, vMemData );
+    //_rc_ = FilesystemHelper::LoadFileIntoByteVector( strTempFile, vMemData );
   }
 
   return _rc_;
@@ -2980,7 +3015,7 @@ int ExportRequestData::ExportTmx(){
     buildErrorReturn(_rc_, "Error happened during tmx  export", 500);
   }else{    
     T5LOG( T5DEBUG) << "end of function EqfExportMem::success ";
-    this->outputMessage = convertIOBufQueueToString(fctdata.bufQueue);//fctdata.bufQueue.move();
+    //this->outputMessage = convertIOBufQueueToString(fctdata.bufQueue);//fctdata.bufQueue.move();
   }
   return 0;
 }

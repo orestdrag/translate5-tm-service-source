@@ -749,13 +749,6 @@ USHORT  MemExportStart( PPROCESSCOMMAREA  pCommArea,
     // call start entry point
     if ( !usRc )
     {
-      // close output file (if open) as external export process will open the file itself...
-      if (false && pExportIDA->hFile ) 
-      {
-        UtlClose( pExportIDA->hFile, FALSE );
-        pExportIDA->hFile = NULL; 
-      } /* endif */
-
       memset( pExportIDA->pstMemInfo, 0, sizeof(MEMEXPIMPINFO) );
 
       // get name of first markup table

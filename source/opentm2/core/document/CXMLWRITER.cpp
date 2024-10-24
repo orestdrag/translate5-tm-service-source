@@ -217,7 +217,7 @@ int CXmlWriter::writeData(const void* buff, long size, long n){
   int rc = 0;
   if(m_hf){
     fwrite(buff, size, n, m_hf);
-  }
+  }else
   //if(chunkBuffer.isActive())
   {
     // Send buffer in chunks
@@ -277,13 +277,13 @@ BOOL CXmlWriter::WriteStartDocument()
   BOOL fOK = TRUE;
 
   //if(!chunkBuffer.isActive()){
-  //if(!m_strFileName){
-  //  m_hf = FilesystemHelper::OpenFile(m_strFileName, "w", false);
-  //}else{
+  if(m_strFileName){
+    m_hf = FilesystemHelper::OpenFile(m_strFileName, "w", false);
+  }else{
     m_hf = nullptr;
-  //}
+  }
 
-  //if ( m_hf || chunkBuffer.isActive() )
+  if ( m_hf )// || chunkBuffer.isActive() )
   {
     // write BOM 
     if ( Encoding == UTF16 )
@@ -310,10 +310,10 @@ BOOL CXmlWriter::WriteStartDocument()
     Push( CXmlWriter::Document, L"doc" );
 
   }
-  //else
-  //{
-  //  fOK = FALSE;
-  //} /* endif */
+  else
+  {
+    fOK = FALSE;
+  } /* endif */
 
   return( fOK );
 }
