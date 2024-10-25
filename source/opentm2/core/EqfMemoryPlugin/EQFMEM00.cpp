@@ -174,6 +174,9 @@ NTMCloseOrganize ( PMEM_ORGANIZE_IDA pRIDA,           //pointer to organize IDA
 // ================ Handle the message WM_EQF_MEMORGANIZE_PROCESS =====================
 
 bool IsValidXml(std::wstring&& sentence);
+
+DEFINE_int32(maxBadSegmentsIdsSaved, 20, "Defines how  much segments(it's id's) that failed during import or reorganize would be saved to the status response");
+
 VOID EQFMemOrganizeProcess
 (
   PPROCESSCOMMAREA  pCommArea
@@ -244,7 +247,9 @@ VOID EQFMemOrganizeProcess
     {
       // ignore invalid proposal
       pRIDA->pMem->importDetails->invalidSegments++;
-      pRIDA->pMem->importDetails->firstInvalidSegmentsSegNums.push_back(std::make_tuple(pRIDA->pProposal->getSegmentId(), -8));
+      if(pRIDA->pMem->importDetails->invalidSegments < FLAGS_maxBadSegmentsIdsSaved){
+        pRIDA->pMem->importDetails->firstInvalidSegmentsSegNums.push_back(std::make_tuple(pRIDA->pProposal->getSegmentId(), -8));
+      }
     }
     else
     {
@@ -273,7 +278,9 @@ VOID EQFMemOrganizeProcess
         {
           T5LOG(T5ERROR) << "segment in reorganize was skipped! segment: "<< *pRIDA->pProposal;
           pRIDA->pMem->importDetails->invalidSegments++;
-          pRIDA->pMem->importDetails->firstInvalidSegmentsSegNums.push_back(std::make_tuple(pRIDA->pProposal->getSegmentId(), iRC));
+          if(pRIDA->pMem->importDetails->invalidSegments < FLAGS_maxBadSegmentsIdsSaved){
+            pRIDA->pMem->importDetails->firstInvalidSegmentsSegNums.push_back(std::make_tuple(pRIDA->pProposal->getSegmentId(), iRC));
+          }
           pRIDA->pMem->importDetails->invalidSegmentsRCs[iRC] ++;
         }
         else
@@ -287,8 +294,10 @@ VOID EQFMemOrganizeProcess
   )
   {
     pCommArea->usComplete = (USHORT)iProgress;
-    pRIDA->pMem->importDetails->invalidSegments++;    
-    pRIDA->pMem->importDetails->firstInvalidSegmentsSegNums.push_back(std::make_tuple(pRIDA->pProposal->getSegmentId(), -9));    
+    pRIDA->pMem->importDetails->invalidSegments++;
+    if(pRIDA->pMem->importDetails->invalidSegments < FLAGS_maxBadSegmentsIdsSaved){    
+      pRIDA->pMem->importDetails->firstInvalidSegmentsSegNums.push_back(std::make_tuple(pRIDA->pProposal->getSegmentId(), -9));  
+    }  
     T5LOG(T5ERROR) << "Skipping proposal iRC == EqfMemory::ERROR_ENTRYISCORRUPTED ; proposal :\n" << *pRIDA->pProposal;
   }
   else if ( iRC == EqfMemory::INFO_ENDREACHED )
