@@ -33,12 +33,6 @@ ProxygenHandler::ProxygenHandler(ProxygenStats* stats) : stats_(stats) {
   TMManager::GetInstance()->fWriteRequestsAllowed = true;
 }
 
-
-
-//#include <proxygen/httpserver/HTTPServer.h>
-//#include <proxygen/httpserver/RequestHandler.h>
-//#include <proxygen/httpserver/RequestHandlerFactory.h>
-
 void ProxygenHandler::onRequest(std::unique_ptr<HTTPMessage> req) noexcept {
 #ifdef TIME_MEASURES 
   start_ms = duration_cast< milliseconds >( system_clock::now().time_since_epoch() );
