@@ -226,6 +226,17 @@ int RequestData::buildErrorReturn
   return buildErrorReturn(rc, strMsg.c_str());
 }
 
+bool rcNeedToBeLogged(int rc){
+  switch(rc){
+    case 506:// timeout issue
+    {
+      return false;
+    }
+    default: return true;
+  }
+
+}
+
 int RequestData::buildErrorReturn
 (
   int rc,
@@ -240,7 +251,9 @@ int RequestData::buildErrorReturn
   json_factory.addParmToJSON( outputMessage, "ErrorMsg", pszErrorMsg );
   json_factory.terminateJSON( outputMessage );
   _rest_rc_ = rest_rc;
-  T5LOG(T5ERROR) << outputMessage;
+  if(rcNeedToBeLogged(rc)){
+    T5LOG(T5ERROR) << outputMessage;
+  }
   return( rc );
 }
 
