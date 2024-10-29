@@ -46,6 +46,7 @@ public:
     std::string strUrl;
     std::string strBody;
     std::string requestAcceptHeader;
+    bool fMultipartFormData = false;
 
 
     //return fields
@@ -64,6 +65,8 @@ public:
                 || COMMAND::EXPORT_MEM_TMX_STREAM == command
                 || COMMAND::IMPORT_MEM == command 
                 || COMMAND::IMPORT_MEM_STREAM == command
+                || COMMAND::EXPORT_MEM_INTERNAL_FORMAT == command
+                || COMMAND::EXPORT_MEM_INTERNAL_FORMAT_STREAM == command
                 )
             ){ //for DEBUG and DEVELOP modes leave file in fs
                 FilesystemHelper::DeleteFile( strTempFile, true );

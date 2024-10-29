@@ -63,37 +63,33 @@ void ProxygenHandler::onRequest(std::unique_ptr<HTTPMessage> req) noexcept {
  
   std::string requestAcceptHeader = headers.getSingleOrEmpty("Accept");
   const auto& contentType = headers.getSingleOrEmpty("Content-Type");
+  if (contentType.find("multipart/form-data") != std::string::npos) {
+    pRequest->fMultipartFormData = true;    
+  }
 
   pRequest->responseHandler = downstream_;   
 
-  if(IMPORT_MEM == pRequest->command
+
+  if( pRequest->fMultipartFormData
+    ||  IMPORT_MEM == pRequest->command
     || IMPORT_MEM_STREAM == pRequest->command
     || EXPORT_MEM_TMX_STREAM == pRequest->command
     || EXPORT_MEM_INTERNAL_FORMAT_STREAM == pRequest->command)
-    {
-      std::string reservedName = pRequest->reserveFilename();
-      // Open a file to store the uploaded file data
-      fileStream.open(reservedName, std::ios::binary | std::ios::app);
-      if (!fileStream.is_open()) {
-        pRequest->buildErrorReturn(500, "Failed to open file", 500);
-      }
-    }
-
-  //if(IMPORT_MEM_STREAM == pRequest->command)
-  if(IMPORT_MEM == pRequest->command)
   {
-
-    #ifdef v_1
-    auto contentType = msg->getHeaders().getSingleOrEmpty("Content-Type");
-    
-    if (contentType.find("multipart/form-data") != std::string::npos) {
-        boundary = getBoundaryFromHeaders(msg->getHeaders());//extractBoundaryFromHeaders(msg->getHeaders());
+    std::string reservedName = pRequest->reserveFilename();
+    // Open a file to store the uploaded file data
+    fileStream.open(reservedName, std::ios::binary | std::ios::app);
+    if (!fileStream.is_open()) {
+      pRequest->buildErrorReturn(500, "Failed to open file", 500);
     }
-    // Store headers for later use
-    requestHeaders_ = msg->getHeaders();
-    #endif
+  }
+  
+  if(IMPORT_MEM == pRequest->command || IMPORT_MEM_STREAM == pRequest->command
+    || (pRequest->fMultipartFormData && CREATE_MEM == pRequest->command))
+  {
     if (headers_) {
       boundary = getBoundaryFromHeaders(*headers_);
+      
       
       if (boundary.empty()) {
         proxygen::ResponseBuilder(downstream_)
@@ -103,7 +99,7 @@ void ProxygenHandler::onRequest(std::unique_ptr<HTTPMessage> req) noexcept {
       }
   }
     // reserve filename
-    if (contentType.find("multipart/form-data") == std::string::npos) {
+    if (IMPORT_MEM == pRequest->command && contentType.find("multipart/form-data") == std::string::npos) {
       pRequest->buildErrorReturn(400, "Invalid Content-Type", 400);
     }
   }else if(EXPORT_MEM_TMX == pRequest->command){
@@ -195,7 +191,7 @@ void ProxygenHandler::onBody(std::unique_ptr<folly::IOBuf> body) noexcept {
   if(body){
     ++bodyPartsReceived;
   
-    if(COMMAND::IMPORT_MEM == pRequest->command){
+    if(pRequest->fMultipartFormData){
       processMultipartChunk(body);
     }else{
       bodyQueue_.append(std::move(body));  // Default case for other commands
@@ -220,6 +216,9 @@ void ProxygenHandler::onEOM() noexcept {
 
       if(body){
         pRequest->strBody = body->moveToFbString().toStdString();
+      }
+      
+      if(!pRequest->strBody.empty()){
         size_t json_end = pRequest->strBody.find("\n}") ;
         if(json_end > 0 && json_end != std::string::npos){
           pRequest->strBody = pRequest->strBody.substr(0, json_end + 2);
@@ -323,14 +322,6 @@ void ProxygenHandler::sendResponse()noexcept{
       }
     }
     
-    
-    //if(COMMAND::EXPORT_MEM_TMX_STREAM == pRequest->command){
-      //do nothing
-    //}else 
-    //if(pRequest->isStreamingRequest()){
-    //if(COMMAND::EXPORT_MEM_INTERNAL_FORMAT_STREAM == pRequest->command){
-    //   downstream_->sendEOM();
-    //}else
     {
       builder->status(pRequest->_rest_rc_, responseText);
       if (FLAGS_request_number) {
@@ -356,16 +347,18 @@ void ProxygenHandler::sendResponse()noexcept{
       } if(COMMAND::EXPORT_MEM_TMX_STREAM == pRequest->command && pRequest->isSuccessful()){
         // Add headers to the response
         std::stringstream contDisposition;
+        ExportRequestData* exp_request = (ExportRequestData*) pRequest;
         
         builder->header("Content-Type", "application/octet-stream"); 
         contDisposition << "attachment; filename=\"" << pRequest->strMemName  << ".tmx\"";
         builder->header("Content-Disposition", contDisposition.str());
-        builder->header("NextInternalKey", ((ExportRequestData*) pRequest)->nextInternalKey);
+        builder->header("NextInternalKey", exp_request->nextInternalKey);
       }else if (COMMAND::EXPORT_MEM_INTERNAL_FORMAT_STREAM == pRequest->command  && pRequest->isSuccessful()){
+
         std::stringstream contDisposition;
         contDisposition << "attachment; filename=\"" << pRequest->strMemName  << ".tm\"";
         builder->header("Content-Type", "application/octet-stream");
-        builder->header("Content-Disposition", contDisposition.str());
+        builder->header("Content-Disposition", contDisposition.str()); 
         
       }else{
         builder->header("Content-Type", "application/json");
@@ -389,16 +382,10 @@ void ProxygenHandler::sendResponse()noexcept{
         builder->body("{}");
         builder->sendWithEOM();
       }
-      //builder->send();
-      //delete pRequest;
-      //pRequest = nullptr;
-      //builder->sendWithEOM();
     }
     pRequest->fRunning = false;
     T5Logger::GetInstance()->ResetLogBuffer();
-
 }
-
 
 } // namespace ProxygenService
 //#endif

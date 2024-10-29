@@ -123,64 +123,268 @@ class ProxygenHandler : public proxygen::RequestHandler {
     return boundary;//"--" + boundary; // Prefix with "--" as per multipart form data boundary format
   }
 
- void parse(std::unique_ptr<folly::IOBuf>& body) {
-    std::string boundaryLine = "--" + boundary;
-    std::string endBoundaryLine = boundaryLine + "--";
-    folly::io::Cursor cursor(body.get());
-    std::string line;
-    BodyPart currentPart = BodyPart::OTHER;
-
-    //while (cursor.readLine(line)) {
-      while (cursor.canAdvance(1)) {
-            // Accumulate data into a line
-            line.clear();
-            char ch;
-            while (cursor.canAdvance(1)) {
-                ch = cursor.read<char>();
-                if (ch == '\n') {
-                    break;
-                } else if (ch != '\r') {
-                    line.push_back(ch);
-                }
-            }
-        if (line == boundaryLine) {
-            // Start of a new part
-            currentPart = BodyPart::OTHER;
-        } else if (line == endBoundaryLine) {
-            // End of multipart message
-            break;
-        } else if (line.find("Content-Disposition") != std::string::npos) {
-            // Header line
-            if (line.find("filename=") != std::string::npos) {
-                currentPart = BodyPart::FILE;
-                // Extract filename and open file stream
-                //auto filenamePos = line.find("filename=") + 9;
-                //auto filenameEnd = line.find("\"", filenamePos);
-                //std::string filename = line.substr(filenamePos, filenameEnd - filenamePos);
-                //fileStream.open(filename, std::ios::binary);
-            } else if (line.find("name=\"json_data\"") != std::string::npos) {
-                currentPart = BodyPart::JSON;
-            }
-        } else {
-            // Body line
-            if (currentPart == BodyPart::FILE && fileStream.is_open()) {
-                fileStream << line << "\n";
-            } else if (currentPart == BodyPart::JSON) {
-                pRequest->strBody += line + "\n";
-            }
-        }
-    }
-}
 
 bool fBoundaryWasMissingInPreviousBodyChunk = false;
 
-void processMultipartChunk(std::unique_ptr<folly::IOBuf>& body) {
-    
+size_t findBoundary(const uint8_t* data, size_t startPos, size_t dataSize, const std::string& boundary) {
+    for (size_t i = startPos; i <= dataSize - boundary.size(); ++i) {
+        if (memcmp(data + i, boundary.data(), boundary.size()) == 0) {
+            return i;
+        }
+    }
+    return std::string::npos;
+}
 
+#include <cstring>
+
+std::string trim(const std::string& str) {
+    size_t first = str.find_first_not_of(" \t\r\n");
+    size_t last = str.find_last_not_of(" \t\r\n");
+    return str.substr(first, (last - first + 1));
+}
+
+size_t findBinaryBoundary(const uint8_t* data, size_t dataSize, size_t start, const std::string& boundary) {
+    if (start >= dataSize) {
+        return std::string::npos;
+    }
+
+    std::string trimmedBoundary = boundary;//trim(boundary);
+
+    const uint8_t* boundaryData = reinterpret_cast<const uint8_t*>(trimmedBoundary.data());
+    size_t boundarySize = trimmedBoundary.size();
+    if(boundarySize >= dataSize){
+        return std::string::npos;
+    }
+
+    for (size_t i = start; i <= dataSize - boundarySize; ++i) {
+        if (std::memcmp(data + i, boundaryData, boundarySize) == 0) {
+            return i;  // Found the boundary, return position.
+        }
+    }
+
+    // Boundary not found in the data.
+    return std::string::npos;
+}
+
+const uint8_t* findLineEnd(const uint8_t* start, size_t maxLength) {
+    for (size_t i = 0; i < maxLength; ++i) {
+        if (start[i] == '\n') {
+            return start + i + 1;  // Return pointer after '\n'.
+        } else if (start[i] == '\r' && i + 1 < maxLength && start[i + 1] == '\n') {
+            return start + i + 2;  // Return pointer after '\r\n'.
+        }
+    }
+    return start + maxLength;  // No line end found within maxLength.
+}
+
+
+
+
+void processMultipartChunkNew1(std::unique_ptr<folly::IOBuf>& body) {
+    // Access the raw binary data directly
+    const uint8_t* data = body->data();
+    size_t bodySize = body->length();
+
+    size_t pos = 0;
+    size_t nextPos = 0;
+
+    // Process the chunk part by part
+    while (pos < bodySize) {
+        bool isBody = false;
+
+        isBody = fBoundaryWasMissingInPreviousBodyChunk;
+        fBoundaryWasMissingInPreviousBodyChunk = false;
+
+        // Find the boundary line in this chunk
+        nextPos = findBoundary(data, pos, bodySize, boundaryLine);
+        if (nextPos == std::string::npos) {
+            nextPos = pos;
+        } else {
+            if (isBody) {
+                // Content data before the next boundary
+                size_t contentSize = nextPos - pos;
+                const uint8_t* contentData = data + pos;
+
+                if (processedBodyPart == FILE) {
+                    // Write binary data directly to the file
+                    fileStream.write(reinterpret_cast<const char*>(contentData), contentSize);
+                } else if (processedBodyPart == JSON) {
+                    // Append JSON data (assuming it's text)
+                    pRequest->strBody.append(reinterpret_cast<const char*>(contentData), contentSize);
+                }
+                isBody = false;
+            }
+            pos = nextPos + boundaryLine.length();
+        }
+
+        // Skip leading CRLF or whitespace
+        while (pos < bodySize && (data[pos] == '\r' || data[pos] == '\n')) {
+            pos++;
+        }
+
+        // Read until the next boundary or end boundary
+        nextPos = findBoundary(data, pos, bodySize, boundaryLine);
+        if (nextPos == std::string::npos) {
+            nextPos = findBoundary(data, pos, bodySize, endBoundaryLine);
+        }
+
+        size_t partSize = (nextPos == std::string::npos) ? bodySize - pos : nextPos - pos;
+        const uint8_t* partData = data + pos;
+
+        if (partSize == 0) {
+            continue;
+        }
+
+        // Parse headers and body within the chunk
+        // Use a state machine or similar mechanism to parse headers and the body
+        std::istringstream partStream(std::string(reinterpret_cast<const char*>(partData), partSize));
+        std::string line;
+        while (std::getline(partStream, line)) {
+            if (!isBody) {
+                if (line == "\r" || line.empty()) {
+                    isBody = true;
+                    continue;
+                }
+                // Parse headers
+                auto delimiterPos = line.find(": ");
+                if (delimiterPos != std::string::npos) {
+                    std::string headerName = line.substr(0, delimiterPos);
+                    std::string headerValue = line.substr(delimiterPos + 2);
+                    if (headerName.find("Content-Disposition") != std::string::npos) {
+                        if (headerValue.find("filename=") != std::string::npos) {
+                            processedBodyPart = FILE;
+                        } else if (headerValue.find("name=\"json_data\"") != std::string::npos) {
+                            processedBodyPart = JSON;
+                        } else {
+                            processedBodyPart = OTHER;
+                        }
+                    }
+                }
+            } else {
+                size_t bodyStart = partStream.str().find("\r\n\r\n") + 4; // Skip headers
+                if (FILE == processedBodyPart) {
+                    // Write binary data directly to disk in chunks
+                    fileStream.write(reinterpret_cast<const char*>(partData + bodyStart), partSize - bodyStart);
+                } else if (JSON == processedBodyPart) {
+                    pRequest->strBody.append(reinterpret_cast<const char*>(partData + bodyStart), partSize - bodyStart);
+                }
+            }
+        }
+
+        // Move position for the next part
+        pos = nextPos + boundaryLine.length();
+    }
+}
+
+void processMultipartChunkNew2(std::unique_ptr<folly::IOBuf>& body) {
+    // Directly access IOBuf data for binary handling
+    size_t bodySize = body->length();
+    const uint8_t* bodyData = body->data();
+
+    size_t pos = 0;
+    size_t nextPos = 0;
+
+    // Process the chunk part by part
+    while (pos < bodySize) {
+        bool isBody = fBoundaryWasMissingInPreviousBodyChunk;
+        fBoundaryWasMissingInPreviousBodyChunk = false;
+
+        // Find the boundary line in this chunk
+        nextPos = findBinaryBoundary(bodyData, bodySize, pos, boundaryLine);
+        if (nextPos == std::string::npos) {
+            nextPos = pos;
+        } else {
+            if (isBody) {  // Start of the body is in previous data
+                const uint8_t* contentStart = bodyData;
+                size_t contentSize = nextPos;
+                
+                if (processedBodyPart == FILE) {
+                    fileStream.write(reinterpret_cast<const char*>(contentStart), contentSize);
+                } else if (processedBodyPart == JSON) {
+                    pRequest->strBody.append(reinterpret_cast<const char*>(contentStart), contentSize);
+                    pRequest->strBody.push_back('\n');
+                }
+                isBody = false;
+            }
+            pos = nextPos + boundaryLine.size();
+        }
+
+        // Skip leading CRLF or whitespace
+        while (pos < bodySize && (bodyData[pos] == '\r' || bodyData[pos] == '\n')) {
+            pos++;
+        }
+
+        // Read until the next boundary or end boundary
+        nextPos = findBinaryBoundary(bodyData, bodySize, pos, boundaryLine);
+        if (nextPos == std::string::npos) {
+            nextPos = findBinaryBoundary(bodyData, bodySize, pos, endBoundaryLine);
+        }
+
+        size_t partSize = (nextPos == std::string::npos) ? (bodySize - pos) : (nextPos - pos);
+        const uint8_t* partStart = bodyData + pos;
+
+        if (partSize == 0) {
+            continue;
+        }
+
+        // Parse headers and body within the chunk
+        const uint8_t* lineStart = partStart;
+        const uint8_t* lineEnd;
+        size_t lineLength;
+        bool isBodySection = false;
+        
+        while (lineStart < partStart + partSize) {
+            lineEnd = findLineEnd(lineStart, partStart + partSize - lineStart);
+            lineLength = lineEnd - lineStart;
+
+            if (!isBodySection) {
+                if (lineLength == 0 || ((*lineStart == '\r' || *lineStart == '\n') && lineLength == 1)) {
+                    isBodySection = true;
+                    lineStart = lineEnd + 1;  // Move to the start of the body content
+                    continue;
+                }
+
+                // Parse headers
+                auto delimiterPos = std::find(lineStart, lineEnd, ':');
+                if (delimiterPos != lineEnd) {
+                    std::string headerName(reinterpret_cast<const char*>(lineStart), delimiterPos - lineStart);
+                    std::string headerValue(reinterpret_cast<const char*>(delimiterPos + 2), lineEnd - delimiterPos - 2);
+
+                    if (headerName.find("Content-Disposition") != std::string::npos) {
+                        if (headerValue.find("filename=") != std::string::npos) {
+                            processedBodyPart = FILE;
+                        } else if (headerValue.find("name=\"json_data\"") != std::string::npos) {
+                            processedBodyPart = JSON;
+                        } else {
+                            processedBodyPart = OTHER;
+                        }
+                    }
+                }
+            } else {
+                if (processedBodyPart == FILE) {
+                    fileStream.write(reinterpret_cast<const char*>(lineStart), lineLength);
+                } else if (processedBodyPart == JSON) {
+                    pRequest->strBody.append(reinterpret_cast<const char*>(lineStart), lineLength);
+                    pRequest->strBody.push_back('\n');
+                }
+            }
+            lineStart = lineEnd + 1;
+        }
+
+        // Move position for the next part
+        pos = nextPos + boundaryLine.size();
+    }
+}
+
+
+
+void processMultipartChunkOld(std::unique_ptr<folly::IOBuf>& body) {
     // Convert chunk to a string (or use IOBuf directly for better performance)
     std::string bodyChunk = body->moveToFbString().toStdString();
     bodyPart = bodyChunk; 
     size_t bodySize = bodyChunk.length();
+    T5LOG(T5TRANSACTION) << "processing body with len:" << bodySize << ", body:" << bodyChunk;
+
     if(bool fEndBody = bodyChunk.find(endBoundaryLine) != std::string::npos){
       int g = 0;
     }
@@ -206,8 +410,10 @@ void processMultipartChunk(std::unique_ptr<folly::IOBuf>& body) {
             std::string content = bodyChunk.substr(0, nextPos);
 
             if (FILE == processedBodyPart) {
+                T5LOG(T5TRANSACTION) << "writting data to the file len:" << content.size() << ", data:" << content;
                 fileStream.write(content.data(), content.size());
             } else if (JSON == processedBodyPart) {
+              T5LOG(T5TRANSACTION) << "parsed json data:" << content.size() << ", data:" << content;
                 pRequest->strBody += content + '\n';
             }
             isBody = false;
@@ -232,7 +438,6 @@ void processMultipartChunk(std::unique_ptr<folly::IOBuf>& body) {
         if(nextPos == std::string::npos) {
           partStr = bodyChunk.substr(pos);
           nextPos = bodySize;
-          //isBody = true;
           fBoundaryWasMissingInPreviousBodyChunk = true;
         }else{
           partStr = bodyChunk.substr(pos, nextPos - pos);
@@ -257,7 +462,6 @@ void processMultipartChunk(std::unique_ptr<folly::IOBuf>& body) {
                     if (headerName.find("Content-Disposition") != std::string::npos) {
                         if (headerValue.find("filename=") != std::string::npos) {
                             processedBodyPart = FILE;
-                            //openFileStream(headerValue);  // Open file stream based on file name
                         } else if (headerValue.find("name=\"json_data\"") != std::string::npos) {
                             processedBodyPart = JSON;
                         } else {
@@ -274,13 +478,12 @@ void processMultipartChunk(std::unique_ptr<folly::IOBuf>& body) {
                 size_t bodyStart = partStr.find("\r\n\r\n") + 4;  // Skip headers
                 if (FILE == processedBodyPart) {
                     // Write file content directly to disk in chunks
-                    //std::string fileContent = partStr.substr(bodyStart);
-                    std::string fileContent = line;
+                    std::string fileContent = line + '\n';
+                    T5LOG(T5TRANSACTION) << "writting line to the file len:" << line.size() << ", data:" << line;
                     fileStream.write(fileContent.data(), fileContent.size());
                 } else if (JSON == processedBodyPart) {
                     // Accumulate JSON content (or process it incrementally)
-                    //std::string jsonContent = partStr.substr(bodyStart);
-                    //pRequest->strBody += jsonContent;
+                    T5LOG(T5TRANSACTION) << "parsed json, len:" << line.size() << ", data:" << line;
                     pRequest->strBody += line + '\n';
                 }
             }
@@ -291,116 +494,225 @@ void processMultipartChunk(std::unique_ptr<folly::IOBuf>& body) {
     }
 }
 
+/*
+void processMultipartChunkOld2(std::unique_ptr<folly::IOBuf>& body) {
+    // Convert chunk to a string (or use IOBuf directly for better performance)
+    size_t bodySize = body->length();
+    const uint8_t* bodyData = body->data();
+    std::string log_str(reinterpret_cast<const char*>(bodyData), bodySize);
+    T5LOG(T5TRANSACTION) << " data: " << log_str;
+    //std::string bodyChunk = body->moveToFbString().toStdString();
+    //bodyPart = bodyChunk; 
+    //size_t bodySize = bodyChunk.length();
+    //T5LOG(T5TRANSACTION) << "processing body with len:" << bodySize << ", body:" << bodyChunk;
 
- void parseMultipart(std::unique_ptr<folly::IOBuf>& body, const std::string& boundary) {  
-    std::string boundaryLine = "--" + boundary;
-    std::string endBoundaryLine = boundaryLine + "--";
-
-    std::string bodyStr = body->moveToFbString().toStdString();
+    //if(bool fEndBody = bodyChunk.find(endBoundaryLine) != std::string::npos){
+    //  int g = 0;
+    //}
     size_t pos = 0;
     size_t nextPos = 0;
 
-    while(true){
+    // Process the chunk part by part
+    while (pos < bodySize) {
         bool isBody = false;
         std::string line;
-        std::unique_ptr<folly::IOBuf> partBody = folly::IOBuf::create(0);
 
-        nextPos = bodyStr.find(boundaryLine, pos);
-        
+        isBody = fBoundaryWasMissingInPreviousBodyChunk;
+        fBoundaryWasMissingInPreviousBodyChunk = false;
 
-        size_t nextEndPos = bodyStr.find(endBoundaryLine, pos);
-        /*
-        if(FILE == processedBodyPart && endBoundaryLineWasUsed){
-          endBoundaryLineWasUsed = false;
-          //isBody = true;
-          std::string bodyContent = bodyStr.substr(0, nextPos);
-          processedBodyPart = FILE;
-          auto data = folly::IOBuf::copyBuffer(bodyContent.data(), bodyContent.size());
-          //auto data = iobufToVector(bodyContent.data());
-          fileStream.write(reinterpret_cast<const char*>(data->data()), data->length());
-          //processedBodyPart = OTHER;
-          continue;
-        }else if(JSON == processedBodyPart && endBoundaryLineWasUsed){
-          endBoundaryLineWasUsed = false;
-          //isBody = true;
-          std::string bodyContent = bodyStr.substr(0, nextPos);
-          pRequest->strBody += bodyContent;
-          //processedBodyPart = OTHER;
-          continue;
-        }//*/
-        
-        if(std::string::npos == nextPos)
-        {
-          //isBody = true;
-          nextPos = bodyStr.length();
-          //break;
+        // Find the boundary line in this chunk
+        nextPos = findBinaryBoundary(bodyData, bodySize, pos, boundaryLine);
+        //nextPos = bodyChunk.find(boundaryLine, pos);
+        if (std::string::npos == nextPos) {
+          nextPos = pos;
+          //  break;  // No more parts in this chunk
         }else{
+          if(isBody)
+          {//start of the body is still previous data
+            //std::string content = bodyChunk.substr(0, nextPos);
+            //uint8_t content = 
+
+            if (FILE == processedBodyPart) {
+                fileStream.write(reinterpret_cast<const char*>(bodyData), nextPos);
+                //fileStream.write(content.data(), content.size());
+            } else if (JSON == processedBodyPart) {
+              //T5LOG(T5TRANSACTION) << "parsed json data:" << content.size() << ", data:" << content;
+              std::string content; 
+              content = std::string(reinterpret_cast<const char*>(bodyData), nextPos);
+              pRequest->strBody += content + '\n';
+            }
+            isBody = false;
+          }
           pos = nextPos + boundaryLine.length();
-
-          // Skip any leading CRLF or whitespace
-          while (pos < bodyStr.size() && (bodyStr[pos] == '\r' || bodyStr[pos] == '\n')) {
-              pos++;
-          }
-
-          nextPos = bodyStr.find(boundaryLine, pos);
-    
-          if (nextPos == std::string::npos) {
-              nextPos = bodyStr.find(endBoundaryLine, pos);
-              endBoundaryLineWasUsed = true;
-          }
+        }
+        // Skip leading CRLF or whitespace
+        while (pos < bodySize && (bodyData[pos] == '\r' || bodyData[pos] == '\n')) {
+            pos++;
         }
 
-        std::string partStr = bodyStr.substr(pos, nextPos - pos);
-        if (partStr.empty()) {
-            continue;
+        // Read until the next boundary or end boundary
+        //nextPos = bodyChunk.find(boundaryLine, pos);
+        nextPos = findBinaryBoundary(bodyData, bodySize, pos, boundaryLine);
+        if (nextPos == std::string::npos) {
+          //nextPos = bodyChunk.find(endBoundaryLine, pos);
+          nextPos = findBinaryBoundary(bodyData, bodySize, pos, endBoundaryLine);
+        }else{
+          int a = 0;
         }
 
-        std::istringstream partStream(partStr);
+        //size_t partStart = 0;
+        //size_t partEnd = 0;
+
+        if(nextPos == std::string::npos) {          
+          nextPos = bodySize;
+          fBoundaryWasMissingInPreviousBodyChunk = true;
+        }else{
+          //nextPos = nextPos + pos;
+
+        }
         
+        //partStart = pos;
+        //partEnd = nextPos;
 
-        while (std::getline(partStream, line)) {
-            if (line == "\r" || line.empty()) {
-                // End of headers, start of body
-                isBody = true;
+        //if (partStr.empty()) {
+        //    continue;
+        //}
+
+        // Parse headers and body within the chunk
+        //std::istringstream partStream(partStr);
+
+        //while (partStart < partEnd)//std::getline(partStream, line)) 
+        bool isBody = fBoundaryWasMissingInPreviousBodyChunk;
+        const uint8_t* lineStart = bodyData + pos;
+        const uint8_t* partEnd = bodyData + bodySize;//bodyData+nextPos;
+        const uint8_t* lineEnd = findLineEnd(lineStart, partEnd-lineStart);
+        while(lineStart < partEnd)
+        {            
+
+          std::string partStr(reinterpret_cast<const char*>(lineStart), lineEnd-lineStart);
+          T5LOG(T5TRANSACTION) << "partStr = " << partStr;
+
+          if (!isBody) {
+              std::string headerValue(reinterpret_cast<const char*>(lineStart), lineEnd-lineStart);
+              if (headerValue == "\r" || headerValue == "\n" || headerValue == "\r\n" || headerValue.empty()) {
+                  isBody = true;
+                  lineStart += headerValue.size(); //*lineEnd == '\r'? lineEnd+2 : lineEnd + 1;
+                  lineEnd = findLineEnd(lineStart, partEnd-lineStart);
+                  continue;
+              }
+              // Parse headers
+              if (headerValue.find("filename=") != std::string::npos) {
+                processedBodyPart = FILE;
+                //isBody = true;
+              } else if (headerValue.find("name=\"json_data\"") != std::string::npos) {
+                processedBodyPart = JSON;
+                //  isBody = true;
+              } else {
+                //processedBodyPart = OTHER;
+              }
+              //lineStart += headerValue.size();
+          } else {
+              if(findBinaryBoundary(lineStart, lineEnd-lineStart, 0, boundaryLine) != std::string::npos 
+                || findBinaryBoundary(lineStart, lineEnd-lineStart, 0, endBoundaryLine) != std::string::npos)
+              {
+                processedBodyPart = OTHER;
+                isBody = false;
+              }
+              //if (line == "\r" || line.empty()) {
+              //  continue;
+              //}
+              // Handle body based on the part type (write to file or process JSON)
+              //size_t bodyStart = partStr.find("\r\n\r\n") + 4;  // Skip headers
+              if (FILE == processedBodyPart) {
+                  // Write file content directly to disk in chunks
+                  //std::string fileContent = line;
+                  
+                  //T5LOG(T5TRANSACTION) << "writting line to the file len:" << line.size() << ", data:" << line;
+                  //fileStream.write(fileContent.data(), fileContent.size());
+                  //fileStream.write(reinterpret_cast<const char*>(bodyData + partStart), partEnd-partStart);
+                  fileStream.write(reinterpret_cast<const char*>(lineStart), lineEnd-lineStart);
+                  //partStart = partEnd;
+              } else if (JSON == processedBodyPart) {
+                  // Accumulate JSON content (or process it incrementally)
+                  std::string json_data(reinterpret_cast<const char*>(lineStart), lineEnd-lineStart);
+                  T5LOG(T5TRANSACTION) << "parsed json, len:" << json_data.size() << ", json_data:" << json_data;
+                  pRequest->strBody += json_data;// + '\n';
+                  
+              }
+          }
+
+          lineStart = lineEnd;// *lineEnd == '\r'? lineEnd+2 : lineEnd + 1;
+          lineEnd = findLineEnd(lineStart, partEnd-lineStart);
+      }
+
+      // Move position for the next part
+      //pos = nextPos + boundaryLine.length();
+      pos = bodySize;
+    }
+}//*/
+
+
+void processMultipartChunk(std::unique_ptr<folly::IOBuf>& body) {
+    // Convert chunk to a string (or use IOBuf directly for better performance)
+    size_t bodySize = body->length();
+    const uint8_t* bodyData = body->data();
+    std::string log_str(reinterpret_cast<const char*>(bodyData), bodySize);
+    T5LOG(T5TRANSACTION) << " data: " << log_str;
+    
+    bool isBody = fBoundaryWasMissingInPreviousBodyChunk;
+
+    const uint8_t* lineStart = bodyData;
+    const uint8_t* partEnd = bodyData + bodySize;
+    const uint8_t* lineEnd = findLineEnd(lineStart, partEnd-lineStart);
+
+    while(lineStart < partEnd)
+    {            
+        std::string partStr(reinterpret_cast<const char*>(lineStart), lineEnd-lineStart);
+        T5LOG(T5TRANSACTION) << "partStr = " << partStr;
+
+        if (!isBody) {
+            std::string headerValue(reinterpret_cast<const char*>(lineStart), lineEnd-lineStart);
+            if (headerValue == "\r" || headerValue == "\n" || headerValue == "\r\n" || headerValue.empty()) {
+                fBoundaryWasMissingInPreviousBodyChunk = isBody = true;
+                lineStart += headerValue.size(); //*lineEnd == '\r'? lineEnd+2 : lineEnd + 1;
+                lineEnd = findLineEnd(lineStart, partEnd-lineStart);
                 continue;
             }
-
-            if (!isBody) {
-                // Parse headers
-                auto delimiterPos = line.find(": ");
-                if (delimiterPos != std::string::npos) {
-                    std::string headerName = line.substr(0, delimiterPos);
-                    std::string headerValue = line.substr(delimiterPos + 2);
-                    if (headerName.find("Content-Disposition") != std::string::npos) {
-                      if (headerValue.find("filename=") != std::string::npos) {
-                        processedBodyPart = FILE;
-                      } else if (headerValue.find("name=\"json_data\"") != std::string::npos) {
-                        // Handle JSON part
-                        processedBodyPart = JSON;
-                      }else{
-                        processedBodyPart = OTHER;
-                      }
-                    }
-                }
+            
+            // Parse headers
+            if (headerValue.find("filename=") != std::string::npos) {
+                processedBodyPart = FILE;
+            } else if (headerValue.find("name=\"json_data\"") != std::string::npos) {
+                processedBodyPart = JSON;
             } else {
-                // Handle body as a block of data, not line by line
-                size_t bodyStart = partStr.find("\r\n\r\n") + 4; // End of headers
-                if(FILE == processedBodyPart){
-                  std::string bodyContent = partStr.substr(bodyStart);
-                  auto data = folly::IOBuf::copyBuffer(bodyContent.data(), bodyContent.size());
-                  fileStream.write(reinterpret_cast<const char*>(data->data()), data->length());
-                }else if(JSON == processedBodyPart){
-                  std::string bodyContent = partStr.substr(bodyStart);
-                  pRequest->strBody += bodyContent;//iobufToString(part.body);
-                }
-                break;
+                //processedBodyPart = OTHER;
+            }
+                //lineStart += headerValue.size();
+        } else {
+            if(findBinaryBoundary(lineStart, lineEnd-lineStart, 0, boundaryLine) != std::string::npos
+                || findBinaryBoundary(lineStart, lineEnd-lineStart, 0, endBoundaryLine) != std::string::npos){
+                    if(findBinaryBoundary(lineStart, lineEnd-lineStart, 0, endBoundaryLine) != std::string::npos){
+                        int a = 0;
+                    }
+                processedBodyPart = OTHER;
+                fBoundaryWasMissingInPreviousBodyChunk = isBody = false;
+            }else if (FILE == processedBodyPart) 
+            {
+                // Write file content directly to disk in chunks                  
+                fileStream.write(reinterpret_cast<const char*>(lineStart), lineEnd-lineStart);
+                //partStart = partEnd;
+            } else if (JSON == processedBodyPart) {
+                // Accumulate JSON content (or process it incrementally)
+                std::string json_data(reinterpret_cast<const char*>(lineStart), lineEnd-lineStart);
+                T5LOG(T5TRANSACTION) << "parsed json, len:" << json_data.size() << ", json_data:" << json_data;
+                pRequest->strBody += json_data;;
             }
         }
-        // Move position for the next part
-        pos = nextPos + boundaryLine.length();
+
+        lineStart = lineEnd;
+        lineEnd = findLineEnd(lineStart, partEnd-lineStart);
     }
 }
-
   
 };
 

@@ -547,19 +547,19 @@ int RequestData::sendStreamFile(proxygen::ResponseBuilder* builder){
   
   std::vector<uint8_t> buffer(chunkSize);
   ssize_t bytesRead;    // Read from file in chunks
+  //T5LOG(T5TRANSACTION) << "sending headers";
   builder->send();
   
   while ((bytesRead = ::read(file.fd(), buffer.data(), buffer.size())) > 0) {
-      //if (bytesRead < 0) {
-      //    // Handle read error
-      //    downstream_->sendError(proxygen::k500InternalServerError, "File read error");
-      //    return -1;
-      //}        // Send the buffer chunk as HTTP body
-      //builder->sendBody(folly::IOBuf::copyBuffer(buffer.data(), bytesRead));
+    //builder->sendBody(folly::IOBuf::copyBuffer(buffer.data(), bytesRead));
+    //T5LOG(T5TRANSACTION) << "sending data chunk, size = " << bytesRead; 
+    responseHandler->sendBody(folly::IOBuf::copyBuffer(buffer.data(), bytesRead));
+    //sleep(1);
   }    
   
   // Close the file
   file.close();
+  //T5LOG(T5TRANSACTION) << "sending EOM"; 
   builder->sendWithEOM(); // End of message
   return 0;
 }
@@ -613,27 +613,30 @@ const char* GetFileExtention(std::string file){
 }
 
 int CreateMemRequestData::importInInternalFomat(){
-  T5LOG( T5INFO) << ":: strData is not empty -> setup temp file name for ZIP package file ";
-  // setup temp file name for ZIP package file 
-
-  strTempFile =  reserveFilename();
-
-  T5LOG( T5INFO) << "+   Temp binary file is " << strTempFile ;
-
-  // decode binary data and write it to temp file
   std::string strError;
-  if(isBase64){
-    _rc_ = FilesystemHelper::DecodeBase64ToFile( strTmData.c_str(), strTempFile.c_str(), strError );
-  }else{
-    if(binTmData.size() > 0){
-      auto filesize = FilesystemHelper::WriteToFile(strTempFile, &binTmData[0], binTmData.size());
-      if(0 == filesize){
-        return buildErrorReturn( _rc_, "cant write tm data to temp file", 500);
-      }
+  T5LOG( T5INFO) << ":: strData is not empty -> setup temp file name for ZIP package file ";
+  
+  // setup temp file name for ZIP package file 
+  if(!fMultipartFormData){
+    strTempFile =  reserveFilename();
+
+    T5LOG( T5INFO) << "+   Temp binary file is " << strTempFile ;
+
+    // decode binary data and write it to temp file
+    if(isBase64){
+      _rc_ = FilesystemHelper::DecodeBase64ToFile( strTmData.c_str(), strTempFile.c_str(), strError );
     }else{
-      return buildErrorReturn( _rc_, "binary tm  file data not found", 400);
+      if(binTmData.size() > 0){
+        auto filesize = FilesystemHelper::WriteToFile(strTempFile, &binTmData[0], binTmData.size());
+        if(0 == filesize){
+          return buildErrorReturn( _rc_, "cant write tm data to temp file", 500);
+        }
+      }else{
+        return buildErrorReturn( _rc_, "binary tm  file data not found", 400);
+      }
     }
   }
+
   if ( _rc_ != 0 )
   {
     return buildErrorReturn( _rc_, (char *)strError.c_str(), INTERNAL_SERVER_ERROR);
@@ -695,7 +698,7 @@ int CreateMemRequestData::checkData(){
     return buildErrorReturn( ERROR_INPUT_PARMS_INVALID, "Error: Missing memory name input parameter", BAD_REQUEST);
   } /* end */
   
-  if ( !_rc_ && strSrcLang.empty() && strTmData.empty() && binTmData.empty())// it's import in internal format
+  if ( !_rc_ && strSrcLang.empty() && strTmData.empty() && binTmData.empty() && !fMultipartFormData)// it's import in internal format
   {
     return buildErrorReturn( ERROR_INPUT_PARMS_INVALID, "Error: Missing source language input parameter", BAD_REQUEST );
   } /* end */
@@ -712,6 +715,16 @@ int CreateMemRequestData::checkData(){
       std::string err =  "Error: Could not convert language " + strSrcLang + "to OpenTM2 language name";
       return buildErrorReturn( ERROR_INPUT_PARMS_INVALID, (PSZ)err.c_str(), INTERNAL_ERROR);
     } /* end */
+    // check if source language is valid
+    if ( _rc_ == NO_ERROR )
+    {
+      SHORT sID = 0;    
+      if ( MorphGetLanguageID( (PSZ)strSrcLang.c_str(), &sID ) != MORPH_OK )
+      {
+        std::string errMsg = "MorhpGetLanguageID returned error, usRC = ERROR_PROPERTY_LANG_DATA::" +  strSrcLang ;
+        return buildErrorReturn( ERROR_PROPERTY_LANG_DATA, errMsg.c_str(), BAD_REQUEST);
+      } /* endif */
+    } /* endif */
   }
 
   T5LOG(T5DEBUG) << "( MemName = "<<strMemName <<", pszDescription = "<<strMemDescription<<", pszSourceLanguage = "<<strSrcLang<<" )";
@@ -735,18 +748,7 @@ int CreateMemRequestData::checkData(){
       return buildErrorReturn( ERROR_MEM_NAME_EXISTS, errMsg.c_str(), INTERNAL_SERVER_ERROR);
     }
   } /* endif */
-
-
-  // check if source language is valid
-  if ( _rc_ == NO_ERROR )
-  {
-    SHORT sID = 0;    
-    if ( MorphGetLanguageID( (PSZ)strSrcLang.c_str(), &sID ) != MORPH_OK )
-    {
-      std::string errMsg = "MorhpGetLanguageID returned error, usRC = ERROR_PROPERTY_LANG_DATA::" +  strSrcLang ;
-      return buildErrorReturn( ERROR_PROPERTY_LANG_DATA, errMsg.c_str(), BAD_REQUEST);
-    } /* endif */
-  } /* endif */
+  
   //fValid = !_rest_rc_ && !_rc_;
   return _rest_rc_;
 }
@@ -809,7 +811,7 @@ int CreateMemRequestData::parseJSON(){
 }
 
 int CreateMemRequestData::execute(){
-  if ( strTmData.empty()  && binTmData.empty()) // create empty tm
+  if ( strTmData.empty()  && binTmData.empty() &&  !fMultipartFormData) // create empty tm
   {
     createNewEmptyMemory();
   }else{
@@ -2902,20 +2904,7 @@ int ExportRequestData::execute(){
     std::string strErrMsg = "::getMem:: Error: the type " + requestAcceptHeader + " is not supported" ;
     return buildErrorReturn(_rc_, strErrMsg.c_str(), BAD_REQUEST);
     //return( _rest_rc_ = NOT_ACCEPTABLE );
-  }
-
-  // fill the vMemData vector with the content of zTempFile
-  //std::vector<unsigned char> vMemData;
-  //_rc_ = FilesystemHelper::LoadFileIntoByteVector( strTempFile, vMemData );
-  //outputMessage = std::string(vMemData.begin(), vMemData.end());
-  //cleanup
-  //if(false == isStreamingRequest()){
-    if(T5Logger::GetInstance()->CheckLogLevel(T5DEBUG) == false 
-      && COMMAND::EXPORT_MEM_TMX != command
-      && COMMAND::EXPORT_MEM_TMX_STREAM != command ){ //for DEBUG and DEVELOP modes leave file in fs
-      //FilesystemHelper::DeleteFile( strTempFile, true );
-    }
-  //}
+  } 
   
   if ( _rc_ != 0 )
   {
