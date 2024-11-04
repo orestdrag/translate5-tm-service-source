@@ -990,8 +990,121 @@ int JSONFactory::extractStringW
 */
 int JSONFactory::parseJSON
 (
+  std::string &JSONString,
+  PJSONPARSECONTROLUTF8 pParserControl, JSONParseCallbackUTF8 callback 
+)
+{
+  int iRC = 0;
+
+  void *parseHandle = parseJSONStart( JSONString, &iRC );
+  if ( parseHandle == NULL )
+  {
+    return( iRC );
+  } /* end */         
+
+  while ( iRC == 0 )
+  {
+    std::string name;
+    std::string value;
+    iRC = parseJSONGetNext( parseHandle, name, value );
+    if ( iRC == 0 )
+    {
+      PJSONPARSECONTROLUTF8 pParm = pParserControl;
+      bool fFound = false;
+
+      while( !fFound && (pParm->szName[0] != 0) )
+      {
+        if ( strcasecmp( name.c_str(), pParm->szName ) == 0 )
+        {
+          fFound = true;
+        }
+        else
+        {
+          pParm++;
+        } /* endif */
+      } /* endwhile */
+
+      if ( false == fFound )
+      {
+        if(callback){
+          iRC = callback( name, value);
+        }
+      }
+      else
+      {
+        switch ( pParm->type )
+        {
+          case UTF8_STRING_PARM_TYPE:
+          {
+            std::strncpy((char*)pParm->pvValue, value.c_str(), pParm->iBufferLen-1);
+            *(((char *)pParm->pvValue) + (pParm->iBufferLen - 1)) = 0;
+            break;
+          }
+         
+
+          case UTF32_STRING_PARM_TYPE:
+          {
+            std::wstring str = EncodingHelper::convertToUTF32(value);
+            wcsncpy( (wchar_t *)pParm->pvValue, str.c_str(), pParm->iBufferLen - 1 );
+            *(((wchar_t *)pParm->pvValue) + (pParm->iBufferLen - 1)) = 0;
+            break;
+          }
+
+          case INT_PARM_TYPE:
+          {
+            // Use std::stoi to convert the string to an integer
+            try {
+              *((int *)pParm->pvValue) = std::stoi(value);
+            } catch (const std::invalid_argument& e) {
+                std::string msg = "Invalid argument: ";
+                msg += e.what();
+                T5LOG(T5ERROR) << msg;
+                return -1;
+            } catch (const std::out_of_range& e) {
+                std::string msg = "Out of range: "; 
+                msg += e.what();
+                T5LOG(T5ERROR) << msg;
+                return -1;
+            }
+            //wchar_t * pEnd;
+            //*((int *)pParm->pvValue) = wcstol( value.c_str(), &pEnd, 10 );
+            break;
+          }
+
+          case UTF8_STRING_CLASS_PARM_TYPE:
+          {
+            *((std::string*)pParm->pvValue) = value; 
+            break;
+          }
+
+          case TIMESTAMP_PARM_TYPE:
+          {
+            break;
+          }
+          case SEARCH_FILTER_PARM_TYPE:
+          {
+            break;
+          }
+        } /* endswitch */
+      } /* endif */
+    } /* endif */       
+
+    // reset iRC for specific codes
+    if ( iRC == INFO_BEGINOFELEMENTDETECTED )
+    {
+      iRC = 0;
+    } /* endif */
+  } /* endwhile */    
+
+  parseJSONStop( parseHandle );
+
+  return( (iRC == INFO_ENDOFPARAMETERLISTREACHED) ? 0 : iRC );
+}
+
+int JSONFactory::parseJSON
+(
   std::wstring &JSONString,
-  PJSONPARSECONTROL pParserControl, JSONParseCallback callback 
+  PJSONPARSECONTROLUTF32 pParserControl, JSONParseCallback callback 
 )
 {
   int iRC = 0;
@@ -1009,7 +1122,7 @@ int JSONFactory::parseJSON
     iRC = parseJSONGetNextW( parseHandle, name, value );
     if ( iRC == 0 )
     {
-      PJSONPARSECONTROL pParm = pParserControl;
+      PJSONPARSECONTROLUTF32 pParm = pParserControl;
       bool fFound = false;
 
       while( !fFound && (pParm->szName[0] != 0) )
@@ -1034,22 +1147,16 @@ int JSONFactory::parseJSON
       {
         switch ( pParm->type )
         {
-          case ASCII_STRING_PARM_TYPE:
+          case UTF8_STRING_PARM_TYPE:
           {
             std::string str = EncodingHelper::convertToUTF8(value);
             std::strncpy((char*)pParm->pvValue, str.c_str(), pParm->iBufferLen-1);
-            //WideCharToMultiByte( CP_OEMCP, 0, (LPWSTR)value.c_str(), -1, (char *)pParm->pvValue, pParm->iBufferLen - 1, NULL, NULL );
             *(((char *)pParm->pvValue) + (pParm->iBufferLen - 1)) = 0;
             break;
           }
-          case UTF8_STRING_PARM_TYPE:
-          {
-            WideCharToMultiByte( CP_UTF8, 0, (LPWSTR)value.c_str(), -1, (char *)pParm->pvValue, pParm->iBufferLen - 1, NULL, NULL );
-            *(((char *)pParm->pvValue) + (pParm->iBufferLen - 1)) = 0;
-            break;
-          }
+         
 
-          case UTF16_STRING_PARM_TYPE:
+          case UTF32_STRING_PARM_TYPE:
           {
             wcsncpy( (wchar_t *)pParm->pvValue, value.c_str(), pParm->iBufferLen - 1 );
             *(((wchar_t *)pParm->pvValue) + (pParm->iBufferLen - 1)) = 0;
@@ -1088,7 +1195,7 @@ int JSONFactory::parseJSON
           {
             break;
           }
-          case SARCH_FILTER_PARM_TYPE:
+          case SEARCH_FILTER_PARM_TYPE:
           {
             break;
           }

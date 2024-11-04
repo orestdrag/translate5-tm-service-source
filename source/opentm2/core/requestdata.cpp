@@ -1777,30 +1777,29 @@ int DeleteEntriesReorganizeRequestData::parseJSON(){
   } /* endif */
 
   // parse input parameters
-  std::wstring strInputParmsW = EncodingHelper::convertToWChar( strBody.c_str() );
   
-  JSONFactory::JSONPARSECONTROL parseControl[] = { 
+  JSONFactory::JSONPARSECONTROLUTF8 parseControl[] = { 
     //searchFilterFactory
-    { L"source",     JSONFactory::UTF8_STRING_CLASS_PARM_TYPE, &(  searchFilterFactory.source ), 0 },
-    { L"target",     JSONFactory::UTF8_STRING_CLASS_PARM_TYPE, &(  searchFilterFactory.target ), 0 },
-    { L"addInfo",     JSONFactory::UTF8_STRING_CLASS_PARM_TYPE, &(  searchFilterFactory.addInfo ), 0 },
-    { L"context",     JSONFactory::UTF8_STRING_CLASS_PARM_TYPE, &(  searchFilterFactory.context ), 0 },
-    { L"author",     JSONFactory::UTF8_STRING_CLASS_PARM_TYPE, &(  searchFilterFactory.author ), 0 },
-    { L"document",     JSONFactory::UTF8_STRING_CLASS_PARM_TYPE, &(  searchFilterFactory.document ), 0 },
-                                                   { L"tmMutexTimeout", JSONFactory::INT_PARM_TYPE, &tmMutexTimeoutMs, -1},
-                                                   { L"tmListMutexTimeout", JSONFactory::INT_PARM_TYPE, &tmListMutexTimeoutMs, -1},
-                                                   { L"requestTMMutexTimeout", JSONFactory::INT_PARM_TYPE, &requestTMMutexTimeoutMs, -1},
+    { "source",     JSONFactory::UTF8_STRING_CLASS_PARM_TYPE, &(  searchFilterFactory.source ), 0 },
+    { "target",     JSONFactory::UTF8_STRING_CLASS_PARM_TYPE, &(  searchFilterFactory.target ), 0 },
+    { "addInfo",     JSONFactory::UTF8_STRING_CLASS_PARM_TYPE, &(  searchFilterFactory.addInfo ), 0 },
+    { "context",     JSONFactory::UTF8_STRING_CLASS_PARM_TYPE, &(  searchFilterFactory.context ), 0 },
+    { "author",     JSONFactory::UTF8_STRING_CLASS_PARM_TYPE, &(  searchFilterFactory.author ), 0 },
+    { "document",     JSONFactory::UTF8_STRING_CLASS_PARM_TYPE, &(  searchFilterFactory.document ), 0 },
+                                                   { "tmMutexTimeout", JSONFactory::INT_PARM_TYPE, &tmMutexTimeoutMs, -1},
+                                                   { "tmListMutexTimeout", JSONFactory::INT_PARM_TYPE, &tmListMutexTimeoutMs, -1},
+                                                   { "requestTMMutexTimeout", JSONFactory::INT_PARM_TYPE, &requestTMMutexTimeoutMs, -1},
 
-    //{ L"timestampSpanStart",     JSONFactory::TIMESTAMP_PARM_TYPE, &(  searchFilterFactory.timestampSpanStart ), 0 },
-    //{ L"timestampSpanEnd",     JSONFactory::TIMESTAMP_PARM_TYPE, &(  searchFilterFactory.timestampSpanEnd ), 0 },
+    //{ "timestampSpanStart",     JSONFactory::TIMESTAMP_PARM_TYPE, &(  searchFilterFactory.timestampSpanStart ), 0 },
+    //{ "timestampSpanEnd",     JSONFactory::TIMESTAMP_PARM_TYPE, &(  searchFilterFactory.timestampSpanEnd ), 0 },
 
-    { L"",               JSONFactory::ASCII_STRING_PARM_TYPE, NULL, 0 } 
+    { "",               JSONFactory::UTF8_STRING_PARM_TYPE, NULL, 0 } 
   };
 
   
-  JSONParseCallback callback = std::bind(&SearchFilterFactory::parseJSONNameAndValueW, &searchFilterFactory, std::placeholders::_1, std::placeholders::_2);
+  JSONParseCallbackUTF8 callback = std::bind(&SearchFilterFactory::parseJSONNameAndValue, &searchFilterFactory, std::placeholders::_1, std::placeholders::_2);
 
-  _rc_ = json_factory.parseJSON( strInputParmsW, parseControl, callback );
+  _rc_ = json_factory.parseJSON( strBody, parseControl, callback );
     
   if(_rc_ == 1001){buildErrorReturn(_rc_,"Can't parse start timestamp", BAD_REQUEST);}
   else if(_rc_ == 1002){buildErrorReturn(_rc_,"Can't parse end timestamp", BAD_REQUEST);}
@@ -2816,22 +2815,21 @@ int ExportRequestData::parseJSON(){
   
   int loggingThreshold = -1;
   
-  JSONFactory::JSONPARSECONTROL parseControl[] = { 
-    { L"startFromInternalKey",         JSONFactory::ASCII_STRING_PARM_TYPE, &( szKey ), sizeof( szKey ) / sizeof( szKey[0] ) },
-    { L"limit",          JSONFactory::INT_PARM_TYPE, &(numberOfRequestedProposals), 0},
-    { L"loggingThreshold",JSONFactory::INT_PARM_TYPE        , &(loggingThreshold), 0}, 
-                                                   { L"tmMutexTimeout", JSONFactory::INT_PARM_TYPE, &tmMutexTimeoutMs, -1},
-                                                   { L"tmListMutexTimeout", JSONFactory::INT_PARM_TYPE, &tmListMutexTimeoutMs, -1},
-                                                   { L"requestTMMutexTimeout", JSONFactory::INT_PARM_TYPE, &requestTMMutexTimeoutMs, -1},
-    { L"",               JSONFactory::ASCII_STRING_PARM_TYPE, NULL, 0 } 
+  JSONFactory::JSONPARSECONTROLUTF8 parseControl[] = { 
+    { "startFromInternalKey",         JSONFactory::UTF8_STRING_PARM_TYPE, &( szKey ), sizeof( szKey ) / sizeof( szKey[0] ) },
+    { "limit",          JSONFactory::INT_PARM_TYPE, &(numberOfRequestedProposals), 0},
+    { "loggingThreshold",JSONFactory::INT_PARM_TYPE        , &(loggingThreshold), 0}, 
+                                                   { "tmMutexTimeout", JSONFactory::INT_PARM_TYPE, &tmMutexTimeoutMs, -1},
+                                                   { "tmListMutexTimeout", JSONFactory::INT_PARM_TYPE, &tmListMutexTimeoutMs, -1},
+                                                   { "requestTMMutexTimeout", JSONFactory::INT_PARM_TYPE, &requestTMMutexTimeoutMs, -1},
+    { "",               JSONFactory::UTF8_STRING_PARM_TYPE, NULL, 0 } 
   };
 
   if(loggingThreshold >= 0){
     T5LOG( T5WARNING) <<"::ExportRequestData::set new threshold for logging" << loggingThreshold;
     T5Logger::GetInstance()->SetLogLevel(loggingThreshold);
   }
-  std::wstring strInputParmsW = EncodingHelper::convertToWChar( strBody.c_str() );
-  _rc_ = json_factory.parseJSON( strInputParmsW, parseControl );
+  _rc_ = json_factory.parseJSON( strBody, parseControl );
   return 0;
 }
 
@@ -3035,35 +3033,33 @@ int UpdateEntryRequestData::parseJSON(){
   } /* endif */
 
   // parse input parameters
-  std::wstring strInputParmsW = EncodingHelper::convertToWChar( strBody.c_str() );
-  // parse input parameters
   
   ulong recordKey = 0, targetKey = 0;
   Data.clear();    
-  JSONFactory::JSONPARSECONTROL parseControl[] = { 
-  { L"source",         JSONFactory::UTF16_STRING_PARM_TYPE, &( Data.szSource ), sizeof( Data.szSource ) / sizeof( Data.szSource[0] ) },
-  { L"target",         JSONFactory::UTF16_STRING_PARM_TYPE, &( Data.szTarget ), sizeof( Data.szTarget ) / sizeof( Data.szTarget[0] ) },
-  { L"sourceLang",     JSONFactory::ASCII_STRING_PARM_TYPE, &( Data.szIsoSourceLang ), sizeof( Data.szIsoSourceLang ) },
-  { L"targetLang",     JSONFactory::ASCII_STRING_PARM_TYPE, &( Data.szIsoTargetLang ), sizeof( Data.szIsoTargetLang ) },  
+  JSONFactory::JSONPARSECONTROLUTF8 parseControl[] = { 
+  { "source",         JSONFactory::UTF32_STRING_PARM_TYPE, &( Data.szSource ), sizeof( Data.szSource ) / sizeof( Data.szSource[0] ) },
+  { "target",         JSONFactory::UTF32_STRING_PARM_TYPE, &( Data.szTarget ), sizeof( Data.szTarget ) / sizeof( Data.szTarget[0] ) },
+  { "sourceLang",     JSONFactory::UTF8_STRING_PARM_TYPE, &( Data.szIsoSourceLang ), sizeof( Data.szIsoSourceLang ) },
+  { "targetLang",     JSONFactory::UTF8_STRING_PARM_TYPE, &( Data.szIsoTargetLang ), sizeof( Data.szIsoTargetLang ) },  
 
-  { L"segmentId",  JSONFactory::INT_PARM_TYPE,          &( Data.lSegmentId ), 0 },
-  { L"documentName",   JSONFactory::ASCII_STRING_PARM_TYPE, &( Data.szDocName ), sizeof( Data.szDocName ) },
-  { L"type",           JSONFactory::ASCII_STRING_PARM_TYPE, &( szType ), sizeof( szType ) },
-  { L"author",         JSONFactory::ASCII_STRING_PARM_TYPE, &( Data.szTargetAuthor ), sizeof( Data.szTargetAuthor ) },
-  { L"markupTable",    JSONFactory::ASCII_STRING_PARM_TYPE, &( Data.szMarkup ), sizeof( Data.szMarkup ) },
-  { L"context",        JSONFactory::UTF16_STRING_PARM_TYPE, &( Data.szContext ), sizeof( Data.szContext ) / sizeof( Data.szContext[0] ) },
-  { L"timeStamp",      JSONFactory::ASCII_STRING_PARM_TYPE, &( szDateTime ), sizeof( szDateTime ) },
-  { L"addInfo",        JSONFactory::UTF16_STRING_PARM_TYPE, &( Data.szAddInfo ), sizeof( Data.szAddInfo ) / sizeof( Data.szAddInfo[0] ) },
-  { L"loggingThreshold",JSONFactory::INT_PARM_TYPE        , &(loggingThreshold), 0},
-  { L"save2disk",      JSONFactory::INT_PARM_TYPE         , &(fSave2Disk), 0 },
-  { L"recordKey",      JSONFactory::INT_PARM_TYPE         , &(recordKey), 0 },
-  { L"targetKey",      JSONFactory::INT_PARM_TYPE         , &(targetKey), 0 },
-                                                   { L"tmMutexTimeout", JSONFactory::INT_PARM_TYPE, &tmMutexTimeoutMs, -1},
-                                                   { L"tmListMutexTimeout", JSONFactory::INT_PARM_TYPE, &tmListMutexTimeoutMs, -1},
-                                                   { L"requestTMMutexTimeout", JSONFactory::INT_PARM_TYPE, &requestTMMutexTimeoutMs, -1},
-  { L"",               JSONFactory::ASCII_STRING_PARM_TYPE, NULL, 0 } };
+  { "segmentId",  JSONFactory::INT_PARM_TYPE,          &( Data.lSegmentId ), 0 },
+  { "documentName",   JSONFactory::UTF8_STRING_PARM_TYPE, &( Data.szDocName ), sizeof( Data.szDocName ) },
+  { "type",           JSONFactory::UTF8_STRING_PARM_TYPE, &( szType ), sizeof( szType ) },
+  { "author",         JSONFactory::UTF8_STRING_PARM_TYPE, &( Data.szTargetAuthor ), sizeof( Data.szTargetAuthor ) },
+  { "markupTable",    JSONFactory::UTF8_STRING_PARM_TYPE, &( Data.szMarkup ), sizeof( Data.szMarkup ) },
+  { "context",        JSONFactory::UTF32_STRING_PARM_TYPE, &( Data.szContext ), sizeof( Data.szContext ) / sizeof( Data.szContext[0] ) },
+  { "timeStamp",      JSONFactory::UTF8_STRING_PARM_TYPE, &( szDateTime ), sizeof( szDateTime ) },
+  { "addInfo",        JSONFactory::UTF32_STRING_PARM_TYPE, &( Data.szAddInfo ), sizeof( Data.szAddInfo ) / sizeof( Data.szAddInfo[0] ) },
+  { "loggingThreshold",JSONFactory::INT_PARM_TYPE        , &(loggingThreshold), 0},
+  { "save2disk",      JSONFactory::INT_PARM_TYPE         , &(fSave2Disk), 0 },
+  { "recordKey",      JSONFactory::INT_PARM_TYPE         , &(recordKey), 0 },
+  { "targetKey",      JSONFactory::INT_PARM_TYPE         , &(targetKey), 0 },
+                                                   { "tmMutexTimeout", JSONFactory::INT_PARM_TYPE, &tmMutexTimeoutMs, -1},
+                                                   { "tmListMutexTimeout", JSONFactory::INT_PARM_TYPE, &tmListMutexTimeoutMs, -1},
+                                                   { "requestTMMutexTimeout", JSONFactory::INT_PARM_TYPE, &requestTMMutexTimeoutMs, -1},
+  { "",               JSONFactory::UTF8_STRING_PARM_TYPE, NULL, 0 } };
 
-  _rc_ = json_factory.parseJSON( strInputParmsW, parseControl );
+  _rc_ = json_factory.parseJSON( strBody, parseControl );
 
   if ( _rc_ != 0 )
   {
@@ -3212,23 +3208,23 @@ int GetEntryRequestData::parseJSON(){
   {
     return buildErrorReturn( _rc_, "Missing name of memory", BAD_REQUEST);
   } /* endif */
-    // parse input parameters
-  std::wstring strInputParmsW = EncodingHelper::convertToWChar( strBody.c_str() );
+    
+
   // parse input parameters
   Data.clear();
 
   auto loggingThreshold = -1;
        
-  JSONFactory::JSONPARSECONTROL parseControl[] = { 
-  { L"loggingThreshold",JSONFactory::INT_PARM_TYPE        , &(loggingThreshold), 0},
-  { L"recordKey",      JSONFactory::INT_PARM_TYPE         , &(recordKey), 0 },
-  { L"targetKey",      JSONFactory::INT_PARM_TYPE         , &(targetKey), 0 },
-                                                   { L"tmMutexTimeout", JSONFactory::INT_PARM_TYPE, &tmMutexTimeoutMs, -1},
-                                                   { L"tmListMutexTimeout", JSONFactory::INT_PARM_TYPE, &tmListMutexTimeoutMs, -1},
-                                                   { L"requestTMMutexTimeout", JSONFactory::INT_PARM_TYPE, &requestTMMutexTimeoutMs, -1},
-  { L"",               JSONFactory::ASCII_STRING_PARM_TYPE, NULL, 0 } };
+  JSONFactory::JSONPARSECONTROLUTF8 parseControl[] = { 
+  { "loggingThreshold",JSONFactory::INT_PARM_TYPE        , &(loggingThreshold), 0},
+  { "recordKey",      JSONFactory::INT_PARM_TYPE         , &(recordKey), 0 },
+  { "targetKey",      JSONFactory::INT_PARM_TYPE         , &(targetKey), 0 },
+                                                   { "tmMutexTimeout", JSONFactory::INT_PARM_TYPE, &tmMutexTimeoutMs, -1},
+                                                   { "tmListMutexTimeout", JSONFactory::INT_PARM_TYPE, &tmListMutexTimeoutMs, -1},
+                                                   { "requestTMMutexTimeout", JSONFactory::INT_PARM_TYPE, &requestTMMutexTimeoutMs, -1},
+  { "",               JSONFactory::UTF8_STRING_PARM_TYPE, NULL, 0 } };
 
-  _rc_ = json_factory.parseJSON( strInputParmsW, parseControl );  
+  _rc_ = json_factory.parseJSON( strBody, parseControl );  
  
   if(loggingThreshold >=0) T5Logger::GetInstance()->SetLogLevel(loggingThreshold);  
   Data.nextInternalKey.setInternalKey(recordKey, targetKey);
@@ -3284,36 +3280,35 @@ int DeleteEntryRequestData::parseJSON(){
     return buildErrorReturn( _rc_, "Missing name of memory", BAD_REQUEST);
   } /* endif */
     // parse input parameters
-  std::wstring strInputParmsW = EncodingHelper::convertToWChar( strBody.c_str() );
   // parse input parameters
   Data.clear();
 
   auto loggingThreshold = -1;
   ulong recordKey = 0, targetKey = 0 ;
        
-  JSONFactory::JSONPARSECONTROL parseControl[] = { 
-  { L"source",         JSONFactory::UTF16_STRING_PARM_TYPE, &( Data.szSource ), sizeof( Data.szSource ) / sizeof( Data.szSource[0] ) },
-  { L"target",         JSONFactory::UTF16_STRING_PARM_TYPE, &( Data.szTarget ), sizeof( Data.szTarget ) / sizeof( Data.szTarget[0] ) },
-  { L"segmentId",  JSONFactory::INT_PARM_TYPE,          &( Data.lSegmentId ), 0 },
-  { L"documentName",   JSONFactory::ASCII_STRING_PARM_TYPE, &( Data.szDocName ), sizeof( Data.szDocName ) },
-  { L"sourceLang",     JSONFactory::ASCII_STRING_PARM_TYPE, &( Data.szIsoSourceLang ), sizeof( Data.szIsoSourceLang ) },
-  { L"targetLang",     JSONFactory::ASCII_STRING_PARM_TYPE, &( Data.szIsoTargetLang ), sizeof( Data.szIsoTargetLang ) },
-  { L"type",           JSONFactory::ASCII_STRING_PARM_TYPE, &( szType ), sizeof( szType ) },
-  { L"author",         JSONFactory::ASCII_STRING_PARM_TYPE, &( Data.szTargetAuthor ), sizeof( Data.szTargetAuthor ) },
-  { L"markupTable",    JSONFactory::ASCII_STRING_PARM_TYPE, &( Data.szMarkup ), sizeof( Data.szMarkup ) },
-  { L"context",        JSONFactory::UTF16_STRING_PARM_TYPE, &( Data.szContext ), sizeof( Data.szContext ) / sizeof( Data.szContext[0] ) },
-  { L"timeStamp",      JSONFactory::ASCII_STRING_PARM_TYPE, &( szDateTime ), sizeof( szDateTime ) },
-  { L"addInfo",        JSONFactory::UTF16_STRING_PARM_TYPE, &( Data.szAddInfo ), sizeof( Data.szAddInfo ) / sizeof( Data.szAddInfo[0] ) },
-  { L"loggingThreshold",JSONFactory::INT_PARM_TYPE        , &(loggingThreshold), 0},
-  { L"recordKey",      JSONFactory::INT_PARM_TYPE         , &(recordKey), 0 },
-  { L"targetKey",      JSONFactory::INT_PARM_TYPE         , &(targetKey), 0 },
-  { L"save2disk",      JSONFactory::INT_PARM_TYPE         , &(fSave2Disk), 0},
-                                                   { L"tmMutexTimeout", JSONFactory::INT_PARM_TYPE, &tmMutexTimeoutMs, -1},
-                                                   { L"tmListMutexTimeout", JSONFactory::INT_PARM_TYPE, &tmListMutexTimeoutMs, -1},
-                                                   { L"requestTMMutexTimeout", JSONFactory::INT_PARM_TYPE, &requestTMMutexTimeoutMs, -1},
-  { L"",               JSONFactory::ASCII_STRING_PARM_TYPE, NULL, 0 } };
+  JSONFactory::JSONPARSECONTROLUTF8 parseControl[] = { 
+  { "source",         JSONFactory::UTF32_STRING_PARM_TYPE, &( Data.szSource ), sizeof( Data.szSource ) / sizeof( Data.szSource[0] ) },
+  { "target",         JSONFactory::UTF32_STRING_PARM_TYPE, &( Data.szTarget ), sizeof( Data.szTarget ) / sizeof( Data.szTarget[0] ) },
+  { "segmentId",  JSONFactory::INT_PARM_TYPE,          &( Data.lSegmentId ), 0 },
+  { "documentName",   JSONFactory::UTF8_STRING_PARM_TYPE, &( Data.szDocName ), sizeof( Data.szDocName ) },
+  { "sourceLang",     JSONFactory::UTF8_STRING_PARM_TYPE, &( Data.szIsoSourceLang ), sizeof( Data.szIsoSourceLang ) },
+  { "targetLang",     JSONFactory::UTF8_STRING_PARM_TYPE, &( Data.szIsoTargetLang ), sizeof( Data.szIsoTargetLang ) },
+  { "type",           JSONFactory::UTF8_STRING_PARM_TYPE, &( szType ), sizeof( szType ) },
+  { "author",         JSONFactory::UTF8_STRING_PARM_TYPE, &( Data.szTargetAuthor ), sizeof( Data.szTargetAuthor ) },
+  { "markupTable",    JSONFactory::UTF8_STRING_PARM_TYPE, &( Data.szMarkup ), sizeof( Data.szMarkup ) },
+  { "context",        JSONFactory::UTF32_STRING_PARM_TYPE, &( Data.szContext ), sizeof( Data.szContext ) / sizeof( Data.szContext[0] ) },
+  { "timeStamp",      JSONFactory::UTF8_STRING_PARM_TYPE, &( szDateTime ), sizeof( szDateTime ) },
+  { "addInfo",        JSONFactory::UTF32_STRING_PARM_TYPE, &( Data.szAddInfo ), sizeof( Data.szAddInfo ) / sizeof( Data.szAddInfo[0] ) },
+  { "loggingThreshold",JSONFactory::INT_PARM_TYPE        , &(loggingThreshold), 0},
+  { "recordKey",      JSONFactory::INT_PARM_TYPE         , &(recordKey), 0 },
+  { "targetKey",      JSONFactory::INT_PARM_TYPE         , &(targetKey), 0 },
+  { "save2disk",      JSONFactory::INT_PARM_TYPE         , &(fSave2Disk), 0},
+                                                   { "tmMutexTimeout", JSONFactory::INT_PARM_TYPE, &tmMutexTimeoutMs, -1},
+                                                   { "tmListMutexTimeout", JSONFactory::INT_PARM_TYPE, &tmListMutexTimeoutMs, -1},
+                                                   { "requestTMMutexTimeout", JSONFactory::INT_PARM_TYPE, &requestTMMutexTimeoutMs, -1},
+  { "",               JSONFactory::UTF8_STRING_PARM_TYPE, NULL, 0 } };
 
-  _rc_ = json_factory.parseJSON( strInputParmsW, parseControl );  
+  _rc_ = json_factory.parseJSON( strBody, parseControl );  
   Data.nextInternalKey.setInternalKey(recordKey, targetKey);// next internal key used for sending position, current- for receiving
   if(loggingThreshold >=0) T5Logger::GetInstance()->SetLogLevel(loggingThreshold);  
 
@@ -3451,29 +3446,27 @@ int FuzzySearchRequestData::parseJSON(){
     return buildErrorReturn( _rc_, "Missing name of memory", BAD_REQUEST);
   } /* endif */
 
-    // parse input parameters
-  std::wstring strInputParmsW = EncodingHelper::convertToWChar( strBody.c_str() );
-  
+  // parse input parameters
   Data.clear();
   int loggingThreshold = -1;
-  JSONFactory::JSONPARSECONTROL parseControl[] = { { L"source",         JSONFactory::UTF16_STRING_PARM_TYPE, &( Data.szSource ), sizeof( Data.szSource ) / sizeof( Data.szSource[0] ) },
-                                                   { L"segmentId",  JSONFactory::INT_PARM_TYPE,          &( Data.lSegmentId ), 0 },
-                                                   { L"documentName",   JSONFactory::ASCII_STRING_PARM_TYPE, &( Data.szDocName ), sizeof( Data.szDocName ) },
-                                                   { L"sourceLang",     JSONFactory::ASCII_STRING_PARM_TYPE, &( Data.szIsoSourceLang ), sizeof( Data.szIsoSourceLang ) },
-                                                   { L"targetLang",     JSONFactory::ASCII_STRING_PARM_TYPE, &( Data.szIsoTargetLang ), sizeof( Data.szIsoTargetLang ) },
-                                                   { L"markupTable",    JSONFactory::ASCII_STRING_PARM_TYPE, &( Data.szMarkup ), sizeof( Data.szMarkup ) },
-                                                   { L"context",        JSONFactory::UTF16_STRING_PARM_TYPE, &( Data.szContext ), sizeof( Data.szContext ) / sizeof( Data.szContext[0] ) },
-                                                   { L"numOfProposals", JSONFactory::INT_PARM_TYPE,          &( Data.iNumOfProposals ), 0 },
-                                                   { L"loggingThreshold", JSONFactory::INT_PARM_TYPE,        &loggingThreshold, 0 },
-                                                   { L"tmMutexTimeout", JSONFactory::INT_PARM_TYPE, &tmMutexTimeoutMs, -1},
-                                                   { L"tmListMutexTimeout", JSONFactory::INT_PARM_TYPE, &tmListMutexTimeoutMs, -1},
-                                                   { L"requestTMMutexTimeout", JSONFactory::INT_PARM_TYPE, &requestTMMutexTimeoutMs, -1},
-                                                   { L"tmMutexTimeout", JSONFactory::INT_PARM_TYPE, &tmMutexTimeoutMs, -1},
-                                                   { L"tmListMutexTimeout", JSONFactory::INT_PARM_TYPE, &tmListMutexTimeoutMs, -1},
-                                                   { L"requestTMMutexTimeout", JSONFactory::INT_PARM_TYPE, &requestTMMutexTimeoutMs, -1},
-                                                   { L"",               JSONFactory::ASCII_STRING_PARM_TYPE, NULL, 0 } };
+  JSONFactory::JSONPARSECONTROLUTF8 parseControl[] = { { "source",         JSONFactory::UTF32_STRING_PARM_TYPE, &( Data.szSource ), sizeof( Data.szSource ) / sizeof( Data.szSource[0] ) },
+                                                   { "segmentId",  JSONFactory::INT_PARM_TYPE,          &( Data.lSegmentId ), 0 },
+                                                   { "documentName",   JSONFactory::UTF8_STRING_PARM_TYPE, &( Data.szDocName ), sizeof( Data.szDocName ) },
+                                                   { "sourceLang",     JSONFactory::UTF8_STRING_PARM_TYPE, &( Data.szIsoSourceLang ), sizeof( Data.szIsoSourceLang ) },
+                                                   { "targetLang",     JSONFactory::UTF8_STRING_PARM_TYPE, &( Data.szIsoTargetLang ), sizeof( Data.szIsoTargetLang ) },
+                                                   { "markupTable",    JSONFactory::UTF8_STRING_PARM_TYPE, &( Data.szMarkup ), sizeof( Data.szMarkup ) },
+                                                   { "context",        JSONFactory::UTF32_STRING_PARM_TYPE, &( Data.szContext ), sizeof( Data.szContext ) / sizeof( Data.szContext[0] ) },
+                                                   { "numOfProposals", JSONFactory::INT_PARM_TYPE,          &( Data.iNumOfProposals ), 0 },
+                                                   { "loggingThreshold", JSONFactory::INT_PARM_TYPE,        &loggingThreshold, 0 },
+                                                   { "tmMutexTimeout", JSONFactory::INT_PARM_TYPE, &tmMutexTimeoutMs, -1},
+                                                   { "tmListMutexTimeout", JSONFactory::INT_PARM_TYPE, &tmListMutexTimeoutMs, -1},
+                                                   { "requestTMMutexTimeout", JSONFactory::INT_PARM_TYPE, &requestTMMutexTimeoutMs, -1},
+                                                   { "tmMutexTimeout", JSONFactory::INT_PARM_TYPE, &tmMutexTimeoutMs, -1},
+                                                   { "tmListMutexTimeout", JSONFactory::INT_PARM_TYPE, &tmListMutexTimeoutMs, -1},
+                                                   { "requestTMMutexTimeout", JSONFactory::INT_PARM_TYPE, &requestTMMutexTimeoutMs, -1},
+                                                   { "",               JSONFactory::UTF8_STRING_PARM_TYPE, NULL, 0 } };
 
-  _rc_ = json_factory.parseJSON( strInputParmsW, parseControl );
+  _rc_ = json_factory.parseJSON( strBody, parseControl );
 
   if(loggingThreshold >=0) T5Logger::GetInstance()->SetLogLevel(loggingThreshold);  
 
@@ -3669,42 +3662,41 @@ int ConcordanceExtendedSearchRequestData::parseJSON(){
   } /* endif */
 
   // parse input parameters
-  std::wstring strInputParmsW = EncodingHelper::convertToWChar( strBody.c_str() );
   
   int loggingThreshold = -1;
-  JSONFactory::JSONPARSECONTROL parseControl[] = { 
-    { L"searchPosition", JSONFactory::ASCII_STRING_PARM_TYPE, &( Data.szSearchPos ), sizeof( Data.szSearchPos ) },
-    { L"sourceLang",     JSONFactory::ASCII_STRING_PARM_TYPE, &( Data.szIsoSourceLang ), sizeof( Data.szIsoSourceLang ) },
-    { L"targetLang",     JSONFactory::ASCII_STRING_PARM_TYPE, &( Data.szIsoTargetLang ), sizeof( Data.szIsoTargetLang ) },
-    { L"numResults",     JSONFactory::INT_PARM_TYPE,          &( Data.iNumOfProposals ), 0 },
-    { L"numOfProposals", JSONFactory::INT_PARM_TYPE,          &( Data.iNumOfProposals ), 0 },
-    { L"msSearchAfterNumResults", JSONFactory::INT_PARM_TYPE, &( Data.iSearchTime ), 0 },
-    { L"onlyCountSegments",       JSONFactory::INT_PARM_TYPE, &(fCountInsteadOfReturnSegments ), 0 },
-    { L"logicalOr",       JSONFactory::INT_PARM_TYPE, &(fCombineAsLogicalOr ), 0 },
+  JSONFactory::JSONPARSECONTROLUTF8 parseControl[] = { 
+    { "searchPosition", JSONFactory::UTF8_STRING_PARM_TYPE, &( Data.szSearchPos ), sizeof( Data.szSearchPos ) },
+    { "sourceLang",     JSONFactory::UTF8_STRING_PARM_TYPE, &( Data.szIsoSourceLang ), sizeof( Data.szIsoSourceLang ) },
+    { "targetLang",     JSONFactory::UTF8_STRING_PARM_TYPE, &( Data.szIsoTargetLang ), sizeof( Data.szIsoTargetLang ) },
+    { "numResults",     JSONFactory::INT_PARM_TYPE,          &( Data.iNumOfProposals ), 0 },
+    { "numOfProposals", JSONFactory::INT_PARM_TYPE,          &( Data.iNumOfProposals ), 0 },
+    { "msSearchAfterNumResults", JSONFactory::INT_PARM_TYPE, &( Data.iSearchTime ), 0 },
+    { "onlyCountSegments",       JSONFactory::INT_PARM_TYPE, &(fCountInsteadOfReturnSegments ), 0 },
+    { "logicalOr",       JSONFactory::INT_PARM_TYPE, &(fCombineAsLogicalOr ), 0 },
     //searchFilterFactory
-    { L"source",     JSONFactory::UTF8_STRING_CLASS_PARM_TYPE, &(  searchFilterFactory.source ), 0 },
-    { L"target",     JSONFactory::UTF8_STRING_CLASS_PARM_TYPE, &(  searchFilterFactory.target ), 0 },
-    { L"addInfo",     JSONFactory::UTF8_STRING_CLASS_PARM_TYPE, &(  searchFilterFactory.addInfo ), 0 },
-    { L"context",     JSONFactory::UTF8_STRING_CLASS_PARM_TYPE, &(  searchFilterFactory.context ), 0 },
-    { L"author",     JSONFactory::UTF8_STRING_CLASS_PARM_TYPE, &(  searchFilterFactory.author ), 0 },
-    { L"document",     JSONFactory::UTF8_STRING_CLASS_PARM_TYPE, &(  searchFilterFactory.document ), 0 },
-                                                   { L"tmMutexTimeout", JSONFactory::INT_PARM_TYPE, &tmMutexTimeoutMs, -1},
-                                                   { L"tmListMutexTimeout", JSONFactory::INT_PARM_TYPE, &tmListMutexTimeoutMs, -1},
-                                                   { L"requestTMMutexTimeout", JSONFactory::INT_PARM_TYPE, &requestTMMutexTimeoutMs, -1},
+    { "source",     JSONFactory::UTF8_STRING_CLASS_PARM_TYPE, &(  searchFilterFactory.source ), 0 },
+    { "target",     JSONFactory::UTF8_STRING_CLASS_PARM_TYPE, &(  searchFilterFactory.target ), 0 },
+    { "addInfo",     JSONFactory::UTF8_STRING_CLASS_PARM_TYPE, &(  searchFilterFactory.addInfo ), 0 },
+    { "context",     JSONFactory::UTF8_STRING_CLASS_PARM_TYPE, &(  searchFilterFactory.context ), 0 },
+    { "author",     JSONFactory::UTF8_STRING_CLASS_PARM_TYPE, &(  searchFilterFactory.author ), 0 },
+    { "document",     JSONFactory::UTF8_STRING_CLASS_PARM_TYPE, &(  searchFilterFactory.document ), 0 },
+                                                   { "tmMutexTimeout", JSONFactory::INT_PARM_TYPE, &tmMutexTimeoutMs, -1},
+                                                   { "tmListMutexTimeout", JSONFactory::INT_PARM_TYPE, &tmListMutexTimeoutMs, -1},
+                                                   { "requestTMMutexTimeout", JSONFactory::INT_PARM_TYPE, &requestTMMutexTimeoutMs, -1},
 
-    //{ L"timestampSpanStart",     JSONFactory::TIMESTAMP_PARM_TYPE, &(  searchFilterFactory.timestampSpanStart ), 0 },
-    //{ L"timestampSpanEnd",     JSONFactory::TIMESTAMP_PARM_TYPE, &(  searchFilterFactory.timestampSpanEnd ), 0 },
+    //{ "timestampSpanStart",     JSONFactory::TIMESTAMP_PARM_TYPE, &(  searchFilterFactory.timestampSpanStart ), 0 },
+    //{ "timestampSpanEnd",     JSONFactory::TIMESTAMP_PARM_TYPE, &(  searchFilterFactory.timestampSpanEnd ), 0 },
 
-    { L"",               JSONFactory::ASCII_STRING_PARM_TYPE, NULL, 0 } 
+    { "",               JSONFactory::UTF8_STRING_PARM_TYPE, NULL, 0 } 
   };
 
   if(loggingThreshold >=0) T5Logger::GetInstance()->SetLogLevel(loggingThreshold);
 
   // Using std::bind to bind member function handleData of DataHandler to callback
-  JSONParseCallback callback = std::bind(&SearchFilterFactory::parseJSONNameAndValueW, &searchFilterFactory, std::placeholders::_1, std::placeholders::_2);
+  JSONParseCallbackUTF8 callback = std::bind(&SearchFilterFactory::parseJSONNameAndValue, &searchFilterFactory, std::placeholders::_1, std::placeholders::_2);
  
 
-  _rc_ = json_factory.parseJSON( strInputParmsW, parseControl, callback);
+  _rc_ = json_factory.parseJSON( strBody, parseControl, callback);
 
   if(_rc_ == 1001){buildErrorReturn(_rc_,"Can't parse start timestamp", BAD_REQUEST);}
   else if(_rc_ == 1002){buildErrorReturn(_rc_,"Can't parse end timestamp", BAD_REQUEST);}
@@ -4009,27 +4001,26 @@ int ConcordanceSearchRequestData::parseJSON(){
   } /* endif */
 
   // parse input parameters
-  std::wstring strInputParmsW = EncodingHelper::convertToWChar( strBody.c_str() );
   
   int loggingThreshold = -1;
-  JSONFactory::JSONPARSECONTROL parseControl[] = { 
-  { L"searchString",   JSONFactory::UTF16_STRING_PARM_TYPE, &( Data.szSearchString ), sizeof( Data.szSearchString ) / sizeof( Data.szSearchString[0] ) },
-  { L"searchType",     JSONFactory::ASCII_STRING_PARM_TYPE, &( Data.szSearchMode ), sizeof( Data.szSearchMode ) },
-  { L"searchPosition", JSONFactory::ASCII_STRING_PARM_TYPE, &( Data.szSearchPos ), sizeof( Data.szSearchPos ) },
-  { L"sourceLang",     JSONFactory::ASCII_STRING_PARM_TYPE, &( Data.szIsoSourceLang ), sizeof( Data.szIsoSourceLang ) },
-  { L"targetLang",     JSONFactory::ASCII_STRING_PARM_TYPE, &( Data.szIsoTargetLang ), sizeof( Data.szIsoTargetLang ) },
-  { L"numResults",     JSONFactory::INT_PARM_TYPE,          &( Data.iNumOfProposals ), 0 },
-  { L"numOfProposals", JSONFactory::INT_PARM_TYPE,          &( Data.iNumOfProposals ), 0 },
-  { L"msSearchAfterNumResults", JSONFactory::INT_PARM_TYPE, &( Data.iSearchTime ), 0 },
-  { L"loggingThreshold", JSONFactory::INT_PARM_TYPE,        &loggingThreshold, 0 },
-                                                   { L"tmMutexTimeout", JSONFactory::INT_PARM_TYPE, &tmMutexTimeoutMs, -1},
-                                                   { L"tmListMutexTimeout", JSONFactory::INT_PARM_TYPE, &tmListMutexTimeoutMs, -1},
-                                                   { L"requestTMMutexTimeout", JSONFactory::INT_PARM_TYPE, &requestTMMutexTimeoutMs, -1},
-  { L"",               JSONFactory::ASCII_STRING_PARM_TYPE, NULL, 0 } };
+  JSONFactory::JSONPARSECONTROLUTF8 parseControl[] = { 
+  { "searchString",   JSONFactory::UTF32_STRING_PARM_TYPE, &( Data.szSearchString ), sizeof( Data.szSearchString ) / sizeof( Data.szSearchString[0] ) },
+  { "searchType",     JSONFactory::UTF8_STRING_PARM_TYPE, &( Data.szSearchMode ), sizeof( Data.szSearchMode ) },
+  { "searchPosition", JSONFactory::UTF8_STRING_PARM_TYPE, &( Data.szSearchPos ), sizeof( Data.szSearchPos ) },
+  { "sourceLang",     JSONFactory::UTF8_STRING_PARM_TYPE, &( Data.szIsoSourceLang ), sizeof( Data.szIsoSourceLang ) },
+  { "targetLang",     JSONFactory::UTF8_STRING_PARM_TYPE, &( Data.szIsoTargetLang ), sizeof( Data.szIsoTargetLang ) },
+  { "numResults",     JSONFactory::INT_PARM_TYPE,          &( Data.iNumOfProposals ), 0 },
+  { "numOfProposals", JSONFactory::INT_PARM_TYPE,          &( Data.iNumOfProposals ), 0 },
+  { "msSearchAfterNumResults", JSONFactory::INT_PARM_TYPE, &( Data.iSearchTime ), 0 },
+  { "loggingThreshold", JSONFactory::INT_PARM_TYPE,        &loggingThreshold, 0 },
+                                                   { "tmMutexTimeout", JSONFactory::INT_PARM_TYPE, &tmMutexTimeoutMs, -1},
+                                                   { "tmListMutexTimeout", JSONFactory::INT_PARM_TYPE, &tmListMutexTimeoutMs, -1},
+                                                   { "requestTMMutexTimeout", JSONFactory::INT_PARM_TYPE, &requestTMMutexTimeoutMs, -1},
+  { "",               JSONFactory::UTF8_STRING_PARM_TYPE, NULL, 0 } };
 
   if(loggingThreshold >=0) T5Logger::GetInstance()->SetLogLevel(loggingThreshold); 
 
-  _rc_ = json_factory.parseJSON( strInputParmsW, parseControl );
+  _rc_ = json_factory.parseJSON( strBody, parseControl );
   if(_rc_){
     return buildErrorReturn( _rc_, "::concordanceSearch::json parsing failed", BAD_REQUEST);
   }

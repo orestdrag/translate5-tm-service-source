@@ -13,6 +13,7 @@
 //typedef int (*JSONParseCallback)(const std::wstring&, const std::wstring&);
 // Typedef for the callback function type
 typedef std::function<int(const std::wstring&, const std::wstring&)> JSONParseCallback;
+typedef std::function<int(const std::string&, const std::string&)> JSONParseCallbackUTF8;
 
 
 
@@ -32,23 +33,30 @@ public:
 */
   typedef enum 
   {
-    ASCII_STRING_PARM_TYPE,
     UTF8_STRING_PARM_TYPE,
-    UTF16_STRING_PARM_TYPE,
+    UTF32_STRING_PARM_TYPE,
     INT_PARM_TYPE, 
 
     UTF8_STRING_CLASS_PARM_TYPE,
     TIMESTAMP_PARM_TYPE,
-    SARCH_FILTER_PARM_TYPE
+    SEARCH_FILTER_PARM_TYPE
   } PARMTYPE;
 
-typedef struct _JSONPARSECONTROL
+typedef struct _JSONPARSECONTROLUTF32
   {
     wchar_t szName[40];      // name of the parameter
     PARMTYPE type;           // type of the parameter
     void *pvValue;           // pointer to a buffer receiving the value
     int iBufferLen;          // size of the buffer in number of characters
-  } JSONPARSECONTROL, *PJSONPARSECONTROL;
+  } JSONPARSECONTROLUTF32, *PJSONPARSECONTROLUTF32;
+
+  typedef struct _JSONPARSECONTROLUTF8
+  {
+    char szName[40];      // name of the parameter
+    PARMTYPE type;           // type of the parameter
+    void *pvValue;           // pointer to a buffer receiving the value
+    int iBufferLen;          // size of the buffer in number of characters
+  } JSONPARSECONTROLUTF8, *PJSONPARSECONTROLUTF8;
 
 
 /*! \brief This static method returns a pointer to the JSON object.
@@ -204,7 +212,13 @@ typedef struct _JSONPARSECONTROL
   int parseJSON
   (
     std::wstring &JSONString,
-    PJSONPARSECONTROL paParserControl, JSONParseCallback callback = [](const std::wstring&, const std::wstring&) {return 0;}
+    PJSONPARSECONTROLUTF32 paParserControl, JSONParseCallback callback = [](const std::wstring&, const std::wstring&) {return 0;}
+  ); 
+
+   int parseJSON
+  (
+    std::string &JSONString,
+    JSONPARSECONTROLUTF8* paParserControl, JSONParseCallbackUTF8 callback = [](const std::string&, const std::string&) {return 0;}
   ); 
 
 
@@ -226,7 +240,7 @@ typedef struct _JSONPARSECONTROL
 
     This method initializes the parsing of a JSON string 
 
-    \param JSONString reference to a JSON string 
+    \param JSONString reference to a JSON string yf t
 
   	\returns handle of a JSON string parser instance or NULL in case of errors
 */
