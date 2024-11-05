@@ -864,7 +864,7 @@ USHORT MemFuncPrepImport
          {
             UtlClose( pLoadIDA->hFile, FALSE );
          } /* endif */
-         UtlAlloc( (PVOID *) &pLoadIDA, 0L, 0L, NOMSG );
+         //UtlAlloc( (PVOID *) &pLoadIDA, 0L, 0L, NOMSG );
       } /* endif */
    } /* endif */
 

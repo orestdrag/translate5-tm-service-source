@@ -60,6 +60,7 @@ USHORT TMLoopAndDelTargetClb
 		OtmProposal& 	  TmProposal,
     USHORT              usPutLang,
     USHORT              usPutFile,
+    USHORT              usPutAuthor,
     PBOOL               fNewerTargetExists,
     PINT                pTargetKey
 	);
@@ -2095,7 +2096,7 @@ USHORT EqfMemory::ComparePutData
         //RJ: 04/01/22: P018830:
         // loop through all target records
         // delete entry if current segment has already been translated
-        TMLoopAndDelTargetClb(pTmRecord, TmProposal, usPutLang, usPutFile, &fNewerTargetExists, &delTargetKey );
+        TMLoopAndDelTargetClb(pTmRecord, TmProposal, usPutLang, usPutFile, usAuthorId, &fNewerTargetExists, &delTargetKey );
 
         // recalc since record may have changed during delete above!
         lLeftTgtLen = RECLEN(pTmRecord) - pTmRecord->usFirstTargetRecord;
@@ -2146,9 +2147,10 @@ USHORT EqfMemory::ComparePutData
                   targetKey++;
                   if ( (//
                        // (pClb->ulSegmId == TmProposal.lSegmentId) &&
-                        (pClb->usFileId == usPutFile)
-                        ) ||
-                        pClb->bMultiple )
+                        (pClb->usFileId == usPutFile) &&
+                        (pClb->usAuthorId == usAuthorId)
+                        )// ||  pClb->bMultiple 
+                        )
                   {
                     // either an identical segment already in record (update
                     // time if newer than existing one)
@@ -2157,9 +2159,9 @@ USHORT EqfMemory::ComparePutData
                     // with a valid doc/segno information (intention is to
                     // get rid off multipe flagged target records asap))
 
-                    if ( pClb->bMultiple )
+                    //if ( pClb->bMultiple )
                     {
-                      pClb->bMultiple = FALSE;
+                      //pClb->bMultiple = FALSE;
                       pClb->lTime     = TmProposal.lTargetTime;
                       pClb->ulSegmId  = TmProposal.getSegmentId();
                       pClb->usFileId  = usPutFile;
@@ -2168,6 +2170,7 @@ USHORT EqfMemory::ComparePutData
                       fUpdate         = TRUE;
                       fStop           = TRUE;
                     }
+                    /*
                     else
                     {
                       if ( (pClb->lTime < TmProposal.lTargetTime) || !TmProposal.lTargetTime )
@@ -2179,10 +2182,10 @@ USHORT EqfMemory::ComparePutData
                         else
                         {
                           UtlTime( &(pClb->lTime) );
-                        } /* endif */
+                        }
                         pClb->bTranslationFlag       = ProposalTypeToFlag(TmProposal.eType);
                         fUpdate         = TRUE;
-                      } /* endif */
+                      } 
                       fStop           = TRUE;
                     } /* endif */
 
@@ -2247,7 +2250,7 @@ USHORT EqfMemory::ComparePutData
                   // fill-in new target CLB
                   if ( fOK )
                   {
-                    pClb->bMultiple = FALSE;
+                    //pClb->bMultiple = FALSE;
                     if ( TmProposal.lTargetTime )
                     {
                       pClb->lTime = TmProposal.lTargetTime;
@@ -3200,6 +3203,7 @@ USHORT TMLoopAndDelTargetClb
 	OtmProposal& 		TmProposal,
 	USHORT              usPutLang,
   USHORT              usPutFile,
+  USHORT              usPutAuthor,
   PBOOL               pfNewerTargetExists,
   PINT                pTargetKey
 )
@@ -3240,10 +3244,12 @@ USHORT TMLoopAndDelTargetClb
 
 		while ( ( lLeftClbLen > 0 ) && !fDel )
 		{
-      *pTargetKey++;
+      (*pTargetKey)++;
 			if ( (pClb->usLangId == usPutLang) &&
+           (pClb->usAuthorId == usPutAuthor) &&
 			     //(pClb->ulSegmId == TmProposal.lSegmentId) &&
-			     (pClb->usFileId == usPutFile) && !pClb->bMultiple )
+			     (pClb->usFileId == usPutFile) //&& !pClb->bMultiple 
+           )
 			{  	// remove target CLB and target record (if only 1 CLB)
 				// as the segment is putted with a new value
 				if ( (pClb->lTime < TmProposal.lTargetTime) || !TmProposal.lTargetTime )

@@ -63,8 +63,8 @@ public:
         if(T5Logger::GetInstance()->CheckLogLevel(T5DEBUG) == false 
             && (COMMAND::EXPORT_MEM_TMX == command
                 || COMMAND::EXPORT_MEM_TMX_STREAM == command
-                || COMMAND::IMPORT_MEM == command 
-                || COMMAND::IMPORT_MEM_STREAM == command
+                //|| COMMAND::IMPORT_MEM == command 
+                //|| COMMAND::IMPORT_MEM_STREAM == command
                 || COMMAND::EXPORT_MEM_INTERNAL_FORMAT == command
                 || COMMAND::EXPORT_MEM_INTERNAL_FORMAT_STREAM == command
                 )
