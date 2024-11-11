@@ -533,7 +533,7 @@ BOOL UtlInitUtils( HAB hab )
    /* init lower and upper case in table 1.= COUNTRY 2. = CODE PAGE      */
    /* 0 = DEFAULT                                                        */
    /**********************************************************************/
-   UtlLowUpInit( );
+   //UtlLowUpInit( );
 
    /*******************************************************************/
    /* Clear drive type array                                          */

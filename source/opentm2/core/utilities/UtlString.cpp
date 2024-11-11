@@ -155,33 +155,6 @@ VOID UtlStripBlanks
 //                    set to 0, the currently active country and code page is   
 //                    taken.                                                    
 //------------------------------------------------------------------------------
-VOID
-UtlLowUpInit()
-{
-  USHORT  i;                           // index
-
-  /********************************************************************/
-  /* init tables with default                                         */
-  /********************************************************************/
-  for ( i=0; i<256; i++ )
-  {
-    chEQFLower[ i ] = chEQFUpper[ i ] = (CHAR) i;
-  } /* endfor */
-  /********************************************************************/
-  /* add a string end character -- just in case we have to use it     */
-  /*   with string functions                                          */
-  /********************************************************************/
-  chEQFLower[ 256 ] = chEQFUpper[ 256 ] = EOS;
-  LOG_TEMPORARY_COMMENTED_W_INFO("use the ANSILOW function");
-  // use the ANSILOW function
-  /*
-  //AnsiUpper( (PSZ)&(chEQFUpper[1]) );
- 
-  EQFLOG_TEMPORARY_COMMENTED_W_INFO ("OEMTOANSI"); //OEMTOANSI ( (PSZ)&(chEQFLower[1]), (PSZ)&(chEQFLower[1]) );
-  //AnsiLower( (PSZ)&(chEQFLower[1]) );
-  //*/
-  return;
-} /* end of function UtlLowUpInit */
 
 
 //------------------------------------------------------------------------------
@@ -199,35 +172,6 @@ UtlLowUpInit()
 //------------------------------------------------------------------------------
 // Prerequesits:      UtlLowUpInit have to be run previously                    
 //------------------------------------------------------------------------------
-PSZ
-UtlLower
-(
-  PSZ  pData                           // pointer to data
-)
-{
-  T5LOG(T5FATAL) << ":: Called not implemented func";
-  PSZ  pTempData = pData;              // get pointer to data
-  BYTE c;                              // active byte
-
-  while ( (c = *pTempData) != NULC )
-  {
-    *pTempData++ = chEQFLower[ c ];
-  } /* endwhile */
-
-  return pData;
-} /* end of function UtlLower */
-
-
-PSZ_W
-UtlLowerW
-(
-  PSZ_W  pData                           // pointer to data
-)
-{
-    //CharLowerW(pData);
-T5LOG(T5FATAL) << ":: Called not implemented func";
-  return pData;
-} /* end of function UtlLower */
 
 
 //------------------------------------------------------------------------------
@@ -245,23 +189,7 @@ T5LOG(T5FATAL) << ":: Called not implemented func";
 //------------------------------------------------------------------------------
 // Prerequesits:      UtlLowUpInit have to be run previously                    
 //------------------------------------------------------------------------------
-PSZ
-UtlUpper
-(
-  PSZ  pData                           // pointer to data
-)
-{
-  T5LOG(T5FATAL) << ":: Called not implemented func";
-  PSZ  pTempData = pData;              // get pointer to data
-  BYTE c;                              // active byte
 
-  while ( (c = *pTempData) != NULC )
-  {
-    *pTempData++ = chEQFUpper[ c ];
-  } /* endwhile */
-
-  return pData;
-} /* end of function UtlUpper */
 
 
 ///////////////////////////////////////////////////////////////////////////////
