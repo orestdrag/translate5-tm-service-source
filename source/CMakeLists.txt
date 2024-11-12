@@ -1,27 +1,41 @@
 cmake_minimum_required(VERSION 3.10)
 SET(APP_VERSION_GLOBAL 0)
 SET(APP_VERSION_MAJOR 6)
-SET(APP_VERSION_MINOR 54)
+SET(APP_VERSION_MINOR 55)
 
 SET(APP_VERSION  "${APP_VERSION_GLOBAL}.${APP_VERSION_MAJOR}.${APP_VERSION_MINOR}")
 
 project(T5MEMORY VERSION ${APP_VERSION})
 
-# Optional: Add a flag to enable/disable TSan
-option(ENABLE_TSAN "Enable ThreadSanitizer (TSan)" OFF)
 
-# Handle TSan configuration
-#if(ENABLE_TSAN)
-    #message("ThreadSanitizer is enabled")
-    #set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -pthread -fno-omit-frame-pointer -fsanitize=address")# -fsanitize-recover=address")
-    #set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -pthread -fno-omit-frame-pointer -fsanitize=address")#thread -fsanitize-recover=address")
-    #set(CMAKE_LINKER_FLAGS "${CMAKE_LINKER_FLAGS} -pthread -fno-omit-frame-pointer -fsanitize=address")#thread -fsanitize-recover=address")
+# Set the compilers to gcc-10 and g++-10
+#set(CMAKE_C_COMPILER "/usr/bin/gcc-10")
+#set(CMAKE_CXX_COMPILER "/usr/bin/g++-10")
+
+# Define an option for selecting the sanitizer
+set(SANITIZER "asan" CACHE STRING "Specify sanitizer type: asan, tsan, or ubsan")
+
+# Apply the chosen sanitizer flags
+#if(SANITIZER STREQUAL "asan")
+    message("AddressSanitizer is enabled")
+    set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -pthread -fno-omit-frame-pointer -fsanitize=address")# -fsanitize-recover=address")
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -pthread -fno-omit-frame-pointer -fsanitize=address")# -fsanitize-recover=address")
+    set(CMAKE_LINKER_FLAGS "${CMAKE_LINKER_FLAGS} -pthread -fno-omit-frame-pointer -fsanitize=address")# -fsanitize-recover=address")
+#elseif(SANITIZER STREQUAL "tsan")
+#    message("ThreadSanitizer is enabled")
+#    set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -pthread -fno-omit-frame-pointer -fsanitize=thread")
+#    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -pthread -fno-omit-frame-pointer -fsanitize=thread")
+#    set(CMAKE_LINKER_FLAGS "${CMAKE_LINKER_FLAGS} -pthread -fno-omit-frame-pointer -fsanitize=thread")
+#elseif(SANITIZER STREQUAL "ubsan")
+#    message("Undefined Behavior Sanitizer is enabled")
+#    set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -pthread -fno-omit-frame-pointer -fsanitize=undefined")
+#    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -pthread -fno-omit-frame-pointer -fsanitize=undefined")
+#    set(CMAKE_LINKER_FLAGS "${CMAKE_LINKER_FLAGS} -pthread -fno-omit-frame-pointer  -fsanitize=undefined -lstdc++")
 #else()
-#    message("ThreadSanitizer is disabled")
-    set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -pthread -fno-omit-frame-pointer -fsanitize=address -fsanitize-recover=address")
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -pthread -fno-omit-frame-pointer -fsanitize=address -fsanitize-recover=address")
-    set(CMAKE_LINKER_FLAGS "${CMAKE_LINKER_FLAGS} -pthread -fno-omit-frame-pointer -fsanitize=address -fsanitize-recover=address")
+#    message("No sanitizer is enabled")
 #endif()
+
+
 
 set(CMAKE_BUILD_TYPE Debug)
 #include(GNUInstallDirs)
@@ -145,6 +159,7 @@ set(T5MEMORY_Source_Files
 )
 
 link_directories(/usr/lib/gcc/x86_64-linux-gnu/9/)
+#link_directories(/usr/lib/gcc/x86_64-linux-gnu/10/)
 
 
 
@@ -222,6 +237,8 @@ target_link_libraries(T5MEMORY PRIVATE
   ssl
   crypto
   libxerces-c-3.2.so  zip   ICU::uc ICU::i18n dl
+#  -lubsan
+#  -lstdc++
 )
 
 
