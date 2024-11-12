@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.10)
 SET(APP_VERSION_GLOBAL 0)
 SET(APP_VERSION_MAJOR 6)
-SET(APP_VERSION_MINOR 55)
+SET(APP_VERSION_MINOR 56)
 
 SET(APP_VERSION  "${APP_VERSION_GLOBAL}.${APP_VERSION_MAJOR}.${APP_VERSION_MINOR}")
 
@@ -17,10 +17,10 @@ set(SANITIZER "asan" CACHE STRING "Specify sanitizer type: asan, tsan, or ubsan"
 
 # Apply the chosen sanitizer flags
 #if(SANITIZER STREQUAL "asan")
-    message("AddressSanitizer is enabled")
-    set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -pthread -fno-omit-frame-pointer -fsanitize=address")# -fsanitize-recover=address")
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -pthread -fno-omit-frame-pointer -fsanitize=address")# -fsanitize-recover=address")
-    set(CMAKE_LINKER_FLAGS "${CMAKE_LINKER_FLAGS} -pthread -fno-omit-frame-pointer -fsanitize=address")# -fsanitize-recover=address")
+#    message("AddressSanitizer is enabled")
+#    set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -pthread -fno-omit-frame-pointer -fsanitize=address")# -fsanitize-recover=address")
+#    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -pthread -fno-omit-frame-pointer -fsanitize=address")# -fsanitize-recover=address")
+#    set(CMAKE_LINKER_FLAGS "${CMAKE_LINKER_FLAGS} -pthread -fno-omit-frame-pointer -fsanitize=address")# -fsanitize-recover=address")
 #elseif(SANITIZER STREQUAL "tsan")
 #    message("ThreadSanitizer is enabled")
 #    set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -pthread -fno-omit-frame-pointer -fsanitize=thread")
@@ -35,7 +35,17 @@ set(SANITIZER "asan" CACHE STRING "Specify sanitizer type: asan, tsan, or ubsan"
 #    message("No sanitizer is enabled")
 #endif()
 
+# Enable ASan with verbose error reporting for detailed info - slow asan 
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -pthread -fsanitize=address -fno-omit-frame-pointer -O1 -g")
+set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -pthread -fsanitize=address -fno-omit-frame-pointer -O1 -g")
+set(CMAKE_LINKER_FLAGS "${CMAKE_LINKER_FLAGS} -pthread -fno-omit-frame-pointer -O1 -g -fsanitize=address")# -fsanitize-recover=address")
 
+# Optionally set runtime options to make ASan output more informative
+set(ASAN_OPTIONS "log_path=/root/asan.log:detect_stack_use_after_return=1:detect_leaks=1:fast_unwind_on_malloc=0:halt_on_error=1:verbosity=1")
+add_definitions(-DASAN_OPTIONS="${ASAN_OPTIONS}")
+add_custom_target(set_asan_options ALL
+    COMMAND ${CMAKE_COMMAND} -E env ASAN_OPTIONS="${ASAN_OPTIONS}" ${CMAKE_COMMAND} .
+)
 
 set(CMAKE_BUILD_TYPE Debug)
 #include(GNUInstallDirs)
