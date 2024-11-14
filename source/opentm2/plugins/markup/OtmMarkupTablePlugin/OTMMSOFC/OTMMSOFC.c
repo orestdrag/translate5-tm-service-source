@@ -664,7 +664,7 @@ BOOL ConvertXmlToWord( char *in, char *temp, char *ErrText, USHORT usFileFormat 
              hProcess = OpenProcess( PROCESS_ALL_ACCESS,FALSE,ulEndWordIDs[i] ) ;
              if ( hProcess != NULL )  {
                 TerminateProcess(hProcess, 0xffffffff);
-                CloseHandle( hProcess);
+                FilesystemHelper::CloseFile( hProcess);
              }
           }
        }
@@ -717,7 +717,7 @@ BOOL GetWordProcessList( ULONG *ulList )
         } 
         while (Process32Next(hSnapshot, &pe32)); 
     } 
-    CloseHandle (hSnapshot); 
+    FilesystemHelper::CloseFile(hSnapshot); 
     ulList[i] = 0 ;
 
     return( TRUE ) ;

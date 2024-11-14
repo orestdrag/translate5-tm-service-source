@@ -829,7 +829,7 @@ void CXmlWriter::Close()
 {
   if ( m_hf )
   {
-    fclose( m_hf );
+    FilesystemHelper::CloseFile( m_hf );
   } /* endif */
 }
 

@@ -1745,7 +1745,7 @@ class EqfMemory //: public TMX_CLB
 
 public:
   std::recursive_timed_mutex tmMutex;
-  bool fOpen = false;
+  //bool fOpen = false;
   BTREE TmBtree;
   BTREE InBtree;
   TMX_TABLE Languages;

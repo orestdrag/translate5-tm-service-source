@@ -158,9 +158,6 @@ int filesystem_open_file(const char* path, FILE*& ptr, const char* mode){
             return false;
         }
 
-    BOOL CloseHandle(HFILE hf ){
-        FilesystemHelper::CloseFile(hf);
-    }
 
 LARGE_INTEGER intToLargeInt(int i) {
     LARGE_INTEGER li;

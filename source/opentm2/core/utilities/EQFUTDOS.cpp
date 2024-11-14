@@ -738,6 +738,9 @@ USHORT UtlCloseHwnd
    HWND     hwndParent
 )
 {
+   FilesystemHelper::CloseFile( hf ) ;
+   return 0;
+   #ifdef TEMPORARY_COMMENTED
    USHORT usRetCode = 0;               // function return code
    USHORT usMBCode = 0;                    // message box/UtlError return code
 
@@ -766,7 +769,7 @@ USHORT UtlCloseHwnd
      do {
         DosError(0);
 
-        if ( CloseHandle( hf ) == 0 )
+        if ( FilesystemHelper::CloseFile( hf ) == 0 )
         {
           //usRetCode = (USHORT)GetLastError();
         } /* endif */
@@ -780,6 +783,7 @@ USHORT UtlCloseHwnd
      } while ( fMsg && usRetCode && (usMBCode == MBID_RETRY) ); /* enddo */
    } /* endif */
    return( usRetCode );
+   #endif
 }
 
 //+----------------------------------------------------------------------------+

@@ -886,7 +886,7 @@ SHORT NTMKeyCompare
   HeadRecord.usFreeKeyBuffer = usFreeKeyBuffer;
   HeadRecord.usFreeDataBuffer = usFreeDataBuffer;
   HeadRecord.usFirstDataBuffer = usFirstDataBuffer;  // first data buffer
-  HeadRecord.fOpen  = fOpen;                    // open flag set
+  HeadRecord.fOpen  = true;//fOpen;                    // open flag set
   memcpy( HeadRecord.DataRecList, DataRecList, MAX_LIST*sizeof(HeadRecord.DataRecList[0]) );
   HeadRecord.fTerse = (EQF_BOOL) fTerse;
   memcpy( HeadRecord.chCollate, &chCollate, sizeof(chCollate) );
@@ -1491,16 +1491,7 @@ BTREE::QDAMDictLockDictLocal
 //                    endif
 //                    return number of open count
 //------------------------------------------------------------------------------
-USHORT
-QDAMRemoveDict
-(
-  PBTREE pBTIda                        // pointer to ida
-)
-{
-  T5LOG(T5DEVELOP) << "TEMPORARY COMMENTED";
 
-  return 0;
-} /* end of function QDAMRemoveDict */
 
 
 
@@ -1617,54 +1608,40 @@ SHORT QDAMDictFlushLocal( PBTREE pBT)
 
 SHORT BTREE::QDAMDictClose()
 {
-   SHORT sRc = 0;                            // error return
+  SHORT sRc = 0;                            // error return
 
-   /*******************************************************************/
-   /* validate passed pointer ...                                     */
-   /*******************************************************************/
-   CHECKPBTREE( this, sRc );
+  //  reset open flag in header and force a write to disk
+  // open flag will only be set if opened for r/w
+  if (// fOpen &&
+    !fCorrupted )
+  {
+    sRc = QDAMDictFlushLocal( this );
+    //fOpen = FALSE;
+    // re-write header record
+    if ( sRc == NO_ERROR ) 
+      sRc = QDAMWriteHeader();
+  } /* endif */
   
-   /*******************************************************************/
-   /* decrement the counter and check if we have to physically close  */
-   /* the dictionary                                                  */
-   /*******************************************************************/
-   if ( !sRc && ! QDAMRemoveDict( this ) )
-   {
-      sRc = QDAMDictFlushLocal( this );
+  if ( UtlClose(fb.file, FALSE) && !sRc )
+  {
+    sRc = BTREE_CLOSE_ERROR;
+  } /* endif */
 
-     //  reset open flag in header and force a write to disk
-     // open flag will only be set if opened for r/w
-     if ( !sRc && fOpen && ! fCorrupted )
-     {
-        fOpen = FALSE;
-        // re-write header record
-        if ( sRc == NO_ERROR ) 
-          sRc = QDAMWriteHeader();
-     } /* endif */
-     
-     if ( UtlClose(fb.file, FALSE) && !sRc )
-     {
-        sRc = BTREE_CLOSE_ERROR;
-     } /* endif */
+  if ( fpDummy )
+  {
+    UtlClose( fpDummy, FALSE );
+  } /* endif */
 
-     if ( fpDummy )
-     {
-      UtlClose( fpDummy, FALSE );
-     } /* endif */
+  /*******************************************************************/
+  /* free the allocated buffers                                      */
+  /*******************************************************************/
 
-     /*******************************************************************/
-     /* free the allocated buffers                                      */
-     /*******************************************************************/
-     //if ( pBT  )
-     {
-      freeLookupTable();
-     } /* endif */
-     /********************************************************************/
-     /* unlock the dictionary                                            */
-     /* -- do not take care about return code...                         */
-     /********************************************************************/
-     QDAMDictLockDictLocal( FALSE );
-   } /* endif */
+  freeLookupTable();
+  /********************************************************************/
+  /* unlock the dictionary                                            */
+  /* -- do not take care about return code...                         */
+  /********************************************************************/
+  QDAMDictLockDictLocal( FALSE );
 }
 
 
@@ -2102,7 +2079,7 @@ SHORT BTREE::QDAMDictCreateLocal
     usFreeKeyBuffer = 0;
     usFreeDataBuffer = 0;
     usFirstDataBuffer = 0;  // first data buffer
-    fOpen  = TRUE;                          // open flag set
+    //fOpen  = TRUE;                          // open flag set
     fpDummy = NULLHANDLE;
 
     /******************************************************************/
@@ -5201,7 +5178,9 @@ SHORT  BTREE::QDAMDictOpenLocal
       else
       {
         T5LOG(T5ERROR) <<"Can't understand file " << fb.fileName << ". File has illegal structure!";
-           sRc = BTREE_ILLEGAL_FILE;
+        fCorrupted = true;
+        //fOpen = FALSE;
+        sRc = BTREE_ILLEGAL_FILE;
       } /* endif */
     }
     else
@@ -5218,7 +5197,7 @@ SHORT  BTREE::QDAMDictOpenLocal
 
     if ( !sRc && /*fWrite &&*/ !header.fOpen)
     {
-      fOpen = TRUE;                       // set open flag
+      //fOpen = TRUE;                       // set open flag
     } /* endif */
 
     #ifdef TEMPORARY_COMMENTED
@@ -5276,7 +5255,7 @@ SHORT  BTREE::QDAMDictOpenLocal
     T5LOG(T5ERROR) << ":: sRc" << sRc;
     ERREVENT2( QDAMDICTOPENLOCAL_LOC, INTFUNCFAILED_EVENT, sRc, DB_GROUP, "" );
   } /* endif */
-  fOpen = true;
+  //fOpen = true;
   return ( sRc );
 }
 

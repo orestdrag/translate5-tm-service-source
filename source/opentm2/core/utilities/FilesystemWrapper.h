@@ -130,7 +130,6 @@ BOOL FindNextFile(
     );
 
 
-BOOL CloseHandle(HFILE hf );
 
 /*
 BOOL SetFilePointerEx(

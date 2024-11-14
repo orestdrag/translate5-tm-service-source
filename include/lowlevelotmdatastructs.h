@@ -542,17 +542,17 @@ struct BTREEDATA{
 
   USHORT       usFirstNode=0;                    // file pointer of record
   USHORT       usFirstLeaf=0;                    // file pointer of record
+  bool         fGuard=0;                         // write every record
+  //BOOL         fOpen=0;                          // open flag
+  bool         fCorrupted=0;                     // mark as corrupted
+  bool         fTerse=0;                         // tersing requested
 
   //PFN_QDAMCOMPARE compare = nullptr;             // Comparison function
   USHORT       usNextFreeRecord;                 // Next record to expand to
   //CHAR         chFileName[144];                // Name of B-tree file
   RECPARAM     DataRecList[ MAX_LIST ];          // last used data records
-  BOOL         fGuard=0;                         // write every record
-  BOOL         fOpen=0;                          // open flag
-  BOOL         fCorrupted=0;                     // mark as corrupted
   WCHAR        TempKey[HEADTERM_SIZE];           // pointer to temp. key
   //ULONG        ulTempRecSize = MAXDATASIZE;      // size of temp record area
-  BOOL         fTerse=0;                         // tersing requested
   BYTE         chEntryEncode[ ENTRYENCODE_LEN];  // significant characters
   BYTE         bEncodeLen[COLLATE_SIZE];         // encoding table length
   CHAR         chEncodeVal[COLLATE_SIZE];        // encoding table
@@ -591,13 +591,13 @@ struct BTREEDATA{
   USHORT       usCurrentRecord=0;                // current sequence record
   USHORT       usDictNum=0;                      // index in global structure
   wchar_t      chHeadTerm[HEADTERM_SIZE];        // last active head term
-  BOOL         fLock=0;                          // head term is locked
+  bool         fLock=0;                          // head term is locked
   wchar_t      chLockedTerm[HEADTERM_SIZE];      // locked term if any
   //QDAM part
   //PBTREEGLOB   pBTree;                           // pointer to global struct
   ULONG        ulNum=0;
   //CHAR         chDictName[ MAX_EQF_PATH ];
-  BOOL         fDictLock=0;                        // is dictionary locked
+  bool         fDictLock=0;                        // is dictionary locked
   //std::atomic<int> usOpenCount;                  // number of accesses...
   //PBTREE       pIdaList[ MAX_NUM_DICTS ];        // number of instances ...
   //End of qdam part

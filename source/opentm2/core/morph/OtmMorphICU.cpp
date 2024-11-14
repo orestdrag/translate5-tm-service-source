@@ -501,7 +501,7 @@ void OtmMorphICU::loadAbbrevList( bool fUserAbbreviation ) {
                 pList->push_back(wWord);
             }
         }
-        fclose(fpFilePointer);
+        FilesystemHelper::CloseFile(fpFilePointer);
     }
 }
 
@@ -556,7 +556,7 @@ T5LOG(T5ERROR) << ":: TEMPORARY_COMMENTED temcom_id = 73 // This code loads the 
             strcat(buffer, line);
         }
     }
-    fclose(file);
+    FilesystemHelper::CloseFile(file);
 
     BreakIterator* b = new RuleBasedBreakIterator(UnicodeString(buffer), UParseError(), status);
     if (b == NULL || U_FAILURE(status)) {
@@ -1031,6 +1031,6 @@ void OtmMorphICU::saveAbbreviations()
 			fputs( tWord, tFilePointer);
 			fputc('\n', tFilePointer);
     }
-		fclose(tFilePointer);
+		FilesystemHelper::CloseFile(tFilePointer);
 	}
 }

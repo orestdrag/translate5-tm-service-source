@@ -14,6 +14,7 @@
 #include "string.h"
 
 #include "LogWrapper.h"
+#include "FilesystemHelper.h"
 
 int _getpid(){
     //pthread_id_np_t   tid;
@@ -43,7 +44,7 @@ void init(){
     while(fgets(line, 128, file) != NULL){
         if (strncmp(line, "processor", 9) == 0) numProcessors++;
     }
-    fclose(file);
+    FilesystemHelper::CloseFile(file);
 }
 
 double getCurrentCPUUsageByProcess(){
@@ -94,7 +95,7 @@ int getVirtualMemUsageKBValue(){ //Note: this value is in KB!
         }
     }
 
-    fclose(file);
+    FilesystemHelper::CloseFile(file);
     return result;
 }
 

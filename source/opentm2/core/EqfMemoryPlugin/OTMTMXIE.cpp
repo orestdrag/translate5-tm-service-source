@@ -1481,7 +1481,7 @@ USHORT CTMXExportImport::PreProcessInFile
     }
     
     if(hIn){
-      fclose(hIn);
+      FilesystemHelper::CloseFile(hIn);
       hIn = nullptr;
     }
         
@@ -1552,8 +1552,8 @@ USHORT CTMXExportImport::PreProcessInFile
 
 
   //cleanup
-  if ( hIn )  fclose( hIn );
-  if ( hOut ) fclose( hOut );
+  if ( hIn )  FilesystemHelper::CloseFile( hIn );
+  if ( hOut ) FilesystemHelper::CloseFile( hOut );
   if ( buff ){
     delete[] buff;
     buff = nullptr;
@@ -4387,7 +4387,7 @@ USHORT CloseInput( PCONVERTERDATA pData )
 
   if ( pData->hInFile )
   {
-    fclose( pData->hInFile );
+    FilesystemHelper::CloseFile( pData->hInFile );
     pData->hInFile = NULL;
   } /* endif */
   return( usRC );
