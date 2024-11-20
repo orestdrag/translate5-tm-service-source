@@ -1870,8 +1870,8 @@ public:
 /*! \brief Constructors
 */
 	EqfMemory()  {
-    TmBtree.AllocateMem();
-    InBtree.AllocateMem();
+    //TmBtree.AllocateMem();
+    //InBtree.AllocateMem();
     //readOnlyPtr = std::make_shared<EqfMemory>(*this);
     //writePtr(std::make_shared<EqfMemory>(*this));
     readOnlyCnt = std::make_shared<int>(0);

@@ -274,9 +274,9 @@ typedef LONG  TIME_L;                  // new typedef to avoid conflicts with Lo
 
 typedef struct _RECPARAM
 {
-    USHORT  usNum;           // record number
-    USHORT  usOffset;        // record offset
-    ULONG   ulLen;           // record length
+    USHORT  usNum = 0;           // record number
+    USHORT  usOffset = 0;        // record offset
+    ULONG   ulLen = 0;           // record length
 }  RECPARAM, * PRECPARAM;
 
 /**********************************************************************/
@@ -285,8 +285,8 @@ typedef struct _RECPARAM
 /**********************************************************************/
 typedef struct _TMVITALINFO
 {
-  ULONG   ulStartKey;                  // key to start with
-  ULONG   ulNextKey;                   // currently active key
+  ULONG   ulStartKey = 0;                  // key to start with
+  ULONG   ulNextKey = 0;                   // currently active key
 } NTMVITALINFO, * PNTMVITALINFO;
 
 
@@ -319,15 +319,15 @@ typedef struct _TMX_SIGN
 /*****************************************************************************/
 typedef struct _BTREEHEADER
 {
-  CHAR    chType;                                 // record type
-  USHORT  usNum;                                  // record number
-  USHORT  usPrevious;                             // previous leaf node
-  USHORT  usNext;                                 // next leaf node
-  USHORT  usParent;                               // parent node
-  USHORT  usOccupied;                             // # of keys in record
-  USHORT  usFilled;                               // number of bytes filled
-  USHORT  usLastFilled;                           // ptr. to next free byte
-  USHORT  usWasteSize;                            // waste size?
+  CHAR    chType = 0;                                 // record type
+  USHORT  usNum = 0;                                  // record number
+  USHORT  usPrevious = 0;                             // previous leaf node
+  USHORT  usNext = 0;                                 // next leaf node
+  USHORT  usParent = 0;                               // parent node
+  USHORT  usOccupied = 0;                             // # of keys in record
+  USHORT  usFilled = 0;                               // number of bytes filled
+  USHORT  usLastFilled = 0;                           // ptr. to next free byte
+  USHORT  usWasteSize = 0;                            // waste size?
 } BTREEHEADER , * PBTREEHEADER;
 
 
@@ -394,11 +394,11 @@ typedef struct _BTREERECORD_V3
 /*****************************************************************************/
 typedef struct _BTREEBUFFER_V3
 {
-  USHORT usRecordNumber;                           // index of rec in buffer
-  BOOL   fLocked;                                  // Is the record locked ?
+  USHORT usRecordNumber=0;                           // index of rec in buffer
+  BOOL   fLocked=0;                                  // Is the record locked ?
   //BOOL   fNeedToWrite;                             // Commit before reuse
-  SHORT  sUsed;                                    // buffer used count
-  ULONG  ulCheckSum;                               // CheckSum of contents data
+  SHORT  sUsed=0;                                    // buffer used count
+  ULONG  ulCheckSum=0;                               // CheckSum of contents data
   BTREERECORD_V3 contents;                            // data from disk
 } BTREEBUFFER_V3, *PBTREEBUFFER_V3;
 
@@ -534,51 +534,7 @@ typedef enum _SEARCHTYPE
 #define MIN_NUMBER_OF_LOOKUP_ENTRIES 32
 
 
-
-struct BTREEDATA{
-  BTREEDATA() {
-    memset(this, 0, sizeof(*this));
-  }
-
-  USHORT       usFirstNode=0;                    // file pointer of record
-  USHORT       usFirstLeaf=0;                    // file pointer of record
-  bool         fGuard=0;                         // write every record
-  //BOOL         fOpen=0;                          // open flag
-  bool         fCorrupted=0;                     // mark as corrupted
-  bool         fTerse=0;                         // tersing requested
-
-  //PFN_QDAMCOMPARE compare = nullptr;             // Comparison function
-  USHORT       usNextFreeRecord;                 // Next record to expand to
-  //CHAR         chFileName[144];                // Name of B-tree file
-  RECPARAM     DataRecList[ MAX_LIST ];          // last used data records
-  WCHAR        TempKey[HEADTERM_SIZE];           // pointer to temp. key
-  //ULONG        ulTempRecSize = MAXDATASIZE;      // size of temp record area
-  BYTE         chEntryEncode[ ENTRYENCODE_LEN];  // significant characters
-  BYTE         bEncodeLen[COLLATE_SIZE];         // encoding table length
-  CHAR         chEncodeVal[COLLATE_SIZE];        // encoding table
-  BYTE         chDecode[ENTRYDECODE_LEN];        // decoding table
-  //BYTE         chCollate[COLLATE_SIZE];          // collating sequence to use
-  NTMVITALINFO chCollate;
-  BYTE         chCaseMap[COLLATE_SIZE];          // case mapping to be used
-  USHORT       usFreeKeyBuffer=0;                // index of buffer to use
-  USHORT       usFreeDataBuffer=0;               // first data buffer chain
-  USHORT       usFirstDataBuffer=0;              // first data buffer
-  BTREEBUFFER_V3  BTreeTempBuffer_V3;            // temporary V3 buffer
-  LONG         lTime=0;                          // time of last update/open
-  USHORT       usVersion=0;                      // version identification...
-  CHAR         chEQF[7];                         // The type of file
-  BYTE         bVersion=0;                       // version flag
-  USHORT       usOpenFlags=0;                    // settings used for open
-  LONG         alUpdCtr[MAX_UPD_CTR];            // list of update counters
-  HFILE        fpDummy=nullptr;                  // dummy/lock semaphore file handle
-  //USHORT       usNumberOfLookupEntries=0;        // Number of allocated lookup-table-entries
-  USHORT       usNumberOfAllocatedBuffers=0;     // Number of allocated buffers
-  ULONG        ulReadRecCalls=0;                 // Number of calls to QDAMReadRecord
-  BYTE         bRecSizeVersion=0;                  // record size version flag
-  //} //end of PBTREEGLOB
-
-
-  // the following define moved from eqfqdami.h since it must be known in
+// the following define moved from eqfqdami.h since it must be known in
   // eqfdorg.c
   /**********************************************************************/
   /* To check that we are opening a valid B-tree file, there is a       */
@@ -587,57 +543,67 @@ struct BTREEDATA{
   /**********************************************************************/
   #define BTREE_VERSION3      3
 
-  SHORT        sCurrentIndex=0;                  // current sequence array
-  USHORT       usCurrentRecord=0;                // current sequence record
-  USHORT       usDictNum=0;                      // index in global structure
-  wchar_t      chHeadTerm[HEADTERM_SIZE];        // last active head term
-  bool         fLock=0;                          // head term is locked
-  wchar_t      chLockedTerm[HEADTERM_SIZE];      // locked term if any
-  //QDAM part
-  //PBTREEGLOB   pBTree;                           // pointer to global struct
-  ULONG        ulNum=0;
-  //CHAR         chDictName[ MAX_EQF_PATH ];
-  bool         fDictLock=0;                        // is dictionary locked
-  //std::atomic<int> usOpenCount;                  // number of accesses...
-  //PBTREE       pIdaList[ MAX_NUM_DICTS ];        // number of instances ...
-  //End of qdam part
-
-};
-
-struct BTREE: public BTREEDATA
+struct BTREE
 {   
+
+  bool         fCorrupted =false;                     // mark as corrupted
+  bool         fGuard =false;                         // write every record
+  //BOOL         fOpen=false;                        // open flag
+  bool         fTerse =false;                         // tersing requested
+
+  ushort       usFirstNode=0;                    // file pointer of record
+  ushort       usFirstLeaf=0;                    // file pointer of record
+
+  ushort       usNextFreeRecord = 0;             // Next record to expand to
+  RECPARAM     DataRecList[ MAX_LIST ];          // last used data records
+  unsigned char         chEntryEncode[ ENTRYENCODE_LEN];  // significant characters
+  unsigned char         bEncodeLen[COLLATE_SIZE];         // encoding table length
+  unsigned char         chEncodeVal[COLLATE_SIZE];        // encoding table
+  unsigned char         chDecode[ENTRYDECODE_LEN];        // decoding table
+  NTMVITALINFO chCollate;
+  unsigned char         chCaseMap[COLLATE_SIZE];          // case mapping to be used
+  ushort       usFreeKeyBuffer=0;                // index of buffer to use
+  ushort       usFreeDataBuffer=0;               // first data buffer chain
+  ushort       usFirstDataBuffer=0;              // first data buffer
+  BTREEBUFFER_V3  BTreeTempBuffer_V3;            // temporary V3 buffer
+  long         lTime=0;                          // time of last update/open
+  ushort       usVersion=0;                      // version identification...
+  char         chEQF[7];                         // The type of file
+  char         bVersion=0;                       // version flag
+  ushort       usOpenFlags=0;                    // settings used for open
+  HFILE        fpDummy=nullptr;                  // dummy/lock semaphore file handle
+  //USHORT       usNumberOfLookupEntries=0;        // Number of allocated lookup-table-entries
+  ushort       usNumberOfAllocatedBuffers=0;     // Number of allocated buffers
+  unsigned long        ulReadRecCalls=0;                 // Number of calls to QDAMReadRecord
+  char         bRecSizeVersion=0;                  // record size version flag  
+
+  char        sCurrentIndex=0;                  // current sequence array
+  ushort       usCurrentRecord=0;                // current sequence record
+  ushort       usDictNum=0;                      // index in global structure
+  //wchar_t      chHeadTerm[HEADTERM_SIZE];        // last active head term
+  bool         fLock =false;                          // head term is locked
+  unsigned long        ulNum=0;
+  bool         fDictLock =false;   
+
   //new fields 
   FileBuffer fb;
   std::vector<BYTE>         TempRecord;
-
   std::vector<LOOKUPENTRY_V3> LookupTable_V3;        // Pointer to lookup-table
 
   BTREE(){
-    AllocateMem();
-    /*
-    memset(&DataRecList[0], 0, sizeof(DataRecList));
-    memset(&TempKey, 0, sizeof(TempKey));
-    memset(&chEntryEncode, 0, sizeof(chEntryEncode));
-    memset(&bEncodeLen, 0, sizeof(bEncodeLen));
-
-    memset(&chEncodeVal[0], 0, sizeof(chEncodeVal));
-    memset(&chDecode, 0, sizeof(chDecode));
-    memset(&chCaseMap, 0, sizeof(chCaseMap));
-    memset(&chEQF, 0, sizeof(chEQF));
-
-    memset(&alUpdCtr[0], 0, sizeof(alUpdCtr));
-    memset(&chHeadTerm, 0, sizeof(chHeadTerm));
-    memset(&chLockedTerm, 0, sizeof(chLockedTerm));
-
-    memset(&chCollate, 0, sizeof(chCollate));
-    memset(&BTreeTempBuffer_V3, 0, sizeof(BTreeTempBuffer_V3));
-    //*/
-  }
-  int AllocateMem(){
-    int rc = 0;
     TempRecord = std::vector<BYTE>(MAXDATASIZE, 0);
-    return rc;
+    // Ensure proper initialization for arrays and complex types
+    std::fill(std::begin(chEntryEncode), std::end(chEntryEncode), 0);
+    std::fill(std::begin(bEncodeLen), std::end(bEncodeLen), 0);
+    std::fill(std::begin(chEncodeVal), std::end(chEncodeVal), 0);
+    std::fill(std::begin(chDecode), std::end(chDecode), 0);
+    std::fill(std::begin(chCaseMap), std::end(chCaseMap), 0);
+    //std::fill(std::begin(chCollate), std::end(chCollate), 0);
+    std::fill(std::begin(chEQF), std::end(chEQF), '\0');
+    memset(&BTreeTempBuffer_V3, 0, sizeof(BTreeTempBuffer_V3));
+    //std::fill(std::begin(chHeadTerm), std::end(chHeadTerm), L'\0'); 
   }
+  
 
   void freeMem(){
     freeLookupTable();
@@ -684,6 +650,8 @@ struct BTREE: public BTREEDATA
 
 
     ULONG GetNumOfSavedRecords()const;
+
+    SHORT QDAMDictFlushLocal();
     
     //+----------------------------------------------------------------------------+
     // Internal function
@@ -721,6 +689,9 @@ struct BTREE: public BTREEDATA
     PUSHORT pusLen                      // length of user data
     );
 
+    
+   VOID  QDAMTerseInit (unsigned char* );
+ 
     //SHORT
     //EQFNTMInsert
     //(
@@ -1075,7 +1046,7 @@ struct BTREE: public BTREEDATA
     SHORT  EQFNTMOpen( USHORT usOpenFlags);                 // Read Only or Read/Write
     SHORT QDAMCheckDict( PSZ    pName);                        // name of dictionary
     
-    SHORT  QDAMDictLockDictLocal( BOOL ); 
+
     //SHORT QDAMDictCloseLocal  ();
     //+----------------------------------------------------------------------------+
 // External function

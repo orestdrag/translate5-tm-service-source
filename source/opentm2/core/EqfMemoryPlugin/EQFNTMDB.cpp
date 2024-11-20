@@ -1400,7 +1400,7 @@ SHORT BTREE::QDAMDictUpdateLocal
         }
         else
         {         
-          memcpy( chHeadTerm, pKey, sizeof(ULONG));   // save data
+          //memcpy( chHeadTerm, pKey, sizeof(ULONG));   // save data
           
           QDAMDictUpdStatus();
           sRc = QDAMFindRecord_V3( pKey, &pRecord );
@@ -1688,7 +1688,7 @@ SHORT BTREE::QDAMDictExactLocal
                  sCurrentIndex = i;
                  usCurrentRecord = RECORDNUM( pRecord );
 
-                 memcpy( chHeadTerm, pKey, sizeof(ULONG) );  // save data
+                 //memcpy( chHeadTerm, pKey, sizeof(ULONG) );  // save data
                  
                  recData = QDAMGetrecData_V3( pRecord, i, usVersion );
                  if ( *pulLength == 0 || ! pchBuffer )

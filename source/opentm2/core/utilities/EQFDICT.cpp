@@ -763,28 +763,26 @@ SHORT QDAMKeyCompare
 //|                   return                                                   |
 //+----------------------------------------------------------------------------+
 
-VOID QDAMTerseInit
+VOID BTREE::QDAMTerseInit
 (
-   PBTREE  pBTIda,                               // pointer to btree
-   PUCHAR  pComp                                 // pointer to comp table
+  unsigned char*  pComp                                 // pointer to comp table
 )
 {
    USHORT usI;                                  // index
-   PBTREE    pBT = pBTIda;
 
    /*******************************************************************/
    /* init values                                                     */
    /*******************************************************************/
-   memset( pBT->chEncodeVal, (BYTE) stEncodeBits[0].usVal, COLLATE_SIZE);
-   memset( pBT->bEncodeLen, (BYTE) stEncodeBits[0].usLen, COLLATE_SIZE);
+   memset( chEncodeVal, (BYTE) stEncodeBits[0].usVal, COLLATE_SIZE);
+   memset( bEncodeLen, (BYTE) stEncodeBits[0].usLen, COLLATE_SIZE);
    /*******************************************************************/
    /* use the 15 first characters to build the encoding sequence      */
    /*******************************************************************/
    for ( usI = 0; usI < 15; usI++ )
    {
-     pBT->bEncodeLen[*(pComp+usI)] = (BYTE) stEncodeBits[usI+1].usLen;
-     pBT->chEncodeVal[*(pComp+usI)] = (BYTE) stEncodeBits[usI+1].usVal;
-     pBT->chDecode[ stEncodeBits[ usI+1 ].usVal ] = *(pComp+usI);
+     bEncodeLen[*(pComp+usI)] = (BYTE) stEncodeBits[usI+1].usLen;
+     chEncodeVal[*(pComp+usI)] = (BYTE) stEncodeBits[usI+1].usVal;
+     chDecode[ stEncodeBits[ usI+1 ].usVal ] = *(pComp+usI);
    } /* endfor */
 
    return;
@@ -1426,37 +1424,7 @@ QDAMAddDict
 //                     endif
 //                     return success
 //------------------------------------------------------------------------------
-SHORT
-BTREE::QDAMDictLockDictLocal
-(
-  BOOL    fLock                        // lock or unlock
-)
-{
-  SHORT  sRc = 0;
-  T5LOG(T5DEVELOP) << "TEMPORARY COMMENTED";
-  #ifdef TEMPORARY_COMMENTED
-  /********************************************************************/
-  /* check if open count > 1, then no exclusive use possible any more */
-  /********************************************************************/
-  if ( fLock )
-  {
-    if ( QDAMDict[ usDictNum ].usOpenCount > 1 )
-    {
-      sRc = BTREE_DICT_LOCKED;
-    }
-    else
-    {
-      QDAMDict[ usDictNum ].fDictLock = fLock;
-    } /* endif */
-  }
-  else
-  {
-    QDAMDict[ usDictNum ].fDictLock = fLock;
-  } /* endif */
-  #endif
 
-  return sRc;
-} /* end of function QDAMDictLockDictLocal */
 
 #define CHECKPBTREE(pBTIda, sRc)                  \
    if ( !pBTIda )                                 \
@@ -1529,13 +1497,13 @@ BTREE::QDAMDictLockDictLocal
 //                    endif
 //------------------------------------------------------------------------------
 
-SHORT QDAMDictFlushLocal( PBTREE pBT)
+SHORT BTREE::QDAMDictFlushLocal()
 {
   SHORT sRc = 0;                                 // return code
 
   DEBUGEVENT2( QDAMDICTFLUSHLOCAL_LOC, FUNCENTRY_EVENT, 0, DB_GROUP, "" );
 
-  if ( pBT->fCorrupted )
+  if ( fCorrupted )
   {
      sRc = BTREE_CORRUPTED;
   }
@@ -1544,12 +1512,12 @@ SHORT QDAMDictFlushLocal( PBTREE pBT)
     //if ( pBT->LookupTable_V3 != NULL  )
     {
       BOOL fRecordWritten = FALSE;
-      for (int i=0; !sRc && (i < pBT->LookupTable_V3.size()); i++ )
+      for (int i=0; !sRc && (i < LookupTable_V3.size()); i++ )
       {
-        PLOOKUPENTRY_V3 pLEntry = &pBT->LookupTable_V3[i];
+        PLOOKUPENTRY_V3 pLEntry = &LookupTable_V3[i];
         if ( pLEntry->pBuffer /*&&  (pLEntry->pBuffer)->fNeedToWrite*/ )
         {
-          sRc = pBT->QDAMWRecordToDisk_V3( pLEntry->pBuffer);
+          sRc = QDAMWRecordToDisk_V3( pLEntry->pBuffer);
           fRecordWritten = TRUE;
         } /* endif */
       } /* endfor */
@@ -1615,7 +1583,7 @@ SHORT BTREE::QDAMDictClose()
   if (// fOpen &&
     !fCorrupted )
   {
-    sRc = QDAMDictFlushLocal( this );
+    sRc = QDAMDictFlushLocal();
     //fOpen = FALSE;
     // re-write header record
     if ( sRc == NO_ERROR ) 
@@ -1637,11 +1605,8 @@ SHORT BTREE::QDAMDictClose()
   /*******************************************************************/
 
   freeLookupTable();
-  /********************************************************************/
-  /* unlock the dictionary                                            */
-  /* -- do not take care about return code...                         */
-  /********************************************************************/
-  QDAMDictLockDictLocal( FALSE );
+
+  return sRc;
 }
 
 
@@ -4822,7 +4787,7 @@ SHORT BTREE::QDAMInsertKey_V3
 
   if ( !sRc )
   {
-    CHAR chHeadTerm[128];
+    //CHAR chHeadTerm[128];
     // fill in key data
     usLastPos = pRecord->contents.header.usLastFilled;
     usLastPos = usLastPos - usDataRec;
@@ -5157,7 +5122,7 @@ SHORT  BTREE::QDAMDictOpenLocal
           fTerse = header.fTerse;
           if ( fTerse == BTREE_TERSE_HUFFMAN )
           {
-            QDAMTerseInit( this, chEntryEncode );   // init compression
+            QDAMTerseInit( chEntryEncode );   // init compression
           } /* endif */
 
           memcpy( &chCollate, header.chCollate, /*COLLATE_SIZE*/ sizeof(chCollate) );  
@@ -5241,13 +5206,6 @@ SHORT  BTREE::QDAMDictOpenLocal
   if ( !sRc || (sRc == BTREE_CORRUPTED) )
   {
     QDAMAddDict( (PSZ)fb.fileName.c_str(), this );
-    /*****************************************************************/
-    /* add the lock if necessary                                     */
-    /*****************************************************************/
-    if ( usOpenFlags & ASD_LOCKED )
-    {
-      QDAMDictLockDictLocal( TRUE );
-    } /* endif */
   } /* endif */
 
   if ( sRc )
@@ -5475,7 +5433,7 @@ SHORT BTREE::QDAMDictInsertLocal
   if ( !sRc )
   {
     usKeyLen = (USHORT) sizeof(ULONG);
-    memcpy( (PBYTE)chHeadTerm, (PBYTE)pKey, usKeyLen);//+sizeof(TMWCHAR) );   // save current data
+    //memcpy( (PBYTE)chHeadTerm, (PBYTE)pKey, usKeyLen);//+sizeof(TMWCHAR) );   // save current data
       
     QDAMDictUpdStatus ();
     sRc = QDAMFindRecord_V3( pKey, &pNode );
@@ -6447,7 +6405,7 @@ SHORT QDAMDictFirstLocal
           if ( !sRc && ulKeyLen )
             {
               ULONG ul = 0l;
-              memcpy( pBTIda->chHeadTerm, &ul, sizeof(ULONG) );              
+             // memcpy( pBTIda->chHeadTerm, &ul, sizeof(ULONG) );              
           } /* endif */
 
            if ( !sRc )
