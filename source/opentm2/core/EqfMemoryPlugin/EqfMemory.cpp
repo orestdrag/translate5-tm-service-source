@@ -210,28 +210,18 @@ int EqfMemory::putProposal
   int iRC = 0;
   TMX_EXT_OUT_W TmPutOut;
   memset( &TmPutOut, 0, sizeof(TMX_EXT_OUT_W) );
-
-  //OtmProposalToPutIn( Proposal, &TmPutIn );
-
-  if(T5Logger::GetInstance()->CheckLogLevel(T5INFO)){
+  if(T5Logger::GetInstance()->CheckLogLevel(T5INFO)){ 
+    std::string author = Proposal.szTargetAuthor;
     std::string source = EncodingHelper::convertToUTF8(Proposal.pInputSentence->pStrings->getOriginalStrC());
-    T5LOG( T5INFO) <<"EqfMemory::putProposal, source = " << source;
+    T5LOG( T5INFO) <<"EqfMemory::putProposal, source = " << source << "; author = " << author;
   }
-  /********************************************************************/
-  /* fill the TMX_PUT_IN prefix structure                             */
-  /* the TMX_PUT_IN structure must not be filled it is provided       */
-  /* by the caller                                                    */
-  /********************************************************************/
+
   iRC = TmtXReplace ( Proposal, &TmPutOut );
 
   if ( iRC != 0 ){
     T5LOG(T5ERROR) <<  "EqfMemory::putProposal result = " << iRC; 
   }
 
-  //if ( ( iRC == 0 ) &&
-       //( TmPutIn.fMarkupChanged ) ) {
-  //   iRC = SEG_RESET_BAD_MARKUP ;
-  //}
 
   return( iRC );
 }

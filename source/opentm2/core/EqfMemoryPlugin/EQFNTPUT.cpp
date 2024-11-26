@@ -1966,6 +1966,7 @@ USHORT EqfMemory::UpdateTmRecordByInternalKey
   return( usRc );
 }
 
+DECLARE_bool(ignore_newer_target_exists_check);
 //------------------------------------------------------------------------------
 // External function                                                            
 //------------------------------------------------------------------------------
@@ -2103,7 +2104,7 @@ USHORT EqfMemory::ComparePutData
         pStartTarget = NTRecPos((PBYTE)(pTmRecord+1), REC_FIRSTTARGET);
         pTMXTargetRecord = (PTMX_TARGET_RECORD)pStartTarget;
 
-        if ( fNewerTargetExists )
+        if ( fNewerTargetExists && !FLAGS_ignore_newer_target_exists_check)
         {
           fStop = TRUE;           // do not continue update loop
         } 

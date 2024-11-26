@@ -123,6 +123,8 @@ DEFINE_bool(useconfigfile, false, "Set to use values from config file that shoul
 
 DEFINE_bool(forbiddeletefiles, false, "Set to true to keep all files(including temporary and tm)");
 
+DEFINE_bool(ignore_newer_target_exists_check, true, "if set to true, check for newer already saved target would be skipped for saving segments" );
+
 void handle_interrupt_sig(int sig) {
     T5LOG( T5TRANSACTION) << "Received interrupt signal\n";
     //StopOtmMemoryService();
@@ -216,6 +218,7 @@ int main(int argc, char* argv[]) {
    //     FilesystemHelper::CreateDir(FLAGS_log_dir, 0700);
    //}
    FLAGS_colorlogtostderr = true;
+   //FLAGS_ignore_newer_target_exists_check = true;
    //FLAGS_logtostderr = true;
    //FLAGS_localhostonly = true;
    //FLAGS_port = 4045;
@@ -223,7 +226,7 @@ int main(int argc, char* argv[]) {
    //#endif
    //#ifdef GFLAGS_ENABLED
    FLAGS_alsologtostderr = true;
-  // FLAGS_t5loglevel = T5DEVELOP;
+   //FLAGS_t5loglevel = T5DEVELOP;
    //google::InstallFailureSignalHandler();
    // google::InstallFailureWriter(FailureWriter);
    google::ParseCommandLineFlags(&argc, &argv, true);
