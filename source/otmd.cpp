@@ -76,7 +76,7 @@ static bool ValidateThreads(const char* flagname, int32_t value) {
    return false;
 }
 
-DEFINE_int32(servicethreads, 1, "Sets amought of worker threads for service");
+DEFINE_int32(servicethreads, 5, "Sets amought of worker threads for service");
 DEFINE_validator(servicethreads, &ValidateThreads);
 
 
@@ -87,7 +87,7 @@ static bool ValidateRAM(const char* flagname, int64_t value) {
    return false;
 }
 
-DEFINE_int64(allowedram, 4096, "Sets amought RAM(in MB) allowed for service to use");
+DEFINE_int64(allowedram, 5000, "Sets amought RAM(in MB) allowed for service to use");
 DEFINE_validator(allowedram, &ValidateRAM);
 
 
@@ -111,9 +111,9 @@ static bool ValidateLOGlevel(const char* flagname, int32_t value) {
 DEFINE_int32(t5loglevel, T5INFO, "Sets t5memory log level threshold from DEVELOP(0) to TRANSACTION(6)");
 DEFINE_validator(t5loglevel, &ValidateLOGlevel);
 
-DEFINE_int64(tmRequestLockDefaultTimeout, 0, "Sets tm mutex lock timeout(in ms) for part where request is requesting tm(which is used to open and close tms, and hold list of opened tms), after which operation would be canceled and mutex would return an error, if set to 0, mutex lock would be waited without timeout");
-DEFINE_int64(tmLockDefaultTimeout, 0, "Sets tm mutex lock timeout(in ms) for TM after which operation would be canceled and mutex would return an error, if set to 0, mutex lock would be waited without timeout");
-DEFINE_int64(tmListLockDefaultTimeout, 0, "Sets tm mutex lock timeout(in ms) for TM list(which is used to open and close tms, and hold list of opened tms), after which operation would be canceled and mutex would return an error, if set to 0, mutex lock would be waited without timeout");
+DEFINE_int64(tmRequestLockDefaultTimeout, 3000, "Sets tm mutex lock timeout(in ms) for part where request is requesting tm(which is used to open and close tms, and hold list of opened tms), after which operation would be canceled and mutex would return an error, if set to 0, mutex lock would be waited without timeout");
+DEFINE_int64(tmLockDefaultTimeout, 3000, "Sets tm mutex lock timeout(in ms) for TM after which operation would be canceled and mutex would return an error, if set to 0, mutex lock would be waited without timeout");
+DEFINE_int64(tmListLockDefaultTimeout, 3000, "Sets tm mutex lock timeout(in ms) for TM list(which is used to open and close tms, and hold list of opened tms), after which operation would be canceled and mutex would return an error, if set to 0, mutex lock would be waited without timeout");
 DEFINE_bool(UseTimedMutexesForReorganizeAndImport, false, "If set to true, in reorganize or impor thread would be used mutexes with timeouts, and reorganizee or import could be canceled, false(by default) - would be used non timed mutexes");
 
 DEFINE_bool(logMutexes, false, "if sets to true you would see mutex logs");
