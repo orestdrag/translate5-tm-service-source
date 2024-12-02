@@ -1451,6 +1451,7 @@ USHORT /*APIENTRY*/ MEMINSERTSEGMENT
     pLIDA->pProposal->setTarget( pSegment->szTarget );
     pLIDA->pProposal->setTargetLanguage( pSegment->szTargetLang );
     pLIDA->pProposal->setAddInfo( pSegment->szAddInfo );
+    pLIDA->pProposal->setContext( pSegment->szContext );
     pLIDA->pProposal->setSegmentId( pSegment->lSegNum );
 
     pLIDA->pProposal->pInputSentence = new TMX_SENTENCE(pSegment->szSource, pSegment->szTarget);

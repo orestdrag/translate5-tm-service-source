@@ -119,6 +119,11 @@ XERCES_CPP_NAMESPACE_USE
 #define DOCNAME_PROP        "tmgr:docname"
 #define DOCNAME_PROP_W      L"tmgr:docname"
 
+//#define ADDINFO_PROP        "tmgr:addinfo"
+//#define ADDINFO_PROP_W      L"tmgr:addinfo"
+//#define CONTEXT_PROP        "tmgr:context"
+//#define CONTEXT_PROP_W      L"tmgr:context"
+
 #define AUTHOR_PROP        "tmgr:author"
 #define AUTHOR_PROP_W      L"tmgr:author"
 
@@ -1934,6 +1939,13 @@ void TMXParseHandler::startElement(const XMLCh* const name, AttributeList& attri
               else if ( (strcasecmp( pszAttVal, DOCNAME_PROP ) == 0) || (strcasecmp( pszAttVal, DOCNAME_PROP_OLD ) == 0) )
               {
                 CurElement.PropID = TMDOCNAME_PROP;
+              } else if ( (strcasecmp( pszAttVal, ADDINFO_PROP ) == 0))
+              {
+                CurElement.PropID = TMADDINFO_PROP;
+              } 
+              else if ( (strcasecmp( pszAttVal, CONTEXT_PROP ) == 0))
+              {
+                CurElement.PropID = TMCONTEXT_PROP;
               }
               else if ( strcasecmp( pszAttVal, AUTHOR_PROP ) == 0  )
               {
@@ -2452,6 +2464,16 @@ void TMXParseHandler::fillSegmentInfo
     swprintf( pSegment->szAddInfo, iLeft, L"<Note style=\"%s\">%s</Note>", pBuf->szNoteStyle, pBuf->szNote );
     iLeft = SEGDATABUFLEN - wcslen(pSegment->szAddInfo);
   } /* endif */     
+
+  if(pBuf->szAddInfo[0])
+  {
+    wcscpy(pSegment->szAddInfo, pBuf->szAddInfo);
+  }
+
+  if(pBuf->szContext[0])
+  {
+    wcscpy(pSegment->szContext, pBuf->szContext);
+  }
 
   // MT meta data
   if ( (pBuf->szMTMetrics[0] != 0) )
@@ -2991,12 +3013,6 @@ void TMXParseHandler::endElement(const XMLCh* const name )
   // for prop elements we have to set the data in the parent element (i.e. after the element has been removed from the stack)
   if ( CurrentID == PROP_ELEMENT )
   {
-    //if ( CurrentProp == TMLANGUAGE_PROP )
-    //{
-    //  memset( CurElement.szTMLanguage, 0, sizeof(CurElement.szTMLanguage) );
-    //  strncpy( CurElement.szTMLanguage, pBuf->szProp, sizeof(CurElement.szTMLanguage) - 1 );
-    //}
-    //else 
     if ( CurrentProp == TMMARKUP_PROP )
     {
       std::string buff = EncodingHelper::convertToUTF8(pBuf->szPropW);
@@ -3005,8 +3021,19 @@ void TMXParseHandler::endElement(const XMLCh* const name )
       memcpy(CurElement.szTMMarkup, buff.c_str(), size);
       //strncpy( CurElement.szTMMarkup, buff.c_str(), size);
     }
-    else if ( CurrentProp == TMDOCNAME_PROP )
+    else if ( CurrentProp == TMCONTEXT_PROP )
     {
+      int size = std::min(wcslen(pBuf->szPropW), (sizeof(pBuf->szContext)/sizeof(pBuf->szContext[0])) - 1);
+      memset( pBuf->szContext, 0, (size+1)* sizeof(pBuf->szContext[0]) );
+      wcpncpy( pBuf->szContext, pBuf->szPropW, size);
+    }
+    else if( CurrentProp == TMADDINFO_PROP )
+    {
+      int size = std::min(wcslen(pBuf->szPropW), (sizeof(pBuf->szAddInfo)/sizeof(pBuf->szAddInfo[0]))  - 1);
+      memset( pBuf->szAddInfo, 0, (size+1) * sizeof(pBuf->szAddInfo[0]) );
+      wcsncpy( pBuf->szAddInfo, pBuf->szPropW, size);
+    }
+    else if( CurrentProp == TMDOCNAME_PROP ){
       std::string buff = EncodingHelper::convertToUTF8(pBuf->szPropW);
       int size = std::min(buff.size(), sizeof(pBuf->szDocument) - 1);
       memset( pBuf->szDocument, 0, size+1 );
@@ -3712,17 +3739,9 @@ USHORT APIENTRY WRITEEXPSEGMENT( LONG lMemHandle, PMEMEXPIMPSEG pSegment )
       WriteMemHeader( pData );
     } /* endif */
     pData->lSegCounter++;
-     T5LOG( T5WARNING) << "TEMPORARY_COMMENTED";
-    //swprintf( pData->szBufferW, L"<Segment>%10.10ld\n", pData->lSegCounter );
     WriteStringToMemory( pData, pData->szBufferW );
     WriteStringToMemory( pData, L"<Control>\n" );
     
-     T5LOG(T5ERROR) << "TEMPORARY_COMMENTED WRITEEXPSEGMENT";
-    /*swprintf( pData->szBufferW, L"%06ld%s%1.1u%s%016lu%s%S%s%S%s%S%s%S%s%s%s%S",
-      pSegment->lSegNum, X15_STRW, pSegment->usTranslationFlag, X15_STRW,
-      pSegment->lTime, X15_STRW, pSegment->szSourceLang, X15_STRW, 
-      (pData->MemInfo.fSourceSource) ? pSegment->szSourceLang : pSegment->szTargetLang, X15_STRW,
-      pSegment->szAuthor, X15_STRW, pSegment->szFormat, X15_STRW, L"na", X15_STRW, pSegment->szDocument );//*/
     WriteStringToMemory( pData, pData->szBufferW );
     WriteStringToMemory( pData, L"\n</Control>\n" );
     if ( pSegment->szAddInfo[0] != 0 )

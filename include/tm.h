@@ -1197,7 +1197,7 @@ class TagReplacer{
 };
 
 // PROP types
-typedef enum { TMLANGUAGE_PROP, TMMARKUP_PROP, TMDOCNAME_PROP, TMAUTHOR_PROP, MACHINEFLAG_PROP, SEG_PROP, TMDESCRIPTION_PROP, TMNOTE_PROP, TMNOTESTYLE_PROP,
+typedef enum { TMLANGUAGE_PROP, TMMARKUP_PROP, TMDOCNAME_PROP, TMCONTEXT_PROP, TMADDINFO_PROP, TMAUTHOR_PROP, MACHINEFLAG_PROP, SEG_PROP, TMDESCRIPTION_PROP, TMNOTE_PROP, TMNOTESTYLE_PROP,
   TRANSLATIONFLAG_PROP, TMTMMATCHTYPE_PROP, TMMTSERVICE_PROP, TMMTMETRICNAME_PROP, TMMTMETRICVALUE_PROP, TMPEEDITDISTANCECHARS_PROP, TMPEEDITDISTANCEWORDS_PROP,  
   TMMTFIELDS_PROP, TMWORDS_PROP, TMMATCHSEGID_PROP, UNKNOWN_PROP } TMXPROPID, PROPID;
 
@@ -1322,6 +1322,8 @@ private:
     CHAR_W   szReplacedNpData[DATABUFFERSIZE];
     CHAR_W   szNormalizedData[DATABUFFERSIZE];
     CHAR_W   szPropW[DATABUFFERSIZE]; // buffer for collected prop values
+    CHAR_W   szContext[DATABUFFERSIZE]; // buffer for collected prop values
+    CHAR_W   szAddInfo[DATABUFFERSIZE]; // buffer for collected prop values
     CHAR     szLang[50];              // buffer for language
     CHAR     szDocument[EQF_DOCNAMELEN];// buffer for document name
 
@@ -2263,19 +2265,6 @@ USHORT NTMLoadNameTable
     void *pvGlobalMemoryOptions
   ); 
 
-
-//private:
-
-  //HTM htm;                                       // old fashioned memory handle for this memory
-  //TMX_EXT_IN_W  TmExtIn;                       // ptr to extract input struct
-  //TMX_EXT_OUT_W TmExtOut;                      // ptr to extract output struct
-  //TMX_PUT_W  TmPutIn;                       // ptr to TMX_PUT_W structure
-  //TMX_EXT_OUT_W TmPutOut;                      // ptr to TMX_EXT_OUT_W structure
-  //TMX_GET_W  TmGetIn;                       // ptr to TMX_PUT_W structure
-  //TMX_GET_OUT_W TmGetOut;                      // ptr to TMX_EXT_OUT_W structure
-  //ULONG ulNextKey = 0;                       // next TM key for GetFirstProposal/GetNextProposal
-  //USHORT usNextTarget = 0;                   // next TM target for GetFirstProposal/GetNextProposal
-  //char szName[MAX_LONGFILESPEC];                 // memory name
 	std::string strLastError;
 	int iLastError = 0;
   void *pvGlobalMemoryOptions = nullptr;                   // pointert to global memory options to be used for global memory proposals
@@ -3124,114 +3113,6 @@ typedef struct _SEG_CTRL_DATA
  CHAR     chFileName[MAX_FILESPEC-1]; /* Segment origin. from that file name  */
 }SEG_CTRL_DATA, * PSEG_CTRL_DATA;
 
-
-
-/*/
-//#ifdef _OTMMEMORY_H_
-using MEM_LOAD_IDA = struct _MEM_LOAD_IDA
-{
- CHAR         szMemName[MAX_LONGFILESPEC];    // Memory database name
- CHAR         szShortMemName[MAX_FILESPEC];   // Memory database name
- CHAR         szMemPath[2048];                // Full memory database name + path
- CHAR         szFilePath[2048];               // Full file name + path
- BOOL         fControlFound;                  // Indicator whether a CONTROL token was found
- std::shared_ptr<EqfMemory> mem;                          // pointer to memory object
- OtmProposal  *pProposal;                     // buffer for memory proposal data
- CHAR_W       szSegBuffer[MAX_SEGMENT_SIZE+1];// buffer for segment data
- CHAR_W       szSource[MAX_SEGMENT_SIZE+1];   // buffer for segment source data
- HFILE        hFile;                          // Handle of file to be loaded
- HWND         hProgressWindow;                // Handle of progress indicator window
- ULONG        ulProgressPos;                  // position of progress indicator
- ULONG        ulBytesRead;                    // bytes already read from the import file
- ULONG        ulTotalSize;                    // total size of import file
- BOOL         fFirstRead;                     // Read Flag
- PLOADEDTABLE pFormatTable;                   // Pointer to Format Table
- BOOL         fEOF;                           // Indicates end of file
- PTOKENENTRY  pTokenEntry;                    // A pointer to token entries
- PTOKENENTRY  pTokenEntryWork;                // A work pointer to token entries
- //ImportStatusDetails* pImportDetails = nullptr;
- //ULONG        ulSegmentCounter;               // Segment counter of progress window
- //ULONG        ulInvSegmentCounter;            // Invalid Segment counter
- //ULONG        ulProgress;
- //ULONG        ulInvSymbolsErrors;
- ULONG        ulResetSegmentCounter;          // Segments using generic markup when not valid
- CHAR         szSegmentID[SEGMENT_CLUSTER_LENGTH +
-                          SEGMENT_NUMBER_LENGTH + 2]; // Segment identification
- CHAR         szFullFtabPath[MAX_EQF_PATH];   // Full path to tag tables
- CHAR_W       szTextBuffer[MEM_TEXT_BUFFER];  // Text buffer to keep the file
- PMEM_IDA     pIDA;                           // Address to the memory database IDA
- BOOL         fDisplayNotReplacedMessage;     // message flag if segment not /*@47A*/
-                                              // not replaced message should /*@47A*/
-                                              // be displayed or not         /*@47A*/
-                                              /*
- CHAR         szTargetLang[MAX_LANG_LENGTH];
- CHAR         szTagTable[MAX_FNAME];
- BOOL         fTagLangDlgCanceled;
- USHORT       usTmVersion;
- BOOL         fBatch;                         // TRUE = we are in batch mode
- HWND         hwndErrMsg;                     // parent handle for error messages
- PDDEMEMIMP   pDDEMemImp;                     // ptr to batch memory import data
- HWND         hwndNotify;                 // send notification about completion
- OBJNAME      szObjName;                  // name of object to be finished
- CHAR         szDescription[MAX_MEM_DESCRIPTION];   //description of memory database
- CHAR         szTempPath[MAX_PATH144];        // buffer for path names
- USHORT       usImpMode;                  // mode for import
- BOOL         fMerge;                     // TRUE = TM is being merged
- PSZ          pszList;                    // list of imported files or NULL
- PSZ          pszActFile;                 // ptr to active file or NULL
- ULONG        ulFilled;                   // filled during read (in num CHAR_Ws)
- BOOL         fSkipInvalidSegments;       // TRUE = skip invalid segments w/o notice
- ULONG        ulOemCP;                    // CP of system preferences lang.
- ULONG        ulAnsiCP;                   // CP of system preferences lang.
- BOOL         fIgnoreEqualSegments;       // TRUE = ignore segments with identical source and target string
- BOOL         fAdjustTrailingWhitespace;  // TRUE = adjust trailing whitespace of target string
-
- // dynamically evaluated token IDs
- SHORT sContextEndTokenID;
- SHORT sControlEndTokenID;
- SHORT sDescriptionEndTokenID;
- SHORT sMemMemoryDBEndTokenID;
- SHORT sNTMMemoryDBEndTokenID;
- SHORT sSegmentEndTokenID;
- SHORT sSourceEndTokenID;
- SHORT sTargetEndTokenID;
- SHORT sContextTokenID;
- SHORT sControlTokenID;
- SHORT sDescriptionTokenID;
- SHORT sMemMemoryDBTokenID;
- SHORT sNTMMemoryDBTokenID;
- SHORT sSegmentTokenID;
- SHORT sSourceTokenID;
- SHORT sTargetTokenID;
- SHORT sCodePageTokenID;
- SHORT sCodePageEndTokenID;
- SHORT sAddInfoEndTokenID;
- SHORT sAddInfoTokenID;
-
- // fields for external memory import methods
- //HMODULE       hmodMemExtImport;                 // handle of external import module/DLL
- PMEMEXPIMPINFO pstMemInfo;                        // buffer for memory information
- PMEMEXPIMPSEG  pstSegment;                        // buffer for segment data
-
- LONG          lExternalImportHandle;            // handle of external memory import functions
-
- BOOL         fMTReceiveCounting;         // TRUE = count received words and write counts to folder properties
- OBJNAME      szFolObjName;               // object name of folder (only set with fMTReceiveCounting = TRUE)
- ULONG        ulMTReceivedWords[3];       // received words per category
- ULONG        ulMTReceivedSegs[3];        // received segments per category
- LONG         lProgress;                  // progress indicator of external import methods
- BOOL         fYesToAll;                  // yes-to-all flag for merge confirmation
- BOOL          fForceNewMatchID;          // create a new match segment ID even when the match already has one
- BOOL          fCreateMatchID;            // create match segment IDs
- CHAR          szMatchIDPrefix[256];      // prefix to be used for the match segment ID
- CHAR_W        szMatchIDPrefixW[256];     // prefix to be used for the match segment ID (UTF16 version)
- CHAR_W        szMatchSegIdInfo[512];     // buffer for the complete match segment ID entry
- ULONG         ulSequenceNumber;          // segment sequence number within current external memory file
- //ULONG         ulActiveSegment;
- std::string fileData;
-};
-using PMEM_LOAD_IDA = MEM_LOAD_IDA *;
-//*/
 
 
 /*! \brief search a string in a proposal
