@@ -329,9 +329,6 @@ USHORT EqfMemory::FindTargetAndDelete(
   PTMX_SOURCE_RECORD pTMXSourceRecord = NULL; //ptr to source record
   PTMX_TARGET_RECORD pTMXTargetRecord = NULL; //ptr to target record
   PTMX_TARGET_CLB    pClb = NULL;    //ptr to target control block
-  //PTMX_TAGTABLE_RECORD pTMXSourceTagTable = NULL; //ptr to source tag info
-  //PTMX_TAGTABLE_RECORD pTMXTargetTagTable = NULL; //ptr to tag info
-  //PTMX_TAGTABLE_RECORD pTagRecord = NULL;  //ptr to tag info
   LONG lTagAlloc;                      //allocate length
   ULONG ulLen = 0;                    //length indicator
   LONG lSrcLen = 0;

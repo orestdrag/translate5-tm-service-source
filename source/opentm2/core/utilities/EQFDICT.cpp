@@ -5056,8 +5056,6 @@ SHORT  BTREE::QDAMDictOpenLocal
   USHORT  usFlags;                    // set the open flags
   USHORT  usAction;                   // return code from UtlOpen
   USHORT  usNumBytesRead=0;           // number of bytes read
-  //PBTREE  pBTIda = this;            // set work pointer to passed pointer
-  //PBTREE pBT;                     // set work pointer to passed pointer
   SHORT   sRc1;
   /*******************************************************************/
   /* allocate global area first ...                                  */

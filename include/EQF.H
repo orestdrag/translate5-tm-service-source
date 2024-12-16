@@ -3667,10 +3667,7 @@ typedef ULONG HPRINT, *PHPRINT;
     USHORT  UtlRemoveDir( PSZ pszDir, BOOL fMsg );
     SHORT   UtlCopyListBox( HWND, HWND );
     PSZ     UtlMakeFullPath ( PSZ, PSZ, PSZ, PSZ, PSZ );
-    USHORT  UtlWriteFile( PSZ pszFile, USHORT usDataLength, PVOID pData, BOOL fMsg );
-    USHORT  UtlWriteFileL( PSZ pszFile, ULONG ulDataLength, PVOID pData, BOOL fMsg );
-    USHORT  UtlWriteFileHwnd( PSZ pszFile, ULONG ulDataLength, PVOID pData,
-            BOOL fMsg, HWND hwndParent );
+    USHORT  UtlWriteFile( PSZ pszFile, ULONG ulDataLength, PVOID pData);
     BOOL    UtlIsEqfDrive( CHAR chDrive );
     BOOL    UtlGetCheckedEqfDrives( PSZ pszDrives );
     char*     UtlGetFnameFromPath( const char* path);
@@ -3791,7 +3788,6 @@ USHORT  UtlQFileModeHwnd( PSZ pszFileName, PUSHORT pusAttribute, ULONG ulReserve
 USHORT  UtlQPathInfoHwnd( PSZ pszPath, USHORT usInfoLevel, PBYTE pInfoBuf,
                           USHORT cbInfoBuf, ULONG ulReserved, BOOL fMsg,
                           HWND hwndParent);
-USHORT  UtlSetFileModeHwnd ( PSZ, USHORT, ULONG, BOOL, HWND );
 USHORT  UtlFileLocks( HFILE, PFILELOCK, PFILELOCK, BOOL );
 USHORT  UtlFileLocksHwnd( HFILE, PFILELOCK, PFILELOCK, BOOL, HWND );
 USHORT  UtlGetLongFTime( HFILE hFile, PLONG plTime );
@@ -5362,11 +5358,6 @@ USHORT ObjLongToShortNameEx2
   PBOOL       pfReserved               // points to callers fReserved flag
 );
 
-USHORT CreateMemFile
-(
-  PSZ         pszName,             // ptr to object long name
-  POBJLONGTOSHORTSTATE pObjState   // ptr to buffer for returned object state
-);
 
 BOOL StartBrowser( PSZ pszUrl );       // start the standard Browser
 VOID EqfDisplayContextHelp( HWND, PHELPSUBTABLE);

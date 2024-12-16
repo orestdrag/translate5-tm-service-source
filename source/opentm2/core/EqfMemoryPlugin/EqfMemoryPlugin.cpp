@@ -87,7 +87,8 @@ const char* EqfMemoryPlugin::getSupplier()
 EqfMemory* EqfMemoryPlugin::initTM(
   const std::string& memName,	
   size_t requiredMemory,	 
-  unsigned short usAccessMode
+  unsigned short usAccessMode, 
+  bool fReorganizeOnly
 ){
   USHORT usRC = 0;
   // use old memory open code
@@ -98,6 +99,8 @@ EqfMemory* EqfMemoryPlugin::initTM(
     pMemory->setExpecedSizeInRAM(requiredMemory);
     pMemory->updateLastUseTime();
     pMemory->eStatus = WAITING_FOR_LOADING_STATUS;
+    pMemory->usAccessMode |= ASD_ORGANIZE;
+    //pMemory->fReorganizeOnly = fReorganizeOnly;
   }else{
     LOG_AND_SET_RC(usRC, T5WARNING, ERROR_NOT_ENOUGH_MEMORY);
   }  
@@ -124,49 +127,7 @@ int EqfMemoryPlugin::closeMemory(
 //*/
 int EqfMemoryPlugin::setDescription(const char* pszName, const char* pszDesc)
 {
-    if(pszName==NULL || pszDesc==NULL)
-        return 0;
-
-   std::shared_ptr<EqfMemory>  pMemInfo ;//= this->findMemory( (PSZ)pszName );
-    if ( pMemInfo.get() == NULL )
-    {
-      // no memory found
-      handleError( ERROR_MEMORY_NOTFOUND, (PSZ)pszName, NULL, NULL, this->strLastError, this->iLastError );
-      return( ERROR_MEMORY_NOTFOUND );
-    }
-
-    // firstly change in memory
-    int tLen = sizeof(pMemInfo.get()->szDescription)/sizeof(pMemInfo.get()->szDescription[0])-1;
-    strncpy( pMemInfo.get()->szDescription, pszDesc, tLen );
-    pMemInfo.get()->szDescription[tLen] = '\0';
-
-    // then change in disk
-    char szPathMem[512];
-    memset(szPathMem, 0, 512);
-    
-    //UtlMakeEQFPath( szPathMem, NULC, PROPERTY_PATH, NULL );
-    Properties::GetInstance()->get_value(KEY_MEM_DIR, szPathMem, 512);
-    strcat(szPathMem, "/");
-    Utlstrccpy( szPathMem+strlen(szPathMem), UtlGetFnameFromPath( pMemInfo.get()->szFullPath ), DOT );
-    strcat( szPathMem, EXT_OF_MEM );
-
-    ULONG ulRead;
-    PPROP_NTM pProp = NULL;
-    BOOL fOK = UtlLoadFileL( szPathMem, (PVOID*)&pProp, &ulRead, FALSE, FALSE );
-
-    if(!fOK || pProp == NULL)
-        return -1;
-
-    int length = sizeof(pProp->stTMSignature.szDescription)/sizeof(pProp->stTMSignature.szDescription[0])-1;
-    strncpy(pProp->stTMSignature.szDescription, pszDesc, length);
-    pProp->stTMSignature.szDescription[length]='\0';
-
-    int res = UtlWriteFileL( szPathMem, ulRead, (PVOID)pProp, FALSE );
-
-    // relase memory
-    UtlAlloc( (PVOID *)&pProp, 0, 0, NOMSG );
-
-    return res;
+  return 0;
 }
 
 /*! \brief Get the error message for the last error occured

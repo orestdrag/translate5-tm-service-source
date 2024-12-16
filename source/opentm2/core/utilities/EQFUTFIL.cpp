@@ -485,38 +485,6 @@ BOOL UtlDirExist( PSZ pszDir )
 //|Function flow:     calls UtlWriteFileHwnd with NULL window handle           |
 //+----------------------------------------------------------------------------+
 
-USHORT UtlWriteFile
-(
-  PSZ       pszFile,            // name of file to write
-  USHORT    usDataLength,       // length of data to write to the file
-  PVOID     pData,              // pointer to data being written to file
-  BOOL      fMsg                // TRUE = do message handling
-)
-{
-   ULONG  ulDataLength = usDataLength;
-
-   return( UtlWriteFileHwnd( pszFile,
-                             ulDataLength,
-                             pData,
-                             fMsg,
-                             NULLHANDLE ) );;
-
-}
-
-USHORT UtlWriteFileL
-(
-  PSZ       pszFile,            // name of file to write
-  ULONG     ulDataLength,       // length of data to write to the file
-  PVOID     pData,              // pointer to data being written to file
-  BOOL      fMsg                // TRUE = do message handling
-)
-{
-   return( UtlWriteFileHwnd( pszFile,
-                             ulDataLength,
-                             pData,
-                             fMsg,
-                             NULLHANDLE ) );
-}
 
 //+----------------------------------------------------------------------------+
 //|External function                                                           |
@@ -550,15 +518,16 @@ USHORT UtlWriteFileL
 //|                   if file is open close file                               |
 //|                   return any error codes to caller                         |
 //+----------------------------------------------------------------------------+
-USHORT UtlWriteFileHwnd                                                  /*@86C*/
+USHORT UtlWriteFile                                                  /*@86C*/
 (
   PSZ       pszFile,                   // name of file to write
   ULONG     ulDataLength,              // length of data to write to the file
-  PVOID     pData,                     // pointer to data being written to file
-  BOOL      fMsg,                      // TRUE = do message handling
-  HWND      hwndParent
+  PVOID     pData                     // pointer to data being written to file
+ 
 )
 {
+    BOOL      fMsg = 0;                      // TRUE = do message handling
+    HWND      hwndParent = NULL;
     USHORT           usDosRC;              // Return code from Dos operations
     HFILE            hOutFile = NULLHANDLE;// File handle for input file
     USHORT           usAction;             // file action performed by DosOpen
@@ -588,10 +557,6 @@ USHORT UtlWriteFileHwnd                                                  /*@86C*
                               &ulBytesWritten,
                               fMsg,
                               hwndParent );
-//      if ( !usDosRC && ( usBytesWritten != usDataLength ) )      /*KIT1274*/
-//      {                                                          /*KIT1274*/
-//        usDosRC = ERROR_DISK_FULL;                               /*KIT1274*/
-//      } /* endif */                                              /*KIT1274*/
     } /* endif */
 
     /******************************************************************/
@@ -611,13 +576,6 @@ USHORT UtlWriteFileHwnd                                                  /*@86C*
                           0L,
                           FALSE,
                           hwndParent );
-//           if ( fMsg )                                           /*KIT1274*/
-//           {                                                     /*KIT1274*/
-//             pszErrParm = pszFile;                               /*KIT1274*/
-//             T5LOG( T5ERROR) <<   ERROR_EQF_DISK_FULL, MB_CANCEL, 1,    /*KIT1274*/
-//                           &pszErrParm, EQF_ERROR,               /*KIT1274*/
-//                           hwndParent );                         /*KIT1274*/
-//           } /* endif */                                         /*KIT1274*/
       } /* endif */
     } /* endif */
 
@@ -974,59 +932,6 @@ USHORT UtlBufOpenHwnd
 //|                   close output file                                        |
 //|                   free memory of buffered output control block             |
 //+----------------------------------------------------------------------------+
-USHORT UtlBufClose
-(
-  PBUFCB pBufCB,                       // pointer to buffered output CB
-  BOOL   fMsg                          // TRUE for message processing
-)
-{
-  return( UtlBufCloseHwnd( pBufCB, fMsg, NULLHANDLE ) );
-}
-
-USHORT UtlBufCloseHwnd
-(
-  PBUFCB pBufCB,                       // pointer to buffered output CB
-  BOOL   fMsg,                         // TRUE for message processing
-  HWND   hwnd                          // handle for error messages
-)
-{
-  USHORT      usRC = 0;               // return code of function
-  ULONG       ulBytesWritten;         // number of bytes written to file
-  PSZ         pszErrParm;             // ptr to error parameter
-
-  /********************************************************************/
-  /* Write pending data to output file                                */
-  /********************************************************************/
-  if ( pBufCB->fWrite && pBufCB->ulUsed )
-  {
-    usRC = UtlWriteHwnd( pBufCB->hFile,
-                     (PVOID)pBufCB->Buffer,
-                     pBufCB->ulUsed,
-                     &ulBytesWritten,
-                     fMsg, hwnd );
-    if ( !usRC && (pBufCB->ulUsed != ulBytesWritten) )
-    {
-      LOG_AND_SET_RC(usRC, T5INFO, ERROR_DISK_FULL);
-      if ( fMsg )
-      {
-        pszErrParm = pBufCB->szFileName,
-        T5LOG(T5ERROR) <<   "; rc = " << usRC << "; " << pszErrParm ;
-      } /* endif */
-    } /* endif */
-  } /* endif */
-
-  /********************************************************************/
-  /* Close the file in any case                                       */
-  /********************************************************************/
-  UtlCloseHwnd( pBufCB->hFile, fMsg, hwnd );
-
-  /********************************************************************/
-  /* Free control block                                               */
-  /********************************************************************/
-  UtlAlloc( (PVOID *)&pBufCB, 0L, 0L, NOMSG );
-
-  return( usRC );
-} /* end of function UtlBufClose */
 
 
 //+----------------------------------------------------------------------------+

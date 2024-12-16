@@ -3,6 +3,9 @@ SET(APP_VERSION_GLOBAL 0)
 SET(APP_VERSION_MAJOR 6)
 SET(APP_VERSION_MINOR 61)
 
+set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD_REQUIRED True)
+
 SET(APP_VERSION  "${APP_VERSION_GLOBAL}.${APP_VERSION_MAJOR}.${APP_VERSION_MINOR}")
 
 project(T5MEMORY VERSION ${APP_VERSION})
@@ -173,6 +176,7 @@ link_directories(/usr/lib/gcc/x86_64-linux-gnu/9/)
 
 
 
+
 set_source_files_properties(
     /home/or/workspace/translate5/translate5-tm-service-source/source/RestAPI/ProxygenServer.cpp
     PROPERTIES COMPILE_FLAGS "-fno-sanitize=thread"
@@ -186,8 +190,10 @@ add_definitions( -DT5MINVERSION=${APP_VERSION_MINOR} )
 
 add_executable(T5MEMORY ${T5MEMORY_Source_Files})
 
-set(CMAKE_CXX_STANDARD 14)
-target_compile_features(T5MEMORY PRIVATE cxx_std_14)
+#set(CMAKE_CXX_STANDARD 14)
+target_compile_features(T5MEMORY PRIVATE  cxx_std_17)
+
+target_compile_options(T5MEMORY PRIVATE -Wunused-function)#-Wall -Wextra 
 
 target_include_directories(T5MEMORY PRIVATE
     ${CMAKE_SOURCE_DIR}
@@ -213,6 +219,7 @@ find_package(proxygen REQUIRED)
 target_compile_definitions(T5MEMORY PRIVATE BOOST_STACKTRACE_USE_ADDR2LINE)
 
 add_definitions(-w)
+#add_definitions(-Wall -Wextra)
 
 if(TARGET Threads::Threads)
   target_link_libraries(T5MEMORY PRIVATE Threads::Threads)

@@ -1396,6 +1396,11 @@ USHORT UtlMove
                         fMsg,
                         (HWND) NULL ) );
 }
+
+
+USHORT UtlSetFileMode ( PSZ, USHORT, ULONG, BOOL ){return 0;}
+
+
 //+----------------------------------------------------------------------------+
 //|External function                                                           |
 //+----------------------------------------------------------------------------+
@@ -1915,20 +1920,7 @@ T5LOG(T5ERROR) << ":: TO_BE_REPLACED_WITH_LINUX_CODE id = 53 if ( FindClose( hdi
 //+----------------------------------------------------------------------------+
 //|Function flow:     call UtlSetFileModeHwnd                                  |
 //+----------------------------------------------------------------------------+
-USHORT UtlSetFileMode
-(
-   PSZ      pszFile,                   // fully qualified file name
-   USHORT   usMode,                    // new file mode
-   ULONG    ulReserved,                // reserved value must be 0L
-   BOOL     fMsg                       // if TRUE handle errors in utility
-)
-{
-   return( UtlSetFileModeHwnd( pszFile,
-                               usMode,
-                               ulReserved,
-                               fMsg,
-                               (HWND) NULL ) );
-}
+
 
 //+----------------------------------------------------------------------------+
 //|External function                                                           |
@@ -1960,20 +1952,6 @@ USHORT UtlSetFileMode
 //|                     endif                                                  |
 //|                   while fMsg and an error occured and MB code is RETRY     |
 //+----------------------------------------------------------------------------+
-USHORT UtlSetFileModeHwnd
-(
-   PSZ      pszFile,                   // fully qualified file name
-   USHORT   usMode,                    // new file mode
-   ULONG    ulReserved,                // reserved value must be 0L
-   BOOL     fMsg,                   // if TRUE handle errors in utility
-   HWND     hwndParent
-)
-{
-   USHORT usRetCode = NO_ERROR;        // function return code
-   USHORT usMBCode = 0;                    // message box/UtlError return code
-
-   return( usRetCode );
-}
 
 
 //+----------------------------------------------------------------------------+
@@ -1993,25 +1971,11 @@ USHORT UtlSetFileModeHwnd
 //+----------------------------------------------------------------------------+
 //|Function flow:                                                              |
 //+----------------------------------------------------------------------------+
-BOOL UtlSetDrive
-(
-  CHAR   szNewDrive                        // driveletter of new drive
-)
+BOOL UtlSetDrive(CHAR   szNewDrive)                        // driveletter of new drive
 {
-  BOOL    fFlag=TRUE;
-  CHAR szRootDir[5] = "A:\\";
-  szRootDir[0] = szNewDrive;
-
-T5LOG(T5ERROR) << ":: TO_BE_REPLACED_WITH_LINUX_CODE id = 55 if ( SetCurrentDirectory( szRootDir ) == 0 ) { fFlag = FALSE; }";
-#ifdef TO_BE_REPLACED_WITH_LINUX_CODE
-  if ( SetCurrentDirectory( szRootDir ) == 0 )
-  {
-    fFlag = FALSE;
-  } /* endif */
-#endif //TO_BE_REPLACED_WITH_LINUX_CODE
-
-  return(fFlag);
+  return 0; 
 }
+
 
 /**********************************************************************/
 /* the following section contains DOS-API functions which are not     */

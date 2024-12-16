@@ -1875,7 +1875,7 @@ void PerformPendingUpdates( char *pszBasePath )
         if ( pProp->fDisabled_UserExitRefresh )
         {
           pProp->fDisabled_UserExitRefresh = FALSE;
-          UtlWriteFileL( szSource, ulSize, pProp, FALSE );
+          UtlWriteFile( szSource, ulSize, pProp );
         } /* endif */           
         UtlAlloc( (PVOID *)&pProp, 0, 0, NOMSG );
       } /* endif */     

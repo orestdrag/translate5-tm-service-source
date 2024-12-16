@@ -93,8 +93,6 @@ class ProxygenHandler : public proxygen::RequestHandler {
   std::unique_ptr<proxygen::HTTPMessage> headers_;
 
 #ifdef TIME_MEASURES
-  //time_t startingTime;
-  //time_t endingTime;
   std::chrono::milliseconds start_ms, end_ms;
 #endif
 
@@ -190,10 +188,7 @@ void processMultipartChunk(std::unique_ptr<folly::IOBuf>& body) {
     const uint8_t* lineEnd = findLineEnd(lineStart, partEnd-lineStart);
 
     while(lineStart < partEnd)
-    {            
-        //std::string partStr(reinterpret_cast<const char*>(lineStart), lineEnd-lineStart);
-        //T5LOG(T5TRANSACTION) << "partStr = " << partStr;
-
+    {
         if (!isBody) {
             std::string headerValue(reinterpret_cast<const char*>(lineStart), lineEnd-lineStart);
             if (headerValue == "\r" || headerValue == "\n" || headerValue == "\r\n" || headerValue.empty()) {
@@ -218,11 +213,9 @@ void processMultipartChunk(std::unique_ptr<folly::IOBuf>& body) {
             {
                 // Write file content directly to disk in chunks                  
                 fileStream.write(reinterpret_cast<const char*>(lineStart), lineEnd-lineStart);
-                //partStart = partEnd;
             } else if (JSON == processedBodyPart) {
                 // Accumulate JSON content (or process it incrementally)
                 std::string json_data(reinterpret_cast<const char*>(lineStart), lineEnd-lineStart);
-                //T5LOG(T5TRANSACTION) << "parsed json, len:" << json_data.size() << ", json_data:" << json_data;
                 pRequest->strBody += json_data;;
             }
         }

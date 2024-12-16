@@ -38,6 +38,155 @@ PFileBufferMap FilesystemHelper::getFileBufferInstance(){
 
 std::mutex FilesystemHelper::fsLock;
 
+
+#include <fstream>
+#include <iostream>
+#include <string>
+#include <cstdio>
+#include <filesystem>
+
+bool atomicSave(const std::string& filename, const std::string& data) {
+    try {
+        // Step 1: Create a temporary file in the same directory
+        std::string tempFilename = filename + ".tmp";
+        
+        // Step 2: Write data to the temporary file
+        {
+            std::ofstream tempFile(tempFilename, std::ios::out | std::ios::trunc | std::ios::binary);
+            if (!tempFile) {
+                std::cerr << "Error: Unable to open temporary file for writing\n";
+                return false;
+            }
+
+            tempFile.write(data.c_str(), data.size());
+            if (!tempFile) {
+                std::cerr << "Error: Write operation failed\n";
+                return false;
+            }
+
+            // Flush the buffer to ensure data is written to the disk
+            tempFile.flush();
+            if (!tempFile) {
+                std::cerr << "Error: Flush operation failed\n";
+                return false;
+            }
+        }
+
+        // Step 3: Ensure data is physically written to disk
+        if (std::filesystem::exists(tempFilename)) {
+            std::filesystem::permissions(tempFilename, std::filesystem::perms::owner_read | 
+                                                      std::filesystem::perms::owner_write);
+        }
+        // Step 4: Rename the temporary file to the target file (atomic on most filesystems)
+        std::filesystem::rename(tempFilename, filename);
+        return true;
+    } catch (const std::exception& e) {
+        std::cerr << "Exception occurred: " << e.what() << "\n";
+        return false;
+    }
+}
+
+int maintest() {
+    std::string filename = "example.txt";
+    std::string data = "This is some important data that needs to be saved atomically.";
+
+    if (atomicSave(filename, data)) {
+        std::cout << "File saved successfully\n";
+    } else {
+        std::cout << "Failed to save file\n";
+    }
+
+    return 0;
+}
+////////////////////////////////////////
+
+#include <fstream>
+#include <iostream>
+#include <string>
+#include <filesystem>
+#include <cstdio>
+
+int FileBuffer::atomicWriteWithBackup() {
+    try {
+        // Step 1: Create a temporary file
+        std::string tempFilename = fileName + ".tmp";
+        {
+            std::ofstream tempFile(tempFilename, std::ios::out | std::ios::trunc | std::ios::binary);
+            if (!tempFile) {
+                T5LOG(T5ERROR) << "Error: Unable to open temporary file for writing\n";
+                return 1;
+            }
+            //tempFile.write(data, data.size());
+            if (!tempFile) {
+                T5LOG(T5ERROR) << "Error: Write operation to temporary file failed\n";
+                return 2;
+            }
+
+            tempFile.write(reinterpret_cast<const char*>(data.data()), data.size());
+            tempFile.flush();
+        }
+
+        // Step 2: Rename original file to backup (if it exists)
+        std::string backupFilename = fileName + ".old";
+        if (std::filesystem::exists(fileName)) {
+            std::filesystem::rename(fileName, backupFilename);
+        }
+
+        // Step 3: Rename the temporary file to the original filename
+        std::filesystem::rename(tempFilename, fileName);
+
+        // Step 4: Delete the backup file
+        if (std::filesystem::exists(backupFilename)) {
+            FilesystemHelper::DeleteFile(backupFilename, true);
+            //std::filesystem::remove(backupFilename);
+        }
+
+        return 0;
+    } catch (const std::exception& e) {
+        T5LOG(T5ERROR) << "Error: " << e.what() << "\n";
+        return 3;
+    }
+}
+
+bool handleMissingTMI(const std::string& tmdFilename, const std::string& tmiFilename) {
+    if (!std::filesystem::exists(tmiFilename)) {
+        std::cout << "Recreating missing TMI file from TMD: " << tmdFilename << "\n";
+        // Logic to recreate TMI from TMD should go here.
+        // Placeholder: just creating an empty TMI file.
+        std::ofstream tmiFile(tmiFilename, std::ios::out | std::ios::trunc | std::ios::binary);
+        if (!tmiFile) {
+            std::cerr << "Error: Unable to recreate TMI file\n";
+            return false;
+        }
+        tmiFile << "Placeholder for regenerated TMI data\n";
+        tmiFile.flush();
+        return true;
+    }
+    return true;
+}
+
+int main2() {
+    std::string tmdFilename = "data.tmd";
+    std::string tmiFilename = "data.tmi";
+    std::string data = "This is critical data for the TMD file.";
+
+    //if (atomicWriteWithBackup(tmdFilename, data)) {
+        std::cout << "TMD file written atomically and safely\n";
+    //} else {
+        std::cout << "Failed to write TMD file\n";
+    //}
+
+    if (handleMissingTMI(tmdFilename, tmiFilename)) {
+        std::cout << "TMI file checked and recreated if necessary\n";
+    } else {
+        std::cout << "Failed to ensure TMI file consistency\n";
+    }
+
+    return 0;
+}
+
+/////////////////////////////////////
+
 std::string FilesystemHelper::parseDirectory(const std::string path){
     std::size_t found = path.rfind('/');
     if (found!=std::string::npos)
@@ -221,7 +370,6 @@ int FilesystemHelper::RenameFile(std::string oldPath, std::string newPath){
     std::string fixedNewPath = FixPath(newPath);
     errno = 0;
     bool fOk = true;
-    //fOk = rename(fixedOldPath.c_str(), fixedNewPath.c_str()) != -1;
     //Copy file instead
     if(FileExists(newPath.c_str())){
         T5LOG(T5ERROR) <<  ":: trg file \'" << newPath << "\' already exists!";
@@ -234,13 +382,7 @@ int FilesystemHelper::RenameFile(std::string oldPath, std::string newPath){
     // Attempt to rename the file
     if (std::rename(oldPath.c_str(), newPath.c_str()) == 0) {
         T5LOG(T5DEBUG) << "File \'"<<oldPath <<"\' renamed successfully to \'" << newPath<< "\'\n";
-    } else {
-    //    T5LOG(T5DEBUG) << "File \'"<<oldPath <<"\' can\'t be renamed to \'" << newPath<< "\'\n";
-    }
-    //RenameFile(oldPath, newPath);
-    //delete prev file
-    //DeleteFile(oldPath);
-    //remove(oldPath);
+    }    
     
     if(!fOk){
        T5LOG(T5ERROR) << "cannot rename "<< fixedOldPath << " to " << fixedNewPath <<  ", error = " <<  strerror(errno);
@@ -467,7 +609,6 @@ int FileBuffer::ReadFromFile(){
     int readed = 0;
     if( originalFileSize > 0  && originalFileSize != -1){
         data.resize(originalFileSize);
-        //memset(&data[0], 0, data.size());
         
         if(VLOG_IS_ON(1)){
             T5LOG( T5INFO) << "OpenFile:: file size >0  -> Filebuffer resized to filesize(" << originalFileSize << "), fname = " << fileName;
@@ -489,12 +630,10 @@ int FileBuffer::ReadFromFile(){
         if(VLOG_IS_ON(1)){
             T5LOG( T5INFO) << "OpenFile:: file size <=0  -> Filebuffer resized to default value, fname = " << fileName ;
         }
-        data.resize(16384);        
-        //memset(&data[0], 0, data.size());
+        data.resize(16384); 
     }
     return 0;
 }
-//int FileBuffer::WriteToFile(){}
 
 int FileBuffer::SetOffset(size_t newOffset, int fileAnchor){
     if(fileAnchor != FILE_BEGIN){
@@ -502,9 +641,7 @@ int FileBuffer::SetOffset(size_t newOffset, int fileAnchor){
         throw;
     }
     if(newOffset > data.size()){
-        //if(T5Logger::GetInstance()->CheckLogLevel(T5DEBUG)){
-            T5LOG(T5ERROR) << "tried to set offset to " << newOffset <<" , but its bigger than data size =" <<data.size();
-        //}
+        T5LOG(T5ERROR) << "tried to set offset to " << newOffset <<" , but its bigger than data size =" <<data.size();
         return -1;
     }
     if(newOffset < 0 ){
@@ -525,6 +662,7 @@ int FileBuffer::Flush(bool forced){
     #endif
     
     bool fileWasOpened = file != nullptr;
+    int rc = 0;
 
     size_t writenBytes = 0;
     if(!FilesystemHelper::FileExists(fileName) && !forced){
@@ -532,10 +670,16 @@ int FileBuffer::Flush(bool forced){
     }else if(forced || wasModified()){
         if(VLOG_IS_ON(1)){
             T5LOG( T5INFO) << "Flush:: writing files from buffer";
+        }  
+
+        int oldSize = 0;
+        if(T5Logger::GetInstance()->CheckLogLevel(T5DEBUG)){ 
+            oldSize = FilesystemHelper::GetFileSize(fileName);
         }
+
+        #ifdef TO_BE_REMOVED
         PUCHAR bufStart = &data[0];
         int size = data.size();
-        
         //if(fileWasOpened && file) fclose(file);
         if(!fileWasOpened) file = fopen(fileName.c_str(),"w+b");
        
@@ -544,29 +688,31 @@ int FileBuffer::Flush(bool forced){
             return FilesystemHelper::FILEHELPER_FILE_PTR_IS_NULL;
         }
 
-        int oldSize = 0;
         if(T5Logger::GetInstance()->CheckLogLevel(T5DEBUG)){
             oldSize = FilesystemHelper::GetFileSize(file);
         }
         
         fseek(file, 0, SEEK_SET);
-        writenBytes = fwrite(bufStart, size, 1, file) * size;
-        if ( writenBytes <=0 ){
+        //if(!fileWasOpened) 
+        {
+            fclose(file);
+            file = nullptr;
+        }
+        #endif
+        //writenBytes = fwrite(bufStart, size, 1, file) * size;
+        rc = atomicWriteWithBackup();
+        if ( rc ){
             T5LOG(T5ERROR) <<"::Flush():: ERROR_WRITE_FAULT";
             return ERROR_WRITE_FAULT;
         }
     
         if(T5Logger::GetInstance()->CheckLogLevel(T5DEBUG)){
             T5LOG( T5DEBUG) "::Flush("  << (long int) file << ") buff = " << "void" <<
-                ", buffsize = " << size << ", path = " << fileName << ", file size = " <<
+                ", buffsize = " << data.size() << ", path = " << fileName << ", file size = " <<
                 FilesystemHelper::GetFileSize(file) << ", oldSize = " << oldSize;
         }
 
-        if(!fileWasOpened) 
-        {
-            fclose(file);
-            file = nullptr;
-        }
+        
     }else{
         if(VLOG_IS_ON(1)){
             T5LOG( T5INFO) <<"Flush:: buffer not modified, so no need to overwrite file, fName = " << fileName;
@@ -599,7 +745,6 @@ int FileBuffer::Read(void* buff, size_t buffSize, size_t startingPos){
 
 
 bool FileBuffer::isTMDFilebuffer(){
-    //if(filebufferType == FilebufferType::TMD_FILEBUFFER){
     return EncodingHelper::endsWithIgnoreCase(fileName, ".tmd" );
 }
 
@@ -635,14 +780,6 @@ int FileBuffer::Write(const void* buff, size_t buffSize, size_t startingPosition
     offset = startingPosition + buffSize;
     return 0 ;
 }
-
-/*
-int FilesystemHelper::DeleteFile(FILE*  ptr){
-    if(!ptr)
-        return FILEHELPER_FILE_PTR_IS_NULL;
-    
-    return FILEHELPER_NO_ERROR;
-}//*/
 
 
 int FilesystemHelper::WriteToBuffer(FILE *& ptr, const void* buff, const int buffSize, const int startingPosition){
@@ -689,11 +826,7 @@ int FilesystemHelper::FlushBufferIntoFile(const std::string& fName){
     auto pFBs = getFileBufferInstance();
     if(pFBs->find(fName)!= pFBs->end()){
         WriteBuffToFile(fName);
-        //T5LOG(T5ERROR) << "TEMPORARY_COMMENTED::FilesystemHelper::FlushBufferIntoFile erasing of filebuffer ", fName.c_str());
-        //(*getFileBufferInstance())[fName].file = nullptr;
-        //(*getFileBufferInstance())[fName].offset = 0;
         (*pFBs)[fName].status &= ~MODIFIED;// reset modified flag
-        //pFBs->erase(fName);
     }else{
         if(VLOG_IS_ON(1)){
             T5LOG( T5INFO) <<"FilesystemHelper::FlushBufferIntoFile:: filebuffer not found, fName = " << fName;
@@ -782,10 +915,6 @@ int FilesystemHelper::CloseFileBuffer(const std::string& path){
     return FILEHELPER_NO_ERROR;
 }
 
-
-
-
-//std::vector<std::string> selFiles;
 int curSelFile = -1;
 FILE* FilesystemHelper::FindFirstFile(const std::string& name){
     LOG_UNIMPLEMENTED_FUNCTION;
@@ -818,8 +947,6 @@ return files;
 std::vector<std::string> FilesystemHelper::FindFiles(const std::string& name, int* errcode){
     std::vector<std::string> selFiles;
     int rc = 0;
-    //if(selFiles.size())
-    //    selFiles.clear();
     std::string fixedPath = name;
     fixedPath = FixPath(fixedPath);
     const std::string dirPath = parseDirectory(fixedPath);
@@ -873,15 +1000,8 @@ int FilesystemHelper::WriteToFile(const std::string& path, const char* buff, con
         oldSize = GetFileSize(ptr);
     }
     int errCode = WriteToFile(ptr, buff, buffsize);
-    //if(errCode == FILEHELPER_NO_ERROR){
-        CloseFile(ptr);
-    //}
-    /*
-    if(T5Logger::GetInstance()->CheckLogLevel(T5DEBUG)){
-        std::string msg = "FilesystemHelper::WriteToFile" + " buff = " + buff;
-        msg += ", buffsize = " + std::to_string(buffsize) + ", path = " + path;
-        T5LOG( T5DEBUG) << msg.c_str());
-    }//*/
+    CloseFile(ptr);
+    
     return __last_error_code = errCode;
 }
 
