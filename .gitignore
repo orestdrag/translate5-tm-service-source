@@ -36,3 +36,4 @@ source/obj/main.o
 source/obj/main.d
 source/obj/OtmMemoryServiceTester.d
 source/obj/OtmMemoryServiceTester.o
+cppcheck.report
