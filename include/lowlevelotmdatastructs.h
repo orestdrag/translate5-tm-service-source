@@ -1647,7 +1647,7 @@ typedef enum _PROCWINSTYLE
 #define ErrProp_InvalidHandle  (Err_Prop+23) // invalid handle to properties
 
 
-#define BTREE_BASE          ERR_BTREE_BASE        //
+#define BTREE_BASE          ERR_BTREE_BASE        //5000
 #define BTREE_NO_ROOM       BTREE_BASE+1          // Insufficent memory
 #define BTREE_ILLEGAL_FILE  BTREE_BASE+2          // Not an index file
 #define BTREE_DUPLICATE_KEY BTREE_BASE+3          // Key is not unique
@@ -1684,6 +1684,7 @@ typedef enum _PROCWINSTYLE
 #define BTREE_LOOKUPTABLE_CORRUPTED   BTREE_BASE+34  // lookup table is corrupted
 #define BTREE_LOOKUPTABLE_TOO_SMALL   BTREE_BASE+35  // lookup table is too small, file is too big
 #define BTREE_NOT_SUPPORTED           BTREE_BASE+36 //
+#define BTREE_NODE_IS_FULL            BTREE_BASE+37
 #define SEGMENT_ID_NOT_EQUAL          BTREE_BASE+81 // segment and requested id is not equal
 
 #define TM_REQUEST_MUTEX_TIMEOUT_FAILED BTREE_BASE + 501

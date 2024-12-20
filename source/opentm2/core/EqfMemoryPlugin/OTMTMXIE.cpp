@@ -1671,7 +1671,7 @@ bool IsValidXml(std::wstring&& sentence){
     char buff[512];
     handler.GetErrorText(buff, sizeof(buff));
     std::string errMsg(buff);
-    T5LOG(T5ERROR) << ":: error during parsing src : " << errMsg;
+    T5LOG(T5ERROR) << ":: error during parsing src("<< src <<") : " << errMsg;
     return false;
   }
   return true;
@@ -1716,7 +1716,7 @@ void StringTagVariants::parseSrc(){
   if(parser.getErrorCount()){
     char buff[512];
     handler.GetErrorText(buff, sizeof(buff));
-    T5LOG(T5ERROR) << ":: error during parsing req : " << buff;
+    T5LOG(T5ERROR) << ":: error during parsing req("<< src  <<")  : " << buff;
   }else{
     fSuccess = true;
     genericTags = handler.GetParsedData();
@@ -1743,7 +1743,7 @@ void StringTagVariants::parseTrg(){
     if(parser.getErrorCount()){
       char buff[512];
       handler.GetErrorText(buff, sizeof(buff));
-      T5LOG(T5ERROR) << ":: error during parsing trg : " << buff;
+      T5LOG(T5ERROR) << ":: error during parsing trg("<< trg <<")  : " << buff;
     }
 
     genericTarget = handler.GetParsedData();    

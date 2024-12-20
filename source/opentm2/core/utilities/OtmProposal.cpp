@@ -107,7 +107,7 @@ void OtmProposal::setSource( wchar_t *pszBuffer )
 {
   size_t len = wcslen(pszBuffer);
   if(len > OTMPROPOSAL_MAXSEGLEN){
-    T5LOG(T5ERROR) << "OtmProposal::setSource::Segment had been longer than 2048 bytes and would be skipped. Origina len =  " << len;
+    //T5LOG(T5ERROR) << "OtmProposal::setSource::Segment had been longer than 2048 bytes and would be skipped. Origina len =  " << len  <<"; data = " << EncodingHelper::convertToUTF8(pszBuffer);
     len = 1; 
     pszBuffer[len] = L'\0';
   }
@@ -141,7 +141,7 @@ void OtmProposal::setTarget( wchar_t *pszBuffer )
   size_t len = wcslen(pszBuffer);
 
   if(len > OTMPROPOSAL_MAXSEGLEN){
-    T5LOG(T5ERROR) << "OtmProposal::setTarget::Segment had been longer than 2048 bytes and would be skipped. Origina len = " << len;
+    //T5LOG(T5ERROR) << "OtmProposal::setTarget::Segment had been longer than 2048 bytes and would be skipped. Origina len = " << len <<"; data = " << EncodingHelper::convertToUTF8(pszBuffer);
     len = 1; 
     pszBuffer[len] = L'\0';
   }

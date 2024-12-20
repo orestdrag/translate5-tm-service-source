@@ -2193,9 +2193,17 @@ USHORT EqfMemory::ComparePutData
                     //try{                    
                     if(size>=0)
                     {
-                      memmove( (((PBYTE)pClb) + lNewClbLen), pClb, size);
-                      RECLEN(pTmRecord) += lNewClbLen;
-                      RECLEN(pTMXTargetRecord) += lNewClbLen;
+                      if(lNewClbLen + RECLEN(pTmRecord) >= TMX_REC_SIZE){
+                        usRc = BTREE_NODE_IS_FULL;
+                        fStop = true;
+                        fOK = false;
+                      }else{
+                        T5LOG(T5DEBUG) << "memmove size = "<< size << "; lNewClbLen = " << lNewClbLen << ";  RECLEN(pTmRecord) = " <<  RECLEN(pTmRecord) << ";  RECLEN(pTMXTargetRecord)  = " << RECLEN(pTMXTargetRecord)
+                          << "; ulKey = " << *pulKey ;
+                        memmove( (((PBYTE)pClb) + lNewClbLen), pClb, size);
+                        RECLEN(pTmRecord) += lNewClbLen;
+                        RECLEN(pTMXTargetRecord) += lNewClbLen;
+                      }
                     }
                     else
                     //}catch(...)

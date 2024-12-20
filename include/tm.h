@@ -1019,12 +1019,6 @@ typedef struct _TMX_TAGTABLE_RECORD
   USHORT  usFirstTagEntry;
 } TMX_TAGTABLE_RECORD, * PTMX_TAGTABLE_RECORD;
 
-typedef struct _TMX_OLD_TAGTABLE_RECORD
-{
-  USHORT  usRecordLen;
-  USHORT  usTagTableId;
-  USHORT  usFirstTagEntry;
-} TMX_OLD_TAGTABLE_RECORD, * PTMX_OLD_TAGTABLE_RECORD;
 
 //individual tag entry in tag table record
 typedef struct _TMX_TAGENTRY

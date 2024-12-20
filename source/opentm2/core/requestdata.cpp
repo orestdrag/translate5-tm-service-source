@@ -3160,7 +3160,17 @@ int UpdateEntryRequestData::execute(){
     _rc_ = mem->TmtXReplace ( Data, &TmPutOut );
   //}
   if ( _rc_ != 0 ){
-      return buildErrorReturn(_rc_, "EqfMemory::putProposal result is error ", INTERNAL_SERVER_ERROR);   
+      std::string errMsg = "EqfMemory::putProposal result is an error;";
+      switch (_rc_)
+      {
+      case BTREE_NODE_IS_FULL:
+          errMsg += " rc = 5037 (BTREE_NODE_IS_FULL): Can't add new entry to the node #" + Data.currentInternalKey.getStr() + "- node is already full."; 
+        break;
+      
+      default:
+        break;
+      } 
+      return buildErrorReturn(_rc_, errMsg.c_str(), INTERNAL_SERVER_ERROR); 
       //handleError( _rc_, this->szName, TmPutIn.stTmPut.szTagTable );
   }else if(fSave2Disk || FLAGS_flush_tm_to_disk_with_every_update){
     mem->FlushFilebuffers(tmLockTimeout);
