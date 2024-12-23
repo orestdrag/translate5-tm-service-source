@@ -70,14 +70,4 @@ typedef struct tagMDIDIALOGINFO {
 #define GET_PROP( x, atom )      GetProp( x, MAKEINTATOM( atom ) )
 #define REMOVE_PROP( x, atom )   RemoveProp( x, MAKEINTATOM( atom ) )
 
-// function declarations
 
-BOOL NEAR CreateMDIDialogChildren( HWND, LPSTR, int, HFONT, WORD, WORD ) ;
-
-BOOL FAR PASCAL RegisterMDIDialog( HINSTANCE ) ;
-
-/*HWND FAR PASCAL CreateMDIDialogParam( HINSTANCE, LPCSTR, HWND, FARPROC,
-                                      LPARAM, BOOL, HICON ) ;
-*/
-
-LRESULT FAR PASCAL MDIDialogProc( HWND, UINT, WPARAM, LPARAM ) ;

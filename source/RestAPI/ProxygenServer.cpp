@@ -127,12 +127,12 @@ class ProxygenHandlerFactory : public RequestHandlerFactory {
     //if(0 || VLOG_IS_ON(1)){
     if(FLAGS_log_every_request_start){
       std::string msg = "SERVER RECEIVED REQUEST:";
-      msg += "\n\t URL: " + url;
-      msg += "\n\t method: " + methodStr;
-      //msg += "\n\t body";
+      msg += "\t URL: " + url;
+      msg += "\t method: " + methodStr;
+      //msg += "\t body";
       
       if(stats_){
-        msg += "\n\t reqCount: " + std::to_string(stats_->getRequestCount());
+        msg += "\t reqCount(id): " + std::to_string(stats_->getRequestCount());
       }
 
       T5LOG(T5TRANSACTION)  << msg;

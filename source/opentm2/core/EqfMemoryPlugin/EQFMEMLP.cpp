@@ -1009,8 +1009,8 @@ USHORT MemFuncImportProcess
           if(VLOG_IS_ON(1)){
             std::string logMsg = "::Memory import ended at     : " + std::string(asctime( localtime( &lCurTime ))) +
                                   "\tNumber of segments imported : " + toStr(pData->mem->importDetails->segmentsImported)+
-                                "\n\tNumber of invalid segments  : " + toStr(pData->mem->importDetails->invalidSegments)+ 
-                                "\n\tNumber of OTMUTF8 segments  : " + toStr(pData->mem->importDetails->resSegments) + "\n\t" + pData->mem->importDetails->importTimestamp;
+                                "\tNumber of invalid segments  : " + toStr(pData->mem->importDetails->invalidSegments)+ 
+                                "\tNumber of OTMUTF8 segments  : " + toStr(pData->mem->importDetails->resSegments) + "\t" + pData->mem->importDetails->importTimestamp;
             T5LOG( T5TRANSACTION) << logMsg;
           }
         }

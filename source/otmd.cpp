@@ -126,9 +126,9 @@ DEFINE_bool(forbiddeletefiles, false, "Set to true to keep all files(including t
 DEFINE_bool(ignore_newer_target_exists_check, true, "if set to true, check for newer already saved target would be skipped for saving segments" );
 
 void handle_interrupt_sig(int sig) {
-    T5LOG( T5TRANSACTION) << "Received interrupt signal\n";
+    T5LOG( T5TRANSACTION) << "Received interrupt signal";
     //StopOtmMemoryService();
-    T5LOG( T5TRANSACTION) << "Stopping t5memory\n";
+    T5LOG( T5TRANSACTION) << "Stopping t5memory";
 
 }
 

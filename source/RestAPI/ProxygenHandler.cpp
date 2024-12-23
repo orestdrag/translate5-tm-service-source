@@ -53,7 +53,7 @@ void ProxygenHandler::onRequest(std::unique_ptr<HTTPMessage> req) noexcept {
   auto command = pRequest->command;
   headers_ = std::move(req);
 
-  T5LOG(T5DEBUG) << "received request url:\"" << pRequest->strUrl <<"\"; type " << searchInCommandToStringsMap(pRequest->command);  
+  //T5LOG(T5DEBUG) << "received request url:\"" << pRequest->strUrl <<"\"; type " << searchInCommandToStringsMap(pRequest->command);  
  
   std::string requestAcceptHeader = headers.getSingleOrEmpty("Accept");
   const auto& contentType = headers.getSingleOrEmpty("Content-Type");

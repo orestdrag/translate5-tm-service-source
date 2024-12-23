@@ -482,10 +482,7 @@ bool RequestData::isLockingRequest()
 }
 
 int RequestData::run(){ 
-  bool logRequests = false;  
-  if(logRequests){
-    T5LOG(T5TRANSACTION)<<"Received "<< _id_<<"; url: " << strUrl <<"; body = "<<strBody;
-  }
+ 
   int res = OtmMemoryServiceWorker::getInstance()->verifyAPISession();
   if(!res) res = parseJSON();
   if(!res) res = checkData();
@@ -523,19 +520,16 @@ int RequestData::run(){
 
   if(FLAGS_log_every_request_end){
     std::string msg = "SERVER FINISHED REQUEST:";
-    msg += "\n\t URL: " + strUrl;
-    msg += "\n\t id: " + std::to_string(_id_);
-    msg += "\n\t command: "; 
+    msg += "\t URL: " + strUrl;
+    msg += "\t id: " + std::to_string(_id_);
+    msg += "\t command: "; 
     msg +=  searchInCommandToStringsMap(command);
-    msg += "\n\t rc: " + std::to_string(_rc_);
-    msg += "\n\t rest_rc: " + std::to_string(_rest_rc_);
+    msg += "\t rc: " + std::to_string(_rc_);
+    msg += "\t rest_rc: " + std::to_string(_rest_rc_);
    
-
     T5LOG(T5TRANSACTION)  << msg;
   }
-  if(logRequests){
-    T5LOG(T5TRANSACTION)<< _id_ << " done";
-  }
+  
   return res;
 }
 

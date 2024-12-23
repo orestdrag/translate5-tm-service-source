@@ -240,31 +240,6 @@ void OtmProposal::setOriginalSourceLanguage( char *pszBuffer )
   fFilled = 1;
 }
 
-/*
-void OtmProposal::setKey(ULONG ulKey)
-{
-   
-  ulKey = ulKey;
-}
-
-void OtmProposal::setTargetNum(USHORT usTargetNum)
-{
-   
-  usTargetNum = usTargetNum;
-}
-
-ULONG OtmProposal::getKey()
-{
-  if ( this->pvProposalData == NULL ) return 0 ; 
-  return ulKey ;
-}
-
-USHORT OtmProposal::getTargetNum()
-{
-  if ( this->pvProposalData == NULL ) return 0 ; 
-  return usTargetNum ;
-}//*/
-
 
 /* \brief get proposal target language
     \param pszBuffer Pointer to buffer receiving the proposal target language
@@ -388,7 +363,7 @@ void OtmProposal::setFuzziness( long iFuzzinessIn )
      \param iDiffs new diffs count from fuzzy calculations of proposal
    */
   void OtmProposal::setDiffs( long iDiffs ){
-    iDiffs = iDiffs;
+    this->iDiffs = iDiffs;
   }
 
     /* \brief get proposal words count during fuzzy calculations
@@ -402,7 +377,7 @@ void OtmProposal::setFuzziness( long iFuzzinessIn )
      \param iWords new words count during fuzzy calculations of proposal
    */
   void OtmProposal::setWords( long iWords ){      
-    iWords = iWords;
+    this->iWords = iWords;
   }
 
 /* \brief get markup table name (format)

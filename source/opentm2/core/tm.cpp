@@ -194,6 +194,8 @@ void EqfMemory::importDone(int iRC, char *pszError )
 }
 
 
+//declare_bool(logReorganizeAndImport);
+
 // update memory status
 void EqfMemory::reorganizeDone(int iRC, char *pszError )
 {
@@ -207,7 +209,9 @@ void EqfMemory::reorganizeDone(int iRC, char *pszError )
     eImportStatus = AVAILABLE_STATUS;
     //TmBtree.fb.Flush(true);
     //InBtree.fb.Flush(true);
-    T5LOG( T5TRANSACTION) <<":: success, memName = " << szName;
+    //if(FLAGS_logReorganizeAndImport){
+      T5LOG( T5INFO) <<":: success, memName = " << szName;
+    //}
   }
   else
   {
