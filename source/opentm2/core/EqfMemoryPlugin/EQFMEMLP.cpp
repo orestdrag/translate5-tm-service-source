@@ -1458,7 +1458,6 @@ USHORT /*APIENTRY*/ MEMINSERTSEGMENT
 
     pLIDA->pProposal->setSegmentId(0);// set to 0 to generate new idd
 
-    //pLIDA->ulActiveSegment++;
     // insert/replace segment in(to) memory
     usRC = (USHORT)pLIDA->mem->putProposal( *(pLIDA->pProposal) );
 
@@ -1495,7 +1494,6 @@ USHORT /*APIENTRY*/ MEMINSERTSEGMENT
     pLIDA->mem->importDetails->invalidSegmentsRCs[-1]++;
     pLIDA->mem->importDetails->invalidSegments++;      // increase invalid segment counter 
     
-    //pRIDA->pMem->importDetails->invalidSegmentsRCs[iRC] ++;
     #ifdef IMPORT_LOGGING
     // write segment to log file
     if ( T5Logger::GetInstance()->CheckLogLevel(T5INFO) )

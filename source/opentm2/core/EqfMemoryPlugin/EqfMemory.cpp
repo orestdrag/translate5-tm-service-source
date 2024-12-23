@@ -222,7 +222,6 @@ int EqfMemory::putProposal
     T5LOG(T5ERROR) <<  "EqfMemory::putProposal result = " << iRC; 
   }
 
-
   return( iRC );
 }
 
@@ -308,8 +307,6 @@ int EqfMemory::getNextProposal
   if ( (iRC == 0) || (iRC == BTREE_CORRUPTED)  || iRC == BTREE_BUFFER_SMALL)
   {
     Proposal.nextInternalKey.setInternalKey(TmExtOut.ulTmKey, TmExtOut.usNextTarget); 
-    //this->ulNextKey = TmExtOut.ulTmKey;
-    //this->usNextTarget = TmExtOut.usNextTarget;
   } /* endif */       
 
   if ( iRC == 0 )

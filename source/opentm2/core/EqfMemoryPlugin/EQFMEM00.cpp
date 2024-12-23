@@ -320,7 +320,6 @@ VOID EQFMemOrganizeProcess
       if ( usDosRc == NO_ERROR )
       {
         // everything in the termination process was ok
-        //pRIDA->pMem = NULL;
 
         // end message only in GUI single organize mode
         if ( !pRIDA->fBatch && !pRIDA->pszNameList)
@@ -329,8 +328,6 @@ VOID EQFMemOrganizeProcess
           CHAR szNumber2[10];    // buffer for character string
 
           pReplAddr[0] = pRIDA->szMemName;
-          //pReplAddr[1] = ltoa( pRIDA->ulSegmentCounter, szNumber1, 10 );
-          //pReplAddr[2] = ltoa( pRIDA->ulInvSegmentCounter, szNumber2, 10 );
           UtlError( MESSAGE_MEM_ORGANIZE_COMPLETED, MB_OK, /*3*/1, &pReplAddr[0], EQF_INFO );
         } /* endif */
       }
@@ -371,13 +368,6 @@ VOID EQFMemOrganizeProcess
       pRIDA->usRC = UtlGetDDEErrorCode( pRIDA->hwndErrMsg );
     } /* endif */
     pRIDA->pMemTemp.reset();
-
-    // Close the input translation memory and temporary translation memory
-    //CloseTmAndTempTm( pRIDA );
-
-    // Delete the temporary translation memory    
-    //std::string strMsg;
-    //TMManager::GetInstance()->DeleteTM( pRIDA->szTempMemName, strMsg );
 
     // Issue message WM_EQF_MEMORGANIZE_END
     pRIDA->NextTask = MEM_END_ORGANIZE;    

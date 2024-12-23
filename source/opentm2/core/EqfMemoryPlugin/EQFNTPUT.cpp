@@ -302,9 +302,6 @@ USHORT EqfMemory::TmtXReplace
   } /* endif */
 
   if(!usRc){
-    //TmProposal.currentInternalKey.setInternalKey(ulNewKeym  TmProposal.targetKey)
-    //pTmPutOut->ulTmKey = TmProposal.recordKey = ulNewKey;
-    //pTmPutOut->usTargetKey = TmProposal.targetKey;
     pTmPutOut->ulTmKey = TmProposal.currentInternalKey.getRecordKey();
     pTmPutOut->usTargetKey = TmProposal.currentInternalKey.getTargetKey();
     RewriteCompactTable();
@@ -2030,7 +2027,6 @@ USHORT EqfMemory::ComparePutData
   //allocate pString
   fOK = UtlAlloc( (PVOID *) &(pString), 0L, (LONG) MAX_SEGMENT_SIZE*sizeof(CHAR_W), NOMSG );
 
-
   if ( !fOK )
   {
     LOG_AND_SET_RC(usRc, T5WARNING, ERROR_NOT_ENOUGH_MEMORY);
@@ -2190,6 +2186,7 @@ USHORT EqfMemory::ComparePutData
                     LONG lNewClbLen = sizeof(TMX_TARGET_CLB) + usAddDataLen; 
                     //LONG size =  RECLEN(pTmRecord) - ((PBYTE)pClb - (PBYTE)pTmRecord);
                     LONG size = TARGETCLBLEN(pClb); 
+                
                     //try{                    
                     if(size>=0)
                     {

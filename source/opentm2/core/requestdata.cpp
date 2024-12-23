@@ -2243,7 +2243,7 @@ std::string StatusMemRequestData::prepareStatusString(std::shared_ptr<EqfMemory>
       firstInvalidSegments += std::to_string(++i) + ":" + std::to_string(segNum) + ":" + std::to_string(invSegErrCode) + "; ";
     }
     json_factory.addParmToJSON( outputMessage, "invalidSegmentsRCs", invalidSegmRCs);
-    json_factory.addParmToJSON( outputMessage, "firstInvalidSegments", firstInvalidSegments);
+    json_factory.addParmToJSON( outputMessage, "firstInvalidSegments(num:segId:errCode)", firstInvalidSegments);
     json_factory.addParmToJSON( outputMessage, "invalidSymbolErrors", mem->importDetails->invalidSymbolErrors );
     json_factory.addParmToJSON( outputMessage, "errorMsg", mem->importDetails->importMsg.str() );
     json_factory.addParmToJSON( outputMessage, "rc", mem->importDetails->importRc);
@@ -3149,16 +3149,9 @@ int UpdateEntryRequestData::execute(){
     std::string source = EncodingHelper::convertToUTF8(Data.szSource);
     T5LOG( T5INFO) <<"EqfMemory::putProposal, source = " << source;
   }
-  /********************************************************************/
-  /* fill the TMX_PUT_IN prefix structure                             */
-  /* the TMX_PUT_IN structure must not be filled it is provided       */
-  /* by the caller                                                    */
-  /********************************************************************/
-  //if(Data.recordKey && Data.targetKey){
-  //  _rc_ = mem->TmtXUpdSeg(  &Data, &TmPutOut, 0 );
-  //}else{
-    _rc_ = mem->TmtXReplace ( Data, &TmPutOut );
-  //}
+
+  _rc_ = mem->TmtXReplace ( Data, &TmPutOut );
+  
   if ( _rc_ != 0 ){
       std::string errMsg = "EqfMemory::putProposal result is an error;";
       switch (_rc_)
@@ -3179,11 +3172,6 @@ int UpdateEntryRequestData::execute(){
       return buildErrorReturn(506, tmLockTimeout.getErrMsg().c_str(), _rc_);
     }
   }
-
-  //if ( ( _rc_ == 0 ) &&
-  //     ( Data.fMarkupChanged ) ) {
-  //  return buildErrorReturn(SEG_RESET_BAD_MARKUP, "SEG_RESET_BAD_MARKUP") ;
-  //}
   
   if ( _rc_ != 0 )
   {
