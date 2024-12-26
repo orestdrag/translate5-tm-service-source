@@ -47,7 +47,7 @@ DECLARE_bool(log_every_request_end);
 DECLARE_int64(tmRequestLockDefaultTimeout);
 DECLARE_int64(tmListLockDefaultTimeout);
 DECLARE_int64(tmLockDefaultTimeout);
-DECLARE_bool(UseTimedMutexesForReorganizeAndImport);
+DECLARE_bool(useTimedMutexesForReorganizeAndImport);
 
 using namespace ProxygenService;
 using namespace proxygen;
@@ -430,7 +430,7 @@ class ProxygenHandlerFactory : public RequestHandlerFactory {
       "\n  tmRequestLockDefaultTimeout = " << FLAGS_tmRequestLockDefaultTimeout << "ms" <<
       "\n  tmListLockDefaultTimeout = " << FLAGS_tmListLockDefaultTimeout << "ms" <<
       "\n  tmLockDefaultTimeout = " << FLAGS_tmLockDefaultTimeout<< "ms" << 
-      "\n  UseTimedMutexesForReorganizeAndImport = " << FLAGS_UseTimedMutexesForReorganizeAndImport <<
+      "\n  useTimedMutexesForReorganizeAndImport = " << FLAGS_useTimedMutexesForReorganizeAndImport <<
       "\n\n\n\
                   |==================================================================|\n\
                   |-------------Setup is done -> waiting for requests...-------------|\n\

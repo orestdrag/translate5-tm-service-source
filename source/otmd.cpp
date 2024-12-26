@@ -114,7 +114,8 @@ DEFINE_validator(t5loglevel, &ValidateLOGlevel);
 DEFINE_int64(tmRequestLockDefaultTimeout, 3000, "Sets tm mutex lock timeout(in ms) for part where request is requesting tm(which is used to open and close tms, and hold list of opened tms), after which operation would be canceled and mutex would return an error, if set to 0, mutex lock would be waited without timeout");
 DEFINE_int64(tmLockDefaultTimeout, 3000, "Sets tm mutex lock timeout(in ms) for TM after which operation would be canceled and mutex would return an error, if set to 0, mutex lock would be waited without timeout");
 DEFINE_int64(tmListLockDefaultTimeout, 3000, "Sets tm mutex lock timeout(in ms) for TM list(which is used to open and close tms, and hold list of opened tms), after which operation would be canceled and mutex would return an error, if set to 0, mutex lock would be waited without timeout");
-DEFINE_bool(UseTimedMutexesForReorganizeAndImport, false, "If set to true, in reorganize or impor thread would be used mutexes with timeouts, and reorganizee or import could be canceled, false(by default) - would be used non timed mutexes");
+DEFINE_bool(useTimedMutexesForReorganizeAndImport, false, "If set to true, in reorganize or import thread would be used mutexes with timeouts, and reorganizee or import could be canceled, false(by default) - would be used non timed mutexes");
+DEFINE_bool(allowLoadingMultipleTmsSimultaneously, false, "If set to true, multiple tms could be loaded from the disk at the same time. ");
 
 DEFINE_bool(logMutexes, false, "if sets to true you would see mutex logs");
 

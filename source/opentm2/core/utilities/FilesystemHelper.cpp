@@ -37,6 +37,7 @@ PFileBufferMap FilesystemHelper::getFileBufferInstance(){
 }
 
 std::mutex FilesystemHelper::fsLock;
+std::recursive_mutex FilesystemHelper::loadingTm;
 
 std::string FilesystemHelper::parseDirectory(const std::string path){
     std::size_t found = path.rfind('/');

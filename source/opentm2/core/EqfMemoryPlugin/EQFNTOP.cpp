@@ -168,7 +168,7 @@ std::string EqfMemory::getActiveRequestString()const
 //|                                                                            |
 //| return open out structure                                                  |
 // ----------------------------------------------------------------------------+
-
+DECLARE_bool(allowLoadingMultipleTmsSimultaneously);
 USHORT EqfMemory::Load(){
   USHORT usRC = LoadMem();
   // create memory object if create function completed successfully
@@ -195,7 +195,12 @@ USHORT EqfMemory::LoadMem()
   //if(isFailedToLoad()){
   //  T5LOG()
  // }
- 
+  
+  if(false == FLAGS_allowLoadingMultipleTmsSimultaneously){
+    T5LOG(T5INFO) << "Locking loadingTm mutex for "<< szName;
+    FilesystemHelper::loadingTm.lock();
+    T5LOG(T5INFO) << "Locked loadingTm mutex for "<< szName;
+  }
   eStatus = LOADING_STATUS;
 
   BOOL fOK;                      //success indicator
@@ -489,6 +494,10 @@ USHORT EqfMemory::LoadMem()
     eStatus = OPEN_STATUS;
   } /* endif */
 
+  if(false == FLAGS_allowLoadingMultipleTmsSimultaneously){
+    FilesystemHelper::loadingTm.unlock();
+    T5LOG(T5INFO) << "Unlocked loadingTm mutex for "<< szName;
+  }
   return( usRc );
 }
 
