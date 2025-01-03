@@ -1828,7 +1828,6 @@ USHORT EqfMemory::UpdateTmRecord
 //                  PTMX_SENTENCE                                               
 //------------------------------------------------------------------------------
 // Output parameter:                                                            
-//------------------------------------------------------------------------------
 // Returncode type: USHORT                                                      
 //------------------------------------------------------------------------------
 // Returncodes:                                                                 
@@ -1950,6 +1949,7 @@ USHORT EqfMemory::UpdateTmRecordByInternalKey
 }
 
 DECLARE_bool(ignore_newer_target_exists_check);
+DECLARE_bool(log_memmove_in_compareputdata);
 //------------------------------------------------------------------------------
 // External function                                                            
 //------------------------------------------------------------------------------
@@ -2190,13 +2190,18 @@ USHORT EqfMemory::ComparePutData
                     //try{                    
                     if(size>=0)
                     {
-                      if(lNewClbLen + RECLEN(pTmRecord) >= TMX_REC_SIZE){
+                      size_t occupiedSize = RECLEN(pTmRecord) + sizeof( TMX_SOURCE_RECORD ) + sizeof(TMX_TARGET_RECORD);
+                      if(lNewClbLen + occupiedSize >= TMX_REC_SIZE){
                         usRc = BTREE_NODE_IS_FULL;
                         fStop = true;
                         fOK = false;
                       }else{
-                        T5LOG(T5DEBUG) << "memmove size = "<< size << "; lNewClbLen = " << lNewClbLen << ";  RECLEN(pTmRecord) = " <<  RECLEN(pTmRecord) << ";  RECLEN(pTMXTargetRecord)  = " << RECLEN(pTMXTargetRecord)
-                          << "; ulKey = " << *pulKey ;
+                        if(FLAGS_log_memmove_in_compareputdata)
+                        {
+                          T5LOG(T5ERROR) << "memmove size = "<< size << "; lNewClbLen = " << lNewClbLen << ";  RECLEN(pTmRecord) = " 
+                            <<  RECLEN(pTmRecord) << ";  RECLEN(pTMXTargetRecord)  = " << RECLEN(pTMXTargetRecord) <<"; occupiedSize = " << occupiedSize
+                            << "; ulKey = " << *pulKey ;
+                        }
                         memmove( (((PBYTE)pClb) + lNewClbLen), pClb, size);
                         RECLEN(pTmRecord) += lNewClbLen;
                         RECLEN(pTMXTargetRecord) += lNewClbLen;

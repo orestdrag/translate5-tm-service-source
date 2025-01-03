@@ -126,6 +126,9 @@ DEFINE_bool(forbiddeletefiles, false, "Set to true to keep all files(including t
 
 DEFINE_bool(ignore_newer_target_exists_check, true, "if set to true, check for newer already saved target would be skipped for saving segments" );
 
+
+DEFINE_bool(log_memmove_in_compareputdata, false, "if set to true, when saving segment and causing memmove in compareputdata functions, just before memmove, data would be logged - use this to debug btree crashes." );
+
 void handle_interrupt_sig(int sig) {
     T5LOG( T5TRANSACTION) << "Received interrupt signal";
     //StopOtmMemoryService();
