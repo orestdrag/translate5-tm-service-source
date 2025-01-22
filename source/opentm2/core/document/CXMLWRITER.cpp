@@ -153,81 +153,24 @@
 
 bool ChunkBuffer::canFit(long size){
   return true;
-  //T5LOG(T5DEVELOP) << "buffsize = " << m_buff.size() <<"; size = " << size;
-  //return m_bytesCollecedInChunk + size + 1 < chunkSize_;
 }
 
-void ChunkBuffer::triggerChunkSend(){
-  /*
-  if(m_bytesCollecedInChunk)
-  {
-    m_responseHandler->sendChunkHeader(m_bytesCollecedInChunk);    
-    m_responseHandler->sendBody(folly::IOBuf::copyBuffer(&m_buff[0], m_bytesCollecedInChunk));
-    T5LOG(T5DEVELOP)<< "Triggering sendChunkTerminator, because " << m_bytesCollecedInChunk <<" bytes is collected in chunk, limit is set to " << chunkSize_;
-    m_responseHandler->sendChunkTerminator();
-    m_bytesSend += m_bytesCollecedInChunk;
-    m_bytesCollecedInChunk = 0;
-  }//*/
-}
+void ChunkBuffer::triggerChunkSend(){}
 
-void ChunkBuffer::SendResponce(const std::string& memName, const std::string& nextInternalKey)
-{
-  /*
-  // Create response headers
-  proxygen::HTTPMessage response;
-  response.setHTTPVersion(1, 1);
-  response.setStatusCode(200);
-  response.setStatusMessage("OK");
-  //response.setIsChunked(true);
-  
-  // Add headers to the response
-  std::stringstream contDisposition;
-  contDisposition << "attachment; filename=\"" << memName  << ".tmx\"";
-  response.getHeaders().add("Content-Type", "application/octet-stream");
-  response.getHeaders().add("Content-Disposition", contDisposition.str());
-  response.getHeaders().add("NextInternalKey", nextInternalKey);
-  // Send response headers
-  m_responseHandler->sendHeaders(response);
-  m_responseHandler.sendBody(std::move(bufQueue));
-  m_responseHandler->sendEOM();//*/
-}
+void ChunkBuffer::SendResponce(const std::string& memName, const std::string& nextInternalKey){}
 
 void ChunkBuffer::writeToBuff(const void* buff, long size)
 {
   bufQueue.append(folly::IOBuf::copyBuffer(buff, size));
-  /*
-  if(!isActive()) return;
-
-  if(!canFit(size))
-  {
-    triggerChunkSend();
-  }
-
-  if(!canFit(size))
-  {
-    T5LOG(T5ERROR)<<"Not enought space in buffer, required = " << size; 
-  }
-  T5LOG(T5DEBUG) << "writting data buff, m_bytesCollected = " << m_bytesCollecedInChunk <<"; bytesSend = " << m_bytesSend <<"; size = " << size;
-  memcpy(&m_buff[m_bytesCollecedInChunk], buff, size);
-  m_bytesCollecedInChunk += size;
-  //*/
 }
 
 int CXmlWriter::writeData(const void* buff, long size, long n){
   int rc = 0;
   if(m_hf){
     fwrite(buff, size, n, m_hf);
-  }else
-  //if(chunkBuffer.isActive())
-  {
+  }else{
     // Send buffer in chunks
-    size_t totalSize = size*n;
-    //m_responseHandler->sendBody(folly::IOBuf::copyBuffer(buff + bytesSent, totalSize));
-    //proxygen::ResponseBuilder(m_responseHandler)
-    //             .body(buff)//std::move(buff))
-    //             .send();
-    //m_responseHandler->sendBody(folly::IOBuf::copyBuffer(buff, totalSize));
-    //chunkBuffer.writeToBuff(buff, totalSize);  
+    size_t totalSize = size*n; 
     if(bufQueue){
       bufQueue->append(folly::IOBuf::copyBuffer(buff, totalSize));
     }else{

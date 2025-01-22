@@ -720,12 +720,7 @@ USHORT  MemExportStart( PPROCESSCOMMAREA  pCommArea,
   }
   // set first extract flag        
   if(pCommArea->startingRecordKey != 0  && pCommArea->startingTargetKey != 0){
-    //pExportIDA->pProposal->recordKey = pCommArea->startingRecordKey;
-    //pExportIDA->pProposal->targetKey = pCommArea->startingTargetKey;    
-    //pExportIDA->pMem->ulNextKey = pCommArea->startingRecordKey;
-    //pExportIDA->pMem->usNextTarget = pCommArea->startingTargetKey;
     pExportIDA->pProposal->nextInternalKey.setInternalKey(pCommArea->startingRecordKey, pCommArea->startingTargetKey);
-
     pExportIDA->fFirstExtract = FALSE;
   }else{                                 
     pExportIDA->fFirstExtract = TRUE;

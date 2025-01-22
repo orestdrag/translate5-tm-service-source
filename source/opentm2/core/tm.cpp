@@ -201,8 +201,7 @@ void EqfMemory::reorganizeDone(int iRC, char *pszError )
 {
   eStatus = OPEN_STATUS;
 
-  unsigned int mask = ~ASD_ORGANIZE;
-  usAccessMode &= mask;
+  resetOpenedOnlyForReorganize();
   
   if ( iRC == 0 )
   {
@@ -1376,7 +1375,7 @@ bool TMManager::IsMemoryInList(const std::string& strMemName, MutexTimeout& tmLi
   return TMManager::GetInstance()->tms.find(strMemName) != TMManager::GetInstance()->tms.end();
 }
 
-int TMManager::OpenTM(const std::string& strMemName, MutexTimeout& tmListTimeout){
+int TMManager::OpenTM(const std::string& strMemName, MutexTimeout& tmListTimeout, COMMAND command){
   if(IsMemoryLoaded(strMemName, tmListTimeout)){
     return 0;
   }
@@ -1387,23 +1386,31 @@ int TMManager::OpenTM(const std::string& strMemName, MutexTimeout& tmListTimeout
   }
   
   size_t requiredMemory = 0;
+  bool fReorganizeOnly = false;
   
   if(IsMemoryLoading(strMemName, tmListTimeout)){
   //}else if(IsMemoryFailedToLoad(strMemName)){
   }else if(tmListTimeout.failed()){
     tmListTimeout.addToErrMsg(".Failed to lock tm list:", __func__, __LINE__);
     return TM_LIST_MUTEX_TIMEOUT_FAILED;
-  }else if(int res = TMExistsOnDisk(strMemName)){
-    T5LOG(T5ERROR) << "TM is not found, name = " << strMemName <<"; res = " << res;
-    return 404;
-  }else{
+  }
+  int res = TMExistsOnDisk(strMemName);
+  if(!res)
+  {
     requiredMemory += FilesystemHelper::GetFileSize( FilesystemHelper::GetTmdPath(strMemName));
     requiredMemory += FilesystemHelper::GetFileSize( FilesystemHelper::GetTmiPath(strMemName));
     requiredMemory *= 1.2;
-    //requiredMemory += FilesystemHelper::GetFileSize( szTempFile ) * 2;
-    //requiredMemory += strBody.size() * 2;
   }
-  //TODO: add to requiredMemory value that would present changes in mem files sizes after import done 
+  else if(REORGANIZE_MEM == command && TMM_TMI_NOT_FOUND == res)
+  {
+    requiredMemory += FilesystemHelper::GetFileSize( FilesystemHelper::GetTmdPath(strMemName)) * 2 * 1.2;
+    fReorganizeOnly = true;
+  }
+  else
+  {
+    T5LOG(T5ERROR) << "TM is not found, name = " << strMemName <<"; res = " << res;
+    return 404;
+  }
 
   // cleanup the memory list (close memories not used for a longer time)
   size_t memLeftAfterOpening = CleanupMemoryList(requiredMemory, tmListTimeout);
@@ -1422,7 +1429,7 @@ int TMManager::OpenTM(const std::string& strMemName, MutexTimeout& tmListTimeout
     //buildErrorReturn( _rc_, "OtmMemoryServiceWorker::import::Error: too many open translation memory databases" );
     return( INTERNAL_SERVER_ERROR );
   } /* endif */
-  std::shared_ptr<EqfMemory> pMem( EqfMemoryPlugin::GetInstance()->initTM(strMemName, requiredMemory, 0));
+  std::shared_ptr<EqfMemory> pMem( EqfMemoryPlugin::GetInstance()->initTM(strMemName, requiredMemory, 0, fReorganizeOnly));
   if(!pMem){
     T5LOG(T5ERROR) << "::Can't open the file \'"<< strMemName<<"\'";
     return 1;
@@ -1485,7 +1492,7 @@ int TMManager::CloseTM(const std::string& strMemName, MutexTimeout& tmListTimeou
   return 0;
 }
 
-std::shared_ptr<EqfMemory> TMManager::requestServicePointer(const std::string& strMemName, COMMAND command, MutexTimeout& requestTMTimeout,  MutexTimeout& tmListTimeout )
+std::shared_ptr<EqfMemory> TMManager::requestServicePointer(const std::string& strMemName, MutexTimeout& requestTMTimeout,  MutexTimeout& tmListTimeout, COMMAND command )
 {
   TimedMutexGuard l{mutex_requestTM, requestTMTimeout, "requestTMMutex", __func__, __LINE__};
   if(requestTMTimeout.failed()){
@@ -1511,7 +1518,7 @@ std::shared_ptr<EqfMemory> TMManager::requestServicePointer(const std::string& s
   return nullptr;
 }
 
-std::shared_ptr<EqfMemory> TMManager::requestReadOnlyTMPointer(const std::string& strMemName, std::shared_ptr<int>& refBack,  MutexTimeout& requestTMTimeout,  MutexTimeout& tmListTimeout)
+std::shared_ptr<EqfMemory> TMManager::requestReadOnlyTMPointer(const std::string& strMemName, std::shared_ptr<int>& refBack,  MutexTimeout& requestTMTimeout,  MutexTimeout& tmListTimeout, COMMAND command)
 {
   int rc = 0;
   
@@ -1525,7 +1532,7 @@ std::shared_ptr<EqfMemory> TMManager::requestReadOnlyTMPointer(const std::string
       tmListTimeout.addToErrMsg(".Failed to lock tm list:", __func__, __LINE__);
       return nullptr;
     }
-    rc = OpenTM(strMemName, tmListTimeout);
+    rc = OpenTM(strMemName, tmListTimeout, command);
     if(tmListTimeout.failed()){
       tmListTimeout.addToErrMsg(".Failed to lock tm list:", __func__, __LINE__);
       return nullptr;
@@ -1566,7 +1573,7 @@ std::shared_ptr<EqfMemory> TMManager::requestReadOnlyTMPointer(const std::string
   return nullptr;
 }
 
-std::shared_ptr<EqfMemory> TMManager::requestWriteTMPointer(const std::string& strMemName, std::shared_ptr<int>& refBack, MutexTimeout& requestTMTimeout,  MutexTimeout& tmListTimeout){
+std::shared_ptr<EqfMemory> TMManager::requestWriteTMPointer(const std::string& strMemName, std::shared_ptr<int>& refBack, MutexTimeout& requestTMTimeout,  MutexTimeout& tmListTimeout, COMMAND command){
   int rc = 0;
   TimedMutexGuard l{mutex_requestTM, requestTMTimeout, "requestTMMutex", __func__, __LINE__};
   if(requestTMTimeout.failed()){
@@ -1580,7 +1587,7 @@ std::shared_ptr<EqfMemory> TMManager::requestWriteTMPointer(const std::string& s
       return nullptr;
     }
 
-    rc = OpenTM(strMemName, tmListTimeout);
+    rc = OpenTM(strMemName, tmListTimeout, command);
     if(tmListTimeout.failed()){
       tmListTimeout.addToErrMsg(".Failed to lock tm list:", __func__, __LINE__);
       return nullptr;

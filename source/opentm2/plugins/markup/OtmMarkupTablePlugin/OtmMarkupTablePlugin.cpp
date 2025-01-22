@@ -78,7 +78,7 @@ MARKUPINFO  *ptrMarkupInfo ;
 
 OtmMarkup *MarkupObjectList[MAX_NUM_MARKUPS];
 
-
+//#ifdef TEMPORARY_COMMENTED
 
 /* -------------------------------------------------------------- */
 /*   constructor.                                                 */
@@ -1071,6 +1071,8 @@ bool OtmMarkupTablePlugin::stopPlugin( bool fForce  )
   return( true );
 }
 
+//#endif //TEMPORARY_COMMENTED
+
 /* -------------------------------------------------------------- */
 /*   registerPlugin.                                              */
 /* -------------------------------------------------------------- */
@@ -1081,8 +1083,8 @@ USHORT registerPlugins()
 {
 	PluginManager::eRegRc eRc = PluginManager::eSuccess;
 	PluginManager *manager = PluginManager::getInstance();
-	OtmMarkupTablePlugin* plugin = new OtmMarkupTablePlugin();
-	eRc = manager->registerPlugin((OtmPlugin*) plugin);
+	//OtmMarkupTablePlugin* plugin = new OtmMarkupTablePlugin();
+	//eRc = manager->registerPlugin((OtmPlugin*) plugin);
     USHORT usRC = (USHORT) eRc;
     return usRC;
 }
@@ -1430,7 +1432,7 @@ void PerformPendingUpdates( char *pszBasePath )
         if ( pProp->fDisabled_UserExitRefresh )
         {
           pProp->fDisabled_UserExitRefresh = FALSE;
-          UtlWriteFileL( szSource, ulSize, pProp, FALSE );
+          UtlWriteFile( szSource, ulSize, pProp );
         } /* endif */           
         UtlAlloc( (PVOID *)&pProp, 0, 0, NOMSG );
       } /* endif */     

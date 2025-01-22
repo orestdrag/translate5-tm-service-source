@@ -268,12 +268,6 @@ SHORT  BTREE::EQFNTMOpen
 
    DEBUGEVENT( EQFNTMOPEN_LOC, FUNCENTRY_EVENT, 0 );
   
-
-   //if ( ! UtlAlloc( (PVOID *)&pBTIda, 0L , (LONG) sizeof( BTREE ), NOMSG )  )
-   {
-   //   sRc = BTREE_NO_ROOM;
-   }
-   //else
    {
      /*****************************************************************/
      /* check if same dictionary is already open else return index    */
@@ -292,23 +286,7 @@ SHORT  BTREE::EQFNTMOpen
          do
          {
            sRc = QDAMDictOpenLocal( 20, usOpenFlags );
-           if ( sRc == BTREE_IN_USE )
-           {
-             RetryCount--;
-             UtlWait( MAX_WAIT_TIME );
-             if ( RetryCount > 0 )
-             {
-               /*******************************************************/
-               /* re-allocate PBTIDA (has been de-allocated within    */
-               /* QDAMDictOpenLocal due to error code)                */
-               /*******************************************************/
-               //if ( ! UtlAlloc( (PVOID *)&pBTIda, 0L , (LONG) sizeof( BTREE ), NOMSG )  )
-               //{
-               //   sRc = BTREE_NO_ROOM;
-               //} /* endif */
-               //sRc = 1;
-             } /* endif */
-           } /* endif */
+           
          } while ( ((sRc == BTREE_IN_USE) || (sRc == BTREE_INVALIDATED)) &&
                    (RetryCount > 0) ); /* enddo */
        }

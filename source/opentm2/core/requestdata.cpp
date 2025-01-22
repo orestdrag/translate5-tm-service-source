@@ -305,7 +305,7 @@ int RequestData::requestTM(){
   //check if memory is loaded to tmmanager
   if(isReadOnlyRequest())
   {
-    mem = TMManager::GetInstance()->requestReadOnlyTMPointer(strMemName, memRef, requestTMTimeout, tmListTimeout);
+    mem = TMManager::GetInstance()->requestReadOnlyTMPointer(strMemName, memRef, requestTMTimeout, tmListTimeout, command);
     if(tmListTimeout.failed()){
       tmListTimeout.addToErrMsg("Failed to lock tm list:", __func__, __LINE__);
       return buildErrorReturn(506, tmLockTimeout.getErrMsg().c_str(), _rc_);
@@ -316,7 +316,7 @@ int RequestData::requestTM(){
     }
   }else if(isWriteRequest())
   {
-    mem = TMManager::GetInstance()->requestWriteTMPointer(strMemName, memRef, requestTMTimeout, tmListTimeout);
+    mem = TMManager::GetInstance()->requestWriteTMPointer(strMemName, memRef, requestTMTimeout, tmListTimeout, command);
     if(tmListTimeout.failed()){
       tmListTimeout.addToErrMsg("Failed to lock tm list:", __func__, __LINE__);
       return buildErrorReturn(506, tmListTimeout.getErrMsg().c_str(), _rc_);
@@ -326,7 +326,7 @@ int RequestData::requestTM(){
       return buildErrorReturn(506, requestTMTimeout.getErrMsg().c_str(), _rc_);
     }
   }else if(STATUS_MEM == command){
-    mem = TMManager::GetInstance()->requestServicePointer(strMemName, command, requestTMTimeout, tmListTimeout);
+    mem = TMManager::GetInstance()->requestServicePointer(strMemName, requestTMTimeout, tmListTimeout, command);
     if(tmListTimeout.failed()){
       tmListTimeout.addToErrMsg("Failed to lock tm list:", __func__, __LINE__);
       return buildErrorReturn(506, tmListTimeout.getErrMsg().c_str(), _rc_);
@@ -2853,9 +2853,6 @@ int ExportRequestData::checkData(){
     }
   }
 
-  //if(command == EXPORT_MEM_TMX){
-  //  return buildErrorReturn(400, "Base64 export is not supported in this version, use stream export with t5memory/{memname}/download.tmx instead", 400);
-  //}
   return _rc_;
 }
 
@@ -2876,8 +2873,6 @@ int ExportRequestData::execute(){
     ExportTmx();
     if ( _rc_ != 0 )
     {
-      //unsigned short usRC = 0;
-      //EqfGetLastErrorW( OtmMemoryServiceWorker::getInstance()->hSession, &usRC, this->szLastError, sizeof( this->szLastError ) / sizeof( this->szLastError[0] ) );
       std::string strErrMsg = "::getMem:: Error: EqfExportMem failed with rc=" + std::to_string(_rc_) + ", error message is " ;//  EncodingHelper::convertToUTF8( this->szLastError);
       return buildErrorReturn(_rc_, strErrMsg.c_str(), INTERNAL_SERVER_ERROR);
     }
@@ -2888,8 +2883,6 @@ int ExportRequestData::execute(){
     ExportZipStream();
     if ( _rc_ != 0 )
     {
-      //unsigned short usRC = 0;
-      //EqfGetLastErrorW( OtmMemoryServiceWorker::getInstance()->hSession, &usRC, this->szLastError, sizeof( this->szLastError ) / sizeof( this->szLastError[0] ) );
       std::string strErrMsg = "::getMem:: Error: EqfExportMemInInternalFormat failed with rc=" + std::to_string(_rc_) + ", error message is " ;//  EncodingHelper::convertToUTF8( this->szLastError);
       return buildErrorReturn(_rc_, strErrMsg.c_str(), INTERNAL_SERVER_ERROR);
     }
@@ -2900,8 +2893,6 @@ int ExportRequestData::execute(){
     ExportZip();
     if ( _rc_ != 0 )
     {
-      //unsigned short usRC = 0;
-      //EqfGetLastErrorW( OtmMemoryServiceWorker::getInstance()->hSession, &usRC, this->szLastError, sizeof( this->szLastError ) / sizeof( this->szLastError[0] ) );
       std::string strErrMsg = "::getMem:: Error: EqfExportMemInInternalFormat failed with rc=" + std::to_string(_rc_) + ", error message is " ;//  EncodingHelper::convertToUTF8( this->szLastError);
       return buildErrorReturn(_rc_, strErrMsg.c_str(), INTERNAL_SERVER_ERROR);
     }
@@ -2952,40 +2943,31 @@ int ExportRequestData::PrepareTMZip()
 
 int ExportRequestData::ExportZipStream(){
   _rc_ = PrepareTMZip();
-  if(!_rc_){    
-    //_rc_ = FilesystemHelper::LoadFileIntoByteVector( strTempFile, vMemData );
-  }
-
   return _rc_;
 }
 
 std::string convertIOBufQueueToString(folly::IOBufQueue& bufQueue) {
+  std::string result;
+  folly::io::Cursor cursor(bufQueue.front());
 
-    std::string result;
-    folly::io::Cursor cursor(bufQueue.front());
+  while (!cursor.isAtEnd()) {
+    const auto chunk = cursor.peekBytes();
+    result.append(reinterpret_cast<const char*>(chunk.data()), chunk.size());
+    cursor.skip(chunk.size());
+  }
 
-    while (!cursor.isAtEnd()) {
-      const auto chunk = cursor.peekBytes();
-      result.append(reinterpret_cast<const char*>(chunk.data()), chunk.size());
-      cursor.skip(chunk.size());
-    }
-
-    return result;
+  return result;
 }
 
 int ExportRequestData::ExportTmx(){
-  
-  //mem
   // call TM export
   if ( _rc_ == NO_ERROR )
   {
-    //memset( &fctdata, 0, sizeof( FCTDATA ) );
     fctdata.fComplete = TRUE;
     fctdata.usExportProgress = 0;
     fctdata.numOfProposalsRequested = numberOfRequestedProposals;
-    //if(isStreamingRequest()){
-      fctdata.responseHandler = responseHandler;
-    //}
+    fctdata.responseHandler = responseHandler;
+    
     fctdata.startingInternalKey.parseAndSetInternalKey(szKey);
     if(false == fctdata.startingInternalKey.isValid())
     {
@@ -3143,7 +3125,7 @@ int UpdateEntryRequestData::execute(){
     std::string source = EncodingHelper::convertToUTF8(Data.szSource);
     T5LOG( T5INFO) <<"EqfMemory::putProposal, source = " << source;
   }
-
+  
   _rc_ = mem->TmtXReplace ( Data, &TmPutOut );
   
   if ( _rc_ != 0 ){
@@ -3159,6 +3141,7 @@ int UpdateEntryRequestData::execute(){
       } 
       return buildErrorReturn(_rc_, errMsg.c_str(), INTERNAL_SERVER_ERROR); 
       //handleError( _rc_, this->szName, TmPutIn.stTmPut.szTagTable );
+
   }else if(fSave2Disk || FLAGS_flush_tm_to_disk_with_every_update){
     mem->FlushFilebuffers(tmLockTimeout);
     if(tmLockTimeout.failed()){
@@ -3176,24 +3159,10 @@ int UpdateEntryRequestData::execute(){
 
   // return the entry data
   std::wstring outputMessageW;
-  //json_factory.startJSONW( outputMessageW );
-  {
-    //OtmProposal output;
-    //mem->ExtOutToOtmProposal(&TmPutOut, output);
-    //time( (time_t*)&output.lTargetTime );
-    //output.lTargetTime -= 10800L; // correction: - 3 hours (this is a tribute to the old OS/2 times)
-    //convertTimeToUTC(output.lTargetTime, output.szDateTime);
-    //addProposalToJSONString( outputMessageW, output );
-    addProposalToJSONString(outputMessageW, Data);
-    //if(Data.pInputSentence){
-      //delete Data.pInputSentence;
-      //Data.pInputSentence = nullptr;
-    //}
-  }
-  //json_factory.terminateJSONW( outputMessageW );
+  addProposalToJSONString(outputMessageW, Data);
+
   outputMessage = EncodingHelper::convertToUTF8(outputMessageW.c_str());
 
-  //if(!inputSentence) delete inputSentence;
   return( _rc_ );
 }
 
@@ -3443,7 +3412,7 @@ int FuzzySearchRequestData::parseJSON(){
     return buildErrorReturn( _rc_, "Missing name of memory", BAD_REQUEST);
   } /* endif */
 
-    // parse input parameters
+  // parse input parameters
   std::wstring strInputParmsW = EncodingHelper::convertToWChar( strBody.c_str() );
   
   Data.clear();
@@ -3544,12 +3513,9 @@ int FuzzySearchRequestData::execute(){
 
   if ( Data.iNumOfProposals == 0 )
   {
-    //Data.iNumOfProposals = std::min( 5 * (int)sourceLangs.size(), 20);
     Data.iNumOfProposals = 5;
   }
 
-  //std::vector<MEMPROPOSAL> vFoundProposals(Data.iNumOfProposals);
-  //memset( &vFoundProposals[0], 0, sizeof( MEMPROPOSAL ) * Data.iNumOfProposals );
   // do the lookup and handle the results
   // call the memory factory to process the request
 
@@ -3613,8 +3579,6 @@ int FuzzySearchRequestData::execute(){
       T5LOG( T5DEBUG) <<"EqfMemory::SearchProposal::  lookup failed, rc=" << _rc_;
     } /* end */     
 
-    //if ( _rc_ != 0 ) mem->handleError( _rc_, mem->szName, GetIn.szTagTable );
-
     Data.iNumOfProposals = OtmProposal::getNumOfProposals( vProposals );
   } /* endif */
 
@@ -3638,10 +3602,6 @@ int FuzzySearchRequestData::execute(){
   }
   else
   {
-    unsigned short usRC = 0;
-    //EqfGetLastErrorW( OtmMemoryServiceWorker::getInstance()->hSession, &usRC, Data.szError, sizeof( Data.szError ) / sizeof( Data.szError[0] ) );
-    //buildErrorReturn( usRC, Data.szError );
-    //_rc_ = INTERNAL_SERVER_ERROR;
     return buildErrorReturn(_rc_, ":: fuzzy search of mem returned error, rc = ", INTERNAL_SERVER_ERROR) ;
   } /* endif */
 
@@ -3695,7 +3655,6 @@ int ConcordanceExtendedSearchRequestData::parseJSON(){
   // Using std::bind to bind member function handleData of DataHandler to callback
   JSONParseCallback callback = std::bind(&SearchFilterFactory::parseJSONNameAndValueW, &searchFilterFactory, std::placeholders::_1, std::placeholders::_2);
  
-
   _rc_ = json_factory.parseJSON( strInputParmsW, parseControl, callback);
 
   if(_rc_ == 1001){buildErrorReturn(_rc_,"Can't parse start timestamp", BAD_REQUEST);}
@@ -3798,10 +3757,8 @@ int ConcordanceExtendedSearchRequestData::execute()
   }
   else
   {
-    //mem->setSequentialAccessKey((PSZ) Data.szSearchPos );
     _rc_ = OProposal.nextInternalKey.parseAndSetInternalKey(Data.szSearchPos);
   } /* endif */
-  //mem->resetInternalCursor();
 
   do
   {
@@ -3886,7 +3843,6 @@ int ConcordanceExtendedSearchRequestData::execute()
       if ( fFound || (_rc_ == TIMEOUT_RC) )
       {
         strncpy(Data.szSearchPos, OProposal.nextInternalKey.getStr().c_str(), 20);
-        //mem->getSequentialAccessKey( Data.szSearchPos, 20 );
       } /* endif */
       else if ( _rc_ == EqfMemory::INFO_ENDREACHED )
       {
@@ -3905,9 +3861,6 @@ int ConcordanceExtendedSearchRequestData::execute()
       iFoundProposals++;
     }
   } while ( ( _rc_ == 0 ) && ( fCountInsteadOfReturnSegments || iFoundProposals < Data.iNumOfProposals ) );
-
-  //mem->resetInternalCursor();
-
 
   std::string filtersStr, globalOptionsStr;
   for(auto& filter:filters)
@@ -3943,8 +3896,6 @@ int ConcordanceExtendedSearchRequestData::execute()
   std::wstring filtersStrW = EncodingHelper::convertToWChar(filtersStr);
   std::wstring globalOptionsStrW = EncodingHelper::convertToWChar(globalOptionsStr);
 
-
-
   if ( iFoundProposals || (_rc_ == ENDREACHED_RC) || (_rc_ == TIMEOUT_RC) )
   {
     std::wstring strOutputParmsW;
@@ -3979,8 +3930,6 @@ int ConcordanceExtendedSearchRequestData::execute()
   }
   else
   {
-    //unsigned short usRC = 0;
-    //EqfGetLastErrorW( OtmMemoryServiceWorker::getInstance()->hSession, &usRC, Data.szError, sizeof( Data.szError ) / sizeof( Data.szError[0] ) );
     return buildErrorReturn( _rc_, Data.szError, INTERNAL_SERVER_ERROR);
   } /* endif */
 
@@ -4122,7 +4071,6 @@ int ConcordanceSearchRequestData::execute(){
   }
   else
   {
-    //mem->setSequentialAccessKey((PSZ) Data.szSearchPos );
     _rc_ = OProposal.nextInternalKey.parseAndSetInternalKey(Data.szSearchPos);
   } /* endif */ 
 
@@ -4216,7 +4164,6 @@ int ConcordanceSearchRequestData::execute(){
       if ( fFound || (_rc_ == TIMEOUT_RC) )
       {
         strncpy(Data.szSearchPos, OProposal.nextInternalKey.getStr().c_str(), 20);
-        //mem->getSequentialAccessKey( Data.szSearchPos, 20 );
       } /* endif */
       else if ( _rc_ == EqfMemory::INFO_ENDREACHED )
       {
@@ -4262,8 +4209,6 @@ int ConcordanceSearchRequestData::execute(){
   }
   else
   {
-    //unsigned short usRC = 0;
-    //EqfGetLastErrorW( OtmMemoryServiceWorker::getInstance()->hSession, &usRC, Data.szError, sizeof( Data.szError ) / sizeof( Data.szError[0] ) );
     return buildErrorReturn( _rc_, Data.szError, INTERNAL_SERVER_ERROR);
   } /* endif */
 

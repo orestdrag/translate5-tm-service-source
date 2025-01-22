@@ -1727,6 +1727,7 @@ class Dummy{};
 class RequestData;
 
 
+#define ASD_ORGANIZE 0x100             // work in organize mode
 
 std::string StatusToString(int eStatus);
 
@@ -1853,6 +1854,15 @@ public:
     return IMPORT_RUNNING_STATUS == eStatus;
   }
 
+  //bool  fReorganizeOnly = false;
+  bool isOpenedOnlyForReorganize()const{
+    return usAccessMode & ASD_ORGANIZE;
+  }
+
+  void resetOpenedOnlyForReorganize(){
+    unsigned int mask = ~ASD_ORGANIZE;
+    usAccessMode &= mask;
+  }
 
   void updateLastUseTime(){
     tLastAccessTime = time(0);
@@ -3890,7 +3900,8 @@ static const int IMPORTFROMMEMFILES_COMPLETEINONECALL_OPT = 1;  // complete the 
 
   EqfMemory* initTM(const std::string& memName, 
     size_t requiredMemory,	 
-    unsigned short usAccessMode);
+    unsigned short usAccessMode,
+    bool fReorganizeOnly);
 
 /*! \brief Close a memory
   \param pMemory pointer to memory object
@@ -4010,7 +4021,7 @@ class TMManager{
   int TMExistsOnDisk(const std::string& tmName, bool logErrorIfNotExists = true);
 
   int AddMem(const std::shared_ptr<EqfMemory> NewMem, MutexTimeout& tmListTimeout);
-  int OpenTM(const std::string& strMemName, MutexTimeout& tmListTimeout);
+  int OpenTM(const std::string& strMemName, MutexTimeout& tmListTimeout, COMMAND command);
   int CloseTM(const std::string& strMemName, MutexTimeout& tmListTimeout);
   int DeleteTM(const std::string& strMemName, std::string& outputMsg);
 
@@ -4023,9 +4034,9 @@ class TMManager{
     MutexTimeout& tmListTimeout
   );
   
-  std::shared_ptr<EqfMemory> requestServicePointer(const std::string& strMemName, COMMAND command, MutexTimeout& requestTMTimeout,  MutexTimeout& tmListTimeout);
-  std::shared_ptr<EqfMemory> requestReadOnlyTMPointer(const std::string& strMemName, std::shared_ptr<int>& refBack, MutexTimeout& requestTMTimeout,  MutexTimeout& tmListTimeout);
-  std::shared_ptr<EqfMemory> requestWriteTMPointer(const std::string& strMemName, std::shared_ptr<int>& refBack, MutexTimeout& requestTMTimeout,  MutexTimeout& tmListTimeout);
+  std::shared_ptr<EqfMemory> requestServicePointer(const std::string& strMemName, MutexTimeout& requestTMTimeout,  MutexTimeout& tmListTimeout, COMMAND command);
+  std::shared_ptr<EqfMemory> requestReadOnlyTMPointer(const std::string& strMemName, std::shared_ptr<int>& refBack, MutexTimeout& requestTMTimeout,  MutexTimeout& tmListTimeout, COMMAND command);
+  std::shared_ptr<EqfMemory> requestWriteTMPointer(const std::string& strMemName, std::shared_ptr<int>& refBack, MutexTimeout& requestTMTimeout,  MutexTimeout& tmListTimeout, COMMAND command);
 
   std::shared_ptr<EqfMemory> CreateNewEmptyTM(const std::string& strMemName, const std::string& strSrcLang, 
       const std::string& strMemDescription, int& _rc_, bool keepInRamOnly = false);

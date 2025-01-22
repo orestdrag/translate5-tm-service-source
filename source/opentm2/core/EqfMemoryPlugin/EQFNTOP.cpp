@@ -108,19 +108,6 @@ void EqfMemory::resetActiveRequestCommand()
   activeCommand = UNKNOWN_COMMAND;
 }
 
-/*
-//void EqfMemory::setActiveRequestCommand(std::weak_ptr<RequestData> request)
-void EqfMemory::setActiveRequest(RequestData* request)
-{
-  pActiveRequest = request;
-}
-
-void EqfMemory::resetActiveRequest()
-{
-  //pActiveRequest.reset();
-  pActiveRequest = nullptr;
-}//*/
-
 std::string EqfMemory::getStatusString()const
 {
   return StatusToString(eStatus);
@@ -213,6 +200,7 @@ USHORT EqfMemory::LoadMem()
     //TmBtree.fb.fileName = pTmOpenIn->stTmOpen.szDataName;
     //InBtree.fb.fileName = pTmOpenIn->stTmOpen.szIndexName;
     //call open function for data file
+    
     usRc1 = TmBtree.EQFNTMOpen((USHORT)(usAccessMode | ASD_FORCE_WRITE) );
     if ( (usRc1 == NO_ERROR) || (usRc1 == BTREE_CORRUPTED) )
     {

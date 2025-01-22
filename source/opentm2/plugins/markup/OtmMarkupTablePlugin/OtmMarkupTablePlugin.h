@@ -8,6 +8,7 @@
 #ifndef _OtmMarkupTablePlugin_H_
 #define _OtmMarkupTablePlugin_H_
 
+//#ifndef TEMPORARY_COMMENTED
 #include "core\pluginmanager\OtmMarkupPlugin.h"
 #include "core\pluginmanager\OtmMarkup.h"
 #include "core\utilities\LogWriter.h"
@@ -188,6 +189,6 @@ private:
   LogWriter Log;
 };
 
-
+//#endif //TEMPORARY_COMMENTED
 
 #endif // #ifndef _OtmMarkupTablePlugin_H_

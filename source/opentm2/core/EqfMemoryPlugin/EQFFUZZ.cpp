@@ -743,60 +743,8 @@ BOOL FuzzyReplace
 //|Function flow:     compare two tokens                                       |
 //+----------------------------------------------------------------------------+
 
-//int EQFBTokListCompare ( const void * pvElem1, const void *pvElem2 )
-//{
-//  PFUZZYTOK pElem1 = *((PFUZZYTOK *)pvElem1);
-//  PFUZZYTOK pElem2 = *((PFUZZYTOK *)pvElem2);
-//  ULONG ul1, ul2;
-//  int   i;
-//  USHORT usStart1, usStart2;                             // temp. usStart
-//  PSZ  pData1, pData2;
-//
-//  ul1 = pElem1->ulHash;
-//  ul2 = pElem2->ulHash;
-//  if ( ul1 > ul2  )
-//  {
-//    i = 1;
-//  }
-//  else
-//  if ( ul1 < ul2 )
-//  {
-//    i = -1;
-//  }
-//  else
-//  {
-//    /******************************************************************/
-//    /* if hash equal compare strings w/o regard of punctuation        */
-//    /* compare punctuation chars only if no alphanumerical chars exist*/
-//    /******************************************************************/
-//    pData1 = pElem1->pData;
-//    pData2 = pElem2->pData;
-//    i = TokStrCompare( pElem1, pElem2 );
-//
-//    if ( i == 0 )
-//    {
-//      /******************************************************************/
-//      /* if hash is equal, return i=0 only if start equal too           */
-//      /*(hash equal happens if one word is more than once in a segment) */
-//      /******************************************************************/
-//       usStart1 = pElem1->usStart;
-//       usStart2 = pElem2->usStart;
-//       if (usStart1 < usStart2 )
-//       {
-//         i = -1;
-//       }
-//       else if (usStart1 > usStart2 )
-//       {
-//         i = 1;
-//       }
-//       else
-//       {
-//         i = 0;
-//       } /* endif */
-//    } /* endif */
-//  } /* endif */
-//  return( i );
-//}
+
+
 
 //+----------------------------------------------------------------------------+
 //|Internal function                                                           |
@@ -817,11 +765,6 @@ BOOL FuzzyReplace
 //|Function flow:     compare two tokens                                       |
 //+----------------------------------------------------------------------------+
 
-//int EQFBReplListCompare ( const void * pElem1, const void * pElem2 )
-//{
-//  return( (((PREPLLIST)pElem1)->pSrcTok->usStart -
-//           ((PREPLLIST)pElem2)->pSrcTok->usStart) );
-//}
 
 // isNumber
 //
@@ -1286,40 +1229,6 @@ BOOL EQFBCountDiff
    *pusTokens = usLen;
    return( TRUE );
 } /* end of function EQFBCountDiff */
-
-
-/*
-std::wstring removeTagsFromString(std::wstring input){
-
-  bool fTagOpened = false;
-  wchar_t* pIn  = &input[0];
-  wchar_t* pOutStart = pIn;
-  wchar_t* pOut = pOutStart;
-
-  while( *pIn != L'\0'){
-    switch (*pIn)
-    {
-    case L'<':
-      fTagOpened = true;
-      break;
-    case L'>':
-      fTagOpened = false;
-      break;
-    
-    default:
-      if(fTagOpened == false){
-        *pOut = *pIn;
-        pOut++;
-      }
-      break;
-    }
-    
-    pIn++;
-  }
-
-  *pOut = L'\0';
-  return std::wstring(pOutStart);
-}//*/
 
 
 /**********************************************************************/

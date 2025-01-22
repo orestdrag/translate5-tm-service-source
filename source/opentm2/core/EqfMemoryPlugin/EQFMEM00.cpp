@@ -105,17 +105,6 @@ USHORT EQFMemOrganizeStart
         TMManager::GetInstance()->DeleteTM( pRIDA->szTempMemName, strMsg );
       } /* endif */
 
-      // Issue the error message :"Initialization of organize for
-      // translation memory %1 failed". Issue the message only if
-      // no other significant message has been issued already.
-      /*
-      if ( !pRIDA->fMsg )
-      {
-        pReplAddr[0] = pRIDA->szMemName;
-        UtlErrorHwnd( ERROR_MEM_ORGANIZE_INITFAILED, MB_CANCEL, 1,
-                      &pReplAddr[0], EQF_ERROR, pRIDA->hwndErrMsg );
-      } /* endif */
-
       if ( pRIDA->fBatch )
       {
         pRIDA->usRC = UtlGetDDEErrorCode( pRIDA->hwndErrMsg );
