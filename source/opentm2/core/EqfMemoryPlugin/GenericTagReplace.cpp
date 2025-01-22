@@ -153,7 +153,7 @@ void NTMListTokens
 )
 {
   int i = 1;
-  T5LOG(T5INFO) << "\n"<<pszName <<" token list\n"; 
+  T5LOG(T5INFO) << pszName <<" token list"; 
   while ( pToken->ulHash )
   {
     std::string tokenName = "Token " + i;
@@ -230,13 +230,13 @@ BOOL     NTMTagSubst
 #ifdef INLINE_TAG_REPL_LOGGING
   if ( T5Logger::GetInstance()->CheckLogLevel(T5DEBUG) )
   {
-    T5LOG(T5DEBUG) << "*** NTMTagSubst ***\n" ;
+    T5LOG(T5DEBUG) << "*** NTMTagSubst ***" ;
     NTMMarkCRLF( pSubstProp->szSource, szSegBuf );
-    T5LOG(T5DEBUG) << "<Segment>"<< szSegBuf << "</Segment>\n";
+    T5LOG(T5DEBUG) << "<Segment>"<< szSegBuf << "</Segment>";
     NTMMarkCRLF( pSubstProp->szPropSource, szSegBuf );
-    T5LOG(T5DEBUG) << "<PropSource>"<<szSegBuf<<"</PropSource>\n";
+    T5LOG(T5DEBUG) << "<PropSource>"<<szSegBuf<<"</PropSource>";
     NTMMarkCRLF( pSubstProp->szPropTarget, szSegBuf );
-    T5LOG(T5DEBUG) << "<PropTarget>"<<szSegBuf<<"</PropTarget>\n";
+    T5LOG(T5DEBUG) << "<PropTarget>"<<szSegBuf<<"</PropTarget>";
   } /* endif */
   #endif
   
@@ -404,7 +404,7 @@ BOOL     NTMTagSubst
   /********************************************************************/
   if ( fOK && pReplaceSourceList )
   {
-    T5LOG(T5DEBUG) << "replace source list exists\n" ;
+    T5LOG(T5DEBUG) << "replace source list exists" ;
 
     /*************************************************************/
     /* insert a dummy token at the beginning of the pReplaceSourcList */
@@ -449,9 +449,9 @@ BOOL     NTMTagSubst
           if ( fReplaced )
           {
             NTMMarkCRLF( pSubstProp->szPropSource, szSegBuf );
-            T5LOG(T5DEBUG) << "<New PropSource>"<<szSegBuf<<"</PropSource>\n";
+            T5LOG(T5DEBUG) << "<New PropSource>"<<szSegBuf<<"</PropSource>";
             NTMMarkCRLF( pSubstProp->szPropTarget, szSegBuf );
-            T5LOG(T5DEBUG) << "<New PropTarget>"<<szSegBuf<<"</PropTarget>\n";
+            T5LOG(T5DEBUG) << "<New PropTarget>"<<szSegBuf<<"</PropTarget>";
           } /* endif */
         }
         #endif
@@ -1183,7 +1183,7 @@ NTMFuzzyReplace
   pProp;
   ulTgtLen = UTF16strlenCHAR( pTrans );
 
-  T5LOG(T5DEBUG) << "NTMFuzzyReplace\n" ;
+  T5LOG(T5DEBUG) << "NTMFuzzyReplace" ;
   pSubstProp->pTagPairs = (PTMX_REPLTAGPAIR) (pSubstProp->chBuffer);
   /********************************************************************/
   /* replace found tokens in translation with original ones....       */
@@ -1631,7 +1631,7 @@ NTMCheckTagPairs
         {
 #ifdef INLINE_TAG_REPL_LOGGING
           
-            T5LOG(T5DEBUG) << "No tag pair found in target\n" ;
+            T5LOG(T5DEBUG) << "No tag pair found in target" ;
             NTMListToken( "Temp token", pTempTok );
 #endif
           fAllReplace = FALSE;

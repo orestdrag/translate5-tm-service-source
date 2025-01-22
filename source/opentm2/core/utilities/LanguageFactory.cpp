@@ -111,7 +111,7 @@ LanguageFactory::LanguageFactory(void)
 /*! \brief destructor	 */
 LanguageFactory::~LanguageFactory(void)
 {
-  T5LOG(T5DEBUG) <<  "Stopping LanguageFactory" ;
+  T5LOG(T5DEBUG) <<  "Stopping LanguageFactory";
 }
 
 /*! \brief This static method returns a pointer to the LanguageFactory object.

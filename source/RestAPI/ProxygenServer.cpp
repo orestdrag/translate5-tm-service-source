@@ -412,7 +412,7 @@ class ProxygenHandlerFactory : public RequestHandlerFactory {
     additionalServiceName = serviceName+"_service";
 
     if( true /*printIninMsg*/){
-      T5LOG(T5TRANSACTION) << "Service details:\n  Service name = " << szServiceName <<
+      T5LOG(T5TRANSACTION) << "Service details:  Service name = " << szServiceName <<
       "\n  Additional service name: "<< additionalServiceName <<
       "\n  Address :" << host << ":" << uiPort << 
       "\n  Build date: " << buildDate <<

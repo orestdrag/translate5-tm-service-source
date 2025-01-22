@@ -101,12 +101,12 @@ int FileBuffer::atomicWriteWithBackup() {
         {
             std::ofstream tempFile(tempFilename, std::ios::out | std::ios::trunc | std::ios::binary);
             if (!tempFile) {
-                T5LOG(T5ERROR) << "Error: Unable to open temporary file for writing\n";
+                T5LOG(T5ERROR) << "Error: Unable to open temporary file for writing";
                 return 1;
             }
             //tempFile.write(data, data.size());
             if (!tempFile) {
-                T5LOG(T5ERROR) << "Error: Write operation to temporary file failed\n";
+                T5LOG(T5ERROR) << "Error: Write operation to temporary file failed";
                 return 2;
             }
 
@@ -131,7 +131,7 @@ int FileBuffer::atomicWriteWithBackup() {
 
         return 0;
     } catch (const std::exception& e) {
-        T5LOG(T5ERROR) << "Error: " << e.what() << "\n";
+        T5LOG(T5ERROR) << "Error: " << e.what() << "";
         return 3;
     }
 }
@@ -194,7 +194,7 @@ int FilesystemHelper::LoadFileIntoByteVector(const std::string& strFile, std::ve
   if ( hFile == NULL )
   {
     iRC = GetLastError();
-    T5LOG(T5ERROR) <<"   Error: open of file "<< strFile << " failed with rc=" << iRC << "\n";
+    T5LOG(T5ERROR) <<"   Error: open of file "<< strFile << " failed with rc=" << iRC << "";
     return( iRC );
   }
 
@@ -210,7 +210,7 @@ int FilesystemHelper::LoadFileIntoByteVector(const std::string& strFile, std::ve
     fclose( hFile );
     hFile = nullptr;
     iRC = GetLastError();
-    T5LOG(T5ERROR) << "   Error: reading of "<< dwFileSize << " bytes from file "<< strFile <<" failed with rc=" << iRC << "\n";
+    T5LOG(T5ERROR) << "   Error: reading of "<< dwFileSize << " bytes from file "<< strFile <<" failed with rc=" << iRC << "";
     return( iRC );
   }
 
@@ -349,7 +349,7 @@ int FilesystemHelper::RenameFile(std::string oldPath, std::string newPath){
     }
     // Attempt to rename the file
     if (std::rename(oldPath.c_str(), newPath.c_str()) == 0) {
-        T5LOG(T5DEBUG) << "File \'"<<oldPath <<"\' renamed successfully to \'" << newPath<< "\'\n";
+        T5LOG(T5DEBUG) << "File \'"<<oldPath <<"\' renamed successfully to \'" << newPath<< "\'";
     }    
     
     if(!fOk){
@@ -996,10 +996,10 @@ int FilesystemHelper::WriteToFileBuff(FILE*& ptr, const void* buff, const long u
         }
         #ifndef TEMPORARY_HARDCODED
         if(T5Logger::GetInstance()->CheckLogLevel(T5DEBUG)){
-            std::string filesInBuf = "FilesystemHelper::WriteToFileBuff:: files in filebuffer:\n";
+            std::string filesInBuf = "FilesystemHelper::WriteToFileBuff:: files in filebuffer:\t";
             for (auto it = getFileBufferInstance()->begin(); it != getFileBufferInstance()->end(); ++it)
             {
-                filesInBuf += it->first + '\n';
+                filesInBuf += it->first + '\t';
             }
             if(VLOG_IS_ON(1)){
                 T5LOG( T5DEBUG) << filesInBuf;

@@ -1117,7 +1117,7 @@ SHORT BTREE::QDAMReadRecordFromDisk_V3
         else
         {
           ERREVENT2( QDAMREADRECORDFROMDISK_LOC, INVOPERATION_EVENT, 4, DB_GROUP, "" );
-          T5LOG(T5ERROR) << "EQF9998: Write of new QDAM record w/o fNewRec set!\nLoc=READRECORDFROMDISK/3\nInternal Error";
+          T5LOG(T5ERROR) << "EQF9998: Write of new QDAM record w/o fNewRec set\t Loc=READRECORDFROMDISK/3;\t Internal Error";
           sRc = BTREE_READ_ERROR;
         } /* endif */
       } /* endif */
@@ -2322,7 +2322,7 @@ PWCHAR QDAMGetszKey_V3
   {
     // offset pointer is out of range
     T5LOG(T5ERROR) << "QDAMGetszKey_V3:: pusOffset > pEndOfRec , pusOffset = " << (long int)pusOffset << 
-        "; pEndOfRec = " << (long int)pEndOfRec << "\npusOffset - pEndOfRec = " << (long int) ((PBYTE)pusOffset - pEndOfRec);
+        "; pEndOfRec = " << (long int)pEndOfRec << "; pusOffset - pEndOfRec = " << (long int) ((PBYTE)pusOffset - pEndOfRec);
     //ERREVENT2( QDAMGETSZKEY_LOC, INTFUNCFAILED_EVENT, 1, DB_GROUP, "" );
   }
   else

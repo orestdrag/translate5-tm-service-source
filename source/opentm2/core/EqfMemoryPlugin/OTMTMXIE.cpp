@@ -436,23 +436,23 @@ bool is_number(std::u16string s)
 
 std::string TagReplacer::LogTag(TagInfo & tag){
   bool isClosingTag = tag.generated_tagType == EPT_ELEMENT && tag.original_tagType != EPT_ELEMENT && tag.original_tagType != BX_ELEMENT;
-  std::string logMsg = "LogTag::\n original tag = <";
+  std::string logMsg = "LogTag:: original tag = <";
   if(isClosingTag)
     logMsg +="/";
   logMsg += TmxIDToName[tag.original_tagType] + " x = \"" + toStr(tag.original_x) + "\" i = \"" + toStr(tag.original_i) +"\"";
   if(!isClosingTag)
     logMsg +="/";
-  logMsg += ">\n generated tag =  <" + TmxIDToName[tag.generated_tagType] + 
+  logMsg += "> generated tag =  <" + TmxIDToName[tag.generated_tagType] + 
           " x=\"" + toStr(tag.generated_x) + "\" i = \"" + toStr(tag.generated_i) + "\"/>" + 
-          "\n    tagHasClosingTag = \"" + toStr(tag.fPairedTagClosed) + "\" tagWasAlreadyUsedInTarget = \"" + toStr(tag.fTagAlreadyUsedInTarget) +
+          "    tagHasClosingTag = \"" + toStr(tag.fPairedTagClosed) + "\" tagWasAlreadyUsedInTarget = \"" + toStr(tag.fTagAlreadyUsedInTarget) +
           "\" tagLocation = " + TagLocIDToStr[tag.tagLocation];
   return logMsg;
   //T5LOG( T5DEVELOP)<< logMsg;
   //LOG_DEVELOP_MSG << logMsg;
   
-  //T5LOG( T5INFO) << "LogTag::\n original tag = <",TmxIDToName[tag.original_tagType].c_str()," x = \"", toStr(tag.original_x).c_str(), "\" i = \"", toStr(tag.original_i).c_str(),
-  //        "/>\n    tagHasClosingTag = \"", toStr(tag.fPairedTagClosed).c_str(), "\" tagWasAlreadyUsedInTarget = \"", toStr(tag.fTagAlreadyUsedInTarget).c_str());
-  //T5LOG( T5INFO) << " tagLocation = ", TagLocIDToStr[tag.tagLocation].c_str(),"\n generated tag =  <", TmxIDToName[tag.generated_tagType].c_str(), 
+  //T5LOG( T5INFO) << "LogTag:: original tag = <",TmxIDToName[tag.original_tagType].c_str()," x = \"", toStr(tag.original_x).c_str(), "\" i = \"", toStr(tag.original_i).c_str(),
+  //        "/>    tagHasClosingTag = \"", toStr(tag.fPairedTagClosed).c_str(), "\" tagWasAlreadyUsedInTarget = \"", toStr(tag.fTagAlreadyUsedInTarget).c_str());
+  //T5LOG( T5INFO) << " tagLocation = ", TagLocIDToStr[tag.tagLocation].c_str()," generated tag =  <", TmxIDToName[tag.generated_tagType].c_str(), 
   //        " x=\"", toStr(tag.generated_x).c_str(), "\" i = \"",toStr(tag.generated_i).c_str(), "\" />");
 
 }
@@ -495,7 +495,7 @@ TagInfo TagReplacer::GenerateReplacingTag(ELEMENTID tagType, AttributeList* attr
   }else{
     tag.generated_tagType = UNKNOWN_ELEMENT;
       T5LOG(T5ERROR) << ":: wrong tag used, only bpt, ept and ph tags allowed, tag=" << tagType << 
-            ",\n 0<=tag<=9 or tag>=30 -> tmx tags, 20<=tag<=29 -> standalone tags, 10<=tag<=19 -> pair tags, tagName = " << TmxIDToName[tagType];
+            ", 0<=tag<=9 or tag>=30 -> tmx tags, 20<=tag<=29 -> standalone tags, 10<=tag<=19 -> pair tags, tagName = " << TmxIDToName[tagType];
   }  
 
   {//save original data if provided
@@ -1730,8 +1730,8 @@ void StringTagVariants::parseTrg(){
   if(originalTarget.empty() ){
     if(T5Logger::GetInstance()->CheckLogLevel(T5DEBUG)){
       std::string res_src_s = EncodingHelper::convertToUTF8(genericTags);
-      T5LOG( T5DEBUG) << ":: original source = \n\'" << src << "\'\n replaced with:\n\'" << 
-            res_src_s <<"\'\n";
+      T5LOG( T5DEBUG) << ":: original source = \'" << src << "\' replaced with:\'" << 
+            res_src_s <<"\'";
     }
   }else{    
     handler.tagReplacer.activeSegment = TARGET_SEGMENT;
@@ -1768,8 +1768,8 @@ void StringTagVariants::logResults(){
   if(T5Logger::GetInstance()->CheckLogLevel(T5DEBUG)){
       std::string res_src_s = EncodingHelper::convertToUTF8(genericTags);
       std::string res_trg_s = EncodingHelper::convertToUTF8(genericTarget);
-      T5LOG( T5DEBUG) << ":: original source = \n\'" << src << "\'\n replaced with:\n\'" << 
-              res_src_s << "\'\n target: \'" << trg << "\'\n replaced with:\n\'" << res_trg_s << "\'\n";
+      T5LOG( T5DEBUG) << ":: original source = \'" << src << "\' replaced with:\'" << 
+              res_src_s << "\' target: \'" << trg << "\' replaced with:\'" << res_trg_s << "\'";
   }
 }
 
@@ -1839,8 +1839,8 @@ void RequestTagReplacer::parseAndReplaceTags(){
   if(T5Logger::GetInstance()->CheckLogLevel(T5DEBUG)){
     std::string res_src_s = EncodingHelper::convertToUTF8(replacedTagsSrc);
     std::string res_trg_s = EncodingHelper::convertToUTF8(replacedTagsTrg);
-    T5LOG( T5DEBUG) << ":: original source = \n\'" << src << "\'\n replaced with:\n\'" << 
-            res_src_s <<"\'\n target: \'" << trg << "\'\n replaced with:\n\'" << res_trg_s << "\'\n";
+    T5LOG( T5DEBUG) << ":: original source = \'" << src << "\' replaced with:\'" << 
+            res_src_s <<"\' target: \'" << trg << "\' replaced with:\'" << res_trg_s << "\'";
   }
   
   
@@ -2953,8 +2953,8 @@ void TMXParseHandler::endElement(const XMLCh* const name )
         if(T5Logger::GetInstance()->CheckLogLevel(T5DEBUG)){      
           result = EncodingHelper::convertToUTF8(pBuf->szData);
           T5LOG( T5DEBUG) << ":: parsed end of TMX sentence, result = \'" << result << 
-              "\'  ->  fSkipped inclosed tag pair = " << inclosingTagsSkipped <<";\n Generated tags first = \'" <<
-              EncodingHelper::convertToUTF8(begPairTag) << "\'\nlast tag =\'" << EncodingHelper::convertToUTF8(endPairTag.c_str()), "\'\n";     
+              "\'  ->  fSkipped inclosed tag pair = " << inclosingTagsSkipped <<"; Generated tags first = \'" <<
+              EncodingHelper::convertToUTF8(begPairTag) << "last tag =\'" << EncodingHelper::convertToUTF8(endPairTag.c_str()), "\'";     
         }
       }
       
@@ -3228,17 +3228,17 @@ void TMXParseHandler::fatalError(const SAXParseException& exception)
     if(strncmp(message,"invalid character", std::min(strlen(message), strlen("invalid character")))){
       this->fError = TRUE;
       
-      T5LOG(T5ERROR) <<  "Fatal Error: " << message <<" at column " <<  col <<" in line "<< line<<"\n";
+      T5LOG(T5ERROR) <<  "Fatal Error: " << message <<" at column " <<  col <<" in line "<< line<<"";
       sprintf( this->pBuf->szErrorMessage, "Fatal Error: %s at column %ld in line %ld", message, col, line );
       if(pImportDetails){
-        pImportDetails->importMsg << "IMPORT: " << this->pBuf->szErrorMessage << "; \n";
+        pImportDetails->importMsg << "IMPORT: " << this->pBuf->szErrorMessage << ";";
       }
     }else{
       if(pImportDetails){
-        pImportDetails->importMsg << "IMPORT: INVCHAR: " << message <<" at column " <<  col <<" in line "<< line<<"; \n";
+        pImportDetails->importMsg << "IMPORT: INVCHAR: " << message <<" at column " <<  col <<" in line "<< line<<";";
       }
       
-      T5LOG(T5WARNING) <<  "IMPORT: INVCHAR: " << message <<" at column " <<  col <<" in line "<< line<<"\n";
+      T5LOG(T5WARNING) <<  "IMPORT: INVCHAR: " << message <<" at column " <<  col <<" in line "<< line<<"";
       resetErrors(); 
       _invalidCharacterErrorCount++;
     }
@@ -3287,7 +3287,7 @@ void TMXParseHandler::error(const SAXParseException& exception)
     this->fError = TRUE;
     sprintf( this->pBuf->szErrorMessage, "Error: %s at column %ld in line %ld", message, col, line );
     if(pImportDetails){
-      pImportDetails->importMsg << "IMPORT: " << this->pBuf->szErrorMessage << "; \n";
+      pImportDetails->importMsg << "IMPORT: " << this->pBuf->szErrorMessage << ";";
     }
     T5LOG(T5ERROR) << ": "<< this->pBuf->szErrorMessage;
     XMLString::release( &message );
@@ -3298,9 +3298,9 @@ void TMXParseHandler::warning(const SAXParseException& exception)
     char* message = XMLString::transcode(exception.getMessage());
     long line = (long)exception.getLineNumber();
     long col = (long)exception.getColumnNumber();
-    T5LOG(T5WARNING) << "Warning: "<< message << " at column "<< col << " in line " << line << "\n";
+    T5LOG(T5WARNING) << "Warning: "<< message << " at column "<< col << " in line " << line << "";
     if(pImportDetails){
-        pImportDetails->importMsg <<  "Warning: "<< message << " at column "<< col << " in line " << line << "; \n";
+        pImportDetails->importMsg <<  "Warning: "<< message << " at column "<< col << " in line " << line << ";";
     }
     XMLString::release( &message );
 }
@@ -3769,7 +3769,7 @@ USHORT APIENTRY WRITEEXPSEGMENT( LONG lMemHandle, PMEMEXPIMPSEG pSegment )
   {
     //if ( pData->hfLog )
     {
-      T5LOG(T5INFO) <<"Segment "<< pSegment->lSegNum <<" skipped, reason = " << pSegment->szReason   <<"\nSource=" << pSegment->szSource;
+      T5LOG(T5INFO) <<"Segment "<< pSegment->lSegNum <<" skipped, reason = " << pSegment->szReason   <<"Source=" << pSegment->szSource;
     } /* endif */
     pData->lSkippedSegsCounter++;
   } /* endif */
@@ -4387,7 +4387,7 @@ USHORT GetNextSegment( PCONVERTERDATA pData, PBOOL pfSegmentAvailable )
       //if ( pData->hfLog != NULL )
       {
         T5LOG(T5INFO) <<"The segment beginning in line "<< iStartLine <<" is invalid, the reason is \""<< pszError 
-            <<"\".\nSegment data:" <<pData->szSegBuffer;
+            <<"\".Segment data:" <<pData->szSegBuffer;
       } /* endif */
     }
     else

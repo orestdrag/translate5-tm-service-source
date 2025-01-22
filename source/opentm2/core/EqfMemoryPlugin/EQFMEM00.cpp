@@ -287,7 +287,7 @@ VOID EQFMemOrganizeProcess
     if(pRIDA->pMem->importDetails->invalidSegments < FLAGS_maxBadSegmentsIdsSaved){    
       pRIDA->pMem->importDetails->firstInvalidSegmentsSegNums.push_back(std::make_tuple(pRIDA->pProposal->getSegmentId(), -9));  
     }  
-    T5LOG(T5ERROR) << "Skipping proposal iRC == EqfMemory::ERROR_ENTRYISCORRUPTED ; proposal :\n" << *pRIDA->pProposal;
+    T5LOG(T5ERROR) << "Skipping proposal iRC == EqfMemory::ERROR_ENTRYISCORRUPTED ; proposal :" << *pRIDA->pProposal;
   }
   else if ( iRC == EqfMemory::INFO_ENDREACHED )
   {

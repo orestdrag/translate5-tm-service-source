@@ -321,7 +321,7 @@ USHORT EqfStartSession
   if ( usRC == NO_ERROR )
   {
 
-  T5LOG( T5DEBUG) << "==EQFSTARTSESSION==\n  Starting plugins...\n" ;
+  T5LOG( T5DEBUG) << "==EQFSTARTSESSION==  Starting plugins..." ;
 
 
   // initialie plugins
@@ -343,7 +343,7 @@ USHORT EqfStartSession
     // Add end
   }
 
-  T5LOG( T5INFO) << "   ...Plugins have been started\n" ;
+  T5LOG( T5INFO) << "   ...Plugins have been started" ;
     {
       char szBuf[10];
       int i = _getpid();

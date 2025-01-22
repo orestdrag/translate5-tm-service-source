@@ -500,8 +500,8 @@ static USHORT  MemLoadStart( MEM_LOAD_DLG_IDA* pLIDA,
       } /* endif */
    }else{
     time( &pLIDA->mem->importDetails->lImportStartTime );
-    T5LOG(T5DEBUG)  << "************ Memory Import Log *********************\n Memory import started at   : "<<
-          asctime( localtime( &pLIDA->mem->importDetails->lImportStartTime ) )<< "\nMemory name                : "  << pLIDA->szMemName ;
+    T5LOG(T5DEBUG)  << "************ Memory Import Log ********************* Memory import started at   : "<<
+          asctime( localtime( &pLIDA->mem->importDetails->lImportStartTime ) )<< "\tMemory name                : "  << pLIDA->szMemName ;
    } /* endif */   
 
    return ((USHORT)fOK);
@@ -1498,16 +1498,16 @@ USHORT /*APIENTRY*/ MEMINSERTSEGMENT
     // write segment to log file
     if ( T5Logger::GetInstance()->CheckLogLevel(T5INFO) )
     {
-      T5LOG(T5DEBUG) <<"Segment "<<pSegment->lSegNo <<" not imported\n";
-      T5LOG(T5DEBUG) <<"Reason         = \n" <<  pSegment->szReason ;
-      T5LOG(T5DEBUG) <<"Document       = \n" <<  pSegment->szDocument ;
-      T5LOG(T5DEBUG) <<"SourceLanguage = \n" <<  pSegment->szSourceLang ;
-      T5LOG(T5DEBUG) <<"TargetLanguage = \n" <<  pSegment->szTargetLang ;
-      T5LOG(T5DEBUG) <<"Markup         = \n" <<  pSegment->szFormat ;
-      T5LOG(T5DEBUG) <<"Source         = \n";
-      T5LOG(T5DEBUG) <<"\n" << pSegment->szSource ;
-      T5LOG(T5DEBUG) <<"Target         = \n";
-      T5LOG(T5DEBUG) <<"\n" << pSegment->szTarget ;
+      T5LOG(T5DEBUG) <<"Segment "<<pSegment->lSegNo <<" not imported";
+      T5LOG(T5DEBUG) <<"; Reason         = " <<  pSegment->szReason ;
+      T5LOG(T5DEBUG) <<"; Document       = " <<  pSegment->szDocument ;
+      T5LOG(T5DEBUG) <<"; SourceLanguage = " <<  pSegment->szSourceLang ;
+      T5LOG(T5DEBUG) <<"; TargetLanguage = " <<  pSegment->szTargetLang ;
+      T5LOG(T5DEBUG) <<"; Markup         = " <<  pSegment->szFormat ;
+      T5LOG(T5DEBUG) <<"; Source         = ";
+      T5LOG(T5DEBUG) <<"" << pSegment->szSource ;
+      T5LOG(T5DEBUG) <<"; Target         = ";
+      T5LOG(T5DEBUG) <<"" << pSegment->szTarget ;
     } /* endif */
     #endif
   } /* endif */

@@ -908,7 +908,7 @@ int FlushMemRequestData::execute(){
 
 
 int ImportRequestData::parseJSON(){
-  T5LOG( T5INFO) << "+POST " << strMemName << "/import\n";
+  T5LOG( T5INFO) << "+POST " << strMemName << "/import";
   if ( _rc_ != 0 )
   {
     return buildErrorReturn( _rc_, "ImportRequestData::parseJSON, rc is not 0 at the start of function", INTERNAL_SERVER_ERROR );
@@ -1077,7 +1077,7 @@ int ImportRequestData::checkData(){
 
 
 int ImportStreamRequestData::parseJSON(){
-  T5LOG( T5INFO) << "+POST " << strMemName << "/import\n";
+  T5LOG( T5INFO) << "+POST " << strMemName << "/import";
   if ( _rc_ != 0 )
   {
     return buildErrorReturn( _rc_, "parseJSON, rc is not 0 at the start of function", INTERNAL_SERVER_ERROR );
@@ -1309,7 +1309,7 @@ int ImportRequestData::execute(){
 }
 
 int ImportLocalRequestData::parseJSON(){
-  T5LOG( T5INFO) << "+POST " << strMemName << "/importLocal\n";
+  T5LOG( T5INFO) << "+POST " << strMemName << "/importLocal";
   if ( _rc_ != 0 )
   {
     return buildErrorReturn( _rc_, "ImportRequestData::parseJSON, rc is not 0 at the start of function", INTERNAL_SERVER_ERROR );
@@ -1555,7 +1555,7 @@ int SearchFilterFactory::parseJSONNameAndValue(const std::string& name, const st
   {
     bool FLAGS_log_every_json_unexpected_name = false;
     if(FLAGS_log_every_json_unexpected_name)
-      T5LOG( T5WARNING) << "JSON parsed unexpected name, " << name << "; \nvalue: " << value;
+      T5LOG( T5WARNING) << "JSON parsed unexpected name, " << name << "; value: " << value;
   }
   return _rc_;
 }

@@ -72,6 +72,35 @@ enum LOGCODES{
     LOG_FAIL_OPEN_FILE
 };
 
+
+#include <algorithm>
+
+std::string removeNewlines(const std::string& input) ;
+
+class NoNewlineLogSink : public google::LogSink {
+public:
+    void send(google::LogSeverity severity, const char* full_filename, 
+              const char* base_filename, int line, const struct ::tm* tm_time, 
+              const char* message, size_t message_len) override ;
+
+    void WaitTillSent() override ;
+};
+
+
+class CustomLogMessage : public google::LogMessage {
+public:
+    CustomLogMessage(const char* file, int line, google::LogSeverity severity)
+        : google::LogMessage(file, line, severity) {} ;
+
+    ~CustomLogMessage();
+};
+
+
+// Macro to use the custom log message class
+#define LOG_CUSTOM(severity) \
+    CustomLogMessage(__FILE__, __LINE__, google::GLOG_##severity).stream()
+
+
 class T5Logger{
     T5Logger(){
         fFilterLogs = false;
@@ -123,21 +152,43 @@ int getBuffIdForLog(int severity);
 #define FLUSHLOGBUFFERS T5Logger::GetInstance()->FlushBuffers(T5ERROR)
 //#define FLUSHLOGBUFFERS ""
 
-#define _T5_LOG_T5DEVELOP  LOG(INFO)
-#define _T5_LOG_T5DEBUG  LOG(INFO)
-#define _T5_LOG_T5INFO LOG(INFO)
-#define _T5_LOG_T5TRANSACTION LOG(INFO)
-#define _T5_LOG_T5WARNING LOG(WARNING) << GET_STACKTRACE
-#define _T5_LOG_T5ERROR LOG(ERROR) << GET_STACKTRACE << FLUSHLOGBUFFERS
-#define _T5_LOG_T5FATAL LOG(ERROR) << GET_STACKTRACE << FLUSHLOGBUFFERS
 
-#define T5LOG_FROM_ID(id, severity)  static_cast<void>(0), \
-            id == -1 ? google::LogMessageVoidify() & T5Logger::GetInstance()->nullStream \
-                : id == -2?   google::LogMessageVoidify() &  T5Logger::__getLogBuffer() \
-                    : google::LogMessageVoidify() & _T5_LOG_##severity
+//#define CUSTOM_LOG_MESSAGE
+#ifdef CUSTOM_LOG_MESSAGE
 
-#define T5LOG(severity)   T5LOG_FROM_ID(getBuffIdForLog(severity), severity) << \
-            "::[" << #severity << "]::" << __func__ << ": " 
+    #define _T5_LOG_T5DEVELOP CustomLogMessage(__FILE__, __LINE__, google::INFO).stream()
+    #define _T5_LOG_T5DEBUG CustomLogMessage(__FILE__, __LINE__, google::INFO).stream()
+    #define _T5_LOG_T5INFO CustomLogMessage(__FILE__, __LINE__, google::INFO).stream()
+    #define _T5_LOG_T5TRANSACTION CustomLogMessage(__FILE__, __LINE__, google::INFO).stream()
+    #define _T5_LOG_T5WARNING CustomLogMessage(__FILE__, __LINE__, google::WARNING).stream()
+    #define _T5_LOG_T5ERROR CustomLogMessage(__FILE__, __LINE__, google::ERROR).stream()
+    #define _T5_LOG_T5FATAL CustomLogMessage(__FILE__, __LINE__, google::ERROR).stream()
+
+    #define T5LOG_FROM_ID(id, severity) static_cast<void>(0), \
+    id == -1 ? google::LogMessageVoidify() & T5Logger::GetInstance()->nullStream \
+        : id == -2 ? google::LogMessageVoidify() & T5Logger::__getLogBuffer() \
+            : google::LogMessageVoidify() & _T5_LOG_##severity
+
+#define T5LOG(severity) T5LOG_FROM_ID(getBuffIdForLog(severity), severity) << \
+    "::[" << #severity << "]::" << __func__ << ": "
+
+#else
+    #define _T5_LOG_T5DEVELOP  LOG(INFO)
+    #define _T5_LOG_T5DEBUG  LOG(INFO)
+    #define _T5_LOG_T5INFO LOG(INFO)
+    #define _T5_LOG_T5TRANSACTION LOG(INFO)
+    #define _T5_LOG_T5WARNING LOG(WARNING) << GET_STACKTRACE
+    #define _T5_LOG_T5ERROR LOG(ERROR) << GET_STACKTRACE << FLUSHLOGBUFFERS
+    #define _T5_LOG_T5FATAL LOG(ERROR) << GET_STACKTRACE << FLUSHLOGBUFFERS
+
+    #define T5LOG_FROM_ID(id, severity)  static_cast<void>(0), \
+                id == -1 ? google::LogMessageVoidify() & T5Logger::GetInstance()->nullStream \
+                    : id == -2?   google::LogMessageVoidify() &  T5Logger::__getLogBuffer() \
+                        : google::LogMessageVoidify() & _T5_LOG_##severity
+
+    #define T5LOG(severity)   T5LOG_FROM_ID(getBuffIdForLog(severity), severity) << \
+                "::[" << #severity << "]::" << __func__ << ": " 
+#endif //CUSTOM_LOG_MESSAGE
 
 #define LOG_UNIMPLEMENTED_FUNCTION T5LOG(T5FATAL) <<__FILE__ << ":" << __LINE__ << ": called unimplemented function in "  << __func__ << "; stacktrace: " << GET_STACKTRACE_EXPL;
 

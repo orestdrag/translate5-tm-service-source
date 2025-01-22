@@ -3,6 +3,29 @@
 //#include <stacktrace>
 
 
+CustomLogMessage::~CustomLogMessage()  {
+    // Flush the log stream to ensure the content is written
+    stream().flush();
+    std::ostringstream oss;
+    oss << stream().rdbuf();  // Redirect the content of the stream
+    std::string logContent = oss.str();  // Get the string from the stream
+    this->
+    // Efficiently remove '\n' using erase-remove idiom
+    logContent.erase(std::remove(logContent.begin(), logContent.end(), '\n'), logContent.end());
+
+
+    
+    //stream();  // Clear the original stream content
+    stream() << logContent;  // Write the modified content back to the stream
+
+    // Forward the formatted log to the default Google log handler
+    //google::LogMessage::stream() << "c" << logContent;
+
+    // Log the modified message
+    //std::cerr << logContent << std::endl;
+}
+
+
 std::string getTimeStr(){
     // current date/time based on current system
     time_t now = time(0);
@@ -18,6 +41,37 @@ std::string getTimeStr(){
 T5Logger* T5Logger::GetInstance(){
     static T5Logger _instance;
     return &_instance;
+}
+
+#include <glog/logging.h>
+#include <iostream>
+#include <string>
+#include <algorithm>
+
+
+std::string removeNewlines(const std::string& input) {
+    std::string result = input;
+    result.erase(std::remove(result.begin(), result.end(), '\n'), result.end());
+    result.erase(std::remove(result.begin(), result.end(), '\r'), result.end());
+    return result;
+}
+
+void NoNewlineLogSink::send(google::LogSeverity severity, const char* full_filename, 
+            const char* base_filename, int line, const struct ::tm* tm_time, 
+            const char* message, size_t message_len) {
+    std::string logMessage(message, message_len);
+
+    // Remove newline characters
+    logMessage = removeNewlines(logMessage);
+    //strcpy((char*)message, logMessage.c_str());
+
+    // Forward the modified message to the default log handler
+    //google::LogSink::send(severity, full_filename, base_filename, line, tm_time, logMessage.c_str(), logMessage.length());
+    //google::LogMessage(full_filename, line, severity).stream() << logMessage;
+}
+
+void NoNewlineLogSink::WaitTillSent()  {
+    // Optional: Add sync behavior if needed
 }
 
 std::ostringstream& T5Logger::__getLogBuffer(){
@@ -80,9 +134,15 @@ int T5Logger::ResetLogBuffer(){
     return 0;
 }
 
+
+DECLARE_bool(enable_newlines_in_logs);
 int T5Logger::SetLogBuffer(std::string logMsg){
     ResetLogBuffer();
-    __getLogBuffer() << logMsg << std::endl;
+    if(FLAGS_enable_newlines_in_logs){
+        __getLogBuffer() << logMsg << std::endl;
+    }else{
+        __getLogBuffer() << removeNewlines(logMsg) << std::endl;
+    }
     return 0;
 }
 

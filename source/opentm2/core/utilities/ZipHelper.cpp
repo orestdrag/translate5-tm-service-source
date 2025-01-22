@@ -40,7 +40,7 @@ int  FilesystemHelper::ZipClose  ( ZIP* pZip ){
 
 int on_extract_entry(const char *filename, void *arg) {
     int n = *(int *)arg;
-    T5LOG( T5INFO) << "::Extracted: " << filename;//," ("," of ", toStr(n),")\n" );
+    T5LOG( T5INFO) << "::Extracted: " << filename;//," ("," of ", toStr(n),")" );
     return 0;
 }
 

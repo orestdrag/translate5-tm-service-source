@@ -189,7 +189,7 @@ BOOL MoveFile(
   LPCTSTR lpExistingFileName, 
   LPCTSTR lpNewFileName       
 ){
-    T5LOG( T5INFO) <<"MoveFile:: moving file from ", lpExistingFileName, " to ", lpNewFileName;
+    T5LOG( T5INFO) <<"MoveFile:: moving file from " << lpExistingFileName << " to " << lpNewFileName;
     return FilesystemHelper::MoveFile(lpExistingFileName, lpNewFileName);
 }
 

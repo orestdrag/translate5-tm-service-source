@@ -129,6 +129,10 @@ DEFINE_bool(ignore_newer_target_exists_check, true, "if set to true, check for n
 
 DEFINE_bool(log_memmove_in_compareputdata, false, "if set to true, when saving segment and causing memmove in compareputdata functions, just before memmove, data would be logged - use this to debug btree crashes." );
 
+DEFINE_bool(enable_newlines_in_logs, false, 
+        "(not working)if set to true, would keep newline symbols in the logs, otherwise(by default) newlines would be removed and logs would be oneliners" );
+
+
 void handle_interrupt_sig(int sig) {
     T5LOG( T5TRANSACTION) << "Received interrupt signal";
     //StopOtmMemoryService();
@@ -147,7 +151,7 @@ void FailureWriter(const char* data, int size){
         backtraceStr += (char*) array[i];
         backtraceStr += '\n';
     }
-    T5LOG( T5FATAL) << ":backtrace:\n" << backtraceStr ;
+    T5LOG( T5FATAL) << ":backtrace:" << backtraceStr ;
 
     // print out all the frames to stderr
     //fprintf(stderr, "Error: signal %d:\n", sig);
@@ -216,6 +220,8 @@ int main(int argc, char* argv[]) {
    if(FLAGS_log_dir.empty()){
        FLAGS_log_dir = "/root/.t5memory/LOG/";
    }
+
+  //FLAGS_log_dir = "~/t5memory/LOG";
    //std::string initLogMsg;
    //if(!FilesystemHelper::DirExists(FLAGS_log_dir)){
    //     initLogMsg += "Log directory created, path = " + FLAGS_log_dir;
@@ -239,7 +245,10 @@ int main(int argc, char* argv[]) {
 
    //#ifdef GLOGGING_ENABLED
    google::InitGoogleLogging(argv[0]);//, &CustomPrefix); 
-   
+   google::InstallFailureSignalHandler();
+   // Install the custom LogSink
+   //static NoNewlineLogSink sink;
+   //google::AddLogSink(&sink);
    T5LOG(T5TRANSACTION) <<"Worker thread starting, v = "<<T5GLOBVERSION<<"."<< T5MAJVERSION<<"."<<T5MINVERSION;   
    std::thread worker(proxygen_server_init);
    worker.join();

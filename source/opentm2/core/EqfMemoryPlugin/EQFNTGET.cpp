@@ -324,9 +324,9 @@ USHORT EqfMemory::TmtXGet
 
   if(T5Logger::GetInstance()->CheckLogLevel(T5DEBUG)){    
       auto str_source = EncodingHelper::convertToUTF8(pTmGetIn->szSource );
-      T5LOG(T5DEBUG) << "== Lookup in memory  ==" << stTmSign.szName <<" ==\nLookupSource = >>>" <<str_source << "<<<" ;
+      T5LOG(T5DEBUG) << "== Lookup in memory  ==" << stTmSign.szName <<" == ;\tLookupSource = >>>" <<str_source << "<<<" ;
       auto str = EncodingHelper::convertToUTF8(pTmGetIn->szSource);
-      T5LOG(T5INFO) << "-------------- Looking up:\n" <<  str << "\n" ;
+      T5LOG(T5INFO) << "-------------- Looking up:" <<  str << "" ;
   }
 
 #ifdef MEASURETIME
@@ -597,7 +597,7 @@ USHORT EqfMemory::TmtXGet
 
       auto strSource = EncodingHelper::convertToUTF8(pMatch->szSource);
       auto strTarget = EncodingHelper::convertToUTF8(pMatch->szTarget);
-      T5LOG( T5DEVELOP) << "TmtXGet::\n  Source = >>>"<< strSource << "<<<\n  Target = >>>" <<  strTarget << "<<< ";
+      T5LOG( T5DEVELOP) << "TmtXGet::  Source = >>>"<< strSource << ";<<<  Target = >>>" <<  strTarget << ";<<< ";
     } /* endfor */
   } /* endif */  
 
@@ -1702,12 +1702,12 @@ BOOL TMFuzzynessEx
 
   if(*pusWords > *pusDiffs){
     *pusFuzzy = (*pusWords != 0) ? ((*pusWords - *pusDiffs) * 100 / *pusWords) : 100;
-    T5LOG( T5INFO) <<"TMFuzzynessEx::\n Fuzzy = (Words != 0) ? ((Words - Diff) * 100 / Words) : 100;\n Words = " 
-          << *pusWords<< ";\n Diff  = " <<*pusDiffs <<";\n Fuzzy = " <<*pusFuzzy<< ";\n";
+    T5LOG( T5INFO) <<"TMFuzzynessEx:: Fuzzy = (Words != 0) ? ((Words - Diff) * 100 / Words) : 100; Words = " 
+          << *pusWords<< "; Diff  = " <<*pusDiffs <<"; Fuzzy = " <<*pusFuzzy<< ";";
   }else{
     *pusFuzzy = 0;
-    T5LOG( T5INFO) <<"TMFuzzynessEx::\n Fuzzy: Words <= Diff:\n Words = " 
-            <<*pusWords<< ";\n Diff  = "<<*pusDiffs<<";\n Fuzzy = "<<*pusFuzzy<< ";\n";
+    T5LOG( T5INFO) <<"TMFuzzynessEx:: Fuzzy: Words <= Diff: Words = " 
+            <<*pusWords<< "; Diff  = "<<*pusDiffs<<"; Fuzzy = "<<*pusFuzzy<< ";";
   }
   return fOK;
 } /* end of function TMFuzzyness */
@@ -2698,7 +2698,7 @@ USHORT FuzzyTest ( EqfMemory* pTmClb,           //ptr to control block
 
     if(T5Logger::GetInstance()->CheckLogLevel(T5INFO)){    
       auto str = EncodingHelper::convertToUTF8(pString);
-      T5LOG( T5INFO) << "::FuzzyTest: \n<SOURCE>\n" << str << "\n</SOURCE>\n" ;
+      T5LOG( T5INFO) << "::FuzzyTest:<SOURCE>" << str << "</SOURCE>" ;
     }
 
     if (pGetIn->ulParm & GET_RESPECTCRLF )   // if-else nec for P018279
