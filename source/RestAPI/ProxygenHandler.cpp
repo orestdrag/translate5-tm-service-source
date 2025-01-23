@@ -233,7 +233,7 @@ void ProxygenHandler::onEOM() noexcept {
 
     if(pRequest && !pRequest->_rest_rc_){
       std::string truncatedInput = pRequest->strBody.size() > 3000 ? pRequest->strBody.substr(0, 3000) : pRequest->strBody;
-      T5Logger::GetInstance()->SetBodyBuffer(", with body = \n\"" + truncatedInput +"\"\n");
+      T5Logger::GetInstance()->SetBodyBuffer(", with body = \"" + truncatedInput +"\"");
       pRequest->run();
     }
     sendResponse();

@@ -9,7 +9,6 @@ CustomLogMessage::~CustomLogMessage()  {
     std::ostringstream oss;
     oss << stream().rdbuf();  // Redirect the content of the stream
     std::string logContent = oss.str();  // Get the string from the stream
-    this->
     // Efficiently remove '\n' using erase-remove idiom
     logContent.erase(std::remove(logContent.begin(), logContent.end(), '\n'), logContent.end());
 
@@ -139,9 +138,9 @@ DECLARE_bool(enable_newlines_in_logs);
 int T5Logger::SetLogBuffer(std::string logMsg){
     ResetLogBuffer();
     if(FLAGS_enable_newlines_in_logs){
-        __getLogBuffer() << logMsg << std::endl;
+        __getLogBuffer() << logMsg;
     }else{
-        __getLogBuffer() << removeNewlines(logMsg) << std::endl;
+        __getLogBuffer() << removeNewlines(logMsg);
     }
     return 0;
 }
@@ -157,7 +156,12 @@ int T5Logger::AddToLogBuffer(std::string logMsg){
 }
 
 int T5Logger::SetBodyBuffer(std::string logMsg){
-    __getBodyBuffer().str(logMsg);
+      if(FLAGS_enable_newlines_in_logs){
+        __getBodyBuffer() << logMsg;
+    }else{
+        __getBodyBuffer() << removeNewlines(logMsg);
+    }
+    //__getBodyBuffer().str(logMsg);
     auto str = __getBodyBuffer().str();
     return 0;
 }
