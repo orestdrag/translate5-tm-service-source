@@ -420,7 +420,7 @@ USHORT EqfMemory::LoadMem()
       {
         //call open function for index file
         USHORT usIndexRc = InBtree.EQFNTMOpen(usAccessMode );
-        if ( usIndexRc != NO_ERROR )
+        if ( usIndexRc != NO_ERROR  && !isOpenedOnlyForReorganize())
         {
           usRc = usIndexRc;
         } /* endif */

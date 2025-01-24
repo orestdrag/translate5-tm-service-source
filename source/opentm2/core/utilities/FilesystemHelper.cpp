@@ -46,47 +46,6 @@ std::recursive_mutex FilesystemHelper::loadingTm;
 #include <cstdio>
 #include <filesystem>
 
-bool atomicSave(const std::string& filename, const std::string& data) {
-    try {
-        // Step 1: Create a temporary file in the same directory
-        std::string tempFilename = filename + ".tmp";
-        
-        // Step 2: Write data to the temporary file
-        {
-            std::ofstream tempFile(tempFilename, std::ios::out | std::ios::trunc | std::ios::binary);
-            if (!tempFile) {
-                std::cerr << "Error: Unable to open temporary file for writing\n";
-                return false;
-            }
-
-            tempFile.write(data.c_str(), data.size());
-            if (!tempFile) {
-                std::cerr << "Error: Write operation failed\n";
-                return false;
-            }
-
-            // Flush the buffer to ensure data is written to the disk
-            tempFile.flush();
-            if (!tempFile) {
-                std::cerr << "Error: Flush operation failed\n";
-                return false;
-            }
-        }
-
-        // Step 3: Ensure data is physically written to disk
-        if (std::filesystem::exists(tempFilename)) {
-            std::filesystem::permissions(tempFilename, std::filesystem::perms::owner_read | 
-                                                      std::filesystem::perms::owner_write);
-        }
-        // Step 4: Rename the temporary file to the target file (atomic on most filesystems)
-        std::filesystem::rename(tempFilename, filename);
-        return true;
-    } catch (const std::exception& e) {
-        std::cerr << "Exception occurred: " << e.what() << "\n";
-        return false;
-    }
-}
-////////////////////////////////////////
 
 #include <fstream>
 #include <iostream>
@@ -94,6 +53,8 @@ bool atomicSave(const std::string& filename, const std::string& data) {
 #include <filesystem>
 #include <cstdio>
 
+
+DECLARE_bool(keep_tm_backups);
 int FileBuffer::atomicWriteWithBackup() {
     try {
         // Step 1: Create a temporary file
@@ -116,6 +77,11 @@ int FileBuffer::atomicWriteWithBackup() {
 
         // Step 2: Rename original file to backup (if it exists)
         std::string backupFilename = fileName + ".old";
+
+        if(std::filesystem::exists(backupFilename)) {
+            FilesystemHelper::DeleteFile(backupFilename, true);
+        }
+
         if (std::filesystem::exists(fileName)) {
             std::filesystem::rename(fileName, backupFilename);
         }
@@ -124,7 +90,7 @@ int FileBuffer::atomicWriteWithBackup() {
         std::filesystem::rename(tempFilename, fileName);
 
         // Step 4: Delete the backup file
-        if (std::filesystem::exists(backupFilename)) {
+        if (std::filesystem::exists(backupFilename) && !FLAGS_keep_tm_backups) {
             FilesystemHelper::DeleteFile(backupFilename, true);
             //std::filesystem::remove(backupFilename);
         }

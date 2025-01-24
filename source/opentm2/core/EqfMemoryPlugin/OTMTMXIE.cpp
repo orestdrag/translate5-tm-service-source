@@ -1298,7 +1298,7 @@ USHORT CTMXExportImport::ImportNext
     this->m_pTokBuf, TMXTOKBUFSIZE ); 
     try
     {
-      while (fContinue && (m_parser->getErrorCount() <= m_handler->getInvalidCharacterErrorCount()) && iIteration)
+      while (fContinue && (m_parser->getErrorCount() <= m_handler->getInvalidCharacterErrorCount()) && iIteration)// && !m_handler->tmxEndReached())
       {
         fContinue = m_parser->parseNext(m_SaxToken);
         iIteration--;
@@ -2514,6 +2514,7 @@ void TMXParseHandler::endElement(const XMLCh* const name )
       // end of data reached...
       {
         int iTUs = this->iNumOfTu;
+        fEndReached = true;
       }
       break;
     case PROP_ELEMENT:

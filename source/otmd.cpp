@@ -117,7 +117,11 @@ DEFINE_int64(tmListLockDefaultTimeout, 3000, "Sets tm mutex lock timeout(in ms) 
 DEFINE_bool(useTimedMutexesForReorganizeAndImport, false, "If set to true, in reorganize or import thread would be used mutexes with timeouts, and reorganizee or import could be canceled, false(by default) - would be used non timed mutexes");
 DEFINE_bool(allowLoadingMultipleTmsSimultaneously, false, "If set to true, multiple tms could be loaded from the disk at the same time. ");
 
-DEFINE_bool(logMutexes, false, "if sets to true you would see mutex logs");
+
+DEFINE_bool(keep_tm_backups, true, "if set to true, when saving tmd and tmi files, old copies would be saved with .old suffix");
+
+
+DEFINE_bool(logMutexes, false, "if set to true you would see mutex logs");
 
 DEFINE_bool(useconfigfile, false, "Set to use values from config file that should be located under ~/.t5memory/t5memory.conf");
 

@@ -211,7 +211,7 @@ std::string T5Logger::FlushBuffers(int severity){
         if(BodyBuffer.size() > 3000) BodyBuffer = BodyBuffer.substr(0, 3000);
         if(LogBuffer.size() > 3000) LogBuffer = LogBuffer.substr(0, 3000);
         if(LogBuffer.empty()) return BodyBuffer;
-        return BodyBuffer + "\n\tlb: { " + LogBuffer + "}\n";
+        return BodyBuffer + "\tlb: { " + LogBuffer + "}";
     }
     return "";
 }
