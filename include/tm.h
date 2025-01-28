@@ -1260,7 +1260,7 @@ public:
   void fatalError(const xercesc::SAXParseException& exc);
   void fatalInternalError(const xercesc::SAXException& exc);
 
-  bool tmxEndReached()const {return fEndReached;}
+  bool tmxEndReached()const {return fBodyDone;}
   //void resetErrors();
 
   
@@ -1302,7 +1302,7 @@ private:
   BOOL fTMXTagStarted;                 // TRUE = TMX inline tag started
   BOOL fHeaderDone;                    // TRUE = header has been processed
   BOOL fError;                         // TRUE = parsing ended with error
-  bool fEndReached = false;
+  bool fBodyDone = false;
   
   // segment data
   ULONG ulSegNo;                       // segmet number

@@ -418,18 +418,10 @@ static USHORT  MemLoadStart( MEM_LOAD_DLG_IDA* pLIDA,
      {
        char szMemSourceLang[MAX_LANG_LENGTH];
 
-       // close input file (if open) as external import process will open the file itself...
-       //if ( pLIDA->hFile ) 
-       //{
-       //  UtlClose( pLIDA->hFile, FALSE );
-       //  pLIDA->hFile = NULL; 
-       //} /* endif */
-
        memset( pLIDA->pstMemInfo, 0, sizeof(MEMEXPIMPINFO) );
        strcpy( pLIDA->pstMemInfo->szName, pLIDA->szMemName );
        pLIDA->mem->getSourceLanguage( pLIDA->pstMemInfo->szSourceLang, sizeof(pLIDA->pstMemInfo->szSourceLang) );
 
-       //fOK = (pLIDA->pfnMemImpStart( &(pLIDA->lExternalImportHandle), pLIDA->szFilePath, pLIDA->pstMemInfo ) == 0);
        fOK = (pLIDA->TMXImport.StartImport(pLIDA->szFilePath, pLIDA->pstMemInfo, pImportData ) == 0);
        
        pLIDA->mem->getSourceLanguage( szMemSourceLang, sizeof(szMemSourceLang) );
@@ -441,12 +433,8 @@ static USHORT  MemLoadStart( MEM_LOAD_DLG_IDA* pLIDA,
 
          pReplAddr[0] = pLIDA->pstMemInfo->szSourceLang;
          pReplAddr[1] = szMemSourceLang;
-         //usMBCode = T5LOG(T5ERROR) <<   "::ERROR_MEM_DIFFERENT_SOURCE_LANG_IMPORT::", pReplAddr[0] );
          T5LOG(T5INFO)  <<  "::ERROR_MEM_DIFFERENT_SOURCE_LANG_IMPORT::", pReplAddr[0] ;
-         //if ( usMBCode == MBID_CANCEL )
-         //{
-         //  fOK = FALSE;
-         //} /* endif */
+         
        } /* endif */
 
        // update memory description with description of imported memory
@@ -463,11 +451,6 @@ static USHORT  MemLoadStart( MEM_LOAD_DLG_IDA* pLIDA,
    if ( !fOK )
    {
      // call import end function when available
-     /*
-     if ( pLIDA->pfnMemImpEnd != NULL )
-     {
-       pLIDA->pfnMemImpEnd( pLIDA->lExternalImportHandle );
-     }//*/
      pLIDA->TMXImport.EndImport();
 
       // Clean the storage allocations if the MemLoadStart function failed.
@@ -490,13 +473,6 @@ static USHORT  MemLoadStart( MEM_LOAD_DLG_IDA* pLIDA,
          T5LOG(T5ERROR) <<  "::ERROR_MEM_LOAD_INITFAILED::" << pReplAddr[0] ;
 
          if ( pLIDA->pProposal != NULL ) delete(pLIDA->pProposal);
-
-         //UtlAlloc( (PVOID *) &pLIDA, 0L, 0L, NOMSG );
-         //*ppLIDA = NULL;
- 
-         // Dismiss the slider window if it had been created
-//WINAPI
-         //EqfRemoveObject( TWBFORCE, hWnd );
       } /* endif */
    }else{
     time( &pLIDA->mem->importDetails->lImportStartTime );
@@ -757,15 +733,6 @@ USHORT MemFuncPrepImport
    if ( fOK )
    {
      strcpy( pLoadIDA->szMemName, pData->mem.get()->szName );
-     //TMManager *pFactory = TMManager::GetInstance();
-  //   if ( !pFactory->exists( NULL, pszMemName ) )
-  //   {
-  //     T5LOG(T5ERROR) << "Mem file not found:: " << pszMemName;
-	//     fOK = FALSE;
-  //     pszParm = pszMemName;
-  //     usRC = ERROR_MEMORY_NOTFOUND;
-  //     T5LOG(T5ERROR) <<  "::ERROR_MEMORY_NOTFOUND::" << pszParm;
-  //   } /* endif */
   }else if(!fOkFailHandled){
      fOkFailHandled = true;
      T5LOG(T5ERROR) << "MemFuncPrepImport::prepare segment match ID prefix fails";
@@ -943,10 +910,6 @@ USHORT MemFuncImportProcess
             {
               // organize index file of imported memory
               pLIDA->mem->NTMOrganizeIndexFile();
-
-              //TMManager *pFactory = TMManager::GetInstance();
-              //pFactory->closeMemory( pLoadData->mem);
-              //pLoadData->mem = NULL;
             } /* endif */
             usPhase = MEM_END_IMPORT;
             break;
@@ -971,19 +934,13 @@ USHORT MemFuncImportProcess
               ( pLIDA->usImpMode == MEM_FORMAT_TMX_TRADOS ) ||
               ( pLIDA->usImpMode == MEM_FORMAT_XLIFF_MT ) )
          {
-           //if ( pLoadData->pfnMemImpEnd )     pLoadData->pfnMemImpEnd( pLoadData->lExternalImportHandle );
            pLIDA->TMXImport.WriteEnd();
 
            if ( pLIDA->pstMemInfo )       UtlAlloc( (PVOID *)&pLIDA->pstMemInfo, 0L, 0L, NOMSG );
            if ( pLIDA->pstSegment)        UtlAlloc( (PVOID *)&pLIDA->pstSegment, 0L, 0L, NOMSG );
          } /* endif */
 
-         if ( pLIDA->mem )
-         {
-           //TMManager *pFactory = TMManager::GetInstance();
-           //pFactory->closeMemory( pLoadData->mem);
-           //pLoadData->mem = NULLHANDLE;
-         } /* endif */
+         
          if ( pLIDA->hFile ) CloseFile( &(pLIDA->hFile));
          if ( pLIDA->pFormatTable )
          {
@@ -1017,7 +974,6 @@ USHORT MemFuncImportProcess
 
          UtlAlloc( (PVOID *) &(pLIDA->pTokenList),   0L, 0L, NOMSG );
          if ( pLIDA->pProposal != NULL ) delete(pLIDA->pProposal);
-         //UtlAlloc( (PVOID *) &pLIDA,                 0L, 0L, NOMSG );
        } /* endif */
        usPhase = 0;;
        if(!pData->mem->importDetails->importRc){

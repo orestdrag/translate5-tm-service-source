@@ -1298,7 +1298,8 @@ USHORT CTMXExportImport::ImportNext
     this->m_pTokBuf, TMXTOKBUFSIZE ); 
     try
     {
-      while (fContinue && (m_parser->getErrorCount() <= m_handler->getInvalidCharacterErrorCount()) && iIteration)// && !m_handler->tmxEndReached())
+      while (fContinue && (m_parser->getErrorCount() <= m_handler->getInvalidCharacterErrorCount()) 
+        && iIteration && !m_handler->tmxEndReached())
       {
         fContinue = m_parser->parseNext(m_SaxToken);
         iIteration--;
@@ -1333,11 +1334,16 @@ USHORT CTMXExportImport::ImportNext
         // compute current progress
         if ( !errorCount && fContinue )
         {
-          int iPos = (int)m_parser->getSrcOffset();
+          if(m_handler->tmxEndReached()){
+            pImportData->usProgress = 100;
+            fContinue = false;
+          }else{
+            int iPos = (int)m_parser->getSrcOffset();
 
-          INT64 iComplete = (INT64)iPos;
-          INT64 iTotal = (INT64)m_iSourceSize;
-          pImportData->usProgress = (USHORT)(iComplete * 100.0 / iTotal);
+            INT64 iComplete = (INT64)iPos;
+            INT64 iTotal = (INT64)m_iSourceSize;
+            pImportData->usProgress = (USHORT)(iComplete * 100.0 / iTotal);
+          }
         } /* endif */
       }
       if ( m_handler->ErrorOccured() )
@@ -2514,7 +2520,7 @@ void TMXParseHandler::endElement(const XMLCh* const name )
       // end of data reached...
       {
         int iTUs = this->iNumOfTu;
-        fEndReached = true;
+        //fBodyDone = true;
       }
       break;
     case PROP_ELEMENT:
@@ -2795,6 +2801,7 @@ void TMXParseHandler::endElement(const XMLCh* const name )
       break;
 
     case BODY_ELEMENT:
+      fBodyDone = true;
       break;
 
     case SEG_ELEMENT:
