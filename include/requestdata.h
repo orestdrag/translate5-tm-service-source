@@ -71,6 +71,8 @@ public:
             ){ //for DEBUG and DEVELOP modes leave file in fs
                 FilesystemHelper::DeleteFile( strTempFile, true );
             }
+
+        //stats->activeRequests.fetch_sub(1);
     }
     //std::weak_ptr <EqfMemory> memory;
 

@@ -75,6 +75,8 @@ void restoreBlanks( std::string &strInOut )
 
 class ProxygenHandlerFactory;
 
+DECLARE_int64(http_listen_backlog);
+
 HTTPServerOptions setup_proxygen_servers_options(int threads, uint32_t timeout, uint32_t  initialReceiveWindow, uint32_t receiveStreamWindowSize, uint32_t receiveSesionWindowsSize ){
   
   if (threads <= 0) {
@@ -83,6 +85,7 @@ HTTPServerOptions setup_proxygen_servers_options(int threads, uint32_t timeout, 
   }
 
   HTTPServerOptions options;
+
   options.threads = static_cast<size_t>(threads);
   options.idleTimeout = std::chrono::milliseconds(timeout);
   options.shutdownOn = {SIGINT, SIGTERM};
@@ -93,6 +96,7 @@ HTTPServerOptions setup_proxygen_servers_options(int threads, uint32_t timeout, 
   options.initialReceiveWindow = initialReceiveWindow ;
   options.receiveStreamWindowSize = receiveStreamWindowSize ;
   options.receiveSessionWindowSize = receiveSesionWindowsSize ;
+  options.listenBacklog = FLAGS_http_listen_backlog;
   //options.h2cEnabled = true;
   options.h2cEnabled = false;
   options.supportsConnect = false;
@@ -102,6 +106,13 @@ HTTPServerOptions setup_proxygen_servers_options(int threads, uint32_t timeout, 
 
   std::string serviceName;
   std::string additionalServiceName;
+  // Global or class-level atomic counter
+  //std::atomic<int> activeRequests(0); 
+
+  // Define a maximum limit for concurrent requests
+  //constexpr int MAX_CONCURRENT_REQUESTS = 100;
+
+  
 class ProxygenHandlerFactory : public RequestHandlerFactory {
  public:
   void onServerStart(folly::EventBase* /*evb*/) noexcept override {
@@ -116,6 +127,19 @@ class ProxygenHandlerFactory : public RequestHandlerFactory {
 
 
   RequestHandler* onRequest(RequestHandler* handler, HTTPMessage* message) noexcept override {
+     /*if (stats_->activeRequests.fetch_add(1) >= MAX_CONCURRENT_REQUESTS) {
+        // Reject the request with HTTP 503
+        auto rh = new ProxygenHandler(stats_.get());
+        proxygen::ResponseBuilder(rh->downstream_)
+            .status(503, "Service Unavailable")
+            .body("Server overloaded. Try again later.")
+            .sendWithEOM();
+
+        // Decrement the counter immediately since we're not handling this request
+        stats_->activeRequests.fetch_sub(1);
+        return rh;
+    }//*/
+
     auto methodStr = message->getMethodString ();
     auto method = message->getMethod ();
     auto url = message->getURL () ;
@@ -302,6 +326,12 @@ class ProxygenHandlerFactory : public RequestHandlerFactory {
     }
     requestHandler->pRequest->strMemName = urlMemName;
     restoreBlanks(requestHandler->pRequest->strMemName);
+
+     // When the request is completed, decrement the counter
+    //requestHandler->onEgressPaused = [this]() {
+    //    activeRequests.fetch_sub(1);
+    //};
+
     return requestHandler;
   }
 
@@ -393,6 +423,8 @@ class ProxygenHandlerFactory : public RequestHandlerFactory {
     std::vector<HTTPServer::IPConfig> IPs = {
       {addr,  Protocol::HTTP}
     };
+
+    
      
     T5LOG(T5INFO) <<  ":: binding to socket, " << addr.getAddressStr() << "; port = " <<addr.getPort();
     HTTPServer server(std::move(options));

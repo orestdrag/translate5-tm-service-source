@@ -240,6 +240,8 @@ class ProxygenStats {
 
   atomic_uint64_t openedTm_{0};
   atomic_uint64_t closedTm_{0};
+
+  //atomic_int activeRequests{0};
 };
 
 //} // namespace ProxygenService

@@ -48,13 +48,22 @@ DEFINE_int32(triplesthreshold, 5, "Sets threshold to pre fuzzy filtering based o
 DEFINE_validator(triplesthreshold, &ValidateTriplesThreshold);
 
 
+static bool ValidateHttpListenBacklog(const char* flagname, int64_t value) {
+   if (value >= 0 && value <= 4096)   // value is ok
+     return true;
+   printf("Invalid value for --%s: %d, should be [0...4096]\n", flagname, (int)value);
+   return false;
+}
+
+DEFINE_int64(http_listen_backlog, 1024, "Sets http options listen backog");
+DEFINE_validator(http_listen_backlog, &ValidateHttpListenBacklog);
+
 static bool ValidateTimeout(const char* flagname, int32_t value) {
    if (value >= 0 && value <= 3600000)   // value is ok
      return true;
    printf("Invalid value for --%s: %d, should be [0...3600000]\n", flagname, (int)value);
    return false;
 }
-
 DEFINE_int32(timeout, 180000, "Sets timeout for service request handling");
 DEFINE_validator(timeout, &ValidateTimeout);
 
