@@ -481,6 +481,9 @@ bool RequestData::isLockingRequest()
     && !isServiceRequest();
 }
 
+
+DECLARE_int64(debug_sleep_in_request_run);
+
 int RequestData::run(){ 
  
   int res = OtmMemoryServiceWorker::getInstance()->verifyAPISession();
@@ -489,6 +492,10 @@ int RequestData::run(){
   if(!res) res = prepareData();
 
   if(!res) res = requestTM();
+  
+  if(FLAGS_debug_sleep_in_request_run > 0){
+    usleep(FLAGS_debug_sleep_in_request_run);
+  }
 
   if(!res && fValid)
   {

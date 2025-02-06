@@ -120,11 +120,24 @@ static bool ValidateLOGlevel(const char* flagname, int32_t value) {
 DEFINE_int32(t5loglevel, T5INFO, "Sets t5memory log level threshold from DEVELOP(0) to TRANSACTION(6)");
 DEFINE_validator(t5loglevel, &ValidateLOGlevel);
 
-DEFINE_int64(tmRequestLockDefaultTimeout, 3000, "Sets tm mutex lock timeout(in ms) for part where request is requesting tm(which is used to open and close tms, and hold list of opened tms), after which operation would be canceled and mutex would return an error, if set to 0, mutex lock would be waited without timeout");
-DEFINE_int64(tmLockDefaultTimeout, 3000, "Sets tm mutex lock timeout(in ms) for TM after which operation would be canceled and mutex would return an error, if set to 0, mutex lock would be waited without timeout");
-DEFINE_int64(tmListLockDefaultTimeout, 3000, "Sets tm mutex lock timeout(in ms) for TM list(which is used to open and close tms, and hold list of opened tms), after which operation would be canceled and mutex would return an error, if set to 0, mutex lock would be waited without timeout");
-DEFINE_bool(useTimedMutexesForReorganizeAndImport, false, "If set to true, in reorganize or import thread would be used mutexes with timeouts, and reorganizee or import could be canceled, false(by default) - would be used non timed mutexes");
-DEFINE_bool(allowLoadingMultipleTmsSimultaneously, false, "If set to true, multiple tms could be loaded from the disk at the same time. ");
+DEFINE_int64(tmRequestLockDefaultTimeout, 3000, 
+  "Sets tm mutex lock timeout(in ms) for part where request is requesting tm(which is used to open and close tms, and hold list of opened tms), after which operation would be canceled and mutex would return an error, if set to 0, mutex lock would be waited without timeout");
+
+DEFINE_int64(tmLockDefaultTimeout, 3000, 
+  "Sets tm mutex lock timeout(in ms) for TM after which operation would be canceled and mutex would return an error, if set to 0, mutex lock would be waited without timeout");
+
+DEFINE_int64(tmListLockDefaultTimeout, 3000,
+   "Sets tm mutex lock timeout(in ms) for TM list(which is used to open and close tms, and hold list of opened tms), after which operation would be canceled and mutex would return an error, if set to 0, mutex lock would be waited without timeout");
+
+DEFINE_int64(debug_sleep_in_request_run, 0,
+   "If set, provide artificial delay in every request handling execution equal to provided num of microseconds");
+
+
+DEFINE_bool(useTimedMutexesForReorganizeAndImport, false, 
+  "If set to true, in reorganize or import thread would be used mutexes with timeouts, and reorganizee or import could be canceled, false(by default) - would be used non timed mutexes");
+
+DEFINE_bool(allowLoadingMultipleTmsSimultaneously, false, 
+  "If set to true, multiple tms could be loaded from the disk at the same time. ");
 
 
 DEFINE_bool(keep_tm_backups, true, "if set to true, when saving tmd and tmi files, old copies would be saved with .old suffix");
