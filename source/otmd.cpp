@@ -37,6 +37,9 @@ DEFINE_string(t5_ip, "", "Which ip to use in t5memory(default is any). Should be
 
 DEFINE_string(servicename, "t5memory", "Sets service name to use in url");
 
+DEFINE_bool(limit_num_of_active_requests, false, 
+    "If set to true, it would be possible to handle only up to servicethreads-1 requests at the same time, the last thread would respond with 503 to eliminate creating queue of requests waiting to be handled.");
+
 static bool ValidateTriplesThreshold(const char* flagname, int32_t value) {
    if (value >= 0 && value <= 100)   // value is ok
      return true;
@@ -55,8 +58,11 @@ static bool ValidateHttpListenBacklog(const char* flagname, int64_t value) {
    return false;
 }
 
-DEFINE_int64(http_listen_backlog, 1024, "Sets http options listen backog");
+DEFINE_int64(http_listen_backlog, 128/*1024*/, "Sets http options listen backog");
 DEFINE_validator(http_listen_backlog, &ValidateHttpListenBacklog);
+
+DEFINE_int64(socket_backlog, 1024, "Sets proxygen socket listen backog(disabled)");
+DEFINE_validator(socket_backlog, &ValidateHttpListenBacklog);
 
 static bool ValidateTimeout(const char* flagname, int32_t value) {
    if (value >= 0 && value <= 3600000)   // value is ok
@@ -79,10 +85,15 @@ DEFINE_bool(flush_tm_to_disk_with_every_update, false, "If set to true, flushes 
 
 
 static bool ValidateThreads(const char* flagname, int32_t value) {
-   if (value >= 1 && value <= 100)   // value is ok
-     return true;
-   printf("Invalid value for --%s: %d, should be [1...100]\n", flagname, (int)value);
-   return false;
+    if(FLAGS_limit_num_of_active_requests && (value < 2 || value > 100)){
+      printf("Invalid value for --%s: %d, should be [2...100], because limit_num_of_active_requests is set to true\n", flagname, (int)value);
+      return false;
+    }
+    if (value < 1 || value > 100){ 
+      printf("Invalid value for --%s: %d, should be [1...100]\n", flagname, (int)value);
+      return false;
+    }
+    return true;
 }
 
 DEFINE_int32(servicethreads, 5, "Sets amought of worker threads for service");

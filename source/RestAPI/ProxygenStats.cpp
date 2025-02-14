@@ -112,6 +112,10 @@ int ProxygenStats::recordRequest(int command) {
   return reqCount_++;
 }
 
+ProxygenStats* ProxygenStats::getInstance(){
+    static ProxygenStats instance;
+    return &instance;
+  }
 
 int ProxygenStats::addRequestTime(int command,milliseconds time) { 
   switch(command){

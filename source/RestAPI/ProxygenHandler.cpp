@@ -20,6 +20,9 @@
 #include "lowlevelotmdatastructs.h"
 
 
+DECLARE_bool(limit_num_of_active_requests);
+DECLARE_int32(servicethreads);
+
 using namespace proxygen;
 
 DEFINE_bool(request_number,
@@ -29,11 +32,14 @@ DEFINE_bool(request_number,
 
 namespace ProxygenService {
 
-ProxygenHandler::ProxygenHandler(ProxygenStats* stats) : stats_(stats) {
+ProxygenHandler::ProxygenHandler()  {
   TMManager::GetInstance()->fWriteRequestsAllowed = true;
 }
 
+
+
 void ProxygenHandler::onRequest(std::unique_ptr<HTTPMessage> req) noexcept {
+
 #ifdef TIME_MEASURES 
   start_ms = duration_cast< milliseconds >( system_clock::now().time_since_epoch() );
   //time(&startingTime);
@@ -109,18 +115,13 @@ void ProxygenHandler::onRequest(std::unique_ptr<HTTPMessage> req) noexcept {
 
   pRequest->requestAcceptHeader = requestAcceptHeader;
 
-  pRequest->_id_ = stats_->recordRequest(pRequest->command);
+  pRequest->_id_ = ProxygenStats::getInstance()->recordRequest(pRequest->command);
   
   T5Logger::GetInstance()->SetLogInfo(pRequest->command);
   T5Logger::GetInstance()->SetLogBuffer(std::string("Error during ") + searchInCommandToStringsMap(pRequest->command) + " request, id = " + toStr(pRequest->_id_));
 
   if(pRequest->strMemName.empty() == false){
     T5Logger::GetInstance()->AddToLogBuffer(std::string(", for memory \"") + pRequest->strMemName + "\"");
-  }
-
-  if(pRequest->command < COMMAND::START_COMMANDS_WITH_BODY ){ // we handle here only requests without body
-    pRequest->run();
-    sendResponse();
   }
 }
 
@@ -198,7 +199,7 @@ void ProxygenHandler::onEOM() noexcept {
     fileStream.close();
   }
 
-  if(pRequest && pRequest->command >= COMMAND::START_COMMANDS_WITH_BODY)
+  if(pRequest->command >= COMMAND::START_COMMANDS_WITH_BODY)
   {
     auto body = bodyQueue_.move();
     { 
@@ -231,13 +232,17 @@ void ProxygenHandler::onEOM() noexcept {
       }
     }
 
-    if(pRequest && !pRequest->_rest_rc_){
+    if(!pRequest->_rest_rc_){
       std::string truncatedInput = pRequest->strBody.size() > 3000 ? pRequest->strBody.substr(0, 3000) : pRequest->strBody;
       T5Logger::GetInstance()->SetBodyBuffer(", with body = \"" + truncatedInput +"\"");
-      pRequest->run();
+     
     }
-    sendResponse();
   }
+
+  if(!pRequest->_rest_rc_){
+    pRequest->run();
+  }
+  sendResponse();
 }
 
 void ProxygenHandler::onUpgrade(UpgradeProtocol /*protocol*/) noexcept {
@@ -282,8 +287,8 @@ void ProxygenHandler::sendResponse()noexcept{
     #ifdef LOG_SEND_RESPONSE
      T5LOG(T5TRANSACTION) <<"id = " << pRequest->_id_ << "; exection time = " <<  std::chrono::duration<double>(time).count();
     #endif
-    
-    stats_->addRequestTime(pRequest->command, time);
+
+    ProxygenStats::getInstance()->addRequestTime(pRequest->command, time);
     #endif
 
     switch(pRequest->_rest_rc_){
@@ -303,10 +308,16 @@ void ProxygenHandler::sendResponse()noexcept{
       case 400:
       {
         responseText = "Bad Request";
+        break;
       }
       //case 500:
       //{
       //}
+      case 503:
+      {
+        responseText =  "Service Unavailable";
+        break;
+      }
       case 500:
       default:
       {
@@ -379,6 +390,9 @@ void ProxygenHandler::sendResponse()noexcept{
     }
     pRequest->fRunning = false;
     T5Logger::GetInstance()->ResetLogBuffer();
+
+    if(FLAGS_limit_num_of_active_requests) 
+      ProxygenStats::getInstance()->activeRequestsCounter--;
 }
 
 } // namespace ProxygenService

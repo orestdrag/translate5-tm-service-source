@@ -47,8 +47,10 @@ class ProxygenHandler : public proxygen::RequestHandler {
   size_t bodyPartsReceived = 0;
   std::string bodyPart;
 
-  explicit ProxygenHandler(ProxygenStats* stats);
-  explicit ProxygenHandler(ProxygenStats* stats, std::string memoryName, std::string urlCommand);
+  // Global or class-level atomic counter
+
+  explicit ProxygenHandler();
+  explicit ProxygenHandler(std::string memoryName, std::string urlCommand);
 
   void onRequest(
       std::unique_ptr<proxygen::HTTPMessage> headers) noexcept override;
@@ -71,7 +73,6 @@ class ProxygenHandler : public proxygen::RequestHandler {
   std::ofstream fileStream;
 
  private:
-  ProxygenStats* const stats_{nullptr};
   std::string boundary, boundaryLine, endBoundaryLine;
 
   std::unique_ptr<folly::IOBuf> body_;

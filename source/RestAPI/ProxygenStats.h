@@ -22,6 +22,8 @@ class ProxygenStats {
   virtual ~ProxygenStats() {
   }
 
+  static ProxygenStats* getInstance();
+
   ///input- command id, output - requests id
   virtual int addRequestTime(int command, milliseconds time);
   virtual int recordRequest(int command) ;
@@ -183,6 +185,9 @@ class ProxygenStats {
   virtual milliseconds getFlushMemSumTime(){
     return flushMemSumTime_;
   }
+
+
+ atomic_int16_t activeRequestsCounter; 
 
  private:
   atomic_uint64_t reqCount_{0};

@@ -28,9 +28,11 @@
 #include "../opentm2/core/utilities/Property.h"
 #include "../opentm2/core/utilities/FilesystemWrapper.h"
 #include "../opentm2/core/utilities/LanguageFactory.H"
+#include "ProxygenHTTPAcceptor.h"
 #include "../cmake/git_version.h"
 #include "config.h"
 #include "OtmMemoryServiceWorker.h"
+#include "ProxygenHTTPAcceptor.h"
 
 DECLARE_string(servicename);
 DECLARE_string(t5_ip);
@@ -49,6 +51,9 @@ DECLARE_int64(tmListLockDefaultTimeout);
 DECLARE_int64(tmLockDefaultTimeout);
 DECLARE_bool(useTimedMutexesForReorganizeAndImport);
 
+DECLARE_bool(limit_num_of_active_requests);
+DECLARE_int32(servicethreads);
+
 using namespace ProxygenService;
 using namespace proxygen;
 
@@ -59,6 +64,9 @@ using Protocol = HTTPServer::Protocol;
 
 #define USE_CONFIG_FILE 1
 
+DECLARE_int64(socket_backlog);
+
+atomic_int64_t LimitingConnectionEventCallback::activeConnections_ = 0;
 
 // replace plus signs in string with blanks
 void restoreBlanks( std::string &strInOut )
@@ -97,6 +105,13 @@ HTTPServerOptions setup_proxygen_servers_options(int threads, uint32_t timeout, 
   options.receiveStreamWindowSize = receiveStreamWindowSize ;
   options.receiveSessionWindowSize = receiveSesionWindowsSize ;
   options.listenBacklog = FLAGS_http_listen_backlog;
+  
+ 
+  // Use our custom acceptor factory
+  //options.maxConnections = 16;  
+  //options.acceptorFactory = std::make_unique<LimitedAcceptorFactory>(options);
+  //options.acceptorFactory = std::make_unique<LimitedAcceptorFactory>(config);
+  
   //options.h2cEnabled = true;
   options.h2cEnabled = false;
   options.supportsConnect = false;
@@ -106,8 +121,7 @@ HTTPServerOptions setup_proxygen_servers_options(int threads, uint32_t timeout, 
 
   std::string serviceName;
   std::string additionalServiceName;
-  // Global or class-level atomic counter
-  //std::atomic<int> activeRequests(0); 
+
 
   // Define a maximum limit for concurrent requests
   //constexpr int MAX_CONCURRENT_REQUESTS = 100;
@@ -116,30 +130,31 @@ HTTPServerOptions setup_proxygen_servers_options(int threads, uint32_t timeout, 
 class ProxygenHandlerFactory : public RequestHandlerFactory {
  public:
   void onServerStart(folly::EventBase* /*evb*/) noexcept override {
-      stats_.reset(new ProxygenStats);
       
       T5Logger::GetInstance()->SetLogFilter(true);
     }
 
   void onServerStop() noexcept override {
-    stats_.reset();
   }
 
-
   RequestHandler* onRequest(RequestHandler* handler, HTTPMessage* message) noexcept override {
-     /*if (stats_->activeRequests.fetch_add(1) >= MAX_CONCURRENT_REQUESTS) {
-        // Reject the request with HTTP 503
-        auto rh = new ProxygenHandler(stats_.get());
-        proxygen::ResponseBuilder(rh->downstream_)
-            .status(503, "Service Unavailable")
-            .body("Server overloaded. Try again later.")
-            .sendWithEOM();
 
-        // Decrement the counter immediately since we're not handling this request
-        stats_->activeRequests.fetch_sub(1);
-        return rh;
-    }//*/
+    ProxygenHandler* requestHandler = new ProxygenHandler();
 
+    if (FLAGS_limit_num_of_active_requests 
+      && (++ProxygenStats::getInstance()->activeRequestsCounter >= FLAGS_servicethreads)) 
+    {
+      requestHandler->pRequest = new ErrorRequestData;
+      requestHandler->pRequest->buildErrorReturn(503, "Server overloaded. Try again later.", 503);
+      //ProxygenStats::getInstance()->activeRequestsCounter.fetch_sub(1);
+      return requestHandler;
+
+      // Decrement the counter immediately since we're not handling this request
+      //if(FLAGS_limit_num_of_active_requests) 
+      //  activeRequestsCounter.fetch_sub(1);
+        
+    }
+    
     auto methodStr = message->getMethodString ();
     auto method = message->getMethod ();
     auto url = message->getURL () ;
@@ -155,14 +170,14 @@ class ProxygenHandlerFactory : public RequestHandlerFactory {
       msg += "\t method: " + methodStr;
       //msg += "\t body";
       
-      if(stats_){
-        msg += "\t reqCount(id): " + std::to_string(stats_->getRequestCount());
-      }
+      msg += "\t reqCount(id): " + std::to_string(ProxygenStats::getInstance()->getRequestCount());
+      
 
       T5LOG(T5TRANSACTION)  << msg;
     }
     if(url.size() <= 1){
-      return  new ProxygenHandler(stats_.get());;
+      //ProxygenStats::getInstance()->activeRequestsCounter.fetch_sub(1);
+      return requestHandler;
     }
 
     //std::transform(url.begin(), url.end(), url.begin(),
@@ -170,7 +185,6 @@ class ProxygenHandlerFactory : public RequestHandlerFactory {
 
     std::string urlMemName;
     std::string urlCommand;
-    ProxygenHandler* requestHandler = nullptr;
 
     try{
     if(url[0] == '/'){
@@ -181,20 +195,17 @@ class ProxygenHandlerFactory : public RequestHandlerFactory {
 
     if( urlSeparator == -1 ){
       urlSeparator = url.size();
-      //return  new ProxygenHandler(stats_.get());
     }
 
     std::string urlService = url.substr(0, urlSeparator);
-   
+
     if(urlService != serviceName && urlService != additionalServiceName ){
       T5LOG(T5ERROR) <<":: Wrong url \'" << urlService << "\', should be \'"<<
           serviceName << "\' or \'" << additionalServiceName <<"\'";
-      auto rh = new ProxygenHandler(stats_.get());
-      rh->pRequest = new UnknownRequestData;
-      return rh;
+      requestHandler->pRequest = new UnknownRequestData;
+      //ProxygenStats::getInstance()->activeRequestsCounter.fetch_sub(1) 
+      return requestHandler;
     }
-
-    requestHandler = new ProxygenHandler(stats_.get());
 
     requestHandler->pRequest =  nullptr;
     
@@ -260,7 +271,6 @@ class ProxygenHandlerFactory : public RequestHandlerFactory {
             requestHandler->pRequest = new ShutdownRequestData();
           }else if(urlCommand == "resources"){
             auto request = new ResourceInfoRequestData();
-            request->pStats = stats_.get();
             requestHandler->pRequest = request;
           }else if(urlCommand == "flags"){
             requestHandler->pRequest =  new FlagsRequestData();
@@ -325,12 +335,7 @@ class ProxygenHandlerFactory : public RequestHandlerFactory {
       
     }
     requestHandler->pRequest->strMemName = urlMemName;
-    restoreBlanks(requestHandler->pRequest->strMemName);
-
-     // When the request is completed, decrement the counter
-    //requestHandler->onEgressPaused = [this]() {
-    //    activeRequests.fetch_sub(1);
-    //};
+    restoreBlanks(requestHandler->pRequest->strMemName);;
 
     return requestHandler;
   }
@@ -348,6 +353,7 @@ class ProxygenHandlerFactory : public RequestHandlerFactory {
     auto pMemService = OtmMemoryServiceWorker::getInstance();
 
     char szServiceName[100] = "t5memory";
+    
     char szOtmDirPath[255] ="";
     unsigned int uiPort = 4040;
     int iWorkerThreads = 0;
@@ -411,7 +417,9 @@ class ProxygenHandlerFactory : public RequestHandlerFactory {
     auto options = setup_proxygen_servers_options( iWorkerThreads, uiTimeOut, initialReceiveWindow, receiveStreamWindowSize, receiveSessionWindowSize );
     
     T5LOG( T5DEBUG) << ":: creating address data structure";
+
     folly::SocketAddress addr;
+    //LimitingConnectionEventCallback connectionEventCallback;
     if(FLAGS_t5_ip.empty()){
       addr.setFromLocalPort(uiPort);
       host = "any";
@@ -419,16 +427,37 @@ class ProxygenHandlerFactory : public RequestHandlerFactory {
       host = FLAGS_t5_ip;
       addr.setFromIpPort(host, uiPort);
     }
-    
-    std::vector<HTTPServer::IPConfig> IPs = {
-      {addr,  Protocol::HTTP}
-    };
 
+    //folly::AsyncServerSocket::UniquePtr serverSocket(new folly::AsyncServerSocket);
+    //serverSocket->bind(addr);
+    //serverSocket->listen(FLAGS_socket_backlog);
+    //serverSocket->setConnectionEventCallback(&connectionEventCallback);
+    //serverSocket->startAccepting();
+
+    // Now, use the UniquePtr with useExistingSocket
+    //options.useExistingSocket(std::move(serverSocket));
     
      
     T5LOG(T5INFO) <<  ":: binding to socket, " << addr.getAddressStr() << "; port = " <<addr.getPort();
+    
     HTTPServer server(std::move(options));
-    server.bind(IPs);
+    //auto acceptorFactory = std::make_shared<LimitedAcceptorFactory>;
+    server.bind({{addr, proxygen::HTTPServer::Protocol::HTTP}});
+    //server.bind(IPs);
+
+    //auto connectionEventCallback = std::make_shared<MyConnectionEventCallback>();
+    /*
+    for (auto &sock : server.getSockets()) {
+      // Note: setMaxConnections() is provided by folly::AsyncServerSocket.
+      //sock->onConnectionEnqueuedForAcceptorCallback(connectionEventCallback);
+      if (auto* serverSocket = dynamic_cast<folly::AsyncServerSocket*>(sock)) {
+        // basePtr is actually an instance of AsyncServerSocket
+        serverSocket->setConnectionEventCallback(&connectionEventCallback);
+      } else {
+        // basePtr is not an instance of AsyncServerSocket
+        // Handle accordingly
+      }
+    }//*/
 
     // Start HTTPServer mainloop in a separate thread
     std::thread t([&]() { server.start(); });
@@ -474,7 +503,6 @@ class ProxygenHandlerFactory : public RequestHandlerFactory {
     return 0;
   }
  private:
-  folly::ThreadLocalPtr<ProxygenStats> stats_;
 };
 
 int proxygen_server_init(){

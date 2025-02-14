@@ -229,6 +229,7 @@ int RequestData::buildErrorReturn
 bool rcNeedToBeLogged(int rc){
   switch(rc){
     case 506:// timeout issue
+    case 503:
     {
       return false;
     }
@@ -485,7 +486,10 @@ bool RequestData::isLockingRequest()
 DECLARE_int64(debug_sleep_in_request_run);
 
 int RequestData::run(){ 
- 
+  if(COMMAND::ERROR_COMMAND == command){//if error command handler - skip execution
+    return 0;
+  }
+
   int res = OtmMemoryServiceWorker::getInstance()->verifyAPISession();
   if(!res) res = parseJSON();
   if(!res) res = checkData();
@@ -2677,114 +2681,114 @@ int ResourceInfoRequestData::execute(){
   AddToJson(ssOutput, "Resident set", resident_set, true );
   AddToJson(ssOutput, "Virtual memory usage", vm_usage, true );
 
-  if(pStats != nullptr){
+  if(ProxygenStats::getInstance() != nullptr){
     milliseconds sumTime;
     size_t requestCount;
 
     {
       ssOutput << "\"Requests\": {\n";
-      AddToJson(ssOutput, "RequestCount", pStats->getRequestCount(), true );
+      AddToJson(ssOutput, "RequestCount", ProxygenStats::getInstance()->getRequestCount(), true );
 
-      double sec = std::chrono::duration<double>(pStats->getExecutionTime()).count();
+      double sec = std::chrono::duration<double>(ProxygenStats::getInstance()->getExecutionTime()).count();
       AddToJson(ssOutput, "RequestExecutionSumTime(sec)", sec, true);
 
-      requestCount = pStats->getCreateMemRequestCount();
-      sumTime = pStats->getCreateMemSumTime();
+      requestCount = ProxygenStats::getInstance()->getCreateMemRequestCount();
+      sumTime = ProxygenStats::getInstance()->getCreateMemSumTime();
       AddRequestDataToJson(ssOutput, "CreateMem", sumTime, requestCount);
       ssOutput <<",";
       
-      requestCount = pStats->getDeleteEntryRequestCount();
-      sumTime = pStats->getDeleteEntrySumTime();
+      requestCount = ProxygenStats::getInstance()->getDeleteEntryRequestCount();
+      sumTime = ProxygenStats::getInstance()->getDeleteEntrySumTime();
       AddRequestDataToJson(ssOutput, "DeleteMem", sumTime, requestCount);
       ssOutput <<",";
 
-      requestCount = pStats->getImportMemRequestCount();
-      sumTime = pStats->getImportMemSumTime();
+      requestCount = ProxygenStats::getInstance()->getImportMemRequestCount();
+      sumTime = ProxygenStats::getInstance()->getImportMemSumTime();
       AddRequestDataToJson(ssOutput, "ImportMem", sumTime, requestCount);
       ssOutput <<",";
       
-      requestCount = pStats->getExportMemRequestCount();
-      sumTime = pStats->getExportMemSumTime();
+      requestCount = ProxygenStats::getInstance()->getExportMemRequestCount();
+      sumTime = ProxygenStats::getInstance()->getExportMemSumTime();
       AddRequestDataToJson(ssOutput, "ExportMem", sumTime, requestCount);
       ssOutput <<",";
 
-      requestCount = pStats->getCloneLocalyCount();
-      sumTime = pStats->getCloneLocalySumTime();
+      requestCount = ProxygenStats::getInstance()->getCloneLocalyCount();
+      sumTime = ProxygenStats::getInstance()->getCloneLocalySumTime();
       AddRequestDataToJson(ssOutput, "CloneTmLocaly", sumTime, requestCount);
       ssOutput <<",";
       
-      requestCount = pStats->getReorganizeRequestCount();
-      sumTime = pStats->getReorganizeExecutionTime();
+      requestCount = ProxygenStats::getInstance()->getReorganizeRequestCount();
+      sumTime = ProxygenStats::getInstance()->getReorganizeExecutionTime();
       AddRequestDataToJson(ssOutput, "Reorganize", sumTime, requestCount);
       ssOutput <<",";
 
-      requestCount = pStats->getStatusMemRequestCount();
-      sumTime = pStats->getStatusMemSumTime();
+      requestCount = ProxygenStats::getInstance()->getStatusMemRequestCount();
+      sumTime = ProxygenStats::getInstance()->getStatusMemSumTime();
       AddRequestDataToJson(ssOutput, "StatusMem", sumTime, requestCount);
       ssOutput <<",";
 
-      requestCount = pStats->getFlushMemRequestCount();
-      sumTime = pStats->getFlushMemSumTime();
+      requestCount = ProxygenStats::getInstance()->getFlushMemRequestCount();
+      sumTime = ProxygenStats::getInstance()->getFlushMemSumTime();
       AddRequestDataToJson(ssOutput, "FlushMem", sumTime, requestCount);
       ssOutput <<",";
 
-      requestCount = pStats->getFuzzyRequestCount();
-      sumTime = pStats->getFuzzySumTime();
+      requestCount = ProxygenStats::getInstance()->getFuzzyRequestCount();
+      sumTime = ProxygenStats::getInstance()->getFuzzySumTime();
       AddRequestDataToJson(ssOutput, "Fuzzy", sumTime, requestCount);
       ssOutput <<",";
 
-      requestCount = pStats->getConcordanceRequestCount();
-      sumTime = pStats->getConcordanceSumTime();
+      requestCount = ProxygenStats::getInstance()->getConcordanceRequestCount();
+      sumTime = ProxygenStats::getInstance()->getConcordanceSumTime();
       AddRequestDataToJson(ssOutput, "Concordance", sumTime, requestCount);
       ssOutput <<",";
       
-      requestCount = pStats->getUpdateEntryRequestCount();
-      sumTime = pStats->getUpdateEntrySumTime();
+      requestCount = ProxygenStats::getInstance()->getUpdateEntryRequestCount();
+      sumTime = ProxygenStats::getInstance()->getUpdateEntrySumTime();
       AddRequestDataToJson(ssOutput, "UpdateEntry", sumTime, requestCount);
       ssOutput <<",";
 
-      requestCount = pStats->getEntryRequestCount();
-      sumTime = pStats->getEntrySumTime();
+      requestCount = ProxygenStats::getInstance()->getEntryRequestCount();
+      sumTime = ProxygenStats::getInstance()->getEntrySumTime();
       AddRequestDataToJson(ssOutput, "GetEntry", sumTime, requestCount);
       ssOutput <<",";
 
-      requestCount = pStats->getDeleteEntryRequestCount();
-      sumTime = pStats->getDeleteEntrySumTime();
+      requestCount = ProxygenStats::getInstance()->getDeleteEntryRequestCount();
+      sumTime = ProxygenStats::getInstance()->getDeleteEntrySumTime();
       AddRequestDataToJson(ssOutput, "DeleteEntry", sumTime, requestCount);
       ssOutput <<",";
       
-      //requestCount = pStats->getReorganizeRequestCount();
-      //sumTime = pStats->getReorganizeExecutionTime();
+      //requestCount = ProxygenStats::getInstance()->getReorganizeRequestCount();
+      //sumTime = ProxygenStats::getInstance()->getReorganizeExecutionTime();
       //AddRequestDataToJson(ssOutput, "Reorganize", sumTime, requestCount);
       //ssOutput <<",";
 
-      requestCount = pStats->getSaveAllTmsRequestCount();
-      sumTime = pStats->getSaveAllTmsSumTime();
+      requestCount = ProxygenStats::getInstance()->getSaveAllTmsRequestCount();
+      sumTime = ProxygenStats::getInstance()->getSaveAllTmsSumTime();
       AddRequestDataToJson(ssOutput, "SaveAllTms", sumTime, requestCount);
       ssOutput <<",";
 
-      requestCount = pStats->getListOfMemoriesRequestCount();
-      sumTime = pStats->getListOfMemoriesSumTime();
+      requestCount = ProxygenStats::getInstance()->getListOfMemoriesRequestCount();
+      sumTime = ProxygenStats::getInstance()->getListOfMemoriesSumTime();
       AddRequestDataToJson(ssOutput, "ListOfMemories", sumTime, requestCount);
       ssOutput <<",";
       
-      requestCount = pStats->getResourcesRequestCount();
-      sumTime = pStats->getResourcesSumTime();
+      requestCount = ProxygenStats::getInstance()->getResourcesRequestCount();
+      sumTime = ProxygenStats::getInstance()->getResourcesSumTime();
       AddRequestDataToJson(ssOutput, "Resources", sumTime, requestCount);
       ssOutput <<",";
 
-      requestCount = pStats->getFlagsRequestCount();
-      sumTime = pStats->getFlagstSumTime();
+      requestCount = ProxygenStats::getInstance()->getFlagsRequestCount();
+      sumTime = ProxygenStats::getInstance()->getFlagstSumTime();
       AddRequestDataToJson(ssOutput, "Flags", sumTime, requestCount);
       ssOutput <<",";
 
-      requestCount = pStats->getOtherRequestCount();
-      sumTime = pStats->getOtherSumTime();
+      requestCount = ProxygenStats::getInstance()->getOtherRequestCount();
+      sumTime = ProxygenStats::getInstance()->getOtherSumTime();
       AddRequestDataToJson(ssOutput, "Other", sumTime, requestCount);
       ssOutput <<",";
 
-      requestCount = pStats->getUnrecognizedRequestCount();
-      sumTime = pStats->getUnrecognizedSumTime();
+      requestCount = ProxygenStats::getInstance()->getUnrecognizedRequestCount();
+      sumTime = ProxygenStats::getInstance()->getUnrecognizedSumTime();
       AddRequestDataToJson(ssOutput, "Unrecognized", sumTime, requestCount);
       ssOutput << "\n },\n"; 
     }

@@ -96,7 +96,8 @@ typedef char* PSZ;
         IMPORT_MEM,
         IMPORT_MEM_STREAM,
         IMPORT_LOCAL_MEM,
-        CLONE_TM_LOCALY
+        CLONE_TM_LOCALY,
+        ERROR_COMMAND
         //IMPORT_MEM_INTERNAL_FORMAT
     };
 
@@ -104,6 +105,7 @@ typedef char* PSZ;
 
 constexpr  std::initializer_list<std::pair<const COMMAND, const char*>> CommandToStringsMap {
         { UNKNOWN_COMMAND, "UNKNOWN_COMMAND" },
+        { ERROR_COMMAND, "ERROR_COMMAND" },
         { LIST_OF_MEMORIES, "LIST_OF_MEMORIES" },
         { SAVE_ALL_TM_ON_DISK, "SAVE_ALL_TM_ON_DISK" },
         { SHUTDOWN, "SHUTDOWN" },

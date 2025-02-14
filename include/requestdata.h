@@ -71,8 +71,6 @@ public:
             ){ //for DEBUG and DEVELOP modes leave file in fs
                 FilesystemHelper::DeleteFile( strTempFile, true );
             }
-
-        //stats->activeRequests.fetch_sub(1);
     }
     //std::weak_ptr <EqfMemory> memory;
 
@@ -172,7 +170,6 @@ public:
   //BOOL fImpoortFromFile = 0;
   //folly::IOBuf fileData;
   std::string fileData;
-  ProxygenStats* stats_ = nullptr;
   InclosingTagsBehaviour inclosingTagsBehaviour = InclosingTagsBehaviour::saveAll;
   MutexTimeout tmLockTimeout;
   //ushort * pusImportPersent = nullptr;
@@ -268,7 +265,6 @@ protected:
 //class ProxygenStats;
 class ResourceInfoRequestData:public RequestData{
 public:
-    ProxygenStats* pStats = nullptr;
     ResourceInfoRequestData(): RequestData(COMMAND::RESOURCE_INFO) {};
 protected:
     int parseJSON() override { return 0;};
@@ -383,6 +379,22 @@ class UnknownRequestData: public RequestData{
         _rest_rc_ = 404;
         std::string msg = "Url \"" + strUrl + "\" was not parsed correctly";
         return buildErrorReturn(404, msg.c_str(), 404);
+    };
+};
+
+class ErrorRequestData: public RequestData{
+    public: 
+    ErrorRequestData(): RequestData(ERROR_COMMAND){};
+
+    protected:
+    int parseJSON() override {return 0;};
+    int checkData() override {return 0;};
+    int execute()   override {
+        if(!_rest_rc_){
+            _rest_rc_ = 404;
+            std::string msg = "Url \"" + strUrl + "\" was not parsed correctly";
+            return buildErrorReturn(404, msg.c_str(), 404);
+        }
     };
 };
 

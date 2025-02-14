@@ -384,7 +384,7 @@ void importMemoryProcess( void* pvData )
   milliseconds end_ms = duration_cast< milliseconds >( system_clock::now().time_since_epoch() );
   milliseconds time = end_ms-start_ms;   
   T5LOG(T5TRANSACTION) /*<<"id = " << id*/ << "; exection time = " <<  std::chrono::duration<double>(time).count();
-  pData->stats_->addRequestTime(ProxygenService::ProxygenHandler::COMMAND::IMPORT_MEM, time);
+  ProxygenStats::getInstance()->addRequestTime(ProxygenService::ProxygenHandler::COMMAND::IMPORT_MEM, time);
   #endif
 
   //pData->mem->resetActiveRequestCommand();
@@ -469,7 +469,7 @@ void reorganizeMemoryProcess( void* pvData )
   milliseconds end_ms = duration_cast< milliseconds >( system_clock::now().time_since_epoch() );
   milliseconds time = end_ms-start_ms;   
   T5LOG(T5TRANSACTION) /*<<"id = " << id*/ << "; exection time = " <<  std::chrono::duration<double>(time).count();
-  pData->stats_->addRequestTime(ProxygenService::ProxygenHandler::COMMAND::IMPORT_MEM, time);
+  ProxygenStats::getInstance()->addRequestTime(ProxygenService::ProxygenHandler::COMMAND::IMPORT_MEM, time);
   #endif
   
   if(pCommArea) delete( pCommArea );
