@@ -19,7 +19,7 @@
 #include "opentm2/core/utilities/Property.h"
 #include "opentm2/core/utilities/EncodingHelper.h"
 #include "EQF.H"
-
+#include <sys/personality.h>
 
 
 static bool ValidatePort(const char* flagname, int32_t value) {
@@ -247,6 +247,7 @@ using namespace google;
 
 int proxygen_server_init();
 int main(int argc, char* argv[]) {
+   personality(ADDR_NO_RANDOMIZE);
    setlocale(LC_ALL, "");
    std::signal(SIGINT, signal_handler);
    std::signal(SIGABRT, signal_handler);
