@@ -90,45 +90,52 @@ private:
 };
 //*/
 
+DECLARE_bool(log_tcp_backog_events);
+
 class LimitingConnectionEventCallback : public folly::AsyncServerSocket::ConnectionEventCallback {
 public:
     const int64_t maxConnections_{1};
     static atomic_int64_t activeConnections_;
+    static atomic_int64_t allHandledConnections_;
 
     void onConnectionEnqueuedForAcceptorCallback(
 
         const NetworkSocket socket,
         const SocketAddress& addr) noexcept override {
-        if (activeConnections_ >= maxConnections_) {
+        //if (activeConnections_ >= maxConnections_) {
             // Close the socket to reject the connection
-            ::close(socket.toFd());
+            //::close(socket.toFd());
             
             /*
             proxygen::ResponseBuilder(nullptr)
             .status(500, "Internal Server Error")
             .body(folly::IOBuf::copyBuffer("An error occurred"))
             .sendWithEOM();//*/
-        } else {
+        //} else {
             // Increment the active connection couny           
              ++activeConnections_;
-            T5LOG(T5TRANSACTION)  << "onConnectionEnqueuedForAcceptorCallback from: " << addr.describe() << "; activeConnections = " << activeConnections_;
+            if(FLAGS_log_tcp_backog_events)
+                T5LOG(T5TRANSACTION)  << "onConnectionEnqueuedForAcceptorCallback from: " << addr.describe() << "; activeConnections = " << activeConnections_;
             // Proceed with normal processing
-        }
+        //}
         // Custom logic to handle the enqueued connection
     }
     
     void onConnectionAccepted(
         const folly::NetworkSocket socket,
         const folly::SocketAddress& addr) noexcept override {
-        T5LOG(T5TRANSACTION)  << "Connection accepted from: " << addr.describe() << "; activeConnections = " << activeConnections_;
+            
+        if(FLAGS_log_tcp_backog_events)
+            T5LOG(T5TRANSACTION)  << "Connection accepted from: " << addr.describe() << "; activeConnections = " << activeConnections_;
     }
     void onConnectionDropped(
         const folly::NetworkSocket socket,
         const folly::SocketAddress& addr) noexcept override {
         // Decrement the active connection count
         --activeConnections_;
-        T5LOG(T5TRANSACTION)  << "Connection dropped from: " << addr.describe()
-                  << " Error: " << "; activeConnections = " << activeConnections_;
+        if(FLAGS_log_tcp_backog_events)
+            T5LOG(T5TRANSACTION)  << "Connection dropped from: " << addr.describe()
+                    << " Error: " << "; activeConnections = " << activeConnections_;
     }
 
     void onConnectionAcceptError(const int err) noexcept override {
@@ -138,20 +145,26 @@ public:
     void onConnectionDequeuedByAcceptorCallback(
         const folly::NetworkSocket socket,
         const folly::SocketAddress& addr) noexcept override {
-        //    activeConnections_--;
-        T5LOG(T5TRANSACTION)  << "Connection dequeued by acceptor from: " << addr.describe() << "; activeConnections = " << activeConnections_;
+           activeConnections_--;
+           allHandledConnections_++;
+
+        if(FLAGS_log_tcp_backog_events)
+            T5LOG(T5TRANSACTION)  << "Connection dequeued by acceptor from: " << addr.describe() << "; activeConnections = " << activeConnections_ << "; allHandledConnections_ = " << allHandledConnections_;
     }
 
     void onBackoffStarted() noexcept override {
-        T5LOG(T5TRANSACTION)  << "Backoff started." ;
+        if(FLAGS_log_tcp_backog_events)
+            T5LOG(T5TRANSACTION)  << "Backoff started." ;
     }
 
     void onBackoffEnded() noexcept override {
-        T5LOG(T5TRANSACTION)  << "Backoff ended." ;
+        if(FLAGS_log_tcp_backog_events)
+            T5LOG(T5TRANSACTION)  << "Backoff ended." ;
     }
 
     void onBackoffError() noexcept override {
-        T5LOG(T5ERROR) << "Backoff error occurred." ;
+        if(FLAGS_log_tcp_backog_events)
+            T5LOG(T5ERROR) << "Backoff error occurred." ;
     }
 
 };

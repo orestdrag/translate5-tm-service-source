@@ -51,6 +51,10 @@ DEFINE_int32(triplesthreshold, 5, "Sets threshold to pre fuzzy filtering based o
 DEFINE_validator(triplesthreshold, &ValidateTriplesThreshold);
 
 
+
+DEFINE_bool(add_premade_socket, false, "if set to true, socket instance would be created outside of proxygen and then binded, that made possible to add tcp backog event handler and use socket_backog option");
+DEFINE_bool(log_tcp_backog_events, false, "if set to true, tcp backlog events would be logged(to enable, add_premade_socket flag should be set to true)");
+
 static bool ValidateHttpListenBacklog(const char* flagname, int64_t value) {
    if (value >= 0 && value <= 4096)   // value is ok
      return true;
@@ -61,7 +65,7 @@ static bool ValidateHttpListenBacklog(const char* flagname, int64_t value) {
 DEFINE_int64(http_listen_backlog, 128/*1024*/, "Sets http options listen backog");
 DEFINE_validator(http_listen_backlog, &ValidateHttpListenBacklog);
 
-DEFINE_int64(socket_backlog, 1024, "Sets proxygen socket listen backog(disabled)");
+DEFINE_int64(socket_backlog, 1024, "Sets proxygen socket listen backog(disabled, to enable set add_premade_socket=true)");
 DEFINE_validator(socket_backlog, &ValidateHttpListenBacklog);
 
 static bool ValidateTimeout(const char* flagname, int32_t value) {
@@ -143,6 +147,7 @@ DEFINE_int64(tmListLockDefaultTimeout, 3000,
 DEFINE_int64(debug_sleep_in_request_run, 0,
    "If set, provide artificial delay in every request handling execution equal to provided num of microseconds");
 
+DEFINE_bool(disable_aslr, false, "If set to true, process personality would be set to ADDR_NO_RANDOMIZE");
 
 DEFINE_bool(useTimedMutexesForReorganizeAndImport, false, 
   "If set to true, in reorganize or import thread would be used mutexes with timeouts, and reorganizee or import could be canceled, false(by default) - would be used non timed mutexes");
@@ -247,7 +252,24 @@ using namespace google;
 
 int proxygen_server_init();
 int main(int argc, char* argv[]) {
+  FLAGS_disable_aslr = FLAGS_add_premade_socket = FLAGS_log_tcp_backog_events = true;
+
+  if(FLAGS_disable_aslr){
    personality(ADDR_NO_RANDOMIZE);
+    // Get the current personality flags
+    unsigned long pers = personality(0xffffffff);
+    // Check if ASLR is enabled (ADDR_NO_RANDOMIZE is 0x0040000)
+    if (!(pers & ADDR_NO_RANDOMIZE)) {
+        // Disable ASLR by setting ADDR_NO_RANDOMIZE flag
+        if (personality(pers | ADDR_NO_RANDOMIZE) == -1) {
+            perror("personality");
+            return 1;
+        }
+    }
+    // Continue with the rest of your program
+    printf("ASLR disabled; personality now: 0x%lx\n", personality(0xffffffff));
+  }
+   
    setlocale(LC_ALL, "");
    std::signal(SIGINT, signal_handler);
    std::signal(SIGABRT, signal_handler);

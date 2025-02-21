@@ -52,6 +52,7 @@ DECLARE_int64(tmLockDefaultTimeout);
 DECLARE_bool(useTimedMutexesForReorganizeAndImport);
 
 DECLARE_bool(limit_num_of_active_requests);
+DECLARE_bool(add_premade_socket);
 DECLARE_int32(servicethreads);
 
 using namespace ProxygenService;
@@ -67,6 +68,7 @@ using Protocol = HTTPServer::Protocol;
 DECLARE_int64(socket_backlog);
 
 atomic_int64_t LimitingConnectionEventCallback::activeConnections_ = 0;
+atomic_int64_t LimitingConnectionEventCallback::allHandledConnections_ = 0;
 
 // replace plus signs in string with blanks
 void restoreBlanks( std::string &strInOut )
@@ -419,7 +421,7 @@ class ProxygenHandlerFactory : public RequestHandlerFactory {
     T5LOG( T5DEBUG) << ":: creating address data structure";
 
     folly::SocketAddress addr;
-    //LimitingConnectionEventCallback connectionEventCallback;
+    LimitingConnectionEventCallback connectionEventCallback;
     if(FLAGS_t5_ip.empty()){
       addr.setFromLocalPort(uiPort);
       host = "any";
@@ -428,22 +430,23 @@ class ProxygenHandlerFactory : public RequestHandlerFactory {
       addr.setFromIpPort(host, uiPort);
     }
 
-    //folly::AsyncServerSocket::UniquePtr serverSocket(new folly::AsyncServerSocket);
-    //serverSocket->bind(addr);
-    //serverSocket->listen(FLAGS_socket_backlog);
-    //serverSocket->setConnectionEventCallback(&connectionEventCallback);
-    //serverSocket->startAccepting();
-
-    // Now, use the UniquePtr with useExistingSocket
-    //options.useExistingSocket(std::move(serverSocket));
-    
      
-    T5LOG(T5INFO) <<  ":: binding to socket, " << addr.getAddressStr() << "; port = " <<addr.getPort();
+    T5LOG(T5TRANSACTION) <<  ":: binding to socket, " << addr.getAddressStr() << "; port = " <<addr.getPort();
+    folly::AsyncServerSocket::UniquePtr serverSocket(new folly::AsyncServerSocket(folly::EventBaseManager::get()->getEventBase()));
+
+    if(FLAGS_add_premade_socket){
+      // Create and configure the AsyncServerSocket
+      serverSocket->setReusePortEnabled(true); // Example option
+      serverSocket->bind(addr);
+      serverSocket->listen(FLAGS_socket_backlog);
+      serverSocket->setConnectionEventCallback(&connectionEventCallback);
+      serverSocket->startAccepting();
+      options.useExistingSocket(std::move(serverSocket)); 
+    }
     
     HTTPServer server(std::move(options));
     //auto acceptorFactory = std::make_shared<LimitedAcceptorFactory>;
     server.bind({{addr, proxygen::HTTPServer::Protocol::HTTP}});
-    //server.bind(IPs);
 
     //auto connectionEventCallback = std::make_shared<MyConnectionEventCallback>();
     /*
