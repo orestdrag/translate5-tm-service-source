@@ -248,15 +248,27 @@ void CustomPrefix(std::ostream &s, const LogMessageInfo &l, void*) {
 using namespace google;
 //using namespace GFLAGS_NAMESPACE;
 
+#include <iomanip>
+std::string to_hex(unsigned long src){
+  // Create a stringstream object
+  std::stringstream stream;
 
+  // Convert the decimal value to hexadecimal and store it in the stringstream
+  stream << "0x"
+         << std::setfill('0') << std::setw(sizeof(unsigned long) * 2)
+         << std::hex << src;
+
+  // Retrieve the hexadecimal string from the stringstream
+  std::string hex_value = stream.str();
+  return hex_value;
+}
 
 int proxygen_server_init();
 int main(int argc, char* argv[]) {
-  FLAGS_disable_aslr = FLAGS_add_premade_socket = FLAGS_log_tcp_backog_events = true;
+  //FLAGS_disable_aslr = FLAGS_add_premade_socket = FLAGS_log_tcp_backog_events = true;
 
   if(FLAGS_disable_aslr){
    personality(ADDR_NO_RANDOMIZE);
-    // Get the current personality flags
     unsigned long pers = personality(0xffffffff);
     // Check if ASLR is enabled (ADDR_NO_RANDOMIZE is 0x0040000)
     if (!(pers & ADDR_NO_RANDOMIZE)) {
@@ -266,10 +278,7 @@ int main(int argc, char* argv[]) {
             return 1;
         }
     }
-    // Continue with the rest of your program
-    printf("ASLR disabled; personality now: 0x%lx\n", personality(0xffffffff));
   }
-   
    setlocale(LC_ALL, "");
    std::signal(SIGINT, signal_handler);
    std::signal(SIGABRT, signal_handler);
@@ -310,6 +319,12 @@ int main(int argc, char* argv[]) {
    //static NoNewlineLogSink sink;
    //google::AddLogSink(&sink);
    T5LOG(T5TRANSACTION) <<"Worker thread starting, v = "<<T5GLOBVERSION<<"."<< T5MAJVERSION<<"."<<T5MINVERSION;   
+   
+  // Get the current personality flags
+  unsigned long pers = personality(0xffffffff);
+  // Continue with the rest of your program
+  T5LOG(T5TRANSACTION) << "personality now: " << to_hex(pers);
+
    std::thread worker(proxygen_server_init);
    worker.join();
    //TODO::REFACTOR HERE
