@@ -1456,6 +1456,12 @@
         <comments>Serbian(Latin)</comments>
     </language>
     <language>
+        <name>sr-Latn-RS</name>  
+        <preferred>no</preferred>
+        <group>Serbian(Latin)</group>  
+        <comments>Serbian(Latin)(Serbia)</comments>
+    </language>
+    <language>
         <name>sr-RS</name>  
         <preferred>no</preferred>
         <group>Serbian(Latin)</group>  

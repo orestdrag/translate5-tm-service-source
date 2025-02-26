@@ -122,7 +122,7 @@ static bool ValidateTMDSize(const char* flagname, int64_t value) {
    return false;
 }
 
-DEFINE_int64(allowedtmdsize, 500, "Sets max size of tmd file(in MB) after which t5m would not allow to add new data to the tm");
+DEFINE_int64(allowedtmdsize, 190, "Sets max size of tmd file(in MB) after which t5m would not allow to add new data to the tm");
 DEFINE_validator(allowedtmdsize, &ValidateTMDSize);
 
 static bool ValidateLOGlevel(const char* flagname, int32_t value) {

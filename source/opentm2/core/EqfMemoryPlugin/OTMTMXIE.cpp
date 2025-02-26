@@ -614,7 +614,7 @@ TagInfo TagReplacer::GenerateReplacingTag(ELEMENTID tagType, AttributeList* attr
   {//generate new attributes or find matching 
     //try to find matching tag in source
     if(sourceTagList.empty() && VLOG_IS_ON(1)){
-      T5LOG(T5ERROR) << ":: parsing target tags, but there are no source tags parsed yet! Please check if languages for source tag and TM file is maching in TABLE/languages.xml; tag: " << LogTag(tag);
+      T5LOG(T5WARNING) << ":: parsing target tags, but there are no source tags parsed yet! Please check if languages for source tag and TM file is maching in TABLE/languages.xml; tag: " << LogTag(tag);
     }
     std::vector<TagInfo>::iterator matchingSourceTag = std::find_if(sourceTagList.begin(), sourceTagList.end(),
                                   [&tag](TagInfo& i) { return i.fTagAlreadyUsedInTarget == false 
