@@ -399,7 +399,7 @@ class ProxygenHandlerFactory : public RequestHandlerFactory {
     Properties::GetInstance()->set_anyway(KEY_SERVICE_URL, szServiceName);
     Properties::GetInstance()->set_anyway(KEY_OTM_DIR, FilesystemHelper::GetOtmDir().c_str());
     Properties::GetInstance()->set_anyway(KEY_ALLOWED_RAM, uiAllowedRAM);// saving in megabytes to avoid int overflow
-    Properties::GetInstance()->set_anyway(KEY_TRIPLES_THRESHOLD, uiThreshold);
+   // Properties::GetInstance()->set_anyway(KEY_TRIPLES_THRESHOLD, uiThreshold);
     Properties::GetInstance()->set_anyway(KEY_NUM_OF_THREADS, iWorkerThreads);
     Properties::GetInstance()->set_anyway(KEY_TIMEOUT_SETTINGS, uiTimeOut);
 

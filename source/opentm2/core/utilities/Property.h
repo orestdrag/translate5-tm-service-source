@@ -12,7 +12,7 @@
 #define KEY_ALLOWED_RAM "AllowedRAM_MB"
 #define KEY_LOCALHOST_ONLY "localhost_only"
 #define KEY_TEMP_DIR "TEMP_dir"
-#define KEY_TRIPLES_THRESHOLD "TriplesThreshold"
+//#define KEY_TRIPLES_THRESHOLD "TriplesThreshold"
 #define KEY_NUM_OF_THREADS "KEY_NUM_OF_THREADS"
 #define KEY_TIMEOUT_SETTINGS "KEY_TIMEOUT_SETTINGS"
 #define KEY_RUN_DATE "KEY_RUN_DATE" 

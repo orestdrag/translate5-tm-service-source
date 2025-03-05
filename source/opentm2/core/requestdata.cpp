@@ -2571,6 +2571,7 @@ int addProposalToJSONString
 }
 
 
+DECLARE_int32(triplesthreshold);
 int ResourceInfoRequestData::execute(){
   std::stringstream ssOutput;
 
@@ -2664,7 +2665,8 @@ int ResourceInfoRequestData::execute(){
   char buff[255];
   //Properties::GetInstance()->get_value(KEY_OTM_DIR, szOtmDirPath);
   Properties::GetInstance()->get_value(KEY_ALLOWED_RAM, availableRam);// saving in megabytes to avoid int overflow
-  Properties::GetInstance()->get_value(KEY_TRIPLES_THRESHOLD, threshold);
+  //Properties::GetInstance()->get_value(KEY_TRIPLES_THRESHOLD, threshold);
+  threshold = FLAGS_triplesthreshold;
   Properties::GetInstance()->get_value(KEY_NUM_OF_THREADS, workerThreads);
   Properties::GetInstance()->get_value(KEY_TIMEOUT_SETTINGS, timeout);
   Properties::GetInstance()->get_value(KEY_RUN_DATE, buff,254);

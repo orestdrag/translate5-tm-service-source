@@ -585,6 +585,8 @@ BYTE ProposalTypeToFlag(OtmProposal::eProposalType t){
 }
 
 
+DECLARE_int32(triplesthreshold);
+
 /*! \brief Fill TMX_GET_W structure with OtmProposal data
     \param Proposal reference to the OtmProposal containing the data
     \param pGetIn pointer to the TMX_GET_W structure
@@ -610,7 +612,7 @@ int EqfMemory::OtmProposalToGetIn
   Proposal.getDocName( pGetIn->szFileName, sizeof(pGetIn->szFileName)  );
   
   //pGetIn->usMatchThreshold = TM_DEFAULT_THRESHOLD;
-  int threshold = TM_DEFAULT_THRESHOLD;
+  int threshold = FLAGS_triplesthreshold;
   //Properties::GetInstance()->get_value_or_default(KEY_TRIPLES_THRESHOLD, threshold, threshold);
   pGetIn->usMatchThreshold = threshold;
   pGetIn->ulSegmentId = Proposal.getSegmentId();
