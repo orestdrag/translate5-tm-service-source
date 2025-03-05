@@ -391,7 +391,7 @@ VOID HashSentence
   {
     pNormOffset = pSentence->pStrings->getNormStrC() + pTermTokens->usOffset;
     pTermTokens->usHash = HashTupelW( pNormOffset, pTermTokens->usLength );
-    if(T5Logger::GetInstance()->CheckLogLevel(T5DEBUG)){
+    if(T5Logger::GetInstance()->CheckLogLevel(T5DEVELOP)){
       auto str = EncodingHelper::convertToUTF8(pNormOffset).substr(0, pTermTokens->usLength);
       T5LOG( T5DEBUG) <<"HashSentence:: pNormOffset = \"" << str << "\"; len = " << pTermTokens->usLength <<"; hash = " <<pTermTokens->usHash;
     }
@@ -415,15 +415,15 @@ VOID HashSentence
     } /* endfor */
   } /* endif */
 
-  if(T5Logger::GetInstance()->CheckLogLevel(T5DEBUG)){
+  if(T5Logger::GetInstance()->CheckLogLevel(T5DEVELOP)){
     auto str = EncodingHelper::convertToUTF8(pSentence->pStrings->getOriginalStrC());
-    T5LOG( T5DEBUG) <<"HashSentence:: inputString =\"" << str << "\"; count = " << usCount;
+    T5LOG( T5DEVELOP) <<"HashSentence:: inputString =\"" << str << "\"; count = " << usCount;
   }
   
   //build tuples of the term hashes
   if ( usCount >= 3 )
   {
-    T5LOG( T5DEBUG) <<"HashSentence:: Building Votes";
+    T5LOG( T5DEVELOP) <<"HashSentence:: Building Votes";
     BuildVotes( pSentence );
   } /* endif */
 }
@@ -1537,7 +1537,7 @@ USHORT DetermineTmRecord
       ulLen = pIndexRecord->usRecordLen;
       usMaxEntries = (USHORT)((ulLen - sizeof(USHORT)) / sizeof(TMX_INDEX_ENTRY));
 
-      if(T5Logger::GetInstance()->CheckLogLevel(T5DEBUG)){
+      if(T5Logger::GetInstance()->CheckLogLevel(T5DEVELOP)){
         std::string msg = __func__ + std::string(":: Number Entries:  ") + toStr(usMaxEntries).c_str() +"; Entries:";
         pIndexEntry = &pIndexRecord->stIndexEntry;
         for (j=0 ; j<usMaxEntries;j++,pIndexEntry++ )
@@ -1630,7 +1630,7 @@ USHORT DetermineTmRecord
               //set return code to 0
               if ( usRc == BTREE_NOT_FOUND )
               {
-                LOG_AND_SET_RC(usRc, T5INFO, NO_ERROR);
+                LOG_AND_SET_RC(usRc, T5DEVELOP, NO_ERROR);
               } /* endif */
             } /* endif */
           } /* endif */
@@ -1643,12 +1643,12 @@ USHORT DetermineTmRecord
       //code to 0
       if ( usRc == BTREE_NOT_FOUND )
       {
-        LOG_AND_SET_RC(usRc, T5INFO, NO_ERROR);
+        LOG_AND_SET_RC(usRc, T5DEVELOP, NO_ERROR);
       } /* endif */
     } /* endif */
   } /* endif */
 
-  if(T5Logger::GetInstance()->CheckLogLevel(T5DEBUG)){
+  if(T5Logger::GetInstance()->CheckLogLevel(T5DEVELOP)){
     std::string msg = __func__ + std::string(":: Matching Sids: ");
     pIndexEntry = &pIndexRecord->stIndexEntry;
     while ( *pulSidStart )

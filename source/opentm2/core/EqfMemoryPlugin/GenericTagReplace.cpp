@@ -228,7 +228,7 @@ BOOL     NTMTagSubst
   fOK = ( pInBuf && pTokBuf ) ;
 
 #ifdef INLINE_TAG_REPL_LOGGING
-  if ( T5Logger::GetInstance()->CheckLogLevel(T5DEBUG) )
+  if ( T5Logger::GetInstance()->CheckLogLevel(T5DEVELOP) )
   {
     T5LOG(T5DEBUG) << "*** NTMTagSubst ***" ;
     NTMMarkCRLF( pSubstProp->szSource, szSegBuf );

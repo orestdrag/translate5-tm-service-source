@@ -584,7 +584,7 @@ static USHORT MemLoadProcess( MEM_LOAD_DLG_IDA*  pLIDA, ImportStatusDetails*    
      switch ( usRc )
      {
        case 0 :
-         LOG_AND_SET_RC(usRc, T5INFO, MEM_PROCESS_OK);
+         LOG_AND_SET_RC(usRc, T5DEVELOP, MEM_PROCESS_OK);
          break;
        case MEM_IMPORT_COMPLETE: 
          LOG_AND_SET_RC(usRc, T5INFO, MEM_PROCESS_END);
@@ -894,7 +894,7 @@ USHORT MemFuncImportProcess
     case MEM_IMPORT_TASK:
       {
         
-        T5LOG( T5INFO) << "::MEM_IMPORT_TASK, progress = " << pData->mem->importDetails->usProgress;
+        T5LOG( T5DEVELOP) << "::MEM_IMPORT_TASK, progress = " << pData->mem->importDetails->usProgress;
         USHORT usRc = MemLoadProcess( pLIDA, pData->mem->importDetails );
         switch ( usRc )
         {
@@ -1411,11 +1411,15 @@ USHORT /*APIENTRY*/ MEMINSERTSEGMENT
     pLIDA->pProposal->setSegmentId( pSegment->lSegNum );
 
     pLIDA->pProposal->pInputSentence = new TMX_SENTENCE(pSegment->szSource, pSegment->szTarget);
-
-    pLIDA->pProposal->setSegmentId(0);// set to 0 to generate new idd
-
-    // insert/replace segment in(to) memory
-    usRC = (USHORT)pLIDA->mem->putProposal( *(pLIDA->pProposal) );
+    
+    if(pLIDA->pProposal->pInputSentence->wasParsedSuccessfully()){
+      pLIDA->pProposal->setSegmentId(0);// set to 0 to generate new idd
+      // insert/replace segment in(to) memory
+      usRC = (USHORT)pLIDA->mem->putProposal( *(pLIDA->pProposal) );
+    }else{
+      T5LOG(T5ERROR) << "TMX_SENTENSE was not parsed properly,  src = \'"<< EncodingHelper::convertToUTF8(pSegment->szSource) << "\'; target = \'" << EncodingHelper::convertToUTF8(pSegment->szTarget) << "\'; segNum = " << pSegment->lSegNum;
+      usRC = -2;
+    }
 
     if ( !usRC )
     {
@@ -1452,7 +1456,7 @@ USHORT /*APIENTRY*/ MEMINSERTSEGMENT
     
     #ifdef IMPORT_LOGGING
     // write segment to log file
-    if ( T5Logger::GetInstance()->CheckLogLevel(T5INFO) )
+    if ( T5Logger::GetInstance()->CheckLogLevel(T5DEBUG) )
     {
       T5LOG(T5DEBUG) <<"Segment "<<pSegment->lSegNo <<" not imported";
       T5LOG(T5DEBUG) <<"; Reason         = " <<  pSegment->szReason ;

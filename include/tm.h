@@ -1547,8 +1547,8 @@ struct TMX_SENTENCE
     UtlAlloc( (PVOID *) &pAddString, 0L, 0L, NOMSG );
     UtlAlloc( (PVOID *) &pTermTokens, 0L, 0L, NOMSG ); 
   }
-
-};
+  bool wasParsedSuccessfully()const {return pStrings && pStrings->isParsed(); }
+}; 
 using PTMX_SENTENCE = TMX_SENTENCE *;
 
 

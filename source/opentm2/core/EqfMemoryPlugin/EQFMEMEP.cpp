@@ -1596,7 +1596,7 @@ USHORT FCTDATA::MemFuncPrepExport
   PPROCESSCOMMAREA pCommArea = NULL;   // ptr to commmunication area
 
   if(pszMemName && pszOutFile){
-    T5LOG( T5DEBUG) << "called MemFuncPrepExport memName = " << pszMemName << "; pszOutFile = " << pszOutFile << "; options = " <<lOptions;
+    T5LOG( T5DEVELOP) << "called MemFuncPrepExport memName = " << pszMemName << "; pszOutFile = " << pszOutFile << "; options = " <<lOptions;
   }else{
     T5LOG(T5ERROR) << "called MemFuncPrepExport memName or output file path is NULL; options = "<<lOptions;
   }
@@ -1668,24 +1668,24 @@ USHORT FCTDATA::MemFuncPrepExport
 
     if ( lOptions & UTF16_OPT )
     {
-      T5LOG(T5DEBUG) <<"MemFuncPrepExport::setted pIDA->usExpMode = MEM_SGMLFORMAT_UNICODE; fNAME = "<< pszMemName;
+      T5LOG(T5DEVELOP) <<"MemFuncPrepExport::setted pIDA->usExpMode = MEM_SGMLFORMAT_UNICODE; fNAME = "<< pszMemName;
       pIDA->usExpMode = MEM_SGMLFORMAT_UNICODE;
     }
     else if ( lOptions & ANSI_OPT )
     {
-      T5LOG(T5DEBUG) <<"MemFuncPrepExport::setted pIDA->usExpMode = MEM_SGMLFORMAT_ANSI; fNAME = "<< pszMemName;
+      T5LOG(T5DEVELOP) <<"MemFuncPrepExport::setted pIDA->usExpMode = MEM_SGMLFORMAT_ANSI; fNAME = "<< pszMemName;
       pIDA->usExpMode = MEM_SGMLFORMAT_ANSI;
     }
     else if ( lOptions & TMX_UTF8_OPT )
     {
       if ( lOptions & TMX_NOCRLF_OPT )
       {
-        T5LOG(T5DEBUG) <<"MemFuncPrepExport::setted pIDA->usExpMode = MEM_FORMAT_TMX_UTF8_NOCRLF; fNAME = "<< pszMemName;
+        T5LOG(T5DEVELOP) <<"MemFuncPrepExport::setted pIDA->usExpMode = MEM_FORMAT_TMX_UTF8_NOCRLF; fNAME = "<< pszMemName;
         pIDA->usExpMode =  MEM_FORMAT_TMX_UTF8_NOCRLF;
       }
       else
       {
-        T5LOG(T5DEBUG) <<"MemFuncPrepExport::setted pIDA->usExpMode = MEM_FORMAT_TMX_UTF8; fNAME = "<< pszMemName;
+        T5LOG(T5DEVELOP) <<"MemFuncPrepExport::setted pIDA->usExpMode = MEM_FORMAT_TMX_UTF8; fNAME = "<< pszMemName;
         pIDA->usExpMode =  MEM_FORMAT_TMX_UTF8;
       } /* endif */         
     }
@@ -1693,18 +1693,18 @@ USHORT FCTDATA::MemFuncPrepExport
     {
       if ( lOptions & TMX_NOCRLF_OPT )
       {
-        T5LOG( T5DEBUG) <<"MemFuncPrepExport::setted pIDA->usExpMode = MEM_FORMAT_TMX_NOCRLF; fNAME = "<< pszMemName;
+        T5LOG( T5DEVELOP) <<"MemFuncPrepExport::setted pIDA->usExpMode = MEM_FORMAT_TMX_NOCRLF; fNAME = "<< pszMemName;
         pIDA->usExpMode =  MEM_FORMAT_TMX_NOCRLF;
       }
       else
       {
-        T5LOG( T5DEBUG) <<"MemFuncPrepExport::setted pIDA->usExpMode = MEM_FORMAT_TMX; fNAME = "<< pszMemName;
+        T5LOG( T5DEVELOP) <<"MemFuncPrepExport::setted pIDA->usExpMode = MEM_FORMAT_TMX; fNAME = "<< pszMemName;
         pIDA->usExpMode =  MEM_FORMAT_TMX;
       } /* endif */         
     }
     else
     {
-      T5LOG( T5DEBUG) <<"MemFuncPrepExport::setted pIDA->usExpMode = MEM_SGMLFORMAT_ASCII; fNAME = "<< pszMemName;
+      T5LOG( T5DEVELOP) <<"MemFuncPrepExport::setted pIDA->usExpMode = MEM_SGMLFORMAT_ASCII; fNAME = "<< pszMemName;
       pIDA->usExpMode = MEM_SGMLFORMAT_ASCII;
     } /* endif */
 

@@ -322,7 +322,7 @@ USHORT EqfMemory::TmtXGet
 #endif
 
 
-  if(T5Logger::GetInstance()->CheckLogLevel(T5DEBUG)){    
+  if(T5Logger::GetInstance()->CheckLogLevel(T5DEVELOP)){    
       auto str_source = EncodingHelper::convertToUTF8(pTmGetIn->szSource );
       T5LOG(T5DEBUG) << "== Lookup in memory  ==" << stTmSign.szName <<" == ;\tLookupSource = >>>" <<str_source << "<<<" ;
       auto str = EncodingHelper::convertToUTF8(pTmGetIn->szSource);
@@ -2773,7 +2773,7 @@ USHORT FuzzyTest ( EqfMemory* pTmClb,           //ptr to control block
       lLeftTgtLen = RECLEN(pTmRecord) - pTmRecord->usFirstTargetRecord;
 
       T5LOG( T5INFO) << "FuzzyTest: Checking targets, lLeftTgtLen = "<<lLeftTgtLen;
-      while ((lLeftTgtLen > 0) && ( lLeftTgtLen >= RECLEN(pTMXTargetRecord) ) &&  (RECLEN(pTMXTargetRecord) != 0) )
+      while ((lLeftTgtLen >= 0) && ( lLeftTgtLen >= RECLEN(pTMXTargetRecord) ) &&  (RECLEN(pTMXTargetRecord) != 0) )
       {
         BOOL fTestCLB = TRUE;
         USHORT usModifiedTranslationFlag = 0;
@@ -3458,14 +3458,13 @@ VOID CleanupTempMatch( PTMX_MATCHENTRY pTempMatch,
   //with the highest frequency are at the top
   usEntriesInList = usEntries;
   qsort( pTempMatch, usEntries, sizeof(TMX_MATCHENTRY), CompCount );
-  T5LOG( T5INFO) << "CleanupTempMatch: Ranked entries after sort are:" ;
-
-  if(T5Logger::GetInstance()->CheckLogLevel(T5DEBUG))
-  {
+  if(T5Logger::GetInstance()->CheckLogLevel(T5DEVELOP))
+  {  
+    T5LOG( T5INFO) << "CleanupTempMatch: Ranked entries after sort are:";
     PTMX_MATCHENTRY pTest = pTempMatch;
     for ( i = 0; i < usEntries; i++, pTest++ )
     {
-      T5LOG( T5DEBUG) << "ulKey=" << pTest->ulKey << " usMaxVotes=" << pTest->usMaxVotes << " cCount=" <<pTest->cCount ;
+      T5LOG( T5DEVELOP) << "ulKey=" << pTest->ulKey << " usMaxVotes=" << pTest->usMaxVotes << " cCount=" <<pTest->cCount ;
     } /* endfor */
   }
 
@@ -3474,9 +3473,9 @@ VOID CleanupTempMatch( PTMX_MATCHENTRY pTempMatch,
 
   //fill pMatchEntry with the highest ranked entries
   pTempPos = pTempMatch;
-  T5LOG( T5INFO) << "CleanupTempMatch: Highest ranked entries returned are:" ;
   for ( i = 0; i < usEntries; i++, pMatchEntry++, pTempPos++ )
   {
+    T5LOG( T5INFO) << "CleanupTempMatch: Highest ranked entries returned are:" ;
     memcpy( pMatchEntry, pTempPos, sizeof(TMX_MATCHENTRY ));
     T5LOG(T5INFO) <<  "::ulKey=" << (pTempPos->ulKey) << " usMaxVotes=" << (pTempPos->usMaxVotes)<<" cCount="<< ( pTempPos->cCount );
   } /* endfor */
@@ -3484,14 +3483,14 @@ VOID CleanupTempMatch( PTMX_MATCHENTRY pTempMatch,
 
   // add highest matches by using a different metric
   qsort( pTempMatch, usEntriesInList, sizeof(TMX_MATCHENTRY), CompCountVotes );
-  T5LOG( T5INFO) << "CleanupTempMatch: Ranked entries after sort are:" ;
 
-  if(T5Logger::GetInstance()->CheckLogLevel(T5DEBUG))
+  if(T5Logger::GetInstance()->CheckLogLevel(T5DEVELOP))
   {
+    T5LOG( T5INFO) << "CleanupTempMatch: Ranked entries after sort are:" ;
     PTMX_MATCHENTRY pTest = pTempMatch;
     for ( i = 0; i < usEntries; i++, pTest++ )
     {
-      T5LOG( T5DEBUG) << "ulKey="<<(pTest->ulKey)<<" usMaxVotes="<<(pTest->usMaxVotes)<<" cCount="<<(pTest->cCount);
+      T5LOG( T5DEVELOP) << "ulKey="<<(pTest->ulKey)<<" usMaxVotes="<<(pTest->usMaxVotes)<<" cCount="<<(pTest->cCount);
     } /* endfor */
   }
 

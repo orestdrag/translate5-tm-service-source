@@ -79,6 +79,7 @@ XERCES_CPP_NAMESPACE_USE
 #include "CXMLWRITER.H"
 #include "LanguageFactory.H"
 #include "EncodingHelper.h"
+#include "Proposal.h"
 
 // mask for character entitites below 0x20
 #define ENTITY_MASK_STARTCHAR_W L'_'
@@ -422,7 +423,7 @@ std::wstring TagReplacer::PrintTag(TagInfo& tag){
   if(!fClosingTag && fClosedTag)
     res += '/';
   res += ">";
-  T5LOG( T5DEBUG) <<  ":: generated tag = " <<  res;
+  T5LOG( T5DEVELOP) <<  ":: generated tag = " <<  res;
   return EncodingHelper::convertToWChar(res.c_str());
 }
 
@@ -698,7 +699,7 @@ TagInfo TagReplacer::GenerateReplacingTag(ELEMENTID tagType, AttributeList* attr
   }
 
   if(T5Logger::GetInstance()->CheckLogLevel(T5DEBUG)){
-    T5LOG(T5DEBUG) << "Generated tag logging:" << LogTag(tag);
+    T5LOG(T5DEVELOP) << "Generated tag logging:" << LogTag(tag);
   }
   return tag;
 }
@@ -1750,6 +1751,7 @@ void StringTagVariants::parseTrg(){
       char buff[512];
       handler.GetErrorText(buff, sizeof(buff));
       T5LOG(T5ERROR) << ":: error during parsing trg("<< trg <<")  : " << buff;
+      fSuccess = false;
     }
 
     genericTarget = handler.GetParsedData();    
@@ -1850,7 +1852,7 @@ void RequestTagReplacer::parseAndReplaceTags(){
   }
   
   
-  if(T5Logger::GetInstance()->CheckLogLevel(T5DEBUG)){
+  if(T5Logger::GetInstance()->CheckLogLevel(T5DEVELOP)){
     T5LOG( T5DEBUG) <<  ":: request tags: ";
     for(int i = 0; i < handler.tagReplacer.requestTagList.size(); i++){
       T5LOG(T5DEVELOP) << TagReplacer::LogTag(handler.tagReplacer.requestTagList[i]);
@@ -2209,7 +2211,7 @@ void TMXParseHandler::startElement(const XMLCh* const name, AttributeList& attri
             tagReplacer.activeSegment = SOURCE_SEGMENT;
 
             if(fOkLang){
-              T5LOG( T5DEBUG) <<  ":: _szLang = " << _szLang << "; pBuf->szMemSourceLang = " << pBuf->szMemSourceLang;
+              T5LOG( T5DEVELOP)<<  ":: _szLang = " << _szLang << "; pBuf->szMemSourceLang = " << pBuf->szMemSourceLang;
               if(false == LanguageFactory::getInstance()->isMatchingLangs(pBuf->szMemSourceLang, _szLang))
               //if( strcasecmp( _szLang, pBuf->szMemSourceLang ) ) 
               {
@@ -2232,11 +2234,15 @@ void TMXParseHandler::startElement(const XMLCh* const name, AttributeList& attri
       case TMX_SENTENCE_ELEMENT:
         //fTargetSegment = false;
       case SEG_ELEMENT:
+      {
         CurElement.fInlineTagging = FALSE;
         CurElement.fInsideTagging = FALSE;
-        pBuf->szData[0] = 0; // reset data buffer
-        pBuf->szNormalizedData[0] = 0;
-        pBuf->szReplacedNpData[0] = 0;
+        
+        // reset data buffer
+        size_t size_buf1 = sizeof(pBuf->szData)/ sizeof(pBuf->szData[0]);
+        wmemset(pBuf->szData, 0, sizeof(pBuf->szData)/ sizeof(pBuf->szData[0]));
+        wmemset(pBuf->szNormalizedData, 0, sizeof(pBuf->szNormalizedData)/ sizeof(pBuf->szNormalizedData[0]));
+        wmemset(pBuf->szReplacedNpData, 0, sizeof(pBuf->szReplacedNpData)/ sizeof(pBuf->szReplacedNpData[0]));
 
         //reset inclosing tags flags
         pBuf->inclosingTagsAtTheStartOfSegment = 0;
@@ -2244,6 +2250,7 @@ void TMXParseHandler::startElement(const XMLCh* const name, AttributeList& attri
 
         fCatchData = TRUE;    
         break;
+      }
       case T5_N_ELEMENT:
       {
       //  break;
@@ -2272,7 +2279,7 @@ void TMXParseHandler::startElement(const XMLCh* const name, AttributeList& attri
           }
 
           if((iCurLen + replacingTag.size()) < DATABUFFERSIZE){
-            if(T5Logger::GetInstance()->CheckLogLevel(T5DEBUG)){
+            if(T5Logger::GetInstance()->CheckLogLevel(T5DEVELOP)){
               T5LOG( T5DEBUG) << ":: parsed standalone tag \'<" << sName << ">\' , replaced with " << EncodingHelper::convertToUTF8(replacingTag);
             }
             wcscat(pBuf->szData, replacingTag.c_str());
@@ -2298,7 +2305,7 @@ void TMXParseHandler::startElement(const XMLCh* const name, AttributeList& attri
         fCatchData = false;
         CurElement.fInsideTagging = true;
         if((iCurLen + replacingTag.size()) < DATABUFFERSIZE){         
-          if(T5Logger::GetInstance()->CheckLogLevel(T5DEBUG)){       
+          if(T5Logger::GetInstance()->CheckLogLevel(T5DEVELOP)){       
             T5LOG( T5DEBUG) << ":: parsed bpt tag \'<" << sName << ">\' , replaced with " << EncodingHelper::convertToUTF8(replacingTag);
           }
           wcscat(pBuf->szData, replacingTag.c_str());
@@ -2319,7 +2326,7 @@ void TMXParseHandler::startElement(const XMLCh* const name, AttributeList& attri
         std::wstring replacedTag = tagReplacer.PrintTag(tag);
         int iCurLen = wcslen(pBuf->szData);
         if((iCurLen + replacedTag.size()) < DATABUFFERSIZE){
-          if(T5Logger::GetInstance()->CheckLogLevel(T5DEBUG)){           
+          if(T5Logger::GetInstance()->CheckLogLevel(T5DEVELOP)){           
             T5LOG( T5DEBUG) << ":: parsed \'" << pszName << "\' tag \'<" << sName << ">\' , replaced with " << EncodingHelper::convertToUTF8(replacedTag);
           }
           wcscat(pBuf->szData, replacedTag.c_str());  
@@ -2342,7 +2349,7 @@ void TMXParseHandler::startElement(const XMLCh* const name, AttributeList& attri
 
         int iCurLen = wcslen(pBuf->szData);
         if((iCurLen + replacingTag.size()) < DATABUFFERSIZE){  
-          if(T5Logger::GetInstance()->CheckLogLevel(T5DEBUG)){   
+          if(T5Logger::GetInstance()->CheckLogLevel(T5DEVELOP)){   
             T5LOG( T5DEBUG) << ":: parsed pair tag \'<" << sName  << ">\' , replaced with " << EncodingHelper::convertToUTF8(replacingTag);
           }
           wcscat(pBuf->szData, replacingTag.c_str());
@@ -2509,7 +2516,7 @@ void TMXParseHandler::endElement(const XMLCh* const name )
   std::string sName = EncodingHelper::convertToUTF8(u16name);
   char* pszName = (char*) sName.c_str();
 
-  T5LOG( T5DEBUG) << "endElement: " << pszName;
+  T5LOG( T5DEVELOP) << "endElement: " << pszName;
   ELEMENTID CurrentID = CurElement.ID;
   PROPID    CurrentProp = CurElement.PropID;
   
@@ -2534,7 +2541,7 @@ void TMXParseHandler::endElement(const XMLCh* const name )
       {
         int iCurrent = 0;
         PTMXTUV pSourceTuv = NULL;
-        if(T5Logger::GetInstance()->CheckLogLevel(T5DEBUG)){              
+        if(T5Logger::GetInstance()->CheckLogLevel(T5DEVELOP)){              
           T5LOG( T5DEBUG) <<  "::parsed end of TU_ELEMENT::request tags: ";
           for(int i = 0; i < tagReplacer.requestTagList.size(); i++){
             T5LOG(T5DEVELOP) << TagReplacer::LogTag(tagReplacer.requestTagList[i]);
@@ -2659,7 +2666,13 @@ void TMXParseHandler::endElement(const XMLCh* const name )
                 pBuf->SegmentData.fValid = FALSE;
                 sprintf( pBuf->SegmentData.szReason, "Segment target contains invalid characters." );
               }
-              else
+              else if(OTMPROPOSAL_MAXSEGLEN <= iLenSource){
+                pBuf->SegmentData.fValid = FALSE;
+                sprintf( pBuf->SegmentData.szReason, "Segment source contains is too long,len=%d, while limit is %d.", iLenSource, OTMPROPOSAL_MAXSEGLEN);
+              }else if(OTMPROPOSAL_MAXSEGLEN <= iLenCurrent){
+                pBuf->SegmentData.fValid = FALSE;
+                sprintf( pBuf->SegmentData.szReason, "Segment target contains is too long, len=%d, while limit is %d.", iLenCurrent, OTMPROPOSAL_MAXSEGLEN);
+              }else
               {
                 pBuf->SegmentData.fValid = TRUE;
               } /* endif */
@@ -2958,9 +2971,9 @@ void TMXParseHandler::endElement(const XMLCh* const name )
           }  
         }//endif
         
-        if(T5Logger::GetInstance()->CheckLogLevel(T5DEBUG)){      
+        if(T5Logger::GetInstance()->CheckLogLevel(T5DEVELOP)){      
           result = EncodingHelper::convertToUTF8(pBuf->szData);
-          T5LOG( T5DEBUG) << ":: parsed end of TMX sentence, result = \'" << result << 
+          T5LOG( T5DEVELOP) << ":: parsed end of TMX sentence, result = \'" << result << 
               "\'  ->  fSkipped inclosed tag pair = " << inclosingTagsSkipped <<"; Generated tags first = \'" <<
               EncodingHelper::convertToUTF8(begPairTag) << "last tag =\'" << EncodingHelper::convertToUTF8(endPairTag.c_str()), "\'";     
         }
@@ -2982,7 +2995,7 @@ void TMXParseHandler::endElement(const XMLCh* const name )
     case BX_ELEMENT:   
     case EX_ELEMENT:
     {
-      T5LOG( T5DEBUG) << ":: parsed end of tag \'" << sName << "\'";
+      T5LOG( T5DEVELOP) << ":: parsed end of tag \'" << sName << "\'";
       fCatchData = true;
       CurElement.fInsideTagging = false;
       CurElement.fInlineTagging = true;
@@ -2996,7 +3009,7 @@ void TMXParseHandler::endElement(const XMLCh* const name )
       auto replacingTagStr = tagReplacer.PrintTag(tag); 
       int iCurLen = wcslen(pBuf->szData);
       if((iCurLen + replacingTagStr.size()) < DATABUFFERSIZE){            
-          T5LOG( T5DEBUG) << ":: parsed end pair tag \'</" << sName << ">\' , replaced with <ept i=\'" << "calculate i";
+          T5LOG( T5DEVELOP) << ":: parsed end pair tag \'</" << sName << ">\' , replaced with <ept i=\'" << "calculate i";
           wcscat(pBuf->szData, replacingTagStr.c_str());   
           if(fCreateNormalizedStr){
             wcscat(pBuf->szReplacedNpData, replacingTagStr.c_str());
