@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.10)
 SET(APP_VERSION_GLOBAL 0)
 SET(APP_VERSION_MAJOR 6)
-SET(APP_VERSION_MINOR 80)
+SET(APP_VERSION_MINOR 81)
 
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED True)
@@ -16,39 +16,31 @@ project(T5MEMORY VERSION ${APP_VERSION})
 #set(CMAKE_CXX_COMPILER "/usr/bin/g++-10")
 
 # Define an option for selecting the sanitizer
-#set(SANITIZER "asan" CACHE STRING "Specify sanitizer type: asan, tsan, or ubsan")
+# Define an option to enable AddressSanitizer
+option(ENABLE_ASAN "Enable AddressSanitizer" OFF)
 
-# Apply the chosen sanitizer flags
-#if(SANITIZER STREQUAL "asan")
-#    message("AddressSanitizer is enabled")
-#    set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -pthread -fno-omit-frame-pointer -fsanitize=address")# -fsanitize-recover=address")
-#    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -pthread -fno-omit-frame-pointer -fsanitize=address")# -fsanitize-recover=address")
-#    set(CMAKE_LINKER_FLAGS "${CMAKE_LINKER_FLAGS} -pthread -fno-omit-frame-pointer -fsanitize=address")# -fsanitize-recover=address")
-#elseif(SANITIZER STREQUAL "tsan")
-#    message("ThreadSanitizer is enabled")
-#    set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -pthread -fno-omit-frame-pointer -fsanitize=thread")
-#    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -pthread -fno-omit-frame-pointer -fsanitize=thread")
-#    set(CMAKE_LINKER_FLAGS "${CMAKE_LINKER_FLAGS} -pthread -fno-omit-frame-pointer -fsanitize=thread")
-#elseif(SANITIZER STREQUAL "ubsan")
-#    message("Undefined Behavior Sanitizer is enabled")
-#    set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -pthread -fno-omit-frame-pointer -fsanitize=undefined")
-#    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -pthread -fno-omit-frame-pointer -fsanitize=undefined")
-#    set(CMAKE_LINKER_FLAGS "${CMAKE_LINKER_FLAGS} -pthread -fno-omit-frame-pointer  -fsanitize=undefined -lstdc++")
-#else()
-#    message("No sanitizer is enabled")
-#endif()
+# Apply the chosen sanitizer flags if ENABLE_ASAN is ON
+if(ENABLE_ASAN)
+    message("AddressSanitizer is enabled")
+    set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -pthread -fno-omit-frame-pointer -fsanitize=address -fsanitize-recover=address")
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -pthread -fno-omit-frame-pointer -fsanitize=address -fsanitize-recover=address")
+    set(CMAKE_LINKER_FLAGS "${CMAKE_LINKER_FLAGS} -pthread -fno-omit-frame-pointer -fsanitize=address -fsanitize-recover=address")
+    # Optionally set runtime options to make ASan output more informative
+    set(ASAN_OPTIONS "log_path=/root/asan.log:detect_stack_use_after_return=1:detect_leaks=1:fast_unwind_on_malloc=0:halt_on_error=1:verbosity=1")
+    add_definitions(-DASAN_OPTIONS="${ASAN_OPTIONS}")
+    add_custom_target(set_asan_options ALL
+        COMMAND ${CMAKE_COMMAND} -E env ASAN_OPTIONS="${ASAN_OPTIONS}" ${CMAKE_COMMAND} .
+    )
+else()
+    message("No sanitizer is enabled")
+endif()
 
 # Enable ASan with verbose error reporting for detailed info - slow asan 
 #set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -pthread -fsanitize=address -fno-omit-frame-pointer")# -O1 -g")
 #set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -pthread -fsanitize=address -fno-omit-frame-pointer")# -O1 -g")
 #set(CMAKE_LINKER_FLAGS "${CMAKE_LINKER_FLAGS} -pthread -fno-omit-frame-pointer -fsanitize=address")# -O1 -g  -fsanitize-recover=address")
 
-# Optionally set runtime options to make ASan output more informative
-#set(ASAN_OPTIONS "log_path=/root/asan.log:detect_stack_use_after_return=1:detect_leaks=1:fast_unwind_on_malloc=0:halt_on_error=1:verbosity=1")
-#add_definitions(-DASAN_OPTIONS="${ASAN_OPTIONS}")
-#add_custom_target(set_asan_options ALL
-#    COMMAND ${CMAKE_COMMAND} -E env ASAN_OPTIONS="${ASAN_OPTIONS}" ${CMAKE_COMMAND} .
-#)
+
 
 set(CMAKE_BUILD_TYPE Debug)
 #include(GNUInstallDirs)

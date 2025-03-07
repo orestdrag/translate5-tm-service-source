@@ -22,6 +22,19 @@
 #include <sys/personality.h>
 
 
+#if defined(__has_feature)
+#  if __has_feature(address_sanitizer)
+#    define ADDRESS_SANITIZER_ENABLED 1
+#  endif
+#endif
+
+#if !defined(ADDRESS_SANITIZER_ENABLED) && defined(__SANITIZE_ADDRESS__)
+#  define ADDRESS_SANITIZER_ENABLED 1
+#endif
+
+
+
+
 static bool ValidatePort(const char* flagname, int32_t value) {
    if (value > 0 && value < 32768)   // value is ok
      return true;
@@ -266,9 +279,15 @@ std::string to_hex(unsigned long src){
 int proxygen_server_init();
 int main(int argc, char* argv[]) {
   //FLAGS_disable_aslr = FLAGS_add_premade_socket = FLAGS_log_tcp_backog_events = true;
+  bool fAsanEnabled = false;
+
+#if defined(ADDRESS_SANITIZER_ENABLED)
+// Code specific to AddressSanitizer
+  fAsanEnabled = true;
+#endif
 
   if(FLAGS_disable_aslr){
-   personality(ADDR_NO_RANDOMIZE);
+    personality(ADDR_NO_RANDOMIZE);
     unsigned long pers = personality(0xffffffff);
     // Check if ASLR is enabled (ADDR_NO_RANDOMIZE is 0x0040000)
     if (!(pers & ADDR_NO_RANDOMIZE)) {
@@ -278,7 +297,7 @@ int main(int argc, char* argv[]) {
             return 1;
         }
     }
-  }
+  }   
    setlocale(LC_ALL, "");
    std::signal(SIGINT, signal_handler);
    std::signal(SIGABRT, signal_handler);
@@ -305,7 +324,11 @@ int main(int argc, char* argv[]) {
    //#endif
    //#ifdef GFLAGS_ENABLED
    FLAGS_alsologtostderr = true;
-   //FLAGS_t5loglevel = T5DEVELOP;
+   //FLAGS_t5loglevel = 0;
+   //FLAGS_log_every_request_end = FLAGS_log_every_request_start = true;
+   //FLAGS_http_listen_backlog = FLAGS_socket_backlog = 32;//128;
+   //FLAGS_debug_sleep_in_request_run = 10000000;
+
    //google::InstallFailureSignalHandler();
    // google::InstallFailureWriter(FailureWriter);
    google::ParseCommandLineFlags(&argc, &argv, true);
@@ -318,7 +341,7 @@ int main(int argc, char* argv[]) {
    // Install the custom LogSink
    //static NoNewlineLogSink sink;
    //google::AddLogSink(&sink);
-   T5LOG(T5TRANSACTION) <<"Worker thread starting, v = "<<T5GLOBVERSION<<"."<< T5MAJVERSION<<"."<<T5MINVERSION;   
+   T5LOG(T5TRANSACTION) <<"Worker thread starting, v = "<<T5GLOBVERSION<<"."<< T5MAJVERSION<<"."<<T5MINVERSION << "; asan = " << fAsanEnabled; 
    
   // Get the current personality flags
   unsigned long pers = personality(0xffffffff);
