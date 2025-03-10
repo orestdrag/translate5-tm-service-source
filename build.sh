@@ -26,7 +26,15 @@ do_build() {
   cd _build
   #cmake -DCMAKE_BUILD_TYPE=${BUILD_TYPE} VERBOSE=1 -j1 ..
   #make VERBOSE=1 -j1
-  cmake -DCMAKE_BUILD_TYPE=${BUILD_TYPE} ../source
+  #cmake -DCMAKE_BUILD_TYPE=${BUILD_TYPE} ../source
+  
+  # Check if ASan should be enabled
+  if [ "$ENABLE_ASAN" = "ON" ]; then
+    cmake -DCMAKE_BUILD_TYPE=${BUILD_TYPE} -DENABLE_ASAN=ON ../source
+  else
+    cmake -DCMAKE_BUILD_TYPE=${BUILD_TYPE} ../source
+  fi
+  
   make -j${CORES}
 }
 
