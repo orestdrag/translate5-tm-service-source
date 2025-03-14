@@ -12,6 +12,53 @@
 #include "opentm2/core/utilities/LogWrapper.h"
 #include "opentm2/core/utilities/EncodingHelper.h"
 
+#include <cctype>
+
+// Function to extract JSON objects from a JSON array string
+std::vector<std::string> JSONFactory::extractJsonObjects(const std::string& jsonArray, const std::string& arrayKey, std::string& errMsg) {
+    std::vector<std::string> jsonObjects;
+    std::string key = "\"" + arrayKey + "\": [";
+    size_t startPos = jsonArray.find(key);
+    if (startPos == std::string::npos) {
+        errMsg = "Array key not found.";
+        return jsonObjects;
+    }
+    startPos += key.length();
+    size_t endPos = jsonArray.find(']', startPos);
+    if (endPos == std::string::npos) {
+        errMsg = "Array closing bracket not found.";
+        return jsonObjects;
+    }
+    std::string arrayContent = jsonArray.substr(startPos, endPos - startPos);
+
+    size_t braceCount = 0;
+    size_t objectStart = std::string::npos;
+    bool inString = false;
+    for (size_t i = 0; i < arrayContent.length(); ++i) {
+        char c = arrayContent[i];
+        // Toggle inString when encountering an unescaped double quote
+        if (c == '"' && (i == 0 || arrayContent[i - 1] != '\\')) {
+            inString = !inString;
+        }
+        // Only consider braces if not in a string
+        if (!inString) {
+            if (c == '{') {
+                if (braceCount == 0) {
+                    objectStart = i;
+                }
+                braceCount++;
+            } else if (c == '}') {
+                braceCount--;
+                if (braceCount == 0 && objectStart != std::string::npos) {
+                    std::string jsonObject = arrayContent.substr(objectStart, i - objectStart + 1);
+                    jsonObjects.push_back(jsonObject);
+                    objectStart = std::string::npos;
+                }
+            }
+        }
+    }
+    return jsonObjects;
+}
 
 
 /*! \brief This static method returns a pointer to the JSONFactory object.

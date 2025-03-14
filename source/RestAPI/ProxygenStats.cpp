@@ -46,6 +46,11 @@ int ProxygenStats::recordRequest(int command) {
       fuzzyReqCount_++;
       break;
     }
+    case COMMAND::MULTIFUZZY: 
+    {        
+      multiFuzzyReqCount_++;
+      break;
+    }
     case COMMAND::CONCORDANCE: 
     {        
       concordanceReqCount_++;
@@ -157,6 +162,11 @@ int ProxygenStats::addRequestTime(int command,milliseconds time) {
     case COMMAND::FUZZY: 
     {        
       fuzzyReqSumTime_ += time;
+      break;
+    }
+    case COMMAND::MULTIFUZZY: 
+    {        
+      multiFuzzyReqSumTime_ += time;
       break;
     }
     case COMMAND::CONCORDANCE: 

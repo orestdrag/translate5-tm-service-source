@@ -87,6 +87,7 @@ typedef char* PSZ;
         CREATE_MEM = START_COMMANDS_WITH_BODY, 
         EXPORT_MEM_TMX_STREAM,
         FUZZY,
+        MULTIFUZZY,
         CONCORDANCE,
         DELETE_ENTRY,
         GET_ENTRY,
@@ -121,6 +122,7 @@ constexpr  std::initializer_list<std::pair<const COMMAND, const char*>> CommandT
         { FLAGS_INFO, "FLAGS_INFO" },
         { CREATE_MEM, "CREATE_MEM" },
         { FUZZY, "FUZZY" },
+        { MULTIFUZZY, "MULTIFUZZY" },
         { CONCORDANCE, "CONCORDANCE" },
         { DELETE_ENTRY, "DELETE_ENTRY" },
         

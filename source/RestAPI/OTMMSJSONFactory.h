@@ -57,6 +57,9 @@ typedef struct _JSONPARSECONTROL
 	static JSONFactory* getInstance();
 
 
+  std::vector<std::string> extractJsonObjects(const std::string& jsonArray, const std::string& arrayKey, std::string& errMsg);
+
+
   /*! \brief return codes resturned by JSON factory
   */
   static const int ERROR_INVALIDPARSEHANDLE         = 2001;

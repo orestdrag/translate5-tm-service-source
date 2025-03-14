@@ -8,7 +8,7 @@
 #include <proxygen/httpserver/RequestHandler.h>
 #include <proxygen/httpserver/ExMessageHandler.h>
 #include <proxygen/httpserver/ResponseBuilder.h>
-
+#include <vector>
 #include "tm.h"
 
 #include "lowlevelotmdatastructs.h"
@@ -24,7 +24,6 @@ class RequestData{
 protected:
     std::shared_ptr<int> memRef;
     int loggingThreshold = -1;
-    std::shared_ptr<EqfMemory> mem;
     int requestType = 0;
     static JSONFactory json_factory;
 
@@ -33,8 +32,10 @@ protected:
     //RequestData(); // json was parsed in sub class
 public:
     //std::recursive_timed_mutex request_mutex;
-    ProxygenStats* stats = nullptr;
+    //ProxygenStats* stats = nullptr;
     proxygen::ResponseHandler* responseHandler = nullptr;
+
+    std::shared_ptr<EqfMemory> mem;
     //proxygen::HTTPMessage response;
 
     int _id_ = 0;
@@ -51,10 +52,8 @@ public:
 
     //return fields
     std::string outputMessage;
-    //std::string errorMsg;
     int _rc_ = 0; 
     int _rest_rc_ = 0;
-    //timestamp
 
 
     RequestData(COMMAND cmnd, const std::string& json, const std::string& memName): strBody(json), strMemName(memName), command(cmnd) {}
@@ -469,10 +468,26 @@ class FuzzySearchRequestData: public RequestData{
     FuzzySearchRequestData(const std::string& json, const std::string& memName): RequestData(FUZZY,json, memName){};
     FuzzySearchRequestData(): RequestData(FUZZY){};
 
+    int reset();
 protected:
     OtmProposal Data ;
     char szDateTime[100];
     char szType[100];
+
+    int parseJSON() override ;
+    int checkData() override ;
+    int execute()   override ;
+};
+
+class MultiFuzzySearchRequestData: public RequestData{    
+    public:
+    MultiFuzzySearchRequestData(const std::string& json, const std::string& memName): RequestData(MULTIFUZZY,json, memName){};
+    MultiFuzzySearchRequestData(): RequestData(MULTIFUZZY){};
+
+protected:
+    std::vector<std::string> fuzzyRequestObjects;
+    FuzzySearchRequestData fuzzySearch;
+    std::string errMsg;
 
     int parseJSON() override ;
     int checkData() override ;

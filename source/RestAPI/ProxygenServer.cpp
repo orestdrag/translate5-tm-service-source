@@ -286,8 +286,9 @@ class ProxygenHandlerFactory : public RequestHandlerFactory {
         }
       }
       if(!urlMemName.empty()){//for command memName should always exists
-        if(methodStr == "POST"){
-          if(urlCommand == "fuzzysearch"){
+        if(methodStr == "POST"){ if(urlCommand == "multifuzzysearch"){
+          requestHandler->pRequest = new MultiFuzzySearchRequestData();
+        }else if(urlCommand == "fuzzysearch"){
             requestHandler->pRequest = new FuzzySearchRequestData();
           }else if(urlCommand == "concordancesearch"){
             requestHandler->pRequest = new ConcordanceSearchRequestData();

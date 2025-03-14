@@ -391,6 +391,9 @@ public:
 	//std::string strDocName;
 	char szDocName[OTMPROPOSAL_MAXNAMELEN];
 
+  /*! \briefCustom Id provided for the segment in request to track segments in response in multifuzzy*/
+	char szCustomId[OTMPROPOSAL_MAXNAMELEN];
+
 	/*! \brief Segment number within the document from which the proposal comes from. */
   long lSegmentId;                  
 

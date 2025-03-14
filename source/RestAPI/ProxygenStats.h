@@ -203,6 +203,7 @@ class ProxygenStats {
   atomic_uint64_t flushMemReqCount_{0};
   
   atomic_uint64_t fuzzyReqCount_{0};
+  atomic_uint64_t multiFuzzyReqCount_{0};
   atomic_uint64_t concordanceReqCount_{0};
   atomic_uint64_t updateEntryReqCount_{0};
   atomic_uint64_t deleteEntryReqCount_{0};
@@ -227,6 +228,7 @@ class ProxygenStats {
   milliseconds flushMemSumTime_{0};
   
   milliseconds fuzzyReqSumTime_{0};
+  milliseconds multiFuzzyReqSumTime_{0};
   milliseconds concordanceSumTime_{0};
   milliseconds getEntrySumTime_{0};
   milliseconds updateEntrySumTime_{0};

@@ -303,6 +303,10 @@ int RequestData::prepareData(){
 }
 
 int RequestData::requestTM(){
+  if(nullptr != mem){
+    fValid = true;
+    return 0;
+  }
   //check if memory is loaded to tmmanager
   if(isReadOnlyRequest())
   {
@@ -417,6 +421,7 @@ bool RequestData::isWriteRequest(){
 
 bool RequestData::isReadOnlyRequest(){
   return command == COMMAND::FUZZY
+      || command == COMMAND::MULTIFUZZY
       || command == COMMAND::CONCORDANCE
       || command == COMMAND::EXPORT_MEM_TMX
       || command == COMMAND::EXPORT_MEM_INTERNAL_FORMAT
@@ -3413,6 +3418,17 @@ int DeleteEntryRequestData::execute(){
   return _rc_;
 }
 
+int FuzzySearchRequestData::reset(){
+  strBody = outputMessage = "";
+  _rest_rc_ = _rc_ = 0;
+  fValid = 0;
+
+  Data.clear();
+  memset(szDateTime, 0, sizeof(szDateTime));
+  memset(szType, 0, sizeof(szType));
+  return 0;
+}
+
 int FuzzySearchRequestData::parseJSON(){
   _rc_ = OtmMemoryServiceWorker::getInstance()->verifyAPISession();
   if ( _rc_ != 0 )
@@ -3433,6 +3449,7 @@ int FuzzySearchRequestData::parseJSON(){
   JSONFactory::JSONPARSECONTROL parseControl[] = { { L"source",         JSONFactory::UTF16_STRING_PARM_TYPE, &( Data.szSource ), sizeof( Data.szSource ) / sizeof( Data.szSource[0] ) },
                                                    { L"segmentId",  JSONFactory::INT_PARM_TYPE,          &( Data.lSegmentId ), 0 },
                                                    { L"documentName",   JSONFactory::ASCII_STRING_PARM_TYPE, &( Data.szDocName ), sizeof( Data.szDocName ) },
+                                                   { L"customId",   JSONFactory::ASCII_STRING_PARM_TYPE, &( Data.szCustomId ), sizeof( Data.szCustomId ) },
                                                    { L"sourceLang",     JSONFactory::ASCII_STRING_PARM_TYPE, &( Data.szIsoSourceLang ), sizeof( Data.szIsoSourceLang ) },
                                                    { L"targetLang",     JSONFactory::ASCII_STRING_PARM_TYPE, &( Data.szIsoTargetLang ), sizeof( Data.szIsoTargetLang ) },
                                                    { L"markupTable",    JSONFactory::ASCII_STRING_PARM_TYPE, &( Data.szMarkup ), sizeof( Data.szMarkup ) },
@@ -3603,6 +3620,9 @@ int FuzzySearchRequestData::execute(){
     json_factory.addParmToJSONW( strOutputParmsW, L"ReturnValue", _rc_ );
     json_factory.addParmToJSONW( strOutputParmsW, L"ErrorMsg", L"" );
     json_factory.addParmToJSONW( strOutputParmsW, L"NumOfFoundProposals",  Data.iNumOfProposals );
+    json_factory.addParmToJSONW( strOutputParmsW, L"searchedSrc",  Data.szSource );
+    json_factory.addParmToJSONW( strOutputParmsW, L"customId",  Data.szCustomId );
+
     if (  Data.iNumOfProposals > 0 )
     {
       json_factory.addNameToJSONW( strOutputParmsW, L"results" );
@@ -3621,6 +3641,47 @@ int FuzzySearchRequestData::execute(){
   return( _rc_ );
 }
 
+int MultiFuzzySearchRequestData::parseJSON(){
+  const std::string fieldName = "requests";
+  fuzzyRequestObjects = json_factory.extractJsonObjects(strBody, fieldName, errMsg);
+  return _rc_;
+}
+
+
+int MultiFuzzySearchRequestData::checkData(){
+  if(!errMsg.empty()){
+    return buildErrorReturn(400,errMsg.c_str());
+  }
+  return _rc_;
+}
+
+
+int MultiFuzzySearchRequestData::execute(){
+    std::stringstream ss;
+    ss <<"{\n\t \"responses\" : [";
+    int id = 0;
+
+    fuzzySearch.strMemName = strMemName;
+    fuzzySearch.mem = mem;
+    fuzzySearch.strUrl = strUrl;
+
+    for(int i = 0; i < fuzzyRequestObjects.size(); i++){
+      std::string result;
+      fuzzySearch.reset();
+      fuzzySearch.strBody = fuzzyRequestObjects[i];
+      int fsRc = fuzzySearch.run();
+
+      //ss << "\n \"" << i  << "\" : " << fuzzySearch.outputMessage << "\n";
+      ss << fuzzySearch.outputMessage << '\n';
+      if(i +1 < fuzzyRequestObjects.size()){
+        ss << ",";
+      }
+    }
+    ss << "\n]\n}";
+    outputMessage = ss.str();
+    return( _rc_ );
+ }
+ 
 int ConcordanceExtendedSearchRequestData::parseJSON(){
    _rc_ = OtmMemoryServiceWorker::getInstance()->verifyAPISession();
   if ( _rc_ != 0 )
