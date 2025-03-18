@@ -2773,7 +2773,7 @@ USHORT FuzzyTest ( EqfMemory* pTmClb,           //ptr to control block
       lLeftTgtLen = RECLEN(pTmRecord) - pTmRecord->usFirstTargetRecord;
 
       T5LOG( T5INFO) << "FuzzyTest: Checking targets, lLeftTgtLen = "<<lLeftTgtLen;
-      while ((lLeftTgtLen >= 0) && ( lLeftTgtLen >= RECLEN(pTMXTargetRecord) ) &&  (RECLEN(pTMXTargetRecord) != 0) )
+      while ((lLeftTgtLen > 0) && ( lLeftTgtLen >= RECLEN(pTMXTargetRecord) ) &&  (RECLEN(pTMXTargetRecord) != 0) )
       {
         BOOL fTestCLB = TRUE;
         USHORT usModifiedTranslationFlag = 0;
