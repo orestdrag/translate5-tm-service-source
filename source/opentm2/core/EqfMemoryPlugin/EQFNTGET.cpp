@@ -601,6 +601,8 @@ USHORT EqfMemory::TmtXGet
     } /* endfor */
   } /* endif */  
 
+  pTmGetOut->tokens = std::move(Sentence.tokens);
+
   return( usRc );
 }
 

@@ -376,6 +376,8 @@ USHORT EqfMemory::TmtXReplace
 //          through all words and keep to MAX_VOTES)                            
 //                                                                              
 //------------------------------------------------------------------------------
+DECLARE_bool(log_hashes_in_hash_sentence);
+DECLARE_bool(add_tokens_to_fuzzy);
 VOID HashSentence
 (
   PTMX_SENTENCE pSentence         // pointer to sentence structure
@@ -391,9 +393,15 @@ VOID HashSentence
   {
     pNormOffset = pSentence->pStrings->getNormStrC() + pTermTokens->usOffset;
     pTermTokens->usHash = HashTupelW( pNormOffset, pTermTokens->usLength );
-    if(T5Logger::GetInstance()->CheckLogLevel(T5DEVELOP)){
+    if(T5Logger::GetInstance()->CheckLogLevel(T5DEVELOP) || FLAGS_log_hashes_in_hash_sentence || FLAGS_add_tokens_to_fuzzy){
       auto str = EncodingHelper::convertToUTF8(pNormOffset).substr(0, pTermTokens->usLength);
-      T5LOG( T5DEBUG) <<"HashSentence:: pNormOffset = \"" << str << "\"; len = " << pTermTokens->usLength <<"; hash = " <<pTermTokens->usHash;
+      pSentence->tokens.push_back(str);
+      if(FLAGS_log_hashes_in_hash_sentence){
+        T5LOG( T5TRANSACTION) <<"HashSentence:: pNormOffset = \"" << str << "\"; len = " << pTermTokens->usLength <<"; hash = " <<pTermTokens->usHash;
+
+      }else{
+        T5LOG( T5DEBUG) <<"HashSentence:: pNormOffset = \"" << str << "\"; len = " << pTermTokens->usLength <<"; hash = " <<pTermTokens->usHash;
+      }
     }
     //max nr of hashes built
     usCount++;

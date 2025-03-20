@@ -3535,11 +3535,12 @@ int addProposalsToJSONString
   return( 0 );
 }
 
-
+DECLARE_bool(add_tokens_to_fuzzy);
 int FuzzySearchRequestData::execute(){
  // prepare the memory lookup
   EqfGetOpenTM2Lang( OtmMemoryServiceWorker::getInstance()->hSession, Data.szIsoSourceLang, Data.szSourceLanguage, &Data.fIsoSourceLangIsPrefered );
   EqfGetOpenTM2Lang( OtmMemoryServiceWorker::getInstance()->hSession, Data.szIsoTargetLang, Data.szTargetLanguage, &Data.fIsoTargetLangIsPrefered );
+  std::string tokens;
 
   if ( Data.iNumOfProposals == 0 )
   {
@@ -3569,6 +3570,18 @@ int FuzzySearchRequestData::execute(){
     } 
 
     _rc_ = mem->TmtXGet ( &GetIn, &GetOut);
+
+    if(FLAGS_add_tokens_to_fuzzy){
+      tokens = "{[\n";
+      for(auto& token: GetOut.tokens){
+        tokens += "\"" + token + "\",";
+      }
+
+      if(tokens.size()>1){
+        tokens.pop_back();//remove last ','
+      }
+      tokens += "\n}]";
+    }
   
     if ( _rc_ == 0 )
     {
@@ -3623,6 +3636,10 @@ int FuzzySearchRequestData::execute(){
     json_factory.addParmToJSONW( strOutputParmsW, L"searchedSrc",  Data.szSource );
     json_factory.addParmToJSONW( strOutputParmsW, L"customId",  Data.szCustomId );
 
+    if(FLAGS_add_tokens_to_fuzzy){
+     json_factory.addParmToJSONW( strOutputParmsW, L"tokens",  tokens );
+    }
+    
     if (  Data.iNumOfProposals > 0 )
     {
       json_factory.addNameToJSONW( strOutputParmsW, L"results" );

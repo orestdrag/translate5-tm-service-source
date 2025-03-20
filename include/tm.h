@@ -1504,6 +1504,8 @@ struct TMX_SENTENCE
   BOOL      fMarkupChanged;                    // Markup does not exist, changed to OTMUTF8 during import
   //end ADDINFO
 
+  std::vector<std::string> tokens;
+
 
   TMX_SENTENCE(std::wstring&& w_src, std::wstring &&w_trg){
     if(w_trg.empty()){
@@ -1679,6 +1681,7 @@ using TMX_GET_OUT_W = struct _TMX_GET_OUT_W : public TMX_EXT_OUT_W
   USHORT            usNumMatchesFound;         //number of matches found
   TMX_MATCH_TABLE_W stMatchTable[MAX_MATCHES]; //match structure
   USHORT fsAvailFlags;                         // additional flags (more exact/fuzzy matches avail)
+  std::vector<std::string> tokens;
 };
 using PTMX_GET_OUT_W = TMX_GET_OUT_W *;
 

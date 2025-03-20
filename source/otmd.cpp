@@ -64,6 +64,8 @@ DEFINE_int32(triplesthreshold, 5, "Sets threshold to pre fuzzy filtering based o
 DEFINE_validator(triplesthreshold, &ValidateTriplesThreshold);
 
 
+DEFINE_bool(log_hashes_in_hash_sentence, false, " If set to true, and --v=2 and --t5loglevel=4, tokens and their hashed would be logged");
+DEFINE_bool(add_tokens_to_fuzzy, false, " If set to true, list of tokens would be returned in fuzzy responce. Could make execution a bit slower");
 
 DEFINE_bool(add_premade_socket, false, "if set to true, socket instance would be created outside of proxygen and then binded, that made possible to add tcp backog event handler and use socket_backog option");
 DEFINE_bool(log_tcp_backog_events, false, "if set to true, tcp backlog events would be logged(to enable, add_premade_socket flag should be set to true)");
