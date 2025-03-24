@@ -44,7 +44,7 @@ static bool ValidatePort(const char* flagname, int32_t value) {
 
 
 
-DEFINE_int64(tmMaxIdleTimeSec, 0, "If set some value, except, 0, during request, tm list would bee cleaned up from tms that are longer inactive than this number");
+DEFINE_int64(tmMaxIdleTimeSec, 7200, "If set some value, except, 0, during request, tm list would bee cleaned up from tms that are longer inactive than this number");
 
 
 DEFINE_int32(port, 4080, "What port to listen on");
