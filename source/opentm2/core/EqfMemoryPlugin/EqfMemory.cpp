@@ -31,18 +31,15 @@ Copyright Notice:
 /*! \brief Prototypes of helper functions */
 static int CopyToBuffer( char *pszSource, char *pszBuffer, int iBufSize );
 
+DECLARE_bool(log_tm_lifetime);
 EqfMemory::~EqfMemory()
 {
-  T5LOG(T5DEBUG) << "Closing memory " << szName;
+  if(FLAGS_log_tm_lifetime){
+    T5LOG(T5TRANSACTION) << "Closing memory " << szName;
+  }
   UnloadFromRAM();
   //free allocated memory
   NTMDestroyLongNameTable();
-  //if ( this->pTmExtIn != NULL )  delete  this->pTmExtIn ;
-  //if ( &TmExtOut != NULL ) delete  &TmExtOut ;
-  //if ( TmPutIn != NULL )  delete  TmPutIn ;
-  //if ( this->pTmPutOut != NULL ) delete  this->pTmPutOut ;
-  //if ( this->pTmGetIn != NULL )  delete  this->pTmGetIn ;
-  //if ( this->pTmGetOut != NULL ) delete  this->pTmGetOut;
 }
 
 /*! \brief Get number of markups used for the proposals in this mmoryProvides a part of the memory in binary format
@@ -679,7 +676,19 @@ int EqfMemory::setGlobalMemoryOptions
 
 
 // NewTM region
-EqfMemory::EqfMemory(const std::string& tmName): EqfMemory(){
+EqfMemory::EqfMemory(const std::string& tmName){
+  if(FLAGS_log_tm_lifetime){
+    T5LOG(T5TRANSACTION) << "Creating memory " << tmName;
+  }
+  
+  readOnlyCnt = std::make_shared<int>(0);
+  writeCnt = std::make_shared<int>(0);
+
+
+  pvGlobalMemoryOptions = NULL;
+  int rc = NTMCreateLongNameTable();
+  if(rc) T5LOG(T5ERROR) << "NTMCreateLongNameTable returned non-zero, but " << rc; 
+
   TmBtree.fb.fileName = FilesystemHelper::GetTmdPath(tmName);
   InBtree.fb.fileName = FilesystemHelper::GetTmiPath(tmName);
   strcpy(szName, tmName.c_str());

@@ -42,6 +42,11 @@ static bool ValidatePort(const char* flagname, int32_t value) {
    return false;
 }
 
+
+
+DEFINE_int64(tmMaxIdleTimeSec, 0, "If set some value, except, 0, during request, tm list would bee cleaned up from tms that are longer inactive than this number");
+
+
 DEFINE_int32(port, 4080, "What port to listen on");
 DEFINE_validator(port, &ValidatePort);
 
@@ -63,6 +68,7 @@ static bool ValidateTriplesThreshold(const char* flagname, int32_t value) {
 DEFINE_int32(triplesthreshold, 5, "Sets threshold to pre fuzzy filtering based on hashes of neibour tokens");
 DEFINE_validator(triplesthreshold, &ValidateTriplesThreshold);
 
+DEFINE_bool(log_tm_lifetime, false, " If set to true, and --v=2 and --t5loglevel=4, TMs ctor and dctor would have transaction level logs");
 
 DEFINE_bool(log_hashes_in_hash_sentence, false, " If set to true, and --v=2 and --t5loglevel=4, tokens and their hashed would be logged");
 DEFINE_bool(add_tokens_to_fuzzy, false, " If set to true, list of tokens would be returned in fuzzy responce. Could make execution a bit slower");

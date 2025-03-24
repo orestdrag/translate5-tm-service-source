@@ -79,6 +79,33 @@ size_t TMManager::CalculateOccupiedRAM(MutexTimeout& tmListTimeout){
   return UsedMemory;
 }
 
+
+
+DECLARE_int64(tmMaxIdleTimeSec);
+size_t TMManager::CloseTmsThatWasNotUsedForTooLong(MutexTimeout& tmListTimeout, const std::string& tmToOpen)
+{
+  if(0 == FLAGS_tmMaxIdleTimeSec)
+  {
+    return 0;
+  }
+  time_t curTime;
+  time( &curTime );
+  size_t closedSize = 0;
+  TimedMutexGuard l{mutex_access_tms, tmListTimeout, "tmListMutex", __func__, __LINE__};// lock tms list
+    
+  for (auto it = tms.begin(); it != tms.end(); ) {
+    if ( (curTime - it->second->tLastAccessTime > FLAGS_tmMaxIdleTimeSec)
+             && (it->first != tmToOpen) ){
+      T5LOG(T5TRANSACTION) << "Closing "<< it->first;
+      closedSize = it->second->GetRAMSize();
+      it = tms.erase(it); // erase returns next iterator
+    } else {
+      ++it;
+    }
+  }
+  return closedSize;
+}
+
 /*! \brief close any memories which haven't been used for a long time
   \returns 0
 */
@@ -138,11 +165,6 @@ size_t TMManager::CleanupMemoryList(size_t memoryRequested, MutexTimeout& tmList
         }else{
           tms.erase(tmName);
           T5LOG(T5DEBUG) <<"erasing mem with name " <<tm->szName <<"; use count = " << tm.use_count();
-          //memoryNeed = memoryRequested + CalculateOccupiedRAM();
-          //if(tmListTimeout.failed()){
-          //  tmListTimeout.addToErrMsg(".Failed to lock tm list:", __func__, __LINE__);
-          //  return 0;
-          //}
         }
       }
     }
@@ -1376,6 +1398,8 @@ bool TMManager::IsMemoryInList(const std::string& strMemName, MutexTimeout& tmLi
 }
 
 int TMManager::OpenTM(const std::string& strMemName, MutexTimeout& tmListTimeout, COMMAND command){
+  CloseTmsThatWasNotUsedForTooLong(tmListTimeout, strMemName);
+
   if(IsMemoryLoaded(strMemName, tmListTimeout)){
     return 0;
   }
@@ -1387,6 +1411,7 @@ int TMManager::OpenTM(const std::string& strMemName, MutexTimeout& tmListTimeout
   
   size_t requiredMemory = 0;
   bool fReorganizeOnly = false;
+  
   
   if(IsMemoryLoading(strMemName, tmListTimeout)){
   //}else if(IsMemoryFailedToLoad(strMemName)){

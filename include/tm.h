@@ -1881,32 +1881,7 @@ public:
 
 /*! \brief Constructors
 */
-	EqfMemory()  {
-    //TmBtree.AllocateMem();
-    //InBtree.AllocateMem();
-    //readOnlyPtr = std::make_shared<EqfMemory>(*this);
-    //writePtr(std::make_shared<EqfMemory>(*this));
-    readOnlyCnt = std::make_shared<int>(0);
-    writeCnt = std::make_shared<int>(0);
-    /*
-    Languages.ulMaxEntries = 0;
-    Languages.stTmTableEntry.resize(NUM_OF_TMX_TABLE_ENTRIES);
-    FileNames.ulMaxEntries = 0;
-    FileNames.stTmTableEntry.resize(NUM_OF_TMX_TABLE_ENTRIES);
-    Authors.ulMaxEntries = 0;
-    Authors.stTmTableEntry.resize(NUM_OF_TMX_TABLE_ENTRIES);
-    TagTables.ulMaxEntries = 0;
-    TagTables.stTmTableEntry.resize(NUM_OF_TMX_TABLE_ENTRIES);
-    LangGroups.ulMaxEntries = 0;
-    LangGroups.stTmTableEntry.resize(NUM_OF_TMX_TABLE_ENTRIES);
-    //*/
 
-    pvGlobalMemoryOptions = NULL;
-    int rc = NTMCreateLongNameTable();
-    if(rc) T5LOG(T5ERROR) << "NTMCreateLongNameTable returned non-zero, but " << rc; 
-  };
-
-	EqfMemory( HTM htm, char *pszName );
 
 /*! \brief Destructor
 */
@@ -4066,6 +4041,12 @@ class TMManager{
         \returns 0
     */
     size_t CleanupMemoryList(size_t memoryRequested, MutexTimeout& tmListTimeout);
+
+
+    /*! \brief close any memories which haven't been used for a long time
+        \returns size of closed tms
+    */
+    size_t CloseTmsThatWasNotUsedForTooLong(MutexTimeout& tmListTimeout, const std::string& tmToOpen);
 
     /*! \brief calcuate total amount of RAM occupied by opened memory files
         \returns 0
