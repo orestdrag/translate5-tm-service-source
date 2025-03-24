@@ -216,7 +216,11 @@ int EqfMemory::putProposal
   iRC = TmtXReplace ( Proposal, &TmPutOut );
 
   if ( iRC != 0 ){
-    T5LOG(T5ERROR) <<  "EqfMemory::putProposal result = " << iRC; 
+    if(iRC == 5037){
+      T5LOG(T5INFO) <<  "EqfMemory::putProposal result = " << iRC; 
+    }else{
+      T5LOG(T5ERROR) <<  "EqfMemory::putProposal result = " << iRC; 
+    }
   }
 
   return( iRC );

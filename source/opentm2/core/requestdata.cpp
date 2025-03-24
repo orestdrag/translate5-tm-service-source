@@ -230,6 +230,7 @@ bool rcNeedToBeLogged(int rc){
   switch(rc){
     case 506:// timeout issue
     case 503:
+    case 5037:
     {
       return false;
     }
