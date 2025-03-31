@@ -3908,13 +3908,7 @@ USHORT SetSystemLanguage( PSZ pLanguage );
 PSZ    GetSystemLanguage( );
 USHORT UtlSetFHandState( HFILE hf, USHORT fsState, BOOL fMsg );
 USHORT UtlSetFHandStateHwnd( HFILE hf, USHORT fsState, BOOL fMsg, HWND hwnd );
-BOOL   UtlAllocTrace ( PVOID *, LONG, LONG, USHORT, PSZ, USHORT );
-BOOL   UtlAllocTraceHwnd ( PVOID *, LONG, LONG, USHORT, HWND, PSZ, USHORT );
 #ifdef UTLFFST
-  #define UtlAlloc( par1, par2, par3, par4 ) \
-              UtlAllocTrace(par1, par2, par3, par4, __FILE__, __LINE__ )
-  #define UtlAllocHwnd( par1, par2, par3, par4, par5 ) \
-              UtlAllocTraceHwnd(par1, par2, par3, par4, par5, __FILE__, __LINE__ )
 
 #endif
 USHORT EqfDriveType(USHORT iDrive);
@@ -3946,11 +3940,6 @@ BOOL UtlKeepInTWB( PSWP pswpWin );
 USHORT UtlCheckDlgPos( HWND hwndDlg, BOOL fShow );
 LONG UtlTime( PLONG plTime );
 
-#ifdef UTLFFST
-#define UtlAlloc( par1, par2, par3, par4 ) \
-            UtlAllocTrace(par1, par2, par3, par4, __FILE__, __LINE__ )
-
-#endif
 
 VOID UtlWait( SHORT sWaitTime );       // wait the given time
 USHORT UtlLoadWidth( HAB, HMODULE, SHORT, PUSHORT );

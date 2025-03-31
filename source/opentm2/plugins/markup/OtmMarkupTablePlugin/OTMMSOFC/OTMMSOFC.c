@@ -439,23 +439,6 @@ USHORT  EQFQUERYEXITINFO(
 *******************************************************************************/
 
 
-EQF_BOOL  EQFCHECKSEGEXW(
-                                     PSZ_W     pszPrevSrc,
-                                     PSZ_W     pszSrc,
-                                     PSZ_W     pszTgt,
-                                     PEQF_BOOL pfChanged,
-                                     LONG      lInfo,          
-                                     ULONG     ulSegNum,       
-                                     EQF_BOOL  fMsg)
-{
-   BOOL   bReturn = TRUE ; 
-
-   PrepDocLanguageInfo( NULL ) ;   /* Set language unqiue processing, like DBCS */
-
-   bReturn = CheckXmlText( pszPrevSrc, pszSrc, pszTgt, pfChanged, lInfo, ulSegNum, fMsg ) ;
-
-   return( bReturn ) ;
-}
 
 
 

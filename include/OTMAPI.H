@@ -1483,17 +1483,6 @@ EQF_BOOL  EQFCHECKSEGW (
 );
 
 
-EQF_BOOL  EQFCHECKSEGEXW (
-   PSZ_W pszPrevSrc,                     // previous source segment
-   PSZ_W pszSrc,                         // current source segment
-   PSZ_W pszTgt,                         // current translation
-   PEQF_BOOL pfChanged,                  // segment changed
-   LONG  lInfo,                          // info handle to use with EQFGETPREVSEG(W),EQFGETNEXTSEG(W)
-   ULONG ulSegNum,                       // segment number to use with EQFGETPREVSEG(W),EQFGETNEXTSEG(W)
-   EQF_BOOL fMsg                         // message display requested
-);
-
-
 /*******************************************************************************
 *
 *       function:       EQFCHECKSEGTYPE

@@ -79,34 +79,20 @@ typedef enum _UPDPROPTYPE
 
 
        VOID   BuildPath( PSZ pszBuffer, CHAR chEqfDrive, PSZ pszFolder, USHORT usPathID );
-static VOID             DeleteFiles( PSZ, USHORT );
-static USHORT           ErrorMessage( USHORT, PSZ, USHORT );
-static BOOL             FileExists ( PSZ );
-static BOOL             InstCheckAndAdd( PSZ *, PSZ, USHORT );
        PSZ              InstLocateString ( PSZ, PSZ );
        PSZ              InstMatch ( PSZ, PSZ );
-static USHORT           ReadAndPrepareConfigSys ( VOID );
        USHORT           UpdateConfigSys ( VOID );
 
 int SetupMAT();
          USHORT SetupMAT( HAB hab, CHAR chPrimaryDrive, PSZ  pszSecondaryDrives, CHAR chLanDrive );
 
-static   USHORT CreateDictProperties( CHAR chPrimaryDrive );
          USHORT SetupTmCom (CHAR chPrimaryDrive, PSZ pszSecondaryDrives);
          USHORT SetupDemo  (HAB hab, CHAR chPrimaryDrive, PSZ pszSecondaryDrives, CHAR chLanDrive);
          USHORT SetupDocu  (HAB hab, CHAR chPrimaryDrive, PSZ pszSecondaryDrives);
 
-static VOID DeleteDictCacheFiles( CHAR chPrimaryDrive, USHORT usPathId );
-static BOOL UtlPropFileExist( CHAR chDrive, PSZ pszFile );
-
 
        USHORT   UpdatePropFile( USHORT usPropType ,CHAR chDrive,
                          PSZ pszFileName, PSZ pszDocName );
-static USHORT   UpdateFolderProp( PSZ pszFullFileName, CHAR  chDrive );
-static USHORT   UpdateDocumentProp( PSZ pszFullFileName, CHAR  chDrive );
-static USHORT   UpdateDictProp( PSZ pszFullFileName, CHAR  chDrive );
-static USHORT   UpdateTMProp( PSZ pszFullFileName, CHAR  chDrive );
-static USHORT   UpdateSystemProp( PSZ pszFullFileName, PSZ pszFolderName );
 
        BOOL     SetupUtils( HAB, PSZ );
        BOOL     TWBInit( HAB );

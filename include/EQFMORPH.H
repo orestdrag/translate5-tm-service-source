@@ -98,15 +98,7 @@
 #include "LogWrapper.h"
 
 
-/**********************************************************************/
-/* Structure to access MORPH_FLAG_OFFSLIST type term lists            */
-/**********************************************************************/
-typedef struct _FLAGOFFSLIST
-{
-  LONG             lFlags;             // flags of term
-  USHORT           usLen;              // length of term
-  USHORT           usOffs;             // offset of term
-} FLAGOFFSLIST, *PFLAGOFFSLIST;
+
 
 //+----------------------------------------------------------------------------+
 //   Flags for flagged term lists                                               
@@ -328,9 +320,10 @@ USHORT MorphAddTermToList2
 );
 
 
+
 USHORT MorphAddTermToList2W
 (
-  PSZ_W    *ppList,                    // ptr to term list pointer
+  PSZ_W*  ppList,                    // ptr to term list pointer
   PULONG   pulSize,                    // ptr to allocated size of term list
   PULONG   pulUsed,                    // ptr to used bytes in term list
   PSZ_W    pszTerm,                    // ptr to new term being added to list
@@ -339,6 +332,7 @@ USHORT MorphAddTermToList2W
   ULONG    ulFlags,                    // flags for the term
   USHORT   usListType                  // type of list MORPH_ZTERMLIST or
 );
+
 
 
 USHORT MorphCopyTermListASCII2Unicode

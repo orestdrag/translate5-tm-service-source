@@ -160,7 +160,7 @@ PrepareTokens
 (
   PLOADEDTABLE  pTagTable,
   PBYTE         pInBuf,
-  PBYTE         pTokBuf,
+  std::vector<TOKENENTRY>&         pTokBuf,
   PSZ_W         pString,               // pointer to string to be tokenized
   SHORT         sLanguageId,           // language ID
   PFUZZYTOK   * ppTransTokList,         // resulting list of tokens
@@ -194,8 +194,7 @@ PrepareTokens
                  TRUE,
                  &pRest,
                  &usColPos,
-                 (PTOKENENTRY) pTokBuf,
-                 TOK_BUFFER_SIZE / sizeof(TOKENENTRY) );
+                 pTokBuf );
 
   /********************************************************************/
   /* build tokenlist, i.e.                                            */
@@ -205,7 +204,7 @@ PrepareTokens
   /*           this is large enough, we can avoid any checking...     */
   /********************************************************************/
   pstCurrent = (PFUZZYTOK) pInBuf;  // use input buffer for table
-  pTok = (PTOKENENTRY) pTokBuf;
+  pTok = (PTOKENENTRY) pTokBuf.data();
   pStart = pTok->pDataStringW;
   while ( (pTok->sTokenid != ENDOFLIST) )
   {
@@ -215,13 +214,13 @@ PrepareTokens
       pTermList = NULL;
 
       chTemp = *(pTok->pDataStringW+pTok->iLength);
-      *(pTok->pDataStringW+pTok->iLength) = EOS;
+      *(pTok->pDataStringW + pTok->iLength) = EOS;
 
         usRC = MorphTokenizeW( sLanguageId, pTok->pDataStringW,
                             &usListSize, &pTermList,
                             MORPH_OFFSLIST, ulOemCP );
 
-      *(pTok->pDataStringW+pTok->iLength) = chTemp;
+      *(pTok->pDataStringW + pTok->iLength) = chTemp;
 
       if ( pTermList )
       {
@@ -272,6 +271,7 @@ PrepareTokens
     /* adjust current offset to point to new offset in string...    */
     /****************************************************************/
     pTok++;
+    //pTokenBuf.emplace_back(Tok)
     iCurOffs = (USHORT)(pTok->pDataStringW - pStart);
   } /* endwhile */
 
@@ -1116,45 +1116,7 @@ TokStrCompare
 //|                   free forward and backward token lists                    |
 //|                   return success indicator                                 |
 //+----------------------------------------------------------------------------+
-BOOL
-EQFBFindDiff
-(
-  PTBDOCUMENT  pDoc,                   // pointer to document
-  PSZ_W pString1,                      // first string passed
-  PSZ_W pString2,                      // second string
-  SHORT sLanguageId,                   // language id to be used
-  PFUZZYTOK * ppFuzzyTok,              // returned token list
-  PUSHORT     pusModWords,             // num of differences
-  PUSHORT     pusTokens,
-  ULONG       ulOemCP
-)
-{
-  BOOL  fOK;
-  PFUZZYTOK    pFuzzyTgt = NULL;
 
-  fOK = EQFBFindDiffEx( pDoc->pDocTagTable,
-                          pDoc->pInBuf,
-                          pDoc->pTokBuf,
-                          pString1,
-                          pString2,
-                          sLanguageId,
-                          (PVOID *)ppFuzzyTok,
-                          (PVOID *)&pFuzzyTgt, ulOemCP );
-  /**********************************************************************/
-  /*  pFuzzyTgt is not needed, so free space                            */
-  /**********************************************************************/
-  if (pFuzzyTgt )
-  {
-    UtlAlloc ( (PVOID *)&pFuzzyTgt, 0L, 0L, NOMSG );
-  } /* endif */
-
-  if ( fOK )
-  {
-    EQFBCountDiff( *ppFuzzyTok, pusTokens, pusModWords );
-  } /* endif */
-
-  return fOK;
-}
 
 // counts the number of tokens and the number of differences
 // in a fuzzy token list created using EQFBFindDiffEx
@@ -1240,7 +1202,7 @@ EQFBFindDiffEx
 (
   PVOID pTable,                        // pointer to loaded tagtable
   PBYTE pInBuf,                        // pointer to input buffer
-  PBYTE pTokBuf,                       // pointer to temp token buffer
+  std::vector<TOKENENTRY>& pTokBuf,                       // pointer to temp token buffer
   PSZ_W pString1,                      // first string passed
   PSZ_W pString2,                      // second string
   SHORT sLanguageId,                   // language id to be used for pString1
@@ -1262,11 +1224,9 @@ EQFBFindDiffEx
   /******************************************************************/
   T5LOG( T5DEVELOP) <<"EQFBFindDiffEx::Preparing tokens for first string: ";
   //std::wstring ws1 = removeTagsFromString(pString1);
-  fOK = PrepareTokens( //pDoc,
-                       pTagTable,
+  fOK = PrepareTokens( pTagTable,
                        pInBuf,
                        pTokBuf,
-                       //(wchar_t*)ws1.c_str(), 
                        pString1,
                        sLanguageId, &pTokenList1, ulOemCP );
   if ( fOK )
@@ -1274,11 +1234,9 @@ EQFBFindDiffEx
 
     T5LOG( T5DEVELOP) <<"EQFBFindDiffEx::Preparing tokens for second string: ";
     //std::wstring ws2 = removeTagsFromString(pString2);
-    fOK = PrepareTokens( // pDoc,
-                         pTagTable,
+    fOK = PrepareTokens( pTagTable,
                          pInBuf,
                          pTokBuf,
-                         //(wchar_t*)ws2.c_str(), 
                          pString2,
                          sLanguageId, &pTokenList2, ulOemCP );
   } /* endif */
@@ -2511,8 +2469,8 @@ NTMCompareBetweenTokens
     SHORT        sNumTags = 0;
     BOOL         fStringEqual = TRUE;
     CHAR_W       chW;
-    PBYTE        pInBuf = NULL;
-    PBYTE        pTokBuf = NULL;
+    std::vector<BYTE>        pInBufL;
+    std::vector<TOKENENTRY>        pTokBuf;
     USHORT       usI = 0;
     BOOL         fTokIsTag = FALSE;
     BOOL         fTok2IsTag = FALSE;
@@ -2522,8 +2480,10 @@ NTMCompareBetweenTokens
     PSZ_W        pTemp = NULL;
 
   // allocate required buffers
-  fOK = UtlAlloc((PVOID *)&pInBuf, 0L, 50000L, NOMSG );
-  if ( fOK ) fOK = UtlAlloc((PVOID *)&pTokBuf, 0L, (LONG)TOK_BUFFER_SIZE, NOMSG );
+  pInBufL.resize(50000);
+  pTokBuf.reserve(TOK_BUFFER_SIZE/sizeof(TOKENENTRY));
+
+  fOK =  true;
 
   // load tag table
   if ( fOK )
@@ -2545,14 +2505,14 @@ NTMCompareBetweenTokens
      /* prepare tokens for String1 and string 2                        */
      /******************************************************************/
      fOK = PrepareTokens( pTable,
-                       pInBuf,
+                       pInBufL.data(),
                        pTokBuf,
                        pD1, sLangID, &pTokenList1, ulSrcCP );
   }
   if ( fOK)
   {
      fOK = PrepareTokens( pTable,
-                       pInBuf,
+                       pInBufL.data(),
                        pTokBuf,
                        pD2, sLangID, &pTokenList2, ulSrcCP );
   }
@@ -2689,8 +2649,6 @@ NTMCompareBetweenTokens
 
   if (pTokenList1) UtlAlloc( (PVOID *)&pTokenList1, 0L, 0L, NOMSG );
   if (pTokenList2) UtlAlloc( (PVOID *)&pTokenList2, 0L, 0L, NOMSG );
-  if ( pInBuf )  UtlAlloc( (PVOID *) &pInBuf, 0L, 0L, NOMSG );
-  if ( pTokBuf ) UtlAlloc( (PVOID *) &pTokBuf, 0L, 0L, NOMSG );
   if ( pTable )  TAFreeTagTable( pTable);
   *pfStringEqual = fStringEqual;
 

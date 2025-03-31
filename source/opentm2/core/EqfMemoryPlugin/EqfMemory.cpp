@@ -38,8 +38,6 @@ EqfMemory::~EqfMemory()
     T5LOG(T5TRANSACTION) << "Closing memory " << szName;
   }
   UnloadFromRAM();
-  //free allocated memory
-  NTMDestroyLongNameTable();
 }
 
 /*! \brief Get number of markups used for the proposals in this mmoryProvides a part of the memory in binary format

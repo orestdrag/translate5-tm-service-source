@@ -1112,10 +1112,27 @@ USHORT MorphGetLCB
 
 } /* end of function MorphGetLCB */
 
+USHORT MorphAddTermToList2W
+(
+  std::vector<FLAGOFFSLIST>&  pList,                    // ptr to term list pointer
+  PSZ_W    pszTerm,                    // ptr to new term being added to list
+  USHORT   usLength,                   // length of term
+  USHORT   usOffs,                     // offset of term
+  ULONG    ulFlags                     // flags for the ter
+)
+{
+  FLAGOFFSLIST data;
+  data.lFlags = ulFlags;
+  data.usLen = usLength;
+  data.usOffs = usOffs;
+  pList.emplace_back(data);
+  return 0;
+}
+
 
 USHORT MorphAddTermToList2W
 (
-  PSZ_W    *ppList,                    // ptr to term list pointer
+  PSZ_W*  ppList,                    // ptr to term list pointer
   PULONG   pulSize,                    // alloc. size of term list in # of w's
   PULONG   pulUsed,                    // used # of w's in term list
   PSZ_W    pszTerm,                    // ptr to new term being added to list

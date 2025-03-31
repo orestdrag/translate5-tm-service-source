@@ -1626,9 +1626,8 @@ BTREE::EQFNTMUpdate
 SHORT BTREE::QDAMDictExactLocal
 (
    PWCHAR pKey,                       // key to be searched for
-   PBYTE  pchBuffer,                   // space for user data
-   PULONG pulLength,                   // in/out length of returned user data
-   USHORT usSearchSubType              // special hyphenation lookup flag
+   std::vector<BYTE>&  pchBuffer,     // space for user data
+   USHORT usSearchSubType             // special hyphenation lookup flag
 )
 {
   SHORT    i;
@@ -1667,24 +1666,10 @@ SHORT BTREE::QDAMDictExactLocal
                  usCurrentRecord = RECORDNUM( pRecord );
 
                  //memcpy( chHeadTerm, pKey, sizeof(ULONG) );  // save data
-                 
+               
                  recData = QDAMGetrecData_V3( pRecord, i, usVersion );
-                 if ( *pulLength == 0 || ! pchBuffer )
-                 {
-                    *pulLength = recData.ulLen;
-                 }
-                 else if ( *pulLength < recData.ulLen )
-                 {
-                    if(T5Logger::GetInstance()->CheckLogLevel(T5DEBUG)){
-                      T5LOG(T5ERROR) << "::BTREE_BUFFER_SMALL, pulLength = " << *pulLength << "; recData.ulLen = " << recData.ulLen;
-                    }
-                    *pulLength = recData.ulLen;
-                    sRc = BTREE_BUFFER_SMALL;
-                 }
-                 else
-                 {
-                    sRc = QDAMGetszData_V3( this, recData, pchBuffer, pulLength, DATA_NODE );
-                 } /* endif */
+                 sRc = QDAMGetszData_V3( this, recData, pchBuffer, DATA_NODE );
+                
                }
                else
                {
@@ -1739,41 +1724,33 @@ SHORT
 BTREE::EQFNTMGet
 (
    ULONG  ulKey,                       // key to be searched for
-   PCHAR  pchBuffer,                   // space for user data
-   PULONG pulLength                    // in/out length of returned user data
+   std::vector<BYTE>&  pchBuffer                   // space for user data
 )
 {
-  SHORT sRc;                           // return code
-  DEBUGEVENT( EQFNTMGET_LOC, FUNCENTRY_EVENT, 0 );
+  SHORT sRc = 0;                           // return code
 
-  CHECKPBTREE(this, sRc );
-  if ( !sRc )
+  SHORT  RetryCount = MAX_RETRY_COUNT;                  // retry counter for in-use condition
+  do
   {
-    SHORT  RetryCount = MAX_RETRY_COUNT;                  // retry counter for in-use condition
-    ULONG ulLength;
-    do
+    /******************************************************************/
+    /* disable corruption flag to allow get of data in case memory    */
+    /* is corrupted                                                   */
+    /******************************************************************/
+    BOOL          _fCorrupted = fCorrupted;
+    fCorrupted = FALSE;
+
+    sRc = QDAMDictExactLocal( (PWCHAR) &ulKey, pchBuffer, FEXACT );
+
+    fCorrupted = _fCorrupted;
+
+    if ( sRc == BTREE_IN_USE )
     {
-      /******************************************************************/
-      /* disable corruption flag to allow get of data in case memory    */
-      /* is corrupted                                                   */
-      /******************************************************************/
-      BOOL          _fCorrupted = fCorrupted;
-      fCorrupted = FALSE;
-      ulLength = *pulLength;
+      RetryCount--;
+      UtlWait( MAX_WAIT_TIME );
+    } /* endif */
+  } while ( ((sRc == BTREE_IN_USE) || (sRc == BTREE_INVALIDATED)) &&
+            (RetryCount > 0) ); /* enddo */
 
-      sRc = QDAMDictExactLocal( (PWCHAR) &ulKey, (PBYTE)pchBuffer, &ulLength, FEXACT );
-
-      fCorrupted = _fCorrupted;
-
-      if ( sRc == BTREE_IN_USE )
-      {
-        RetryCount--;
-        UtlWait( MAX_WAIT_TIME );
-      } /* endif */
-    } while ( ((sRc == BTREE_IN_USE) || (sRc == BTREE_INVALIDATED)) &&
-              (RetryCount > 0) ); /* enddo */
-    *pulLength = ulLength;
-  } /* endif */
 
   if ( sRc && (sRc != BTREE_NOT_FOUND) )
   {

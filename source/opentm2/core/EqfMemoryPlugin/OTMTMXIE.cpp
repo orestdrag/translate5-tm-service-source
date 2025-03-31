@@ -3799,7 +3799,7 @@ USHORT APIENTRY WRITEEXPSEGMENT( LONG lMemHandle, PMEMEXPIMPSEG pSegment )
 }
 
 // helper function: is character a list delimiter or space
-static BOOL isDelimiter( CHAR chTest )
+BOOL isDelimiter( CHAR chTest )
 {
  return ( (chTest == '(') || (chTest == ')') || (chTest == ',') || (chTest == ' ') || (chTest == EOS)  );
 }

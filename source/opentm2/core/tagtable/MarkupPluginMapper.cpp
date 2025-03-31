@@ -339,50 +339,6 @@ BOOL MUGetMarkupTablePlugin( char *pszMarkup, char *pszBuffer, int iBufSize )
 }
 
 
-// update the files of a markup table
-
-BOOL MUUpdateMarkupTableFiles( 
-       char   *pszMarkupTableName,
-       char   *pszPluginName,
-       char   *pszShortDescription,
-       char   *pszLongDescription,
-       char   *pszMarkupTableVersion,
-       char   *pszTableFileName,
-       char   *pszUserExitFilename,
-       char   *pszFileList
-)
-{
-   static char   szBuffer[MAX_LONGFILESPEC]; // buffer for markup names
-  BOOL  bReturn = false ;
-
-  if ( ( pszPluginName ) && 
-       ( pszMarkupTableName ) ) {
-
-     // loop through all markup table plugins 
-     for( int i = 0 ; i < (int)pluginList->size() ; i++ ) {
-        OtmMarkupPlugin* curPlugin = (*pluginList)[i];
-        if ( ( ! strcmp( curPlugin->getName(), pszPluginName ) ) ||
-             ( ! strcmp( curPlugin->getShortName(), pszPluginName ) ) ) {
-           int iReturn = curPlugin->updateFiles( pszMarkupTableName,
-                         pszShortDescription, pszLongDescription, 
-                         pszMarkupTableVersion, pszTableFileName,
-                         pszUserExitFilename, pszFileList ) ;
-           if ( iReturn != UPDATE_MARKUP_ERROR ) {
-              bReturn = true;
-       //     OtmMarkup *markup = curPlugin->getMarkup( pszMarkupTableName );
-       //     if ( markup ) {
-       //        markup->updateInfo( pszMarkupTableName,
-       //                            pszShortDescription, pszLongDescription,
-       //                            NULL, pszUserExitFilename ) ;
-       //     }
-           }
-        }
-     }
-  }
-
-  return( bReturn );
-}
-
 
 // delete a markup table 
 

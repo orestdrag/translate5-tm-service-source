@@ -222,19 +222,6 @@ BOOL NTMDocMatch
 } /* end of function NTMDocMatch */
 
 
-BOOL
-PrepareTokens
-(
-  PLOADEDTABLE  pTagTable,
-  PBYTE         pInBuf,
-  PBYTE         pTokBuf,
-  PSZ_W         pString,               // pointer to string to be tokenized
-  SHORT         sLanguageId,           // language ID
-  PFUZZYTOK   * ppTransTokList,         // resulting list of tokens
-  ULONG         ulOemCP
-);
-
-
 
 
 BOOL EQFBCallLCS
@@ -256,8 +243,6 @@ BOOL EQFBMarkModDelIns
     USHORT      usLenStr2
 );
 
-static
-BOOL CheckForAlloc( PTMX_SENTENCE pSentence, PTMX_TERM_TOKEN * ppTermTokens, USHORT usEntries );
 
 static
 BOOL CheckForAlloc
@@ -267,37 +252,17 @@ BOOL CheckForAlloc
    USHORT             usEntries
 )
 {
-  LONG     lFilled = 0L;
-  USHORT   usNewAlloc = 0;
   BOOL     fOK = TRUE;
   PTMX_TERM_TOKEN  pTermTokens;
 
-  pTermTokens = *ppTermTokens;
-  lFilled = ( (PBYTE)pTermTokens - (PBYTE)pSentence->pTermTokens);
-  if ( (pSentence->lTermAlloc - lFilled) <= (LONG)(usEntries * sizeof(TMX_TERM_TOKEN)) )
+  auto lFilled = pTermTokens - pSentence->pTermTokens.data();
+
+  if ( (usEntries + lFilled/*pSentence->pTermTokens.size()*/) >  pSentence->pTermTokens.size())
   {
     //remember offset of pTagEntry
-    lFilled = pTermTokens - pSentence->pTermTokens;
-    if (usEntries == 1)
-    {
-      usNewAlloc = TOK_SIZE;
-    }
-    else
-    {
-      usNewAlloc = usEntries * sizeof(TMX_TERM_TOKEN);
-    }
-    //allocate another 4k for pTagRecord
-    fOK = UtlAlloc( (PVOID *) &pSentence->pTermTokens, pSentence->lTermAlloc,
-                    pSentence->lTermAlloc + (LONG)usNewAlloc, NOMSG );
-    if ( fOK )
-    {
-      pSentence->lTermAlloc += (LONG)usNewAlloc;
-
-      //set new position of pTagEntry
-      pTermTokens = pSentence->pTermTokens + lFilled;
-    } /* endif */
+    pSentence->pTermTokens.resize( pSentence->pTermTokens.size() + usEntries + 1);
   } /* endif */
-  *ppTermTokens= pTermTokens;
+  *ppTermTokens= &pSentence->pTermTokens[lFilled];
   return(fOK);
 }
 
@@ -352,15 +317,15 @@ USHORT EqfMemory::TokenizeSource
    PSZ pSourceLang                      // source language
 )
 {
-  PVOID     pTokenList = NULL;         // ptr to token table
-  BOOL      fOK;                       // success indicator
-  PBYTE     pTagEntry;                 // pointer to tag entries
-  PTMX_TERM_TOKEN pTermTokens;         // pointer to term tokens
+  std::vector<TOKENENTRY>     pTokenList;         // ptr to token table
+  BOOL      fOK = true;                       // success indicator
+  PTMX_TAGENTRY     pTagEntry = nullptr;                 // pointer to tag entries
+  //PTMX_TERM_TOKEN  pTermTokens = nullptr;         // pointer to term tokens
   PLOADEDTABLE pTable = NULL;          // pointer to tagtable
   PTMX_TAGTABLE_RECORD pTagRecord;     // pointer to record
   USHORT    usLangId;                  // language id
   USHORT    usRc = NO_ERROR;           // returned value
-  USHORT    usFilled;                  // counter
+  size_t    sFilled;                  // counter
   USHORT    usTagEntryLen;             // length indicator
   CHAR      szString[MAX_FNAME];       // name without extension
   USHORT    usStart;                   // position counter
@@ -403,7 +368,7 @@ USHORT EqfMemory::TokenizeSource
   }
 
   //allocate 4K pTokenlist for TaTagTokenize
-  fOK = UtlAlloc( (PVOID *) &(pTokenList), 0L, (LONG)TOK_SIZE, NOMSG );
+  pTokenList.reserve(TOK_SIZE/sizeof(pTokenList[0]));
 
   if ( !fOK )
   {
@@ -411,13 +376,12 @@ USHORT EqfMemory::TokenizeSource
   }
   else
   {
-    pTagRecord = pSentence->pTagRecord;
-    pTermTokens = pSentence->pTermTokens;
-    pTagEntry = (PBYTE)pTagRecord;
-    pTagEntry += sizeof(TMX_TAGTABLE_RECORD);
+    pTagRecord = pSentence->pTagRecord.data();
+    //pTermTokens = pSentence->pTermTokens.data();
+    pTagEntry = (PTMX_TAGENTRY) ((PBYTE)pTagRecord + sizeof(TMX_TAGTABLE_RECORD));
     
     RECLEN(pTagRecord) = 0;
-    pTagRecord->usFirstTagEntry = (USHORT)(pTagEntry - (PBYTE)pTagRecord);
+    pTagRecord->usFirstTagEntry = (USHORT)((PBYTE)pTagEntry - (PBYTE)pTagRecord);
 
     //get id of tag table, call
     Utlstrccpy( szString, UtlGetFnameFromPath( pTagTableName ), DOT );
@@ -463,12 +427,12 @@ USHORT EqfMemory::TokenizeSource
       // build protect start/stop table for tag recognition
        usRc = TACreateProtectTableWEx( pStringToTokenize,
                                    pTable, 0,
-                                   (PTOKENENTRY)pTokenList,
+                                   pTokenList,
                                    TOK_SIZE, &pStartStop,
                                    pTable->pfnProtTable,
                                    pTable->pfnProtTableW, 1, 0);
 
-
+    #ifdef TO_BE_REMOVED
       while ((iIterations < 10) && (usRc == EQFRS_AREA_TOO_SMALL))
       {
         // (re)allocate token buffer
@@ -489,13 +453,14 @@ USHORT EqfMemory::TokenizeSource
         {
            usRc = TACreateProtectTableWEx( pStringToTokenize,
                                       pTable, 0,
-                                      (PTOKENENTRY)pTokenList,
+                                      pTokenList,
                                        (USHORT)lNewSize, &pStartStop,
                                        pTable->pfnProtTable,
                                        pTable->pfnProtTableW, 1, 0 );
         } /* endif */
 
       } /* endwhile */
+    #endif
     } /* endif */
 
     if ( !usRc )
@@ -513,8 +478,8 @@ USHORT EqfMemory::TokenizeSource
             // handle translatable text
             {
               PFLAGOFFSLIST pTerm;                   // pointer to terms list
-              PFLAGOFFSLIST pTermList = NULL;        // pointer to offset/length term list
-              ULONG     ulListSize = 0;    
+              std::vector<FLAGOFFSLIST> pTermList;        // pointer to offset/length term list
+              //ULONG     ulListSize = 0;    
               USHORT    usTokLen = pEntry->usStop - pEntry->usStart + 1;
 
               CHAR_W chTemp = pStringToTokenize[pEntry->usStop+1]; // buffer for character values
@@ -522,47 +487,35 @@ USHORT EqfMemory::TokenizeSource
 
               usRc = NTMMorphTokenizeW( usLangId,
                                        pStringToTokenize + pEntry->usStart,
-                                       &ulListSize, (PVOID *)&pTermList,
-                                       MORPH_FLAG_OFFSLIST );
+                                       pTermList );
 
               pStringToTokenize[pEntry->usStop+1] = chTemp;
 
               if ( usRc == MORPH_OK )
               {
-                pTerm = pTermList;
-                fOK = CheckForAlloc( pSentence, &pTermTokens, 1 );
-                if ( !fOK )
+                pTerm = pTermList.data();
+                fOK = true;
+                //fOK = CheckForAlloc( pSentence, &pTermTokens, 1 );
+                
+                usStart = pEntry->usStart;
+                if ( pTerm )
                 {
-                  LOG_AND_SET_RC(usRc, T5WARNING, ERROR_NOT_ENOUGH_MEMORY);
-                }
-                else
-                {
-                  usStart = pEntry->usStart;
-                  if ( pTerm )
-                  {
-                      while ( pTerm->usLen && !usRc )
-                      {
-                        if ( !(pTerm->lFlags & TF_NEWSENTENCE) )
-                        {                         
-                          fOK = CheckForAlloc( pSentence, &pTermTokens, 1 );
-                          if ( !fOK )
-                          {
-                            LOG_AND_SET_RC(usRc, T5WARNING, ERROR_NOT_ENOUGH_MEMORY);
-                          }
-                          else
-                          {
-                            pTermTokens->usOffset = pTerm->usOffs + usStart;
-                            pTermTokens->usLength = pTerm->usLen;
-                            pTermTokens->usHash = 0;
-                            pTermTokens++;
-                          }
-                        } /* endif */
-                        pTerm++;
-                      } /* endwhile */
+                    while ( pTerm->usLen && !usRc )
+                    {
+                      if ( !(pTerm->lFlags & TF_NEWSENTENCE) )
+                      {          
+                        TMX_TERM_TOKEN TermToken;              
+                        
+                        TermToken.usOffset = pTerm->usOffs + usStart;
+                        TermToken.usLength = pTerm->usLen;
+                        TermToken.usHash = 0;
+                          
+                        pSentence->pTermTokens.emplace_back(TermToken);
+                      } /* endif */
+                      pTerm++;
+                    } /* endwhile */
                   } /* endif */
-                } /* endif */
               } /* endif */
-              UtlAlloc( (PVOID *) &pTermList, 0L, 0L, NOMSG );
             } /* end case UNPROTECTED_CHAR */
             break;
           default :
@@ -578,28 +531,19 @@ USHORT EqfMemory::TokenizeSource
               else
               {
                 // add tag data
-                usTagEntryLen = sizeof(TMX_TAGENTRY) +
-                                (pEntry->usStop - pEntry->usStart + 1) * sizeof(CHAR_W);
-                if ( (pSentence->lTagAlloc - (pTagEntry - (PBYTE)pSentence->pTagRecord))
-                                                       <= (SHORT)usTagEntryLen )
-                {
-                  LONG lBytesToAlloc = get_max( ((LONG)TOK_SIZE), ((LONG)usTagEntryLen) );
+                usTagEntryLen = sizeof(TMX_TAGENTRY) + (pEntry->usStop - pEntry->usStart + 1) * sizeof(CHAR_W);
 
+                
+                sFilled = (PBYTE)pTagEntry - (PBYTE)pSentence->pTagRecord.data();
+
+                if (   std::ceil((sFilled + usTagEntryLen) / static_cast<double>(sizeof(TMX_TAGTABLE_RECORD))) // space in bytes/size of entry
+                                                            <= pSentence->pTagRecord.size())
+                {                  
                   //remember offset of pTagEntry
-                  usFilled = (USHORT)(pTagEntry - (PBYTE)pSentence->pTagRecord);
-
-                  //allocate another 4k for pTagRecord
-                  fOK = UtlAlloc( (PVOID *) &pSentence->pTagRecord, pSentence->lTagAlloc,
-                                  pSentence->lTagAlloc + lBytesToAlloc, NOMSG );
-                  if ( fOK )
-                  {
-                    pSentence->lTagAlloc += lBytesToAlloc;
-
-                    //set new position of pTagEntry
-                    pTagEntry = (PBYTE)(pSentence->pTagRecord) + usFilled;
-                    pTagRecord = pSentence->pTagRecord;
-                  } /* endif */
-                } /* endif */
+                  pSentence->pTagRecord.resize(pSentence->pTagRecord.size() + usTagEntryLen);
+                  pTagEntry = (PTMX_TAGENTRY)((PBYTE)pSentence->pTagRecord.data() + sFilled);
+                }
+                
 
                 if ( !fOK )
                 {
@@ -607,12 +551,12 @@ USHORT EqfMemory::TokenizeSource
                 }
                 else
                 {
-                  ((PTMX_TAGENTRY)pTagEntry)->usOffset = pEntry->usStart;
-                  ((PTMX_TAGENTRY)pTagEntry)->usTagLen =
+                  pTagEntry->usOffset = pEntry->usStart;
+                  pTagEntry->usTagLen =
                     (pEntry->usStop - pEntry->usStart + 1);
-                  memcpy( &(((PTMX_TAGENTRY)pTagEntry)->bData),
+                  memcpy( &(pTagEntry->bData),
                           pStringToTokenize + pEntry->usStart,
-                          ((PTMX_TAGENTRY)pTagEntry)->usTagLen * sizeof(CHAR_W));
+                          pTagEntry->usTagLen * sizeof(CHAR_W));
                   pTagEntry += usTagEntryLen;
                 } /* endif */
               } /* endif */
@@ -627,28 +571,29 @@ USHORT EqfMemory::TokenizeSource
       /* check if we filled at least one term token -- if not */
       /* use a dummy token - just to get an exact match ...   */
       /********************************************************/
-      if ( pTermTokens == pSentence->pTermTokens )
+      if (pSentence->pTermTokens.empty()) //pTermTokens == pSentence->pTermTokens.data() )
       {
-        pTermTokens->usOffset = 0;
-        pTermTokens->usLength = (USHORT)UTF16strlenCHAR( pStringToTokenize );
-        pTermTokens->usHash = 0;
-        pTermTokens++;
+        TMX_TERM_TOKEN TermToken;
+        TermToken.usOffset = 0;
+        TermToken.usLength = (USHORT)UTF16strlenCHAR( pStringToTokenize );
+        TermToken.usHash = 0;
+        pSentence->pTermTokens.emplace_back(TermToken);
+
       } /* endif */
 
-      fOK = CheckForAlloc( pSentence, &pTermTokens, 3 );
-      if ( !fOK )
-      {
-        LOG_AND_SET_RC(usRc, T5WARNING, ERROR_NOT_ENOUGH_MEMORY);
-      }
+      //fOK = CheckForAlloc( pSentence, &pTermTokens, 3 );
+      //if ( !fOK )
+      //{
+      //  LOG_AND_SET_RC(usRc, T5WARNING, ERROR_NOT_ENOUGH_MEMORY);
+      //}
 
       //set total tag record length
-      RECLEN(pTagRecord) = pTagEntry - (PBYTE)pTagRecord;
+      RECLEN(pTagRecord) = (PBYTE)pTagEntry - (PBYTE)pTagRecord;
     } /* endif */
   } /* endif */
 
   //release allocated memory
   if ( pStartStop ) UtlAlloc( (PVOID *) &pStartStop, 0L, 0L, NOMSG );
-  if ( pTokenList ) UtlAlloc( (PVOID *) &pTokenList, 0L, 0L, NOMSG );
 
   //free tag table / decrement use count
   if ( pTable != NULL )
@@ -663,46 +608,25 @@ USHORT EqfMemory::TokenizeSource
 USHORT NTMTokenizeW
 (
   PSZ_W    pszInData,                  // IN : ptr to data being tokenized
-  PULONG   pulTermListSize,            // IN/OUT:  address of variable
-                                       //    containing size of term list buffer
-  PVOID    *ppTermList,                // IN/OUT: address of term list pointer
-  USHORT   usListType                 // IN: type of term list MORPH_ZTERMLIST,
-                                       //    MORPH_OFFSLIST, MORPH_FLAG_OFFSLIST,
-                                       //    or MORPH_FLAG_ZTERMLIST
+  std::vector<FLAGOFFSLIST>& ppTermList                // IN/OUT: address of term list pointer
 );
 
 USHORT NTMMorphTokenizeW
 (
    SHORT    sLanguageID,               // language ID
    PSZ_W    pszInData,                 // pointer to input segment
-   PULONG   pulBufferSize,             // address of variable containing size of
-                                       //    term list buffer
-   PVOID    *ppTermList,               // address of caller's term list pointer
-   USHORT   usListType                // type of term list MORPH_ZTERMLIST or
-                                       //    MORPH_OFFSLIST
+   std::vector<FLAGOFFSLIST>& pTermList               // address of caller's term list pointer
 )
 {
   USHORT    usRC = MORPH_OK;           // function return code
-  ULONG     ulTermBufUsed = 0;         // number of bytes used in term buffer
 
   /********************************************************************/
   /* Check input data                                                 */
   /********************************************************************/
-  if ( (pszInData == NULL)     ||
-       (pulBufferSize == NULL) ||
-       (ppTermList == NULL)    ||
-       ((*ppTermList == NULL) && (*pulBufferSize != 0) ) )
+  if ( (pszInData == NULL) )
   {
     LOG_AND_SET_RC(usRC, T5INFO, MORPH_INV_PARMS);
   } /* endif */
-
-///********************************************************************/
-///* Get language control block pointer  -- not needed                */
-///********************************************************************/
-//if ( usRC == MORPH_OK )
-//{
-//  usRC = MorphGetLCB( sLanguageID, &pLCB );
-//} /* endif */
 
 
   /********************************************************************/
@@ -713,21 +637,17 @@ USHORT NTMMorphTokenizeW
     if ( *pszInData != EOS )
     {
       usRC = NTMTokenizeW(pszInData,
-                          pulBufferSize,
-                          ppTermList,
-                          usListType
-                          );
+                          pTermList );
     }
     else
     {
-      usRC = MorphAddTermToList2W( (PSZ_W *)ppTermList,
-                                    pulBufferSize,
-                                    &ulTermBufUsed,
-                                   (PSZ_W)EMPTY_STRING,
-                                    0,
-                                    0,
-                                    0L,
-                                    usListType );
+      
+      usRC = MorphAddTermToList2W(  pTermList,
+                                   (PSZ_W)EMPTY_STRING, //term
+                                    0, // Length
+                                    0, //Offset
+                                    0L //Flags 
+                                    );
     } /* endif */
   } /* endif */
 
@@ -738,43 +658,28 @@ USHORT NTMMorphTokenizeW
 USHORT NTMTokenizeW
 (
   PSZ_W    pszInData,                  // IN : ptr to data being tokenized
-  PULONG   pulTermListSize,            // IN/OUT:  address of variable
-                                       //    containing size of term list buffer
-  PVOID    *ppTermList,                // IN/OUT: address of term list pointer
-  USHORT   usListType                 // IN: type of term list MORPH_ZTERMLIST,
-                                       //    MORPH_OFFSLIST, MORPH_FLAG_OFFSLIST,
-                                       //    or MORPH_FLAG_ZTERMLIST
+  std::vector<FLAGOFFSLIST>& pTermList                // IN/OUT: address of term list pointer
 )
 {
   USHORT     usReturn = 0;             // returncode
   ULONG      ulTermBufUsed = 0;        // amount of space used in term buffer
   PSZ_W      pTerm;                    // pointer to current token string
   PSZ_W      pszCurPos = pszInData;    // current position in input data
-  BOOL       fOffsList;                // TRUE = return a offset/length list
   LONG       lFlags;                   // flags for current term/token
   BOOL       fAllCaps, fAlNum, fNumber;// character classification flags
   BOOL       fSkip, fNewSentence,      // token processing flags
              fSingleToken, fEndOfToken;
   CHAR_W     c, d;
 
-  fOffsList  = (usListType == MORPH_OFFSLIST) ||
-               (usListType == MORPH_FLAG_OFFSLIST);
 
   /********************************************************************/
   /* Always assume start of a new sentence                            */
   /********************************************************************/
-  if ( (usListType == MORPH_FLAG_ZTERMLIST) ||
-       (usListType == MORPH_FLAG_OFFSLIST) )
-  {
-    usReturn = MorphAddTermToList2W( (PSZ_W *)ppTermList,
-                                   pulTermListSize,
-                                   &ulTermBufUsed,
-                                   L" ",
-                                   1,
-                                   0, // no offset possible
-                                   TF_NEWSENTENCE,
-                                   usListType );
-  } /* endif */
+  usReturn = MorphAddTermToList2W( pTermList,
+                                  L" ",
+                                  1,
+                                  0, // no offset possible
+                                  TF_NEWSENTENCE);
 
   /********************************************************************/
   /* Initialize processing flags                                      */
@@ -946,14 +851,13 @@ USHORT NTMTokenizeW
       if ( fAllCaps ) lFlags |= TF_ALLCAPS;
       if ( !fAlNum )  lFlags |= TF_NOLOOKUP;
       if ( fNumber )  lFlags |= TF_NUMBER;
-      usReturn = MorphAddTermToList2W( (PSZ_W *)ppTermList,
-                                     pulTermListSize,
-                                     &ulTermBufUsed,
-                                     pTerm,
+      
+      usReturn = MorphAddTermToList2W( pTermList,
+                                      pTerm,
                                      (USHORT)(pszCurPos - pTerm),
-                                     (USHORT)(fOffsList ? (pTerm-pszInData) : 0),
-                                     lFlags,
-                                     usListType );
+                                     pTerm-pszInData,
+                                     lFlags );
+                                     
       pTerm    = pszCurPos;
       fAllCaps = TRUE;
       fAlNum   = TRUE;
@@ -965,14 +869,11 @@ USHORT NTMTokenizeW
     /******************************************************************/
     if ( fSingleToken && !usReturn )
     {
-      usReturn = MorphAddTermToList2W( (PSZ_W *)ppTermList,
-                                     pulTermListSize,
-                                     &ulTermBufUsed,
+      usReturn = MorphAddTermToList2W( pTermList,
                                      pszCurPos,
                                      1,
-                                     (USHORT)(fOffsList ? (pszCurPos-pszInData) : 0),
-                                     TF_NOLOOKUP,
-                                     usListType );
+                                     pszCurPos-pszInData,
+                                     TF_NOLOOKUP );
       pTerm    = pszCurPos + 1;
     } /* endif */
 
@@ -981,18 +882,11 @@ USHORT NTMTokenizeW
     /******************************************************************/
     if ( fNewSentence && !usReturn )
     {
-      if ( (usListType == MORPH_FLAG_ZTERMLIST) ||
-           (usListType == MORPH_FLAG_OFFSLIST) )
-      {
-        usReturn = MorphAddTermToList2W( (PSZ_W *)ppTermList,
-                                       pulTermListSize,
-                                       &ulTermBufUsed,
+        usReturn = MorphAddTermToList2W( pTermList,
                                        L" ",
                                        1,
                                        0, // no offset possible
-                                       TF_NEWSENTENCE,
-                                       usListType );
-      } /* endif */
+                                       TF_NEWSENTENCE);
     } /* endif */
 
 
@@ -1022,14 +916,11 @@ USHORT NTMTokenizeW
     if ( fAllCaps ) lFlags |= TF_ALLCAPS;
     if ( !fAlNum )  lFlags |= TF_NOLOOKUP;
     if ( fNumber )  lFlags |= TF_NUMBER;
-    usReturn = MorphAddTermToList2W( (PSZ_W *)ppTermList,
-                                   pulTermListSize,
-                                   &ulTermBufUsed,
+    usReturn = MorphAddTermToList2W( pTermList,
                                    pTerm,
                                    (USHORT)(pszCurPos - pTerm),
-                                   (USHORT)(fOffsList ? (pTerm-pszInData) : 0),
-                                   lFlags,
-                                   usListType );
+                                   pTerm - pszInData,
+                                   lFlags);
   } /* endif */
 
   /*****************************************************************/
@@ -1037,14 +928,11 @@ USHORT NTMTokenizeW
   /*****************************************************************/
   if ( !usReturn )
   {
-    usReturn = MorphAddTermToList2W( (PSZ_W *)ppTermList,
-                                   pulTermListSize,
-                                   &ulTermBufUsed,
+    usReturn = MorphAddTermToList2W( pTermList,
                                    (PSZ_W)EMPTY_STRING,
                                    0,
                                    0,
-                                   0L,
-                                   usListType );
+                                   0L );
   } /* endif */
 
   return (usReturn);

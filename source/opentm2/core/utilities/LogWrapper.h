@@ -140,7 +140,7 @@ public:
     std::string FlushBuffers(int severity);
 };
 
-static void GetElapsedTime( long long *plTime );
+void GetElapsedTime( long long *plTime );
 std::string getTimeStr();
 int getBuffIdForLog(int severity);
 

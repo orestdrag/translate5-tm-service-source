@@ -45,7 +45,7 @@ public:
         return m_timeout_failed;
     }
 
-    bool reset(){
+    void reset(){
         m_timeout_failed = false;
         m_errMsg = "";
         m_timeout_ms = 0;

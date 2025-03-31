@@ -117,41 +117,7 @@ BOOL CheckForAlloc
    PTMX_SENTENCE      pSentence,
    PTMX_TERM_TOKEN  * ppTermTokens,
    USHORT             usEntries
-)
-{
-  LONG     lFilled = 0L;
-  USHORT   usNewAlloc = 0;
-  BOOL     fOK = TRUE;
-  PTMX_TERM_TOKEN  pTermTokens;
-
-  pTermTokens = *ppTermTokens;
-  lFilled = ( (PBYTE)pTermTokens - (PBYTE)pSentence->pTermTokens);
-  if ( (pSentence->lTermAlloc - lFilled) <= (LONG)(usEntries * sizeof(TMX_TERM_TOKEN)) )
-  {
-    //remember offset of pTagEntry
-    lFilled = pTermTokens - pSentence->pTermTokens;
-    if (usEntries == 1)
-    {
-      usNewAlloc = TOK_SIZE;
-    }
-    else
-    {
-      usNewAlloc = usEntries * sizeof(TMX_TERM_TOKEN);
-    }
-    //allocate another 4k for pTagRecord
-    fOK = UtlAlloc( (PVOID *) &pSentence->pTermTokens, pSentence->lTermAlloc,
-                    pSentence->lTermAlloc + (LONG)usNewAlloc, NOMSG );
-    if ( fOK )
-    {
-      pSentence->lTermAlloc += (LONG)usNewAlloc;
-
-      //set new position of pTagEntry
-      pTermTokens = pSentence->pTermTokens + lFilled;
-    } /* endif */
-  } /* endif */
-  *ppTermTokens= pTermTokens;
-  return(fOK);
-}
+);
 
 
 
@@ -248,11 +214,8 @@ USHORT EqfMemory::TmtXReplace
   if ( !usRc )
   {
     HashSentence( TmProposal.pInputSentence );
-    TmProposal.pInputSentence->pTagRecord->usTagTableId = 1;
-        
-    //usRc = NTMGetIDFromName( TmProposal.szMarkup, NULL, (USHORT)TAGTABLE_KEY, 
-    //                      &TmProposal.pInputSentence->pTagRecord->usTagTableId );
-    TmProposal.pInputSentence->pTagRecord->usTagTableId = 1;
+    TmProposal.pInputSentence->pTagRecord[0].usTagTableId = 1;
+    
     if(usRc){
       T5LOG( T5WARNING) <<  ":: NTMGetIDFromName( tagtable ) returned " << usRc;
     }
@@ -308,12 +271,6 @@ USHORT EqfMemory::TmtXReplace
     
     usRc = TmBtree.QDAMDictUpdSignLocal(&stTmSign);
   }
-
-  // unlock TM database if database has been locked
-  if ( fLocked )
-  {
-    NTMLockTM( this, FALSE, &fLocked );
-  } /* endif */
 
   pTmPutOut->stPrefixOut.usLengthOutput = sizeof( TMX_EXT_OUT_W );
   pTmPutOut->stPrefixOut.usTmtXRc = usRc;
@@ -384,28 +341,25 @@ VOID HashSentence
 )
 {
   PSZ_W  pNormOffset;               // pointer to start of normalized string
-  PTMX_TERM_TOKEN  pTermTokens;     // pointer to term token structure
   USHORT usCount = 0;               // counter
 
-  pTermTokens = pSentence->pTermTokens;
 
-  while ( pTermTokens->usLength )
+  //while ( pTermTokens->usLength )
+  for(auto& token: pSentence->pTermTokens)
   {
-    pNormOffset = pSentence->pStrings->getNormStrC() + pTermTokens->usOffset;
-    pTermTokens->usHash = HashTupelW( pNormOffset, pTermTokens->usLength );
-    if(T5Logger::GetInstance()->CheckLogLevel(T5DEVELOP) || FLAGS_log_hashes_in_hash_sentence || FLAGS_add_tokens_to_fuzzy){
-      auto str = EncodingHelper::convertToUTF8(pNormOffset).substr(0, pTermTokens->usLength);
-      pSentence->tokens.push_back(str);
-      if(FLAGS_log_hashes_in_hash_sentence){
-        T5LOG( T5TRANSACTION) <<"HashSentence:: pNormOffset = \"" << str << "\"; len = " << pTermTokens->usLength <<"; hash = " <<pTermTokens->usHash;
+    pNormOffset = pSentence->pStrings->getNormStrC() + token.usOffset;
+    token.usHash = HashTupelW( pNormOffset, token.usLength );
 
-      }else{
-        T5LOG( T5DEBUG) <<"HashSentence:: pNormOffset = \"" << str << "\"; len = " << pTermTokens->usLength <<"; hash = " <<pTermTokens->usHash;
-      }
+    if(T5Logger::GetInstance()->CheckLogLevel(T5DEVELOP) || FLAGS_log_hashes_in_hash_sentence || FLAGS_add_tokens_to_fuzzy){
+      auto str = EncodingHelper::convertToUTF8(pNormOffset).substr(0, token.usLength);
+      pSentence->tokens.push_back(str);
+      //if(FLAGS_log_hashes_in_hash_sentence){
+        T5LOG( T5DEBUG) <<"HashSentence:: pNormOffset = \"" << str << "\"; len = " << token.usLength <<"; hash = " << token.usHash;
+      //}
     }
     //max nr of hashes built
     usCount++;
-    pTermTokens++;
+    //pTermTokens++;
 
   } /* endwhile */
 
@@ -415,11 +369,14 @@ VOID HashSentence
   /********************************************************************/
   if ( usCount < 5 )
   {
-    pTermTokens = pSentence->pTermTokens;
+    PTMX_TERM_TOKEN pTermTokens = pSentence->pTermTokens.data();
     for (USHORT i=0; i < usCount; i++ )
     {
-      pSentence->pulVotes[pSentence->usActVote] = pTermTokens[i].usHash;
+      //pSentence->pulVotes[pSentence->usActVote] = pTermTokens[i].usHash;
+      pSentence->pulVotes.push_back(pTermTokens[i].usHash);
       pSentence->usActVote++;
+      T5LOG(T5TRANSACTION) << "pSentence->pulVotes.size = " << pSentence->pulVotes.size() <<"; actVote = " << pSentence->usActVote;
+      
     } /* endfor */
   } /* endif */
 
@@ -508,7 +465,7 @@ USHORT HashTupelW
 //                    with 7 words A B C D E F G                                
 //                    PREREQ: it is ensured that sentence has at least 3 tokens 
 //------------------------------------------------------------------------------
-static VOID
+VOID
 BuildVotes
 (
   PTMX_SENTENCE pSentence              // pointer to sentence structure
@@ -519,7 +476,7 @@ BuildVotes
   PTMX_TERM_TOKEN  pLastTerm;
 
   //run through list of tokens and build tuples
-  pTermTokens = pSentence->pTermTokens;
+  pTermTokens = pSentence->pTermTokens.data();
 
   while ( pTermTokens->usLength && (pSentence->usActVote < ABS_VOTES) )
   {
@@ -529,14 +486,14 @@ BuildVotes
   pLastTerm = pTermTokens;
   pLastTerm --;
 
-  pTermTokens = pSentence->pTermTokens;
+  pTermTokens = pSentence->pTermTokens.data();
 
   while ( pTermTokens->usLength && (pSentence->usActVote < MAX_VOTES) )
   {
     Vote( pTermTokens, pSentence, 1 );         // ABD, BCE, CDF, DEG
     pTermTokens++;
   } /* endwhile */
-  pTermTokens = pSentence->pTermTokens;
+  pTermTokens = pSentence->pTermTokens.data();
 
   while ( pTermTokens->usLength && (pSentence->usActVote < MAX_VOTES) )
   {
@@ -544,7 +501,7 @@ BuildVotes
     pTermTokens++;
   } /* endwhile */
 
-  pTermTokens = pSentence->pTermTokens;
+  pTermTokens = pSentence->pTermTokens.data();
   if( pTermTokens->usLength && (pSentence->usActVote < MAX_VOTES) )
   {
     Vote (pTermTokens, pSentence, 4 );         // 1 * AAC
@@ -559,7 +516,7 @@ BuildVotes
   /********************************************************************/
   /* use 1st token as triple                                          */
   /********************************************************************/
-  pTermTokens = pSentence->pTermTokens;
+  pTermTokens = pSentence->pTermTokens.data();
   if( pTermTokens->usLength && (pSentence->usActVote < MAX_VOTES) )
   {
     Vote (pTermTokens, pSentence, 7 );         // 1 * AAA
@@ -575,7 +532,7 @@ BuildVotes
   } /* endif */
 
   usIndex = 0;
-  pTermTokens = pSentence->pTermTokens;
+  pTermTokens = pSentence->pTermTokens.data();
   while ((usIndex < 3) && pTermTokens->usLength
          && (pSentence->usActVote < MAX_VOTES) )
   {
@@ -604,7 +561,7 @@ BuildVotes
 // Function flow:     build all possible 3 tupels out of a sequence of 4 consec 
 //                    utive tokens. (base is the FLASH algorithm).              
 //------------------------------------------------------------------------------
-static VOID
+VOID
 Vote
 (
   PTMX_TERM_TOKEN pTermTokens,             //ptr to term tokens
@@ -638,9 +595,15 @@ Vote
     {
       ulVote = (ulVote*131) + pTermTokens[usTLookUp[i+3*usTuple]].usHash;
     } /* endfor */
+    
+    pSentence->pulVotes.push_back(ulVote);
 
-    pSentence->pulVotes[pSentence->usActVote] = ulVote;
+    //pSentence->pulVotes[pSentence->usActVote] = ulVote;
     pSentence->usActVote++;
+    
+    //#ifdef DEBUG
+    T5LOG(T5TRANSACTION) << "pulVodet.size()=" << pSentence->pulVotes.size() << "; actVote = " << pSentence->usActVote;
+    //#endif
   } /* endif */
 } /* end of function Vote */
 
@@ -665,7 +628,7 @@ USHORT CheckCompactArea
   EqfMemory*  pTmClb                     // pointer to tm control block
 )
 {                        
-  PULONG pulVotes = pSentence->pulVotes; // pointer to begin of votes                           
+  PULONG pulVotes = pSentence->pulVotes.data(); // pointer to begin of votes                           
   USHORT usMatch = 0;                    // number of matches                           
 
   for (USHORT i = 0; ( i < pSentence->usActVote) ; i++, pulVotes++ )
@@ -727,201 +690,6 @@ USHORT CheckCompactArea
 //       build normalized string                                                
 //                                                                              
 //------------------------------------------------------------------------------
-USHORT TokenizeTarget
-(
-   StringTagVariants* pStrings,                      // ptr to target string
-   //PSZ_W pNormString,                  // ptr to normalized string
-   PTMX_TAGTABLE_RECORD *ppTagRecord,  // ptr to tag record structure
-   PLONG pulTagAlloc,                  // size of allocated area for tag record
-   PSZ pTagTableName,                  // name of tag table
-   //PUSHORT pusNormLen,                 // length of normalized string
-   EqfMemory* pClb                       // pointer to control block
-)
-{
-  PVOID     pTokenList = NULL;         // ptr to token table
-  BOOL      fOK;                       // success indicator
-  PBYTE     pTagEntry;                 // pointer to tag entries
-  PLOADEDTABLE pTable = NULL;          // pointer to tagtable
-//  USHORT    usI;                     // offset
-  USHORT    usFilled = 0;              // counter
-  USHORT    usRc = NO_ERROR;           // returned value
-  int    iTagEntryLen;             // length indicator
-  PTMX_TAGTABLE_RECORD pTagRecord;     // ptr to tag record structure
-  PSTARTSTOP pStartStop = NULL;        // ptr to start/stop table
-  int        iIterations = 0;
-  USHORT     usAddEntries = 0;
-  PSZ_W pStringToTokenize = pStrings->getNormalizedTargetStrC();//pStrings->getGenericTargetStrC();
-
-  pTagRecord = (*ppTagRecord);         //get contents of pointer
-
-  //allocate 4K pTokenlist for TaTagTokenize
-  fOK = UtlAlloc( (PVOID *) &(pTokenList), 0L, (LONG) TOK_SIZE, NOMSG );
-
-  if ( !fOK )
-  {
-    LOG_AND_SET_RC(usRc, T5WARNING, ERROR_NOT_ENOUGH_MEMORY);
-  }
-  else
-  {
-    pTagEntry = (PBYTE)pTagRecord;
-    pTagEntry += sizeof(TMX_TAGTABLE_RECORD);
-    RECLEN(pTagRecord) = 0;
-    pTagRecord->usFirstTagEntry = (USHORT)(pTagEntry - (PBYTE)pTagRecord);
-
-    pTagRecord->usTagTableId = 1;
-    if ( !usRc )
-    {
-      //tokenize target segment with correct tag table
-      //load tag table for tokenize function
-
-      //build tag table path
-      usRc = TALoadTagTableExHwnd( pTagTableName, &pTable, FALSE,
-                                   TALOADUSEREXIT | TALOADPROTTABLEFUNC |
-                                   TALOADCOMPCONTEXTFUNC,
-                                   FALSE, NULLHANDLE );
-      if ( usRc )
-      {
-        LOG_AND_SET_RC(usRc, T5INFO, ERROR_TA_ACC_TAGTABLE);
-      } /* endif */
-    } /* endif */
-
-    if ( !usRc )
-    {
-      // build protect start/stop table for tag recognition
-      usRc = TACreateProtectTableW( pStringToTokenize, pTable, 0,
-                                   (PTOKENENTRY)pTokenList,
-                                   TOK_SIZE, &pStartStop,
-                                   pTable->pfnProtTable, pTable->pfnProtTableW, 0L );
-
-      while ((iIterations < 10) && (usRc == EQFRS_AREA_TOO_SMALL))
-      {
-        // (re)allocate token buffer
-        LONG lOldSize = (usAddEntries * sizeof(TOKENENTRY)) + (LONG)TOK_SIZE;
-        LONG lNewSize = ((usAddEntries+128) * sizeof(TOKENENTRY)) + (LONG)TOK_SIZE;
-
-        if (UtlAlloc((PVOID *) &pTokenList, lOldSize, lNewSize, NOMSG) )
-        {
-          usAddEntries += 128;
-          iIterations++;
-        }
-        else
-        {
-          iIterations = 10;    // force end of loop
-        } /* endif */
-        // retry tokenization
-        if (iIterations < 10 )
-        {
-          usRc = TACreateProtectTableW( pStringToTokenize, pTable, 0,
-                                       (PTOKENENTRY)pTokenList,
-                                       (USHORT)lNewSize, &pStartStop,
-                                       pTable->pfnProtTable, pTable->pfnProtTableW, 0L );
-        } /* endif */
-
-      } /* endwhile */
-    } /* endif */
-
-    if ( !usRc )
-    {
-      PSTARTSTOP pEntry = pStartStop;
-      while ( (pEntry->usStart != 0) ||
-              (pEntry->usStop != 0)  ||
-              (pEntry->usType != 0) )
-      {
-        switch ( pEntry->usType )
-        {
-          case UNPROTECTED_CHAR :
-            // handle translatable text
-            {
-              USHORT usLength = pEntry->usStop - pEntry->usStart + 1;
-            } /* end case UNPROTECTED_CHAR */
-            break;
-          default :
-            // handle not-translatable data
-            {
-              // if next start/stop-entry is a protected one ...
-              if ( ((pEntry+1)->usStart != 0) &&
-                   ((pEntry+1)->usType != UNPROTECTED_CHAR) )
-              {
-                // enlarge next entry and ignore current one
-                (pEntry+1)->usStart = pEntry->usStart;
-              }
-              else
-              {
-                // add tag data
-                iTagEntryLen = sizeof(TMX_TAGENTRY) +
-                                (pEntry->usStop - pEntry->usStart + 1)*sizeof(CHAR_W);
-                if ( ((LONG)*pulTagAlloc - (LONG)(pTagEntry - (PBYTE)pTagRecord))
-                                                       <= (LONG)iTagEntryLen )
-                {
-                  //remember offset of pTagEntry
-                  usFilled = (USHORT)(pTagEntry - (PBYTE)pTagRecord);
-
-                  LONG addedSpace = TOK_SIZE;//how many 4k pages we need for new alloc
-                  while(((LONG)*pulTagAlloc + addedSpace - (LONG)(pTagEntry - (PBYTE)pTagRecord)) 
-                                                       <= (LONG)iTagEntryLen ){
-                                                        addedSpace += TOK_SIZE;
-                                                       }
-                  //allocate another 4k for pTagRecord
-                  int i=0;
-                  do{
-                    fOK = UtlAlloc( (PVOID *) &pTagRecord, *pulTagAlloc,
-                                  *pulTagAlloc + addedSpace, NOMSG );
-                    i++;
-                  }while(i<10 && fOK == false);
-
-                  if ( fOK )
-                  {
-                    *pulTagAlloc += (LONG)TOK_SIZE;
-
-                    //set new position of pTagEntry
-                    pTagEntry = ((PBYTE)pTagRecord) + usFilled;
-                  }else{
-                    T5LOG(T5ERROR) <<  "::ERROR: Segment not saved. It was tried to allocate " << *pulTagAlloc + addedSpace <<
-                      " bytes to save the tags of the segment, but this was still not enough. Since this should never happen, we did not try to allocate even more bytes and did not save the segment. This was the segment, that was not saved: "
-                      << EncodingHelper::convertToUTF8(pStringToTokenize);
-                  }
-
-                } /* endif */
-
-                if ( !fOK )
-                {                  
-                  LOG_AND_SET_RC(usRc, T5WARNING, ERROR_NOT_ENOUGH_MEMORY);
-                }
-                else
-                {
-                  ((PTMX_TAGENTRY)pTagEntry)->usOffset = pEntry->usStart;
-                  ((PTMX_TAGENTRY)pTagEntry)->usTagLen =
-                    (pEntry->usStop - pEntry->usStart + 1);// * sizeof(CHAR_W);
-                  memcpy( &(((PTMX_TAGENTRY)pTagEntry)->bData),
-                          pStringToTokenize + pEntry->usStart,
-                          ((PTMX_TAGENTRY)pTagEntry)->usTagLen * sizeof(CHAR_W));
-                  pTagEntry += iTagEntryLen;
-                } /* endif */
-              } /* endif */
-            } /* end default */
-            break;
-        } /* endswitch */
-        pEntry++;
-      } /* endwhile */
-      RECLEN(pTagRecord) = pTagEntry - (PBYTE)pTagRecord;
-    } /* endif */
-  } /* endif */
-
-
-  //release memory
-  if ( pStartStop ) UtlAlloc( (PVOID *) &pStartStop, 0L, 0L, NOMSG );
-  if ( pTokenList ) UtlAlloc( (PVOID *) &pTokenList, 0L, 0L, NOMSG );
-
-  //free tag table / decrement use count
-  if ( pTable != NULL )
-  {
-    TAFreeTagTable( pTable );
-  } /* endif */
-
-  *ppTagRecord = pTagRecord;
-
-  return( usRc );
-}
 
 //------------------------------------------------------------------------------
 // External function                                                            
@@ -1303,14 +1071,15 @@ USHORT EqfMemory::UpdateTmIndex
   PULONG   pulVotes = NULL;            // pointer to votes
   USHORT   i;                          // index in for loop
   ULONG    ulKey;                      // index key
-  PTMX_INDEX_RECORD pIndexRecord = NULL;  // pointer to index structure
+  std::vector<TMX_INDEX_RECORD> pIndexRecord;  // pointer to index structure
   BOOL     fOK = FALSE;                // success indicator
   PBYTE    pIndex;                     // position pointer
 
   //for all votes add the index to the corresponding list
-  pulVotes = pSentence->pulVotes;
+  pulVotes = pSentence->pulVotes.data();
 
   //allocate 32K for tm index record
+  pIndexRecord.resize(1 + TMX_REC_SIZE/sizeof(TMX_INDEX_RECORD));
   fOK = UtlAlloc( (PVOID *) &(pIndexRecord), 0L, (LONG) TMX_REC_SIZE, NOMSG );
 
   if ( !fOK )
@@ -1325,21 +1094,21 @@ USHORT EqfMemory::UpdateTmIndex
       {
         ulKey = (*pulVotes) & START_KEY;
         ulLen = TMX_REC_SIZE;
-        memset( pIndexRecord, 0, TMX_REC_SIZE );
+        memset( pIndexRecord.data(), 0, TMX_REC_SIZE );
         usRc = InBtree.EQFNTMGet( ulKey,  //index key
-                          (PCHAR)pIndexRecord,   //pointer to index record
+                          (PCHAR)pIndexRecord.data(),   //pointer to index record
                           &ulLen );  //length
 
         if ( usRc == BTREE_NOT_FOUND )
         {
           //key is not in index file; add a new index entry
-          pIndexRecord->usRecordLen = sizeof( TMX_INDEX_RECORD );
+          pIndexRecord.data()->usRecordLen = sizeof( TMX_INDEX_RECORD );
 
-          pIndexRecord->stIndexEntry = NTMINDEX(pSentence->usActVote,ulSidKey);
+          pIndexRecord.data()->stIndexEntry = NTMINDEX(pSentence->usActVote,ulSidKey);
 
           usRc = InBtree.EQFNTMInsert( &ulKey,
-                               (PBYTE)pIndexRecord,  //pointer to index
-                               pIndexRecord->usRecordLen );  //length
+                               (PBYTE)pIndexRecord.data(),  //pointer to index
+                               pIndexRecord.data()->usRecordLen );  //length
 
           // if index DB is full and memory is in exclusive access we try to compact the index file
           if ( (usRc == BTREE_LOOKUPTABLE_TOO_SMALL) && (usAccessMode & ASD_LOCKED) )
@@ -1348,7 +1117,7 @@ USHORT EqfMemory::UpdateTmIndex
 
              if ( usRc == NO_ERROR )
              {
-               usRc = InBtree.EQFNTMInsert(&ulKey, (PBYTE)pIndexRecord, pIndexRecord->usRecordLen );
+               usRc = InBtree.EQFNTMInsert(&ulKey, (PBYTE)pIndexRecord.data(), pIndexRecord.data()->usRecordLen );
              } /* endif */
           } /* endif */
 
@@ -1369,7 +1138,7 @@ USHORT EqfMemory::UpdateTmIndex
             BOOL fFound = FALSE;
 
             //key is in index file; update index entry with new sid
-            ulLen = pIndexRecord->usRecordLen;
+            ulLen = pIndexRecord.data()->usRecordLen;
 
             //calculate number of entries in index record
             usIndexEntries = (USHORT)((ulLen - sizeof(USHORT)) / sizeof(TMX_INDEX_ENTRY));
@@ -1377,7 +1146,7 @@ USHORT EqfMemory::UpdateTmIndex
             //// check if SID is already contained in list..
             //{
             //  int i = (int)usIndexEntries;
-            //  PULONG pulIndex = (PULONG)&(pIndexRecord->stIndexEntry); 
+            //  PULONG pulIndex = (PULONG)&(pIndexRecord.data()->stIndexEntry); 
             //  while ( i )
             //  {
             //    if ( *pulIndex == ulNewSID )
@@ -1395,7 +1164,7 @@ USHORT EqfMemory::UpdateTmIndex
               if ( usIndexEntries >= (MAX_INDEX_LEN -1))
               {
                 //position pointer at beginning of index record
-                pIndex = (PBYTE)pIndexRecord;
+                pIndex = (PBYTE)pIndexRecord.data();
                 memmove( pIndex, pIndex + sizeof(ULONG), ulLen - sizeof(ULONG) );
                 ulLen -= sizeof(ULONG);
                 usIndexEntries--;
@@ -1405,7 +1174,7 @@ USHORT EqfMemory::UpdateTmIndex
                     && ((ulLen + sizeof( TMX_INDEX_ENTRY )) <= TMX_REC_SIZE) )
               {
                 //position pointer at beginning of index record
-                pIndex = (PBYTE)pIndexRecord;
+                pIndex = (PBYTE)pIndexRecord.data();
 
                 //move pointer to end of index record
                 pIndex += ulLen;
@@ -1415,12 +1184,12 @@ USHORT EqfMemory::UpdateTmIndex
                                     NTMINDEX(pSentence->usActVote,ulSidKey);
 
                 //update index record size
-                pIndexRecord->usRecordLen = (USHORT)(ulLen + sizeof( TMX_INDEX_ENTRY ));
+                pIndexRecord.data()->usRecordLen = (USHORT)(ulLen + sizeof( TMX_INDEX_ENTRY ));
 
                 usRc = InBtree.EQFNTMUpdate( 
                                     ulKey,
-                                    (PBYTE)pIndexRecord,  //pointer to index
-                                    pIndexRecord->usRecordLen );  //length
+                                    (PBYTE)pIndexRecord.data(),  //pointer to index
+                                    pIndexRecord.data()->usRecordLen );  //length
                 // if index DB is full and memory is in exclusive access we try to compact the index file
                 if ( (usRc == BTREE_LOOKUPTABLE_TOO_SMALL) && (usAccessMode & ASD_LOCKED) )
                 {
@@ -1428,7 +1197,7 @@ USHORT EqfMemory::UpdateTmIndex
 
                   if ( usRc == NO_ERROR )
                   {
-                    usRc = InBtree.EQFNTMUpdate(ulKey, (PBYTE)pIndexRecord, pIndexRecord->usRecordLen ); 
+                    usRc = InBtree.EQFNTMUpdate(ulKey, (PBYTE)pIndexRecord.data(), pIndexRecord.data()->usRecordLen ); 
                   } /* endif */
                 } /* endif */
                 if ( !usRc )
@@ -1458,8 +1227,6 @@ USHORT EqfMemory::UpdateTmIndex
     } /* endfor */
   } /* endif */
 
-  //release allocated memory
-  UtlAlloc( (PVOID *) &(pIndexRecord), 0L, 0L, NOMSG);
 
   return( usRc );
 }
@@ -1505,7 +1272,7 @@ USHORT DetermineTmRecord
 )
 {
   USHORT usRc = NO_ERROR;            // return code
-  ULONG  ulLen;                      // length paramter
+  ULONG  ulLen = 0;                  // length paramter
   USHORT usSid = 0;                  // number of sentence ids found
   USHORT usPos;                      // position in pulSids
   PULONG pulVotes;                   // pointer to votes
@@ -1513,152 +1280,141 @@ USHORT DetermineTmRecord
   USHORT i, j;                       // index in for loop
   USHORT usMaxEntries = 0;           // nr of index entries in index record
   ULONG ulKey;                       // index key
-  PTMX_INDEX_RECORD pIndexRecord = NULL; // pointer to index structure
-  BOOL fOK;                          // success indicator
+  std::vector<BYTE> pIndexRecord; // pointer to index structure
+  BOOL fOk = true;                          // success indicator
   PTMX_INDEX_ENTRY pIndexEntry;      // pointer to index entry structure
 
   pulSidStart = pulSids;
 
   //for all votes add the index to the corresponding list
-  pulVotes = pSentence->pulVotes;
+  pulVotes = pSentence->pulVotes.data();
 
   //allocate 32K for tm index record
-  fOK = UtlAlloc( (PVOID *) &(pIndexRecord), 0L, (LONG) TMX_REC_SIZE, NOMSG );
+  pIndexRecord.resize(TMX_REC_SIZE);
 
-  if ( !fOK )
+
+  ulKey = (*pulVotes) & START_KEY;
+  memset( pIndexRecord.data(), 0, pIndexRecord.size() );
+  usRc = pTmClb->InBtree.EQFNTMGet( ulKey,  //index key
+                    pIndexRecord);   //pointer to index record
+
+  if ( usRc == NO_ERROR )
   {
-    LOG_AND_SET_RC(usRc, T5WARNING, ERROR_NOT_ENOUGH_MEMORY);
+    //calculate number of index entries in index record
+    ulLen = toIndexRecord(pIndexRecord)->usRecordLen;
+    usMaxEntries = (USHORT)((ulLen - sizeof(USHORT)) / sizeof(TMX_INDEX_ENTRY));
+
+    if(T5Logger::GetInstance()->CheckLogLevel(T5DEVELOP)){
+      std::string msg = __func__ + std::string(":: Number Entries:  ") + toStr(usMaxEntries).c_str() +"; Entries:";
+      pIndexEntry = &toIndexRecord(pIndexRecord)->stIndexEntry;
+      for (j=0 ; j<usMaxEntries;j++,pIndexEntry++ )
+      {
+        if (j % 10 == 0)
+        {
+          msg+="\n";
+        } /* endif */
+        msg +=  std::to_string(NTMKEY(*pIndexEntry)) + "; " ;
+      } /* endfor */
+      T5LOG( T5DEBUG) << msg;
+    }
+
+    pIndexEntry = &toIndexRecord(pIndexRecord)->stIndexEntry;
+
+    for ( j = 0; j < usMaxEntries; j++, pIndexEntry++ )
+    {
+      if ( NTMVOTES(*pIndexEntry) == (BYTE) pSentence->usActVote )
+      {
+        *pulSids = NTMKEY(*pIndexEntry);
+        usSid++;
+        pulSids++;
+      } /* endif */
+    } /* endfor */
+
+    if ( (usSid > 1) )
+    {
+      //there is more than one sentence to check so go through other
+      //indices until all have been tried or usSid has been reduced to 1
+      pulVotes++;
+      for ( i = 0; (i < pSentence->usActVote-1) && (usSid > 1);
+            i++, pulVotes++ )
+      {
+        if ( usRc == NO_ERROR )
+        {
+          ulKey = (*pulVotes) & START_KEY;
+          memset( pIndexRecord.data(), 0, pIndexRecord.size() );
+          usRc = pTmClb->InBtree.EQFNTMGet( ulKey,  //index key
+                            pIndexRecord);  //pointer to index record
+
+          if ( usRc == NO_ERROR )
+          {
+            //calculate number of index entries in index record
+            ulLen = toIndexRecord(pIndexRecord)->usRecordLen;
+            usMaxEntries = (USHORT)((pIndexRecord.size() - sizeof(USHORT)) / sizeof(TMX_INDEX_ENTRY));
+
+            pIndexEntry = &toIndexRecord(pIndexRecord)->stIndexEntry;
+            pulSids = pulSidStart;
+            usPos = 0;
+
+            //end criteria are all sentence ids in index key or only one
+            //sentence id left in pulSids
+            for ( j = 0; (j < usMaxEntries) && (usSid > 1);
+                  j++, pIndexEntry++ )
+            {
+              if ( NTMVOTES(*pIndexEntry) == (BYTE) pSentence->usActVote )
+              {
+                //before adding sentence id check if already in pulsids as the
+                //respective tm record need only be checked once
+                while ( (NTMKEY(*pIndexEntry) > *pulSids) && (usSid > 1) )
+                {
+                  //remove sid from pulSids and decrease sid counter
+                  if ( usSid > usPos )
+                  {
+                    ulLen = (usSid - usPos) * sizeof(ULONG);
+                  }
+                  else
+                  {
+                    ulLen = sizeof(ULONG);
+                  } /* endif */
+                  memmove( (PBYTE) pulSids, (PBYTE)(pulSids+1), ulLen );
+                  usSid--;
+                } /* endwhile */
+
+                if ( NTMKEY(*pIndexEntry) == *pulSids )
+                {
+                  //move on one position in pulSids
+                  pulSids++;
+                  usPos++;
+                } /* endif */
+              } /* endif */
+            } /* endfor */
+          }
+          else
+          {
+            //in case the index record doesn't exist exit function and
+            //set return code to 0
+            if ( usRc == BTREE_NOT_FOUND )
+            {
+              LOG_AND_SET_RC(usRc, T5DEVELOP, NO_ERROR);
+            } /* endif */
+          } /* endif */
+        } /* endif */
+      } /* endfor */
+    } /* endif */
   }
   else
   {
-    ulKey = (*pulVotes) & START_KEY;
-    ulLen = TMX_REC_SIZE;
-    memset( pIndexRecord, 0, TMX_REC_SIZE );
-    usRc = pTmClb->InBtree.EQFNTMGet( 
-                      ulKey,  //index key
-                      (PCHAR)pIndexRecord,   //pointer to index record
-                      &ulLen );  //length
-
-    if ( usRc == NO_ERROR )
+    //in case the index record doesn't exist exit function and set return
+    //code to 0
+    if ( usRc == BTREE_NOT_FOUND )
     {
-      //calculate number of index entries in index record
-      ulLen = pIndexRecord->usRecordLen;
-      usMaxEntries = (USHORT)((ulLen - sizeof(USHORT)) / sizeof(TMX_INDEX_ENTRY));
-
-      if(T5Logger::GetInstance()->CheckLogLevel(T5DEVELOP)){
-        std::string msg = __func__ + std::string(":: Number Entries:  ") + toStr(usMaxEntries).c_str() +"; Entries:";
-        pIndexEntry = &pIndexRecord->stIndexEntry;
-        for (j=0 ; j<usMaxEntries;j++,pIndexEntry++ )
-        {
-          if (j % 10 == 0)
-          {
-            msg+="\n";
-          } /* endif */
-          msg +=  std::to_string(NTMKEY(*pIndexEntry)) + "; " ;
-        } /* endfor */
-        T5LOG( T5DEBUG) << msg;
-      }
-
-      pIndexEntry = &pIndexRecord->stIndexEntry;
-
-      for ( j = 0; j < usMaxEntries; j++, pIndexEntry++ )
-      {
-        if ( NTMVOTES(*pIndexEntry) == (BYTE) pSentence->usActVote )
-        {
-          *pulSids = NTMKEY(*pIndexEntry);
-          usSid++;
-          pulSids++;
-        } /* endif */
-      } /* endfor */
-
-      if ( (usSid > 1) )
-      {
-        //there is more than one sentence to check so go through other
-        //indices until all have been tried or usSid has been reduced to 1
-        pulVotes++;
-        for ( i = 0; (i < pSentence->usActVote-1) && (usSid > 1);
-              i++, pulVotes++ )
-        {
-          if ( usRc == NO_ERROR )
-          {
-            ulKey = (*pulVotes) & START_KEY;
-            ulLen = TMX_REC_SIZE;
-            memset( pIndexRecord, 0, TMX_REC_SIZE );
-            usRc = pTmClb->InBtree.EQFNTMGet( 
-                              ulKey,  //index key
-                              (PCHAR)pIndexRecord,   //pointer to index record
-                              &ulLen );  //length
-
-            if ( usRc == NO_ERROR )
-            {
-              //calculate number of index entries in index record
-              ulLen = pIndexRecord->usRecordLen;
-              usMaxEntries = (USHORT)((ulLen - sizeof(USHORT)) / sizeof(TMX_INDEX_ENTRY));
-
-              pIndexEntry = &pIndexRecord->stIndexEntry;
-              pulSids = pulSidStart;
-              usPos = 0;
-
-              //end criteria are all sentence ids in index key or only one
-              //sentence id left in pulSids
-              for ( j = 0; (j < usMaxEntries) && (usSid > 1);
-                    j++, pIndexEntry++ )
-              {
-                if ( NTMVOTES(*pIndexEntry) == (BYTE) pSentence->usActVote )
-                {
-                  //before adding sentence id check if already in pulsids as the
-                  //respective tm record need only be checked once
-                  while ( (NTMKEY(*pIndexEntry) > *pulSids) && (usSid > 1) )
-                  {
-                    //remove sid from pulSids and decrease sid counter
-                    if ( usSid > usPos )
-                    {
-                      ulLen = (usSid - usPos) * sizeof(ULONG);
-                    }
-                    else
-                    {
-                      ulLen = sizeof(ULONG);
-                    } /* endif */
-                    memmove( (PBYTE) pulSids, (PBYTE)(pulSids+1), ulLen );
-                    usSid--;
-                  } /* endwhile */
-
-                  if ( NTMKEY(*pIndexEntry) == *pulSids )
-                  {
-                    //move on one position in pulSids
-                    pulSids++;
-                    usPos++;
-                  } /* endif */
-                } /* endif */
-              } /* endfor */
-            }
-            else
-            {
-              //in case the index record doesn't exist exit function and
-              //set return code to 0
-              if ( usRc == BTREE_NOT_FOUND )
-              {
-                LOG_AND_SET_RC(usRc, T5DEVELOP, NO_ERROR);
-              } /* endif */
-            } /* endif */
-          } /* endif */
-        } /* endfor */
-      } /* endif */
-    }
-    else
-    {
-      //in case the index record doesn't exist exit function and set return
-      //code to 0
-      if ( usRc == BTREE_NOT_FOUND )
-      {
-        LOG_AND_SET_RC(usRc, T5DEVELOP, NO_ERROR);
-      } /* endif */
+      LOG_AND_SET_RC(usRc, T5DEVELOP, NO_ERROR);
     } /* endif */
   } /* endif */
 
+
   if(T5Logger::GetInstance()->CheckLogLevel(T5DEVELOP)){
     std::string msg = __func__ + std::string(":: Matching Sids: ");
-    pIndexEntry = &pIndexRecord->stIndexEntry;
+    pIndexEntry = &toIndexRecord(pIndexRecord)->stIndexEntry;
     while ( *pulSidStart )
     {
       msg +=  std::to_string(*pulSidStart) + "; ";
@@ -1666,8 +1422,6 @@ USHORT DetermineTmRecord
     } 
     T5LOG( T5DEBUG) << msg;
   }
-
-  UtlAlloc( (PVOID *) &(pIndexRecord), 0L, 0L, NOMSG );
 
   if ( usRc )
   {
@@ -1716,22 +1470,17 @@ USHORT EqfMemory::UpdateTmRecord
   OtmProposal&    TmProposal                //pointer to get in data
 )
 {
-  BOOL   fOK;                          //success indicator
+  BOOL   fOK = true;                   //success indicator
   BOOL   fStop = FALSE;                //indication to leave while loop
   PULONG pulSids = NULL;               //ptr to sentence ids
   PULONG pulSidStart = NULL;           //ptr to sentence ids
   USHORT usRc = NO_ERROR;              //return code
   ULONG  ulLen;                        //length indicator
   ULONG ulKey;                         //tm record key
-  PTMX_RECORD pTmRecord = NULL;        //pointer to tm record
-  ULONG       ulRecBufSize = 0L;       // current size of record buffer
+  std::vector<BYTE> TmRecord;        //pointer to tm record
+  
+  TmRecord.resize(TMX_REC_SIZE);
 
-  //allocate 32K for tm record
-  fOK = UtlAlloc( (PVOID *) &(pTmRecord), 0L, (LONG) TMX_REC_SIZE, NOMSG );
-  if ( fOK )
-  {
-    ulRecBufSize = TMX_REC_SIZE;
-  } /* endif */
 
   //allocate for sentence ids
   if ( fOK )
@@ -1755,36 +1504,13 @@ USHORT EqfMemory::UpdateTmRecord
       while ( (*pulSids) && (usRc == NO_ERROR) && !fStop )
       {
         ulKey = *pulSids;
-        ulLen = TMX_REC_SIZE;
-        memset( pTmRecord, 0, ulLen );
-        usRc =  TmBtree.EQFNTMGet(
-                          ulKey,  //tm record key
-                          (PCHAR)pTmRecord,   //pointer to tm record data
-                          &ulLen );    //length
-        if ( usRc == BTREE_BUFFER_SMALL)
-        {
-          fOK = UtlAlloc( (PVOID *)&pTmRecord, ulRecBufSize, ulLen, NOMSG );
-          if ( fOK )
-          {
-            ulRecBufSize = ulLen;
-            memset( pTmRecord, 0, ulLen );
-
-            usRc =  TmBtree.EQFNTMGet(
-                              ulKey,  //tm record key
-                              (PCHAR)pTmRecord,   //pointer to tm record data
-                              &ulLen );    //length
-          }
-          else
-          {
-            LOG_AND_SET_RC(usRc, T5WARNING, ERROR_NOT_ENOUGH_MEMORY);
-          } /* endif */
-        } /* endif */
+        usRc =  TmBtree.EQFNTMGet( ulKey,  //tm record key
+                          TmRecord);   //pointer to tm record data
 
         if ( usRc == NO_ERROR )
         {
           //compare tm record data with data passed in the get in structure
-          usRc = ComparePutData( &pTmRecord, &ulRecBufSize,
-                                 TmProposal, &ulKey );
+          usRc = ComparePutData( TmRecord, TmProposal, &ulKey );
 
           if ( usRc == SOURCE_STRING_ERROR )
           {
@@ -1813,7 +1539,6 @@ USHORT EqfMemory::UpdateTmRecord
 
   //release memory
   UtlAlloc( (PVOID *) &pulSidStart, 0L, 0L, NOMSG );
-  UtlAlloc( (PVOID *) &pTmRecord, 0L, 0L, NOMSG );
 
   return( usRc );
 }
@@ -1855,7 +1580,7 @@ USHORT EqfMemory::UpdateTmRecordByInternalKey
   OtmProposal& TmProposal
 )
 {
-  BOOL   fOK;                          //success indicator
+  BOOL   fOK = true;                          //success indicator
   BOOL   fStop = FALSE;                //indication to leave while loop
   PULONG pulSids = NULL;               //ptr to sentence ids
   PULONG pulSidStart = NULL;           //ptr to sentence ids
@@ -1863,14 +1588,9 @@ USHORT EqfMemory::UpdateTmRecordByInternalKey
   ULONG  ulLen;                        //length indicator
   ULONG ulKey;                         //tm record key
   PTMX_RECORD pTmRecord = NULL;        //pointer to tm record
-  ULONG       ulRecBufSize = 0L;       // current size of record buffer
 
-  //allocate 32K for tm record
-  fOK = UtlAlloc( (PVOID *) &(pTmRecord), 0L, (LONG) TMX_REC_SIZE, NOMSG );
-  if ( fOK )
-  {
-    ulRecBufSize = TMX_REC_SIZE;
-  } /* endif */
+  std::vector<BYTE> TmRecord;         // space for user data
+  TmRecord.resize(TMX_REC_SIZE);
 
   //allocate for sentence ids
   if ( fOK )
@@ -1894,36 +1614,15 @@ USHORT EqfMemory::UpdateTmRecordByInternalKey
       while ( (*pulSids) && (usRc == NO_ERROR) && !fStop )
       {
         ulKey = *pulSids;
-        ulLen = TMX_REC_SIZE;
-        memset( pTmRecord, 0, ulLen );
-        usRc =  TmBtree.EQFNTMGet(
-                          ulKey,  //tm record key
-                          (PCHAR)pTmRecord,   //pointer to tm record data
-                          &ulLen );    //length
-        if ( usRc == BTREE_BUFFER_SMALL)
-        {
-          fOK = UtlAlloc( (PVOID *)&pTmRecord, ulRecBufSize, ulLen, NOMSG );
-          if ( fOK )
-          {
-            ulRecBufSize = ulLen;
-            memset( pTmRecord, 0, ulLen );
-
-            usRc =  TmBtree.EQFNTMGet(
-                              ulKey,  //tm record key
-                              (PCHAR)pTmRecord,   //pointer to tm record data
-                              &ulLen );    //length
-          }
-          else
-          {
-            LOG_AND_SET_RC(usRc, T5WARNING, ERROR_NOT_ENOUGH_MEMORY);
-          } /* endif */
-        } /* endif */
+        memset( &TmRecord, 0, TmRecord.size() );
+        usRc =  TmBtree.EQFNTMGet(ulKey,  //tm record key
+                          TmRecord);   //pointer to tm record data
+        
 
         if ( usRc == NO_ERROR )
         {
           //compare tm record data with data passed in the get in structure
-          usRc = ComparePutData( &pTmRecord, &ulRecBufSize,
-                                 TmProposal, &ulKey );
+          usRc = ComparePutData( TmRecord, TmProposal, &ulKey );
 
           if ( usRc == SOURCE_STRING_ERROR )
           {
@@ -1951,7 +1650,6 @@ USHORT EqfMemory::UpdateTmRecordByInternalKey
 
   //release memory
   UtlAlloc( (PVOID *) &pulSidStart, 0L, 0L, NOMSG );
-  UtlAlloc( (PVOID *) &pTmRecord, 0L, 0L, NOMSG );
 
   return( usRc );
 }
@@ -2009,13 +1707,12 @@ DECLARE_bool(log_memmove_in_compareputdata);
 //------------------------------------------------------------------------------
 USHORT EqfMemory::ComparePutData
 (
-  PTMX_RECORD *ppTmRecord,             // ptr to ptr of tm record data buffer
-  PULONG      pulRecBufSize,           // current size of record buffer
+  std::vector<BYTE>& ppTmRecord,             // ptr to ptr of tm record data buffer
   OtmProposal&  TmProposal,                  // pointer to get in data
   PULONG      pulKey                   // tm key
 )
 {
-  BOOL fOK;                            //success indicator
+  BOOL fOK = true;                            //success indicator
   BOOL fStop = FALSE;                  //indicates whether to leave loop or not
   PBYTE pByte;                         //position ptr
   PBYTE pStartTarget;                  //position ptr
@@ -2024,7 +1721,8 @@ USHORT EqfMemory::ComparePutData
   PTMX_TARGET_CLB    pClb = NULL;    //ptr to target control block
   LONG lLen = 0;                        //length indicator
   USHORT usNormLen = 0;                    //length of normalized string
-  PSZ_W pString = NULL;                  //pointer to character string
+  //PSZ_W pString = NULL;                  //pointer to character string
+  std::vector<wchar_t> pString(MAX_SEGMENT_SIZE);
   USHORT usRc = NO_ERROR;              //returned value from function
   BOOL        fUpdate = FALSE;         // TRUE = record has been updated
   PTMX_RECORD pTmRecord = *ppTmRecord; // pointer to tm record data
@@ -2033,7 +1731,7 @@ USHORT EqfMemory::ComparePutData
   int delTargetKey = 0, targetKey = 0;
 
   //allocate pString
-  fOK = UtlAlloc( (PVOID *) &(pString), 0L, (LONG) MAX_SEGMENT_SIZE*sizeof(CHAR_W), NOMSG );
+  //fOK = UtlAlloc( (PVOID *) &(pString), 0L, (LONG) MAX_SEGMENT_SIZE*sizeof(CHAR_W), NOMSG );
 
   if ( !fOK )
   {
@@ -2066,9 +1764,9 @@ USHORT EqfMemory::ComparePutData
       //calculate length of source string
       lLen = (RECLEN(pTMXSourceRecord) - sizeof( TMX_SOURCE_RECORD ));
       //copy and compare source string
-      memset( pString, 0, MAX_SEGMENT_SIZE * sizeof(CHAR_W));
+      memset( pString.data(), 0, MAX_SEGMENT_SIZE * sizeof(CHAR_W));
       lLen = EQFCompress2Unicode( pString, pByte, lLen );
-      fStringEqual = ! UTF16strcmp( pString, TmProposal.pInputSentence->pStrings->getGenericTagStrC() );
+      fStringEqual = ! UTF16strcmp( pString.data(), TmProposal.pInputSentence->pStrings->getGenericTagStrC() );
 
       if ( fStringEqual )
       {
@@ -2122,10 +1820,10 @@ USHORT EqfMemory::ComparePutData
               pByte = NTRecPos(pStartTarget, REC_TGTSTRING);
               lLen = pTMXTargetRecord->usClb - pTMXTargetRecord->usTarget;
               lLen = EQFCompress2Unicode( pString, pByte, lLen );
-              pString[lLen] = EOS;
+              pString.data()[lLen] = EOS;
 
               //compare target strings and target tag record
-              if ( !UTF16strcmp( pString, TmProposal.pInputSentence->pStrings->getGenericTargetStrC()))
+              if ( !UTF16strcmp( pString.data(), TmProposal.pInputSentence->pStrings->getGenericTargetStrC()))
               {  //target strings and target tag record are equal
                 //position at first control block
                 pClb = (PTMX_TARGET_CLB)NTRecPos(pStartTarget, REC_CLB);
@@ -2299,7 +1997,7 @@ USHORT EqfMemory::ComparePutData
   } /* endif */
 
   //release memory
-  UtlAlloc( (PVOID *) &pString, 0L, 0L, NOMSG );
+  //UtlAlloc( (PVOID *) &pString, 0L, 0L, NOMSG );
   //UtlAlloc( (PVOID *) &pTagRecord, 0L, 0L, NOMSG );
 
   if ( usRc )
@@ -2349,42 +2047,24 @@ USHORT EqfMemory::AddTmTarget(
   PULONG pulRecBufSize,             //ptr to current size of TM record buffer
   PULONG pulKey )                   //tm key
 {
-  PTMX_TARGET_CLB pTargetClb ;              // ptr to target ctl block
-  PTMX_TARGET_RECORD pTargetRecord = NULL;  // ptr to target record
-  //PTMX_TAGTABLE_RECORD pTagRecord = NULL; // ptr to tag table record
+  PTMX_TARGET_CLB pTargetClb = nullptr ;              // ptr to target ctl block
+  PTMX_TARGET_RECORD pTargetRecord = nullptr;  // ptr to target record
+  std::vector<BYTE> vTargetClb, vTargetRecord;//for managing memory
   USHORT       usRc = NO_ERROR;           // return code
   BOOL         fOK;                       // success indicator
-  //LONG         lTagAlloc;                 // alloc size
   PBYTE        pByte;                     // position pointer
   PTMX_RECORD pTmRecord = *ppTmRecord;    //pointer to tm record data
   ULONG       ulAddDataLen = 0;
 
   //allocate target control block record
   ulAddDataLen = NTMComputeAddDataSize( TmProposal.szContext, TmProposal.szAddInfo );
-  fOK = UtlAlloc( (PVOID *) &pTargetClb, 0L, (LONG)(sizeof(TMX_TARGET_CLB)+ulAddDataLen), NOMSG );
+  vTargetClb.resize(sizeof(TMX_TARGET_CLB)+ulAddDataLen);
+  vTargetRecord.resize(TMX_REC_SIZE);
+  pTargetClb = (PTMX_TARGET_CLB)vTargetClb.data();
+  pTargetRecord = (PTMX_TARGET_RECORD)vTargetRecord.data();
 
-  //allocate target record
-  if ( fOK )
-  {
-    fOK = UtlAlloc( (PVOID *) &(pTargetRecord), 0L, (LONG) TMX_REC_SIZE, NOMSG );
-  }
 
-  //allocate 4k for pTagRecord
-  //if ( fOK )
-  //{
-    //fOK = UtlAlloc( (PVOID *) &(pTagRecord), 0L, (LONG) TOK_SIZE, NOMSG );
-    //if ( fOK )
-    //  lTagAlloc = (LONG)TOK_SIZE;
-  //}
-
-  if ( !fOK )
   {
-    LOG_AND_SET_RC(usRc, T5WARNING, ERROR_NOT_ENOUGH_MEMORY);
-  }
-  else
-  {
-    //usRc = TokenizeTarget( TmProposal.pInputSentence->pStrings.get(), &pTagRecord,
-    //                       &lTagAlloc, TmProposal.szMarkup, this );
     if ( usRc == NO_ERROR )
     {
       usRc = FillClb( pTargetClb, TmProposal );
@@ -2392,11 +2072,8 @@ USHORT EqfMemory::AddTmTarget(
       {
         //fill target record
         FillTargetRecord( TmProposal.pInputSentence,  //ptr to sentence structure
-        //                  pTagRecord, //ptr to target string tag table
                           TmProposal.pInputSentence->pStrings->getGenericTargetStrC(),
                           wcslen(TmProposal.pInputSentence->pStrings->getGenericTargetStrC()),
-                          //pNormString,//ptr to target normalized string
-                          //usNormLen,  //length of target normalized string
                           &pTargetRecord,        //filled tm record returned
                           pTargetClb );                    //tm target control block
 
@@ -2442,16 +2119,10 @@ USHORT EqfMemory::AddTmTarget(
     } /* endif */
   } /* endif */
 
-  //release memory
-  UtlAlloc( (PVOID *) &(pTargetClb), 0L, 0L, NOMSG);
-  UtlAlloc( (PVOID *) &(pTargetRecord), 0L, 0L, NOMSG);
-  //UtlAlloc( (PVOID *) &(pTagRecord), 0L, 0L, NOMSG);
-
   if ( usRc )
   {
     ERREVENT2( ADDTMTARGET_LOC, ERROR_EVENT, usRc, TM_GROUP, "" );
   } /* endif */
-
 
   return( usRc );
 }
@@ -2590,7 +2261,6 @@ USHORT EqfMemory::TmtXUpdSeg
 {
   BOOL       fOK;                      // success indicator
   USHORT     usRc = NO_ERROR;          // return code
-  PTMX_RECORD pTmRecord = NULL;        // pointer to tm record
   BOOL        fLocked = FALSE;         // TM-database-has-been-locked flag
   ULONG  ulLen = 0;                    //length indicator
   PBYTE pByte;                         //position ptr
@@ -2598,18 +2268,9 @@ USHORT EqfMemory::TmtXUpdSeg
   PTMX_TARGET_RECORD pTMXTargetRecord; // ptr to target record
   PTMX_TARGET_CLB    pTargetClb;       // ptr to target CLB
   ULONG       ulLeftClbLen;            // remaining length of CLB area
-  ULONG       ulRecBufSize = 0L;       // current size of record buffer
-
-  //allocate 32K for tm record
-  fOK = UtlAlloc( (PVOID *) &(pTmRecord), 0L, (LONG) TMX_REC_SIZE, NOMSG );
-  if ( !fOK )
-  {
-    LOG_AND_SET_RC(usRc, T5WARNING, ERROR_NOT_ENOUGH_MEMORY);
-  }
-  else
-  {
-    ulRecBufSize = TMX_REC_SIZE;
-  } /* endif */
+  
+  std::vector<BYTE> TmRecord;         // space for user data
+  TmRecord.resize(TMX_REC_SIZE);
 
   // get TM record being modified and update the record
   if ( !usRc )
@@ -2617,27 +2278,8 @@ USHORT EqfMemory::TmtXUpdSeg
     LOG_AND_SET_RC(usRc, T5INFO, BTREE_NOT_FOUND);
 
     ulLen = TMX_REC_SIZE;
-    usRc =  TmBtree.EQFNTMGet( pTmPutIn->currentInternalKey.getRecordKey(), (PCHAR)pTmRecord,
-                      &ulLen );
-
-    if ( usRc == BTREE_BUFFER_SMALL)
-    {
-      fOK = UtlAlloc( (PVOID *)&pTmRecord, ulRecBufSize, ulLen, NOMSG );
-      if ( fOK )
-      {
-        ulRecBufSize = ulLen;
-        memset( pTmRecord, 0, ulLen );
-
-        usRc =  TmBtree.EQFNTMGet(
-                          pTmPutIn->currentInternalKey.getRecordKey(),  //tm record key
-                          (PCHAR)pTmRecord,   //pointer to tm record data
-                          &ulLen );    //length
-      }
-      else
-      {
-        LOG_AND_SET_RC(usRc, T5WARNING, ERROR_NOT_ENOUGH_MEMORY);
-      } /* endif */
-    } /* endif */
+    usRc =  TmBtree.EQFNTMGet( pTmPutIn->currentInternalKey.getRecordKey(), TmRecord );
+    PTMX_RECORD pTmRecord = (PTMX_RECORD) TmRecord.data();    
 
     if ( usRc == NO_ERROR )
     {
@@ -2773,7 +2415,7 @@ USHORT EqfMemory::TmtXUpdSeg
               if ( usRc == NO_ERROR )
               {
                 usRc = TmBtree.EQFNTMUpdate( pTmPutIn->currentInternalKey.getRecordKey(),
-                                     (PBYTE)pTmRecord, RECLEN(pTmRecord) );
+                                     pTmRecord, RECLEN(pTmRecord) );
               } /* endif */
 
               if(usRc == NO_ERROR)
@@ -2801,15 +2443,6 @@ USHORT EqfMemory::TmtXUpdSeg
       } /* endif */
     } /* endif */
   } /* endif */
-
-  // unlock TM database if database has been locked
-  if ( fLocked )
-  {
-    NTMLockTM( this, FALSE, &fLocked );
-  } /* endif */
-
-  //release allocated memory
-  UtlAlloc( (PVOID *)&pTmRecord, 0L, 0L, NOMSG );
 
   return( usRc );
 } /* end of function TmtXUpdSeg */
@@ -2958,26 +2591,26 @@ ULONG EQFUnicode2Compress( PBYTE pTarget, PSZ_W pInput, ULONG ulLenChar )
 }
 
 
-LONG EQFCompress2Unicode( PSZ_W pOutput, PBYTE pTarget, ULONG ulLenComp )
+LONG EQFCompress2Unicode( std::string& pOutput, PBYTE pTarget, ULONG ulLenComp )
 {
     LONG  lLen = ulLenComp-1;
+    pOutput.clear();
 
-  //T5LOG(T5TRANSACTION) <<"; lLen = " << lLen;
     if(lLen <= 0 ) 
       return 0;
+      
+    pOutput.reserve(ulLenComp * 1.5);
     
     BYTE b = *pTarget++;
-    //T5LOG(T5TRANSACTION) << "b = " << b <<"; lLen = " << lLen;
     if ( b == 0 )  // no compression
     {
-        memcpy( pOutput, pTarget, lLen );
         lLen = ulLenComp / sizeof(CHAR_W);
+        pOutput.insert(pOutput.begin(), pTarget, pTarget + lLen);
         pOutput[ lLen ] = EOS;
     }
-    //*
     else if (b == BOCU_COMPRESS)
     {
-      PSZ_W pTemp = pOutput;
+      //PSZ_W pTemp = pOutput;
       long delta = 0;
       USHORT iLen = 0;
       int  oldCodePoint = 0x80;
@@ -3001,22 +2634,21 @@ LONG EQFCompress2Unicode( PSZ_W pOutput, PBYTE pTarget, ULONG ulLenComp )
 
             delta = delta + oldCodePoint - lOffset[i];
 
-            *pOutput++ = (unsigned short) delta;
+            pOutput.insert(pOutput.end(), (unsigned short) delta);
             oldCodePoint = delta;
 
             break;
           }
         }
       }
-      *pOutput = 0;
-      lLen = (pOutput - pTemp);
+      pOutput.push_back('\0');
+      lLen = pOutput.size();//(pOutput - pTemp);
     }
     else
     {
         //FilesystemHelper::FlushAllBuffers();
         assert( 0 == 1);
     }
-    //*/
     return lLen;
 }
 #endif 
@@ -3209,12 +2841,6 @@ USHORT TMLoopAndDelTargetClb
 	NTASSERTLEN(lLeftTgtLen, RECLEN(pTMXTgtRec), 4713);
 	lLeftTgtLen -= RECLEN(pTMXTgtRec);
 
-	// pos at source tag info
-	//pTMXSrcTTable = (PTMX_TAGTABLE_RECORD)NTRecPos((PBYTE)pTMXTgtRec,
-	//											   REC_SRCTAGTABLE);
-	// compare source tag record
-	//if ( (memcmp( pTMXSrcTTable, TmProposal.pInputSentence->pTagRecord,
-  //  RECLEN(pTMXSrcTTable)) == 0) )
 	{
 		pClb = (PTMX_TARGET_CLB)NTRecPos((PBYTE)pTMXTgtRec, REC_CLB);
 		lLeftClbLen = RECLEN(pTMXTgtRec) - pTMXTgtRec->usClb;
@@ -3224,9 +2850,7 @@ USHORT TMLoopAndDelTargetClb
       (*pTargetKey)++;
 			if ( (pClb->usLangId == usPutLang) &&
            (pClb->usAuthorId == usPutAuthor) &&
-			     //(pClb->ulSegmId == TmProposal.lSegmentId) &&
 			     (pClb->usFileId == usPutFile) &&
-           //&& !pClb->bMultiple 
            isAddDataIsTheSame(TmProposal, *pClb)
            )
 			{  	// remove target CLB and target record (if only 1 CLB)

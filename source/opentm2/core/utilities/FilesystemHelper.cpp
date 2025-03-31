@@ -611,28 +611,7 @@ int FileBuffer::Flush(bool forced){
             oldSize = FilesystemHelper::GetFileSize(fileName);
         }
 
-        #ifdef TO_BE_REMOVED
-        PUCHAR bufStart = &data[0];
-        int size = data.size();
-        //if(fileWasOpened && file) fclose(file);
-        if(!fileWasOpened) file = fopen(fileName.c_str(),"w+b");
-       
-        if(file==nullptr){
-            T5LOG(T5ERROR) <<"Cant open the file " << fileName;
-            return FilesystemHelper::FILEHELPER_FILE_PTR_IS_NULL;
-        }
 
-        if(T5Logger::GetInstance()->CheckLogLevel(T5DEBUG)){
-            oldSize = FilesystemHelper::GetFileSize(file);
-        }
-        
-        fseek(file, 0, SEEK_SET);
-        //if(!fileWasOpened) 
-        {
-            fclose(file);
-            file = nullptr;
-        }
-        #endif
         //writenBytes = fwrite(bufStart, size, 1, file) * size;
         rc = atomicWriteWithBackup();
         if ( rc ){

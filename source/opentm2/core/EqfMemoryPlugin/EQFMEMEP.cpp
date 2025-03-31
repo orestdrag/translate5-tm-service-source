@@ -372,12 +372,7 @@ USHORT EQFMemExportEnd ( PPROCESSCOMMAREA pCommArea,
   if ( (pExportIDA->usExpMode == MEM_FORMAT_TMX) || (pExportIDA->usExpMode == MEM_FORMAT_TMX_UTF8) ||
        (pExportIDA->usExpMode == MEM_FORMAT_TMX_NOCRLF) || (pExportIDA->usExpMode == MEM_FORMAT_TMX_UTF8_NOCRLF) )
   {
-    #ifdef TO_BE_REMOVED
-    if ( pExportIDA->pfnMemExpEnd )
-    {
-      pExportIDA->pfnMemExpEnd( pExportIDA->lExternalExportHandle );
-    } /* endif */
-    #endif 
+
     if(pExportIDA->invalidXmlSegments){
       T5LOG(T5ERROR) << pExportIDA->invalidXmlSegments <<" segments was not exported because of invalid xml";
     }

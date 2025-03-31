@@ -396,7 +396,7 @@ USHORT EqfMemory::LoadMem()
           // just for debugging purposes: check if short and long name table have the same numbe rof entries
           if ( usTempRc == NO_ERROR )
           {
-            if ( pLongNames->ulEntries != FileNames.ulMaxEntries )
+            if ( LongNames.stTableEntry.size() != FileNames.ulMaxEntries )
             {
               // this is strange...
               int iSetBreakPointHere = 1;
@@ -451,21 +451,6 @@ USHORT EqfMemory::LoadMem()
   /* Ensure that all required data areas have been loaded and the     */
   /* database files have been opened                                  */
   /********************************************************************/
-  if ( (usRc == NO_ERROR) ||
-       (usRc == BTREE_CORRUPTED) ||
-       (usRc == VERSION_MISMATCH) )
-  {
-    if ( false //(pLanguages == NULL) ||
-         //(pAuthors   == NULL) ||
-         //(pTagTables == NULL) ||
-         //(pFileNames == NULL) //||
-         //(this.TmBtree == NULL) ||
-         //(this.InBtree == NULL) 
-         )
-    {
-      usRc = TM_FILE_SCREWED_UP;
-    } /* endif */
-  } /* endif */
 
   if ( (usRc != NO_ERROR) &&
        (usRc != BTREE_CORRUPTED) &&
@@ -474,7 +459,6 @@ USHORT EqfMemory::LoadMem()
     TmBtree.QDAMDictClose();
     InBtree.QDAMDictClose();
 
-    NTMDestroyLongNameTable( );
     T5LOG(T5ERROR) << "Failed to open tm \""<< this->szName << "\" with rc = " << usRc;
     setErrorCode(usRc);
     eStatus = FAILED_TO_OPEN_STATUS;

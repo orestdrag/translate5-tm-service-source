@@ -156,6 +156,7 @@ int MorphFactory::getLanguageList(
 			return pOtmMorphPlugin->getLanguageList(vLanguageList);
 		}
 	}
+	return 0;
 }
 
 /* \brief check if the given language is supported by any of the available Morph plugins

@@ -73,9 +73,6 @@ CHAR  INTERNAL_ERROR_TXT [30];     // "INTERNAL ERROR"
 /* Protoypes for internal functions                                   */
 /**********************************************************************/
 SHORT  UtlQdamMsgTxt ( SHORT );
-static SHORT UtlDosMsgTxt ( SHORT, PSZ, PUSHORT );
-static SHORT UtlQldbMsgTxt ( SHORT );
-static SHORT UtlPropMsgTxt ( SHORT );
 
 
 USHORT UtlErrorHwnd

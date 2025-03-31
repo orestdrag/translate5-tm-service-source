@@ -46,7 +46,7 @@ VOID MakeHashValue ( PULONG, USHORT, PSZ_W, PULONG );
 
 
 //static 
-BOOL PrepareTokens ( PLOADEDTABLE, PBYTE, PBYTE, PSZ_W, SHORT, PFUZZYTOK *, ULONG );
+BOOL PrepareTokens ( PLOADEDTABLE, PBYTE, std::vector<TOKENENTRY>&, PSZ_W, SHORT, PFUZZYTOK *, ULONG );
 //static 
 BOOL FuzzyReplace ( PSZ_W, PSZ_W, PSZ_W, PREPLLIST, PREPLLIST );
 //static 

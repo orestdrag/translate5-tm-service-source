@@ -111,7 +111,7 @@ USHORT TACreateProtectTableW
   PSZ_W            pszSegmentW,        // ptr to text of segment being processed
   PVOID            pVoidTable,         // ptr to tag table
   USHORT           usColPos,           // column position of first char in segment
-  PTOKENENTRY      pTokBuffer,         // buffer used temporarly for tokens
+  std::vector<TOKENENTRY>&       pTokBuffer,         // buffer used temporarly for tokens
   USHORT           usTokBufferSize,    // size of token buffer in bytes
   PSTARTSTOP       *ppStartStop,       // ptr to caller's start/stop table ptr
   PFN              pvUserExit,          // ptr to user exit function
@@ -128,7 +128,7 @@ USHORT TACreateProtectTableWEx
   PSZ_W            pszSegment,         // ptr to text of segment being processed
   PVOID            pVoidTable,         // ptr to tag table
   USHORT           usColPos,           // column position of first char in segment
-  PTOKENENTRY      pTokBuffer,         // buffer used temporarly for tokens
+  std::vector<TOKENENTRY>&       pTokBuffer,         // buffer used temporarly for tokens
   USHORT           usTokBufferSize,    // size of token buffer in bytes
   PSTARTSTOP       *ppStartStop,       // ptr to caller's start/stop table ptr
   PFN              pvUserExit,          // ptr to user exit function
@@ -138,16 +138,6 @@ USHORT TACreateProtectTableWEx
 );
 
 
-
-USHORT TAPrepProtectTable
-(
-  PVOID            pVoidTable,         // ptr to tag table (PLOADEDTABLE)
-  HMODULE          *phModule,          // address of user exit module handle
-  PFN              *ppfnUserExit,      // address of ptr to user exit function
-  PFN              *ppfnCheckSegExit,  // ptr to segment check function
-  PFN              *ppfnShowTrans,     // ptr to Show transl.  function
-  PFN              *ppfnTocGoto        // ptr to TOC goto function
-);
 
 USHORT TAEndProtectTable
 (

@@ -223,8 +223,8 @@ BOOL ContainsClassID( PLOADEDTABLE pLoadedTable, USHORT usClassID );
 VOID EQFTagTokenize(PSZ, TAGTABLE *, BOOL, PSZ *, USHORT *, TOKENENTRY *, USHORT);
 
 
-BOOL TATagTokenize (PSZ, PLOADEDTABLE, BOOL, PSZ *, USHORT *, TOKENENTRY *, USHORT, ULONG);
-BOOL TATagTokenizeW(PSZ_W, PLOADEDTABLE, BOOL, PSZ_W *, USHORT *, TOKENENTRY *, USHORT);
+//BOOL TATagTokenize (PSZ, PLOADEDTABLE, BOOL, PSZ *, USHORT *, TOKENENTRY *, USHORT, ULONG);
+BOOL TATagTokenizeW(PSZ_W, PLOADEDTABLE, BOOL, PSZ_W *, USHORT *, std::vector<TOKENENTRY>&);
 
 
 /**********************************************************************/

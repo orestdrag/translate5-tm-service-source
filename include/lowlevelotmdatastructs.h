@@ -30,7 +30,7 @@ public:
   void setResponseHandler(proxygen::ResponseHandler* responseHandler){m_responseHandler = responseHandler;}
   bool isActive()const {return m_responseHandler != 0; }
 
-  ChunkBuffer(){//m_buff.reserve(chunkSize_+1);
+  ChunkBuffer(){//m_buff.resize(chunkSize_+1);
   }
   ~ChunkBuffer(){
     //T5LOG(T5INFO)<< "called dctor of chunk buffer- sending last chunk";
@@ -465,13 +465,13 @@ typedef struct _TMX_TABLE_ENTRY
 // name table structure (TM version 5 and up)
 constexpr int NUM_OF_TMX_TABLE_ENTRIES = (BTREE_REC_SIZE_V3 - sizeof(ULONG)) / sizeof(TMX_TABLE_ENTRY);
 
-typedef struct TMX_TABLE_OLD{
+struct TMX_TABLE_OLD{
   ULONG  ulMaxEntries = 0;
   TMX_TABLE_ENTRY stTmTableEntry[NUM_OF_TMX_TABLE_ENTRIES];
 };
 typedef TMX_TABLE_OLD * PTMX_TABLE_OLD;
 
-typedef struct TMX_TABLE
+struct TMX_TABLE
 {
   //ULONG  ulAllocSize = 0;
   ULONG  ulMaxEntries = 0;
@@ -498,21 +498,29 @@ typedef char *PSZ;
 typedef struct _TMX_LONGNAME_TABLE_ENTRY
 {
   PSZ    pszLongName;                  // ptr to long name in buffer area
+  int longNameStartOffset;
+  //std::string pszLongName;
   USHORT usId;                         // ID for long name
 } TMX_LONGNAME_TABLE_ENTRY, * PTMX_LONGNAME_TABLE_ENTRY;
 
 
 //table structure for long document table
-typedef struct _TMX_LONGNAME_TABLE
+typedef struct TMX_LONGNAME_TABLE
 {
-  PSZ    pszBuffer;                              // buffer for names and IDs
-  ULONG  ulBufUsed;                              // number of bytes used in buffer
-  ULONG  ulBufSize;                              // size of buffer in bytes
-  ULONG  ulTableSize;                            // table size (# entries)
-  ULONG  ulEntries;                              // number of entries in table
-  TMX_LONGNAME_TABLE_ENTRY stTableEntry[1];      // dyn. array of table entries
-} TMX_LONGNAMETABLE, * PTMX_LONGNAME_TABLE;
+  std::vector<char>    pszBuffer;                              // buffer for names and IDs
+  //ULONG  ulBufUsed;                              // number of bytes used in buffer
+  //ULONG  ulBufSize;                              // size of buffer in bytes
+  //ULONG  ulTableSize;                            // table size (# entries)
+  //ULONG  ulEntries;                              // number of entries in table
+  std::vector<TMX_LONGNAME_TABLE_ENTRY> stTableEntry;      // dyn. array of table entries
 
+  void restoreStrPointersAfterRealloc(){
+    for(auto& entry: stTableEntry){//during insertion to the pszBuffer, it could be reallocated, so we need to update poiners
+      entry.pszLongName = pszBuffer.data() + entry.longNameStartOffset;
+    };
+
+  }
+};
 
 BOOL   UtlAlloc ( void **, long, long, unsigned short );
 BOOL   UtlAllocHwnd ( void**, long, long, unsigned short, void * );
@@ -788,8 +796,7 @@ struct BTREE
     EQFNTMGet
     (
     ULONG  ulKey,                       // key to be searched for
-    PCHAR  pchBuffer,                   // space for user data
-    PULONG  pulLength                   // in/out length of returned user data
+    std::vector<BYTE>& uchBuff          // space for user data
     );
 
 
@@ -890,13 +897,6 @@ struct BTREE
     //+----------------------------------------------------------------------------+
     // Returncode type:   SHORT
     //+----------------------------------------------------------------------------+
-    SHORT EQFNTMGetUpdCounter
-    (
-    PLONG      plUpdCount,               // ptr to buffer for update counter
-    SHORT      sIndex,                   // index of requested update counter
-    SHORT      sNumCounters              // number of counters requested
-    );
-
     
     VOID  QDAMUpdateList_V3( PBTREEBUFFER_V3 );
     
@@ -907,7 +907,7 @@ struct BTREE
     SHORT QDAMDeleteDataFromBuffer_V3( RECPARAM recParam);
     SHORT QDAMDictUpdateLocal ( PWCHAR, PBYTE, ULONG );
     
-    SHORT QDAMDictExactLocal  ( PWCHAR, PBYTE, PULONG, USHORT );
+    SHORT QDAMDictExactLocal  ( PWCHAR, std::vector<BYTE>&, USHORT );
 
 
     SHORT QDAMDictCreateLocal ( TMX_SIGN*, ULONG, bool keepInRamOnly = false);
@@ -1426,6 +1426,8 @@ typedef struct _TOKENENTRY     // entry in tokenlist :
   USHORT    ClassId;           // class id of token
   CHAR_W * pDataStringW;       // pointer to data string  - Unicode
   // !!!! Attention: above has to match TOKENENTRYSEG definition ....  !!!!
+  
+  void reset(){ memset(this, 0, sizeof(*this));}
 
 } TOKENENTRY, *PTOKENENTRY;
 class ImportStatusDetails;
@@ -2322,7 +2324,7 @@ public:
   void setResponseHandler(proxygen::ResponseHandler* responseHandler){m_responseHandler = responseHandler;}
   bool isActive()const {return m_responseHandler != 0; }
 
-  ChunkBufferOld(){m_buff.reserve(chunkSize_+1);}
+  ChunkBufferOld(){m_buff.resize(chunkSize_+1);}
   ~ChunkBufferOld(){
     T5LOG(T5INFO)<< "called dctor of chunk buffer- sending last chunk";
     triggerChunkSend();

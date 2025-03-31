@@ -66,9 +66,6 @@ USHORT EqfMemory::TmtXExtract
 {
   USHORT usRc = NO_ERROR;              //return code
   BOOL fOK;                            //success indicator
-  PTMX_RECORD pTmRecord = NULL;        //pointer to tm record
-  ULONG  ulRecBufSize = 0;             // current size of record buffer
-  ULONG  ulLen = 0;                    //length indicator
   PTMX_SOURCE_RECORD pTMXSourceRecord; //ptr to source record
   PTMX_TARGET_RECORD pTMXTargetRecord; //ptr to target record
   ULONG ulStartKey;                    //start tm key
@@ -76,9 +73,10 @@ USHORT EqfMemory::TmtXExtract
   BOOL  fSpecialMode = FALSE;          //special mode flag
   ULONG   ulOemCP = 1L;
 
+  std::vector<BYTE> pTmRecord;         // space for user data
+  pTmRecord.resize(2*TMX_REC_SIZE);
+
   //allocate 32K for tm record
-  fOK = UtlAlloc( (PVOID *) &(pTmRecord), 0L, (LONG) (2 * TMX_REC_SIZE), NOMSG );
-  ulRecBufSize = 2 * TMX_REC_SIZE;
   //allocate pString
 
   if ( !fOK )
@@ -143,7 +141,7 @@ USHORT EqfMemory::TmtXExtract
             break;
           case MEM_OUTPUT_LONGNAMES :
             // different handling for long names, no setting of pTable
-            ulMaxEntries = pLongNames->ulEntries;
+            ulMaxEntries = LongNames.stTableEntry.size();
             break;
           case MEM_OUTPUT_ALLDOCS :
             // different handling for long names, no setting of pTable
@@ -202,8 +200,7 @@ USHORT EqfMemory::TmtXExtract
             {
               if ( pTmExtIn->usConvert == MEM_OUTPUT_LONGNAMES )
               {
-                pszName = pLongNames->
-                            stTableEntry[pTmExtIn->usNextTarget].pszLongName;
+                pszName = LongNames.stTableEntry[pTmExtIn->usNextTarget].pszLongName;
               }
               else
               {
@@ -213,15 +210,14 @@ USHORT EqfMemory::TmtXExtract
                 if ( pTmExtIn->usConvert == MEM_OUTPUT_ALLDOCS )
                 {
                   ULONG ulEntry = 0;
-                  while ( (ulEntry < pLongNames->ulEntries) &&
-                          (pEntry->usId != pLongNames->
-                                           stTableEntry[ulEntry].usId ) )
+                  while ( (ulEntry < LongNames.stTableEntry.size()) &&
+                          (pEntry->usId != LongNames.stTableEntry[ulEntry].usId ) )
                   {
                     ulEntry++;
                   } /* endwhile */
-                  if ( ulEntry < pLongNames->ulEntries )
+                  if ( ulEntry < LongNames.stTableEntry.size() )
                   {
-                    pszName = pLongNames->stTableEntry[ulEntry].pszLongName;
+                    pszName = LongNames.stTableEntry[ulEntry].pszLongName;
                   } /* endif */
                 } /* endif */
               } /* endif */
@@ -276,34 +272,11 @@ USHORT EqfMemory::TmtXExtract
         LOG_AND_SET_RC(usRc, T5INFO, BTREE_NOT_FOUND);
         while ( (pTmExtIn->ulTmKey < ulNextKey) && (usRc == BTREE_NOT_FOUND) )
         {
-          ulLen = ulRecBufSize;
-          usRc =  TmBtree.EQFNTMGet(
-                            pTmExtIn->ulTmKey,
-                            (PCHAR)pTmRecord,
-                            &ulLen );
-
-          // re-alloc buffer and try again if buffer overflow occured
-          if ( usRc == BTREE_BUFFER_SMALL )
-          {
-            fOK = UtlAlloc( (PVOID *)&(pTmRecord), ulRecBufSize, ulLen, NOMSG );
-            if ( fOK )
-            {
-              ulRecBufSize = ulLen;
-
-              usRc =  TmBtree.EQFNTMGet(
-                                pTmExtIn->ulTmKey,
-                                (PCHAR)pTmRecord,
-                                &ulLen );
-            }
-            else
-            {
-              LOG_AND_SET_RC(usRc, T5WARNING, ERROR_NOT_ENOUGH_MEMORY);
-            } /* endif */
-          } /* endif */
+          usRc =  TmBtree.EQFNTMGet(pTmExtIn->ulTmKey, pTmRecord );
 
           if ( usRc == NO_ERROR )
           {
-            usRc = ExtractRecordV6( pTmRecord, pTmExtIn, pTmExtOut );            
+            usRc = ExtractRecordV6( toTmxRecord(pTmRecord), pTmExtIn, pTmExtOut );            
           }
           /****************************************************************/
           /* setup new starting point (do this even in the case we are    */
@@ -336,9 +309,6 @@ USHORT EqfMemory::TmtXExtract
 
   pTmExtOut->stPrefixOut.usLengthOutput = sizeof( TMX_EXT_OUT_W );
   pTmExtOut->stPrefixOut.usTmtXRc = usRc;
-
-  //release memory
-  UtlAlloc( (PVOID *) &pTmRecord, 0L, 0L, NOMSG );
 
   // in organize mode only: change any error code (except BTREE_EOF_REACHED) to BTREE_CORRUPTED
   if ( (usRc != NO_ERROR ) && (usRc != BTREE_EOF_REACHED) && ((usAccessMode & ASD_ORGANIZE) != 0) )

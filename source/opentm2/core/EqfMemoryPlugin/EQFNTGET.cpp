@@ -358,7 +358,7 @@ USHORT EqfMemory::TmtXGet
     if ( usRc == NO_ERROR )
     {
       //usRc = NTMGetIDFromName( pTmGetIn->szTagTable, NULL, (USHORT)TAGTABLE_KEY, &Sentence.pTagRecord->usTagTableId );
-      Sentence.pTagRecord->usTagTableId = 1;
+      Sentence.pTagRecord.data()->usTagTableId = 1;
     }
   } /* endif */
 
@@ -648,26 +648,11 @@ USHORT GetExactMatch
   USHORT usRc = NO_ERROR;            //return code
   ULONG ulLen;                       //length indicator
   ULONG ulKey;                       //tm record key
-  PTMX_RECORD pTmRecord = NULL;      //pointer to tm record
   USHORT   usMatchEntries = 0;         //nr of found matches
-  ULONG  ulRecBufSize = 0;             // current size of record buffer
+  std::vector<BYTE>& pTmRecord = pTmClb->pvTmRecord;
 
   ULONG ulStrippedParm = pGetIn->ulParm &
     ~(GET_RESPECTCRLF | GET_IGNORE_PATH | GET_NO_GENERICREPLACE | GET_ALWAYS_WITH_TAGS | GET_IGNORE_COMMENT);
-
-  //allocate 32K for tm record
-  if ( pTmClb->pvTmRecord )
-  {
-    pTmRecord = (PTMX_RECORD)pTmClb->pvTmRecord; 
-    ulRecBufSize = pTmClb->ulRecBufSize;
-//    memset( pTmRecord, 0, ulRecBufSize );
-  }
-  else
-  {
-    fOK = UtlAlloc( (PVOID *) &(pTmRecord), 0L, (LONG) TMX_REC_SIZE, NOMSG );
-    pTmClb->pvTmRecord = pTmRecord;
-    if ( fOK ) pTmClb->ulRecBufSize = ulRecBufSize = TMX_REC_SIZE;
-  } /* endif */
 
 
   //allocate for sentence ids
@@ -689,32 +674,14 @@ USHORT GetExactMatch
       while ( (*pulSids) && (usRc == NO_ERROR) )
       {
         ulKey = *pulSids;
-        ulLen = TMX_REC_SIZE;
         T5LOG( T5INFO) << "GetExactMatch: EQFNTMGET of record #" <<ulKey;
-        usRc =  pTmClb->TmBtree.EQFNTMGet( ulKey, (PCHAR)pTmRecord, &ulLen );
+        usRc =  pTmClb->TmBtree.EQFNTMGet( ulKey, pTmRecord );
 
-        if ( usRc == BTREE_BUFFER_SMALL)
-        {
-          fOK = UtlAlloc( (PVOID *)&pTmRecord, ulRecBufSize, ulLen, NOMSG );
-          if ( fOK )
-          {
-            pTmClb->ulRecBufSize = ulRecBufSize = ulLen;
-            pTmClb->pvTmRecord = pTmRecord;
-            memset( pTmRecord, 0, ulLen );
-
-            usRc =  pTmClb->TmBtree.EQFNTMGet( ulKey, (PCHAR)pTmRecord,
-                              &ulLen );
-          }
-          else
-          {
-            LOG_AND_SET_RC(usRc, T5WARNING, ERROR_NOT_ENOUGH_MEMORY);
-          } /* endif */
-        } /* endif */
         if ( usRc == NO_ERROR )
         {
           //compare tm record data with data passed in the get in structure
           T5LOG( T5INFO) << "GetExactMatch: ExactTest of record " << ulKey;
-          usRc = ExactTest( pTmClb, pTmRecord, pGetIn, pSentence,
+          usRc = ExactTest( pTmClb, toTmxRecord(pTmRecord), pGetIn, pSentence,
                             pstMatchTable, &usMatchEntries, ulKey );
           T5LOG( T5INFO) << "GetExactMatch: ExactTest found " << usMatchEntries << " matching entries" ;
           
@@ -966,7 +933,7 @@ USHORT ExactTest
   ULONG   ulKeyNum                  // number of key record
 )
 {
-  BOOL fOK;                            //success indicator
+  BOOL fOK = true;                     //success indicator
   PBYTE pByte;                         //position ptr
   PBYTE pStartTarget;                  //position ptr
   PTMX_SOURCE_RECORD pTMXSourceRecord; //ptr to source record
@@ -974,32 +941,23 @@ USHORT ExactTest
   PTMX_TARGET_CLB    pTMXTargetClb;    //ptr to target control block
   PTMX_TAGTABLE_RECORD pTMXSourceTagTable; //ptr to source tag info
   ULONG ulLen;                        //length indicator
-  PSZ_W pString = NULL;                  //pointer to character string
   USHORT usRc = NO_ERROR;              //returned value from function
   USHORT usMatchLevel;                 //pointer to ushort value
   BOOL   fStringEqual = FALSE;         // indicator for string equal
   BOOL   fEqualFound = FALSE;          // tagging equal ??
   USHORT usEqual = 0;
-  PSZ_W pContextBuffer = NULL;        //pointer to buffer for context processing
+  std::string pContextBuffer, pString;        //pointer to buffer for context processing
   USHORT usTargetTranslationFlag = (USHORT)-1;    // translation flag of target CLB (processed)
   PSZ pszDocName = NULL;             // document name to check for equal document names in GET_IGNORE_PATH mode
 
+  pString.reserve(MAX_SEGMENT_SIZE);
   //allocate pString and buffer for context processing (when necessary)
-  fOK = UtlAlloc( (PVOID *) &(pString), 0L, (LONG) MAX_SEGMENT_SIZE * sizeof(CHAR_W), NOMSG );
-  if ( fOK )
+  if ( pGetIn->szContext[0] || (pGetIn->pvGMOptList != NULL) )
   {
-    if ( pGetIn->szContext[0] || (pGetIn->pvGMOptList != NULL) )
-    {
-      fOK = UtlAlloc( (PVOID *) &(pContextBuffer), 0L, (LONG) MAX_SEGMENT_SIZE * sizeof(CHAR_W), NOMSG );
-    } /* endif */       
-  
+    pContextBuffer.reserve(MAX_SEGMENT_SIZE);
   } /* endif */     
 
-  if ( !fOK )
-  {
-    LOG_AND_SET_RC(usRc, T5WARNING, ERROR_NOT_ENOUGH_MEMORY);
-  }
-  else
+ 
   {
     //position at beginning of source structure in tm record
     pTMXSourceRecord = (PTMX_SOURCE_RECORD)(pTmRecord+1);
@@ -1124,41 +1082,28 @@ USHORT ExactTest
           //position at source tag table record
           pByte = pStartTarget;
           pTMXTargetRecord = (PTMX_TARGET_RECORD)(pByte);
+          fStringEqual=true;
 
-          //position at source tag table
-          //pByte += pTMXTargetRecord->usSourceTagTable;
-          //pTMXSourceTagTable = (PTMX_TAGTABLE_RECORD)pByte;
-
-          //compare tag table records
-          fStringEqual = true; // tag table should be always equal in t5memory
-          //fStringEqual = memcmp( pTMXSourceTagTable, pSentence->pTagRecord,
-          //                       RECLEN(pTMXSourceTagTable) ) == 0;
-          //if ( !fStringEqual )
+         
+          /**********************************************************/
+          /* if tagging record is unequal than we have some         */
+          /* (slight) differences                                   */
+          /* i.e. we will create a fully qualified string and try   */
+          /* another compare...                                     */
+          /**********************************************************/         
+          LONG lLenTmp = ulLen;       // len of pString in # of w's
+          if ( !fOK )
           {
-            /**********************************************************/
-            /* if tagging record is unequal than we have some         */
-            /* (slight) differences                                   */
-            /* i.e. we will create a fully qualified string and try   */
-            /* another compare...                                     */
-            /**********************************************************/
-
-            if ( fOK )
-            {
-              LONG lLenTmp = ulLen;       // len of pString in # of w's
-              if ( !fOK )
-              {
-                LOG_AND_SET_RC(usRc, T5INFO, BTREE_CORRUPTED);
-              }
-              else
-              {
-                fStringEqual = FALSE;
-                auto genericTagsTmSeg = std::make_unique<StringTagVariants>(pString);
-                fStringEqual = (UtlCompIgnWhiteSpaceW(
-                                              pSentence->pStrings->getNpReplStrC(), 
-                                              genericTagsTmSeg->getNpReplStrC(),
-                                              0 ) == 0 );
-              } /* endif */
-            } /* endif */
+            LOG_AND_SET_RC(usRc, T5INFO, BTREE_CORRUPTED);
+          }
+          else
+          {
+            fStringEqual = FALSE;
+            auto genericTagsTmSeg = std::make_unique<StringTagVariants>(pString);
+            fStringEqual = (UtlCompIgnWhiteSpaceW(
+                                          pSentence->pStrings->getNpReplStrC(), 
+                                          genericTagsTmSeg->getNpReplStrC(),
+                                          0 ) == 0 );
           } /* endif */
 
           if ( usRc == NO_ERROR )
@@ -1168,6 +1113,7 @@ USHORT ExactTest
               fEqualFound = TRUE;
               usEqual = EQUAL_EQUAL;
             }
+            
             else
             {
               usEqual = EQUAL_EQUAL - 3;
@@ -1499,7 +1445,7 @@ USHORT ExactTest
                               pusMatchEntries, &pSentence->usActVote,
                               &pSentence->usActVote,
                               ulKeyNum, usTgtNum,
-                              pGetIn,  pSentence->pTagRecord, usTargetTranslationFlag, usContextRanking, -1, -1, pTMXSourceRecord->usLangId );
+                              pGetIn,  pSentence->pTagRecord.data(), usTargetTranslationFlag, usContextRanking, -1, -1, pTMXSourceRecord->usLangId );
             }
             else
             {
@@ -1536,10 +1482,6 @@ USHORT ExactTest
       } /* endif */
     } /* endif */
   } /* endif */
-
-  //release memory
-  UtlAlloc( (PVOID *) &pString, 0L, 0L, NOMSG );
-  if ( pContextBuffer ) UtlAlloc( (PVOID *)&pContextBuffer, 0L, 0L, NOMSG );
 
   return( usRc );
 }
@@ -1648,7 +1590,8 @@ BOOL TMFuzzynessEx
   PFUZZYTOK    pFuzzyTgt = NULL;
   PFUZZYTOK    pFuzzyTok = NULL;       // returned token list
   PSZ          pInBuf = NULL;          // buffer for EQFBFindDiffEx function
-  PSZ          pTokBuf = NULL;         // buffer for EQFBFindDiffEx function
+  //PSZ          pTokBuf = NULL;         // buffer for EQFBFindDiffEx function
+  std::vector<TOKENENTRY> pTokBuf;
   PLOADEDTABLE pTable = NULL;          // ptr to loaded tag table
 
 
@@ -1672,7 +1615,7 @@ BOOL TMFuzzynessEx
 
   // allocate required buffers
   fOK = UtlAlloc((PVOID *)&pInBuf, 0L, 64000L, NOMSG );
-  if ( fOK ) fOK = UtlAlloc((PVOID *)&pTokBuf, 0L, 64000 /*(LONG)TOK_BUFFER_SIZE*/, NOMSG );
+  //if ( fOK ) fOK = UtlAlloc((PVOID *)&pTokBuf, 0L, 64000 /*(LONG)TOK_BUFFER_SIZE*/, NOMSG );
 
   // load tag table
   if ( fOK )
@@ -1685,7 +1628,7 @@ BOOL TMFuzzynessEx
   // call function to evaluate the differences
   if ( fOK )
   {
-    fOK = EQFBFindDiffEx( pTable, (PBYTE)pInBuf, (PBYTE)pTokBuf, pszSource,
+    fOK = EQFBFindDiffEx( pTable, (PBYTE)pInBuf, pTokBuf, pszSource,
                           pszMatch, sLanguageId, (PVOID *)&pFuzzyTok,
                           (PVOID *)&pFuzzyTgt, ulOemCP );
   } /* endif */
@@ -1699,7 +1642,7 @@ BOOL TMFuzzynessEx
   if ( pFuzzyTgt ) UtlAlloc( (PVOID *)&pFuzzyTgt, 0L, 0L, NOMSG );
   if ( pFuzzyTok ) UtlAlloc( (PVOID *)&pFuzzyTok, 0L, 0L, NOMSG );
   if ( pInBuf )    UtlAlloc( (PVOID *)&pInBuf, 0L, 0L, NOMSG );
-  if ( pTokBuf )   UtlAlloc( (PVOID *)&pTokBuf, 0L, 0L, NOMSG );
+  //if ( pTokBuf )   UtlAlloc( (PVOID *)&pTokBuf, 0L, 0L, NOMSG );
   if ( pTable )    TAFreeTagTable( pTable );
 
   if(*pusWords > *pusDiffs){
@@ -1834,35 +1777,14 @@ USHORT FillMatchTable( EqfMemory* pTmClb,         //ptr to ctl block struct
         //calculate length of target string
         lTargetLen = pTMXTargetRecord->usClb - pTMXTargetRecord->usTarget;
 
-        if ( UtlAlloc( (PVOID *) &pTarget, 0L, (LONG)MAX_SEGMENT_SIZE * sizeof(CHAR_W), NOMSG))
         {
-          lTargetLen = EQFCompress2Unicode(pTarget, pByte, lTargetLen);
+          lTargetLen = EQFCompress2Unicode(pSubstProp->szPropTarget, pByte, lTargetLen);
           //position at target tag record
           pByte = (PBYTE)pTMXTargetRecord;
-          //pByte += pTMXTargetRecord->usTargetTagTable;
-
-          //pSubstProp->pTagsPropTarget = (PTMX_TAGTABLE_RECORD)pByte;
-
-          //usRc = (AddTagsToStringW( pTarget,
-          //                          &lTargetLen,     // in # of w's
-          //                          (PTMX_TAGTABLE_RECORD)pByte,
-          //                          pSubstProp->szPropTarget )) ? usRc : BTREE_CORRUPTED;      
-         //instead of lines above we now save not normalize string to btree
-            wcsncpy(pSubstProp->szPropTarget, pTarget, lTargetLen);
-          UtlAlloc( (PVOID *) &pTarget, 0L, 0L, NOMSG );
-        }
-        else
-        {
-          LOG_AND_SET_RC(usRc, T5WARNING, ERROR_NOT_ENOUGH_MEMORY);
         }
         if ( usRc == NO_ERROR )
         {
           //fill in the markup table
-          //PBYTE p = ((PBYTE)pTMXTargetRecord)+pTMXTargetRecord->usTargetTagTable;
-          //pTmClb->NTMGetNameFromID(
-          //                  &(((PTMX_TAGTABLE_RECORD)p)->usTagTableId),
-          //                  (USHORT)TAGTABLE_KEY,
-          //                  pSubstProp->szPropTagTable, NULL );      
           strcpy(pSubstProp->szPropTagTable, "OTMXUXLF");
 
           ulTgtOemCP = 1;
@@ -1871,9 +1793,6 @@ USHORT FillMatchTable( EqfMemory* pTmClb,         //ptr to ctl block struct
           pTmClb->NTMGetNameFromID( &pTMXTargetClb->usLangId,
                             (USHORT)LANG_KEY,
                             pSubstProp->szTargetLanguage, NULL );
-          //pTmClb->NTMGetNameFromID( &usSrcLangId,
-          //                    (USHORT)LANG_KEY,
-          //                    pSubstProp->szOriginalSrcLanguage, NULL );
         } /* endif */
 
       } /* endif */
@@ -2420,30 +2339,16 @@ USHORT GetFuzzyMatch
   BOOL fOK = TRUE;                     //success indicator
   USHORT usRc = NO_ERROR;              //return code
   ULONG  ulLen;                        //length indicator
-  PTMX_RECORD pTmRecord = NULL;        //pointer to tm record
   PTMX_MATCHENTRY pMatchEntry = NULL;  //pointer to match entry structure
   PTMX_MATCHENTRY pMatchStart = NULL;  //pointer to match entry structure
   USHORT usMatchEntries = 0;           //nr of matches found
   USHORT usOverlaps = 0;               //nr of overlapping triples
-  ULONG  ulRecBufSize = 0L;            // current size of record buffer
 
 #ifdef MEASURETIME
   GetElapsedTime( &(pTmClb->lOtherTime) );
 #endif
-
-  //allocate 32K for tm record if not done yet
-  if ( pTmClb->pvTmRecord )
-  {
-    pTmRecord = (PTMX_RECORD)pTmClb->pvTmRecord; 
-    ulRecBufSize = pTmClb->ulRecBufSize;
-//    memset( pTmRecord, 0, ulRecBufSize );
-  }
-  else
-  {
-    fOK = UtlAlloc( (PVOID *) &(pTmRecord), 0L, (LONG) TMX_REC_SIZE, NOMSG );
-    pTmClb->pvTmRecord = pTmRecord;
-    pTmClb->ulRecBufSize = ulRecBufSize = TMX_REC_SIZE;
-  } /* endif */
+  
+  std::vector<BYTE>& pTmRecord = pTmClb->pvTmRecord;
 
   //allocate for match entry
   if ( fOK ) fOK = UtlAlloc( (PVOID *) &(pMatchEntry), 0L, (LONG)(ABS_VOTES * sizeof(TMX_MATCHENTRY)), NOMSG );
@@ -2473,27 +2378,12 @@ USHORT GetFuzzyMatch
 #ifdef MEASURETIME
   GetElapsedTime( &(pTmClb->lFuzzyOtherTime) );
 #endif
-        ulLen = ulRecBufSize;
 
         T5LOG( T5INFO) << "GetFuzzyMatch: EQFNTMGET of record " << pMatchEntry->ulKey;
 
-        usRc =  pTmClb->TmBtree.EQFNTMGet( pMatchEntry->ulKey, (PCHAR)pTmRecord, &ulLen ); 
+        usRc =  pTmClb->TmBtree.EQFNTMGet( pMatchEntry->ulKey, pTmRecord ); 
 
-        if ( usRc == BTREE_BUFFER_SMALL)
-        {
-          fOK = UtlAlloc( (PVOID *)&pTmRecord, ulRecBufSize, ulLen, NOMSG );
-          if ( fOK )
-          {
-            pTmClb->ulRecBufSize = ulRecBufSize = ulLen;
-            pTmClb->pvTmRecord = pTmRecord;
-            memset( pTmRecord, 0, ulLen );
-            usRc =  pTmClb->TmBtree.EQFNTMGet( pMatchEntry->ulKey, (PCHAR)pTmRecord, &ulLen );
-          }
-          else
-          {
-            LOG_AND_SET_RC(usRc, T5WARNING, ERROR_NOT_ENOUGH_MEMORY);
-          } /* endif */
-        } /* endif */
+        
 #ifdef MEASURETIME
   GetElapsedTime( &(pTmClb->lFuzzyGetTime) );
 #endif
@@ -2503,7 +2393,7 @@ USHORT GetFuzzyMatch
 
           //compare tm record data with data passed in the get in structure
           usOverlaps = std::min( pMatchEntry->usMaxVotes, pSentence->usActVote );
-          usRc = FuzzyTest( pTmClb, pTmRecord, pGetIn, pstMatchTable,
+          usRc = FuzzyTest( pTmClb, toTmxRecord(pTmRecord), pGetIn, pstMatchTable,
                             &usMatchEntries, &usOverlaps,
                             &pMatchEntry->usMaxVotes, &pSentence->usActVote,
                             pSentence, pMatchEntry->ulKey );
@@ -3046,7 +2936,7 @@ USHORT FuzzyTest ( EqfMemory* pTmClb,           //ptr to control block
                             pstMatchTable, &usFuzzy, fTagTableEqual,
                             pusMatchesFound, pusTmMaxVotes, pusOverlaps,
                             ulKeyNum, usTgtNum,
-                            pGetIn, pSentence->pTagRecord, usModifiedTranslationFlag, 0, usWords, usDiffs, pTMXSourceRecord->usLangId );
+                            pGetIn, pSentence->pTagRecord.data(), usModifiedTranslationFlag, 0, usWords, usDiffs, pTMXSourceRecord->usLangId );
           } /* endif */
         } /* endif */
         //position at next target
@@ -3105,14 +2995,14 @@ USHORT FillMatchEntry
   PUSHORT pusMatchThreshold
 )
 {
-  PTMX_INDEX_RECORD pIndexRecord = NULL;      //pointer to index record
+  std::vector<BYTE> pIndexRecord;      //pointer to index record
   BOOL fOK = TRUE;                            //success indicator
   PTMX_MATCHENTRY pTempMatch = NULL;          //ptr to working match entry structure
   PTMX_MATCHENTRY pTempStart = NULL;          //ptr to working match entry structure
   USHORT usRc = NO_ERROR;                     //return code
   PTMX_INDEX_ENTRY pIndexEntry = NULL;        //pointer to index entry
   PULONG pulVotes;                   // pointer to votes
-  ULONG  ulLen;                      // length paramter
+  //ULONG  ulLen;                      // length paramter
   USHORT i, j;                       // index in for loop
   USHORT usMaxEntries;               // nr of index entries in index record
   ULONG  lMatchEntries = 0;             // nr of entries in pTempMatch
@@ -3125,31 +3015,19 @@ USHORT FillMatchEntry
   GetElapsedTime( &(pTmClb->lOtherTime) );
 #endif
 
-  //allocate index record buffer if not done yet
-  if ( pTmClb->pvIndexRecord )
+  pTmClb->pvIndexRecord.reserve(TMX_REC_SIZE);
+
+
+  // allocate match list array if not done yet
+  if ( pTmClb->pvTempMatchList )
   {
-    pIndexRecord = (PTMX_INDEX_RECORD)pTmClb->pvIndexRecord;
-    memset( pIndexRecord, 0, TMX_REC_SIZE );
+    pTempMatch = (PTMX_MATCHENTRY)pTmClb->pvTempMatchList;
+    memset( pTempMatch , 0, lMatchListSize );
   }
   else
   {
-    fOK = UtlAlloc( (PVOID *) &(pIndexRecord), 0L, (LONG) TMX_REC_SIZE, NOMSG );
-    pTmClb->pvIndexRecord = pIndexRecord;
-  } /* endif */
-
-  // allocate match list array if not done yet
-  if ( fOK )
-  {
-    if ( pTmClb->pvTempMatchList )
-    {
-      pTempMatch = (PTMX_MATCHENTRY)pTmClb->pvTempMatchList;
-      memset( pTempMatch , 0, lMatchListSize );
-    }
-    else
-    {
-      fOK = UtlAlloc( (PVOID *) &(pTempMatch), 0L, lMatchListSize, NOMSG );
-      pTmClb->pvTempMatchList = pTempMatch;
-    } /* endif */
+    fOK = UtlAlloc( (PVOID *) &(pTempMatch), 0L, lMatchListSize, NOMSG );
+    pTmClb->pvTempMatchList = pTempMatch;
   } /* endif */
 
   if ( fOK )
@@ -3166,17 +3044,16 @@ USHORT FillMatchEntry
 #endif
   if ( fOK )
   {
-    pulVotes = pSentence->pulVotes;
+    pulVotes = pSentence->pulVotes.data();
     lMatchEntries = 0;
 
     for ( i = 0; i < pSentence->usActVote; i++, pulVotes++ )
     {
       ulKey = (*pulVotes) & START_KEY;
-      ulLen = TMX_REC_SIZE;
 #ifdef MEASURETIME
   GetElapsedTime( &(pTmClb->lFillMatchOtherTime) );
 #endif
-      usRc = pTmClb->InBtree.EQFNTMGet(  ulKey,  (PCHAR)pIndexRecord, &ulLen ); 
+      usRc = pTmClb->InBtree.EQFNTMGet(  ulKey, pIndexRecord ); 
 
 #ifdef MEASURETIME
   GetElapsedTime( &(pTmClb->lFillMatchReadTime) );
@@ -3186,10 +3063,10 @@ USHORT FillMatchEntry
         //calculate number of index entries in index record
         T5LOG(T5INFO) <<"Processing index record "<<ulKey;
 
-        ulLen = pIndexRecord->usRecordLen;
+        ULONG ulLen = toIndexRecord(pIndexRecord)->usRecordLen;
         usMaxEntries = (USHORT)((ulLen - sizeof(USHORT)) / sizeof(TMX_INDEX_ENTRY));
 
-        pIndexEntry = &pIndexRecord->stIndexEntry;
+        pIndexEntry = &toIndexEntry(pIndexRecord)->stIndexEntry;
         pTempMatch = pTempStart;
 
         //end criteria are all sentence ids in index key or only one

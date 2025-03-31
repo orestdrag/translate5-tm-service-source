@@ -395,8 +395,8 @@ std::shared_ptr<EqfMemory> TMManager::CreateNewEmptyTM(const std::string& strMem
     ulKey = LONGNAME_KEY;
     // write long document name buffer area to the database
     _rc_ = NewMem->TmBtree.EQFNTMInsert(&ulKey,
-                        (PBYTE)NewMem->pLongNames->pszBuffer,
-                        NewMem->pLongNames->ulBufUsed );        
+                        (PBYTE)NewMem->LongNames.pszBuffer.data(),
+                        NewMem->LongNames.pszBuffer.size() );        
 
   } /* endif */
 

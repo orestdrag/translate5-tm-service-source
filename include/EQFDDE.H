@@ -587,10 +587,10 @@ typedef struct _BATCHIMPORTPARMS
 
 HGLOBAL MakeDDEDataSeg(USHORT, PSZ, PVOID, USHORT, USHORT );
 
-static BOOL EQFFunctionCmdLine (PDDECLIENT );
-static BATCHCMD ValidateToken ( PSZ  *ppToken, PBATCHLIST  pBatchList );
-static BOOL CheckBatchOccurrence (PDDECLIENT, PUSHORT);
-static DDETASK ValidateTask ( PDDECLIENT pDDEClient );
+BOOL EQFFunctionCmdLine (PDDECLIENT );
+BATCHCMD ValidateToken ( PSZ  *ppToken, PBATCHLIST  pBatchList );
+BOOL CheckBatchOccurrence (PDDECLIENT, PUSHORT);
+DDETASK ValidateTask ( PDDECLIENT pDDEClient );
 
 BOOL DDEDocUnLoad( PDOCIMPEXP pDocExpIda );
 BOOL DDEDocLoad( PDOCIMPEXP pDocImpIda );

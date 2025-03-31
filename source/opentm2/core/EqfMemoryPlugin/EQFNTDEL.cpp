@@ -65,14 +65,12 @@ USHORT EqfMemory::TmtXDelSegm
   USHORT usRc = NO_ERROR;              // return code
   USHORT usMatchesFound = 0;           // compact area hits
   ULONG  ulLen = 0;                    // length indication
-  PTMX_RECORD pTmRecord = NULL;        // pointer to tm record
   CHAR szString[MAX_EQF_PATH];         // character string
   PULONG pulSids = NULL;               // ptr to sentence ids
   PULONG pulSidStart = NULL;           // ptr to sentence ids
-  ULONG ulRecBufSize = TMX_REC_SIZE;   // current size of record buffer
 
-  //allocate pSentence
-  fOK = UtlAlloc( (PVOID *) &(pTmRecord), 0L, (LONG) TMX_REC_SIZE, NOMSG );
+  std::vector<BYTE> pTmRecord;         // space for user data
+  pTmRecord.resize(TMX_REC_SIZE);
 
   if ( fOK )
   {
@@ -104,7 +102,7 @@ USHORT EqfMemory::TmtXDelSegm
                            TmDelIn.szSourceLanguage);
 
     // set the tag table ID in the tag record (this can't be done in TokenizeSource anymore)
-    TmDelIn.pInputSentence->pTagRecord->usTagTableId = 1;
+    TmDelIn.pInputSentence->pTagRecord.data()->usTagTableId = 1;
   }
 
 
@@ -130,34 +128,14 @@ USHORT EqfMemory::TmtXDelSegm
         {
           ulKey = *pulSids;
           ulLen = TMX_REC_SIZE;
-          usRc =  TmBtree.EQFNTMGet(
-                            ulKey,  //tm record key
-                            (PCHAR)pTmRecord,   //pointer to tm record data
-                            &ulLen );  //length
-          // re-alloc buffer and try again if buffer overflow occured
-          if ( usRc == BTREE_BUFFER_SMALL )
-          {
-            fOK = UtlAlloc( (PVOID *)&(pTmRecord), ulRecBufSize, ulLen, NOMSG );
-            if ( fOK )
-            {
-              ulRecBufSize = ulLen;
-
-              usRc =  TmBtree.EQFNTMGet(
-                                ulKey,
-                                (PCHAR)pTmRecord,
-                                &ulLen );
-            }
-            else
-            {
-              LOG_AND_SET_RC(usRc, T5WARNING, ERROR_NOT_ENOUGH_MEMORY);
-            } /* endif */
-          } /* endif */
+          usRc =  TmBtree.EQFNTMGet(ulKey,  //tm record key
+                            pTmRecord );  //length
 
           if ( usRc == NO_ERROR )
           {
             //find target record and delete, if the target record was the
             //only target in the tm record, delete the entire record
-            usRc = FindTargetAndDelete( pTmRecord, TmDelIn, pTmDelOut, &ulKey );
+            usRc = FindTargetAndDelete( toTmxRecord(pTmRecord), TmDelIn, pTmDelOut, &ulKey );
             if ( usRc == SEG_NOT_FOUND )
             {
               //get next tm record
@@ -180,7 +158,6 @@ USHORT EqfMemory::TmtXDelSegm
   } /* endif */
 
   //release memory
-  UtlAlloc( (PVOID *) &pTmRecord, 0L, 0L, NOMSG );
   UtlAlloc( (PVOID *) &pulSidStart, 0L, 0L, NOMSG );
 
   pTmDelOut->stPrefixOut.usLengthOutput = sizeof( TMX_EXT_OUT_W );
@@ -200,15 +177,11 @@ USHORT EqfMemory::TmtXDelSegmByKey
   BOOL fOK;                            // success indicator
   USHORT usRc = NO_ERROR;              // return code
   USHORT usMatchesFound = 0;           // compact area hits
-  ULONG  ulLen = 0;                    // length indication
-  PTMX_RECORD pTmRecord = NULL;        // pointer to tm record
-  CHAR szString[MAX_EQF_PATH];         // character string
-  //PULONG pulSids = NULL;               // ptr to sentence ids
-  //PULONG pulSidStart = NULL;           // ptr to sentence ids
+  CHAR szString[MAX_EQF_PATH];         // character strin
   ULONG ulRecBufSize = TMX_REC_SIZE;   // current size of record buffer
+  std::vector<BYTE> pTmRecord;         // space for user data
+  pTmRecord.resize(TMX_REC_SIZE);
 
-  //allocate pSentence
-  fOK = UtlAlloc( (PVOID *) &(pTmRecord), 0L, (LONG) TMX_REC_SIZE, NOMSG );
 
   if ( !fOK )
   {
@@ -218,43 +191,18 @@ USHORT EqfMemory::TmtXDelSegmByKey
   // update TM databse
   if ( !usRc )
   {
-    ulLen = TMX_REC_SIZE;
-    usRc =  TmBtree.EQFNTMGet(
-                      ulKey,  //tm record key
-                      (PCHAR)pTmRecord,   //pointer to tm record data
-                      &ulLen );  //length
-    // re-alloc buffer and try again if buffer overflow occured
-    if ( usRc == BTREE_BUFFER_SMALL )
-    {
-      fOK = UtlAlloc( (PVOID *)&(pTmRecord), ulRecBufSize, ulLen, NOMSG );
-      if ( fOK )
-      {
-        ulRecBufSize = ulLen;
-
-        usRc =  TmBtree.EQFNTMGet(
-                          ulKey,
-                          (PCHAR)pTmRecord,
-                          &ulLen );
-      }
-      else
-      {
-        LOG_AND_SET_RC(usRc, T5WARNING, ERROR_NOT_ENOUGH_MEMORY);
-      } /* endif */
-    } /* endif */
+    usRc =  TmBtree.EQFNTMGet( ulKey,  //tm record key
+                               pTmRecord );  //pointer to tm record data
 
     if ( usRc == NO_ERROR )
     {
       
       //find target record and delete, if the target record was the
       //only target in the tm record, delete the entire record
-      usRc = FindTargetByKeyAndDelete( pTmRecord,
+      usRc = FindTargetByKeyAndDelete( toTmxRecord(pTmRecord),
                           TmDelIn, pSentence, pTmDelOut, &ulKey );
     } /* endif */
   } /* endif */
-
-  //release memory
-  
-  UtlAlloc( (PVOID *) &pTmRecord, 0L, 0L, NOMSG );
 
   pTmDelOut->stPrefixOut.usLengthOutput = sizeof( TMX_EXT_OUT_W );
   pTmDelOut->stPrefixOut.usTmtXRc = usRc;

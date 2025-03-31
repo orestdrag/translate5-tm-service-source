@@ -123,7 +123,7 @@ USHORT  TAProtectedPartsInQuotedText
   int           iAttrStartOffset,
   PSTARTSTOP    * pStartStop,
   PSTARTSTOP    * pCurrent,
-  PTOKENENTRY     pAttrTokBuffer,
+  std::vector<TOKENENTRY>&     pAttrTokBuffer,
   PLOADEDTABLE    pTagTable,
   PULONG          pulTableAlloc,
   PULONG          pulTableUsed,
@@ -437,13 +437,13 @@ BOOL TATagTokenizeW
    BOOL      fComplete,                // TRUE = no more buffers to follow
    PWCHAR      *ppRest,              // pointer to not processed data in buffer
    PUSHORT   pusColPos,                // column position
-   PTOKENENTRY pTokBuf,                // buffer for created tokens
-   USHORT      usTokens                // max entries in token buffer
+   std::vector<TOKENENTRY>& pTokBuf//,                // buffer for created tokens
+   //USHORT      usTokens                // max entries in token buffer
 )
 {
    PWCHAR       pszData;             // pointer for input data processing
    PWCHAR       pszDataStart;        // pointer for end of data block
-   PTOKENENTRY pToken;                 // pointer to current token
+   TOKENENTRY  Token;                 // pointer to current token
    PWCHAR       pszEnd;              // pointer to end of data
    BOOL        fFound = FALSE;         // flag used in setting pRest
    PLOADEDTABLE pTable = (PLOADEDTABLE)pVoidTable;   // pointer to loaded tag table
@@ -451,7 +451,8 @@ BOOL TATagTokenizeW
    TOKENENTRY  NewToken;               // buffer for new tokens
    MSSTACK     MSStack[10];
    PTAG        pTag;                   // pointer to first tag in tagtable
-   PTOKENENTRY pLastTag = NULL;        // pointer to last tag token
+   //PTOKENENTRY pLastTag = NULL;        // pointer to last tag token
+   int iLastTagPosInBuf = -1;
    USHORT      usTagColPos = 0;        // column position of last tag
    USHORT      usCurColPos;            // current column position
    BOOL        fProcessingAttributes;  // TRUE = attributes are processed
@@ -473,7 +474,7 @@ BOOL TATagTokenizeW
    }
    else
    {
-     pTagAddInfo = NULL;
+      pTagAddInfo = NULL;
    } /* endif */
 
 
@@ -516,13 +517,14 @@ BOOL TATagTokenizeW
    pTag = (PTAG)((PBYTE)pTable->pTagTable + pTable->pTagTable->stFixTag.uOffset );
 
    pszData = pszInput;                 // start at begin of input buffer
-   pToken  = pTokBuf;                  // start at begin of token buffer
-   pToken->sTokenid = TEXT_TOKEN;      // assume text data
-   pToken->pDataStringW = pszData;      // remember start of data
-   usTokens--;                         // reserve space for end of list token
+   Token.reset();//  = pTokBuf.data();                  // start at begin of token buffer
+  
+   Token.sTokenid = TEXT_TOKEN;      // assume text data
+   Token.pDataStringW = pszData;      // remember start of data
+   //usTokens--;                         // reserve space for end of list token
    fProcessingAttributes = FALSE;      // we are waiting for tags ...
-   memset(&NewToken, 0, sizeof(NewToken));
-   while( fOK && *pszData && usTokens )// while not end of data and free tokens
+   NewToken.reset();
+   while( fOK && *pszData)// && usTokens )// while not end of data and free tokens
    {
      USHORT      usProcessFlag;        // processing flag        /* @KWT0010A */
      
@@ -546,20 +548,22 @@ BOOL TATagTokenizeW
        /*************************************************************/
        if ( pszDataStart != NewToken.pDataStringW )
        {
-         pToken->sTokenid = TEXT_TOKEN;      // text data
-         pToken->pDataStringW = pszDataStart; // set start of data
-         pToken->iLength = (USHORT)(NewToken.pDataStringW - pszDataStart);
-         pToken->sAddInfo = 0;
-         pToken->ClassId = CLS_DEFAULT;
-         pToken->usOrgId = 0;
-         usTokens--;
-         pToken++;
+         Token.sTokenid = TEXT_TOKEN;      // text data
+         Token.pDataStringW = pszDataStart; // set start of data
+         Token.iLength = (USHORT)(NewToken.pDataStringW - pszDataStart);
+         Token.sAddInfo = 0;
+         Token.ClassId = CLS_DEFAULT;
+         Token.usOrgId = 0;
+         //usTokens--;
+         pTokBuf.push_back(Token);
+         Token.reset();
+         //Token++;
        } /* endif */
 
        /*************************************************************/
        /* Add tag token                                             */
        /*************************************************************/
-       if ( usTokens )
+       //if ( usTokens )
        {
          // special handling for tags which may be followed by attributes:
          // check if tag end character is a blank, when it is one look-ahead
@@ -599,17 +603,20 @@ BOOL TATagTokenizeW
          } /* endif */
 
          // add tag token to token list
-         pLastTag    = pToken;
+         iLastTagPosInBuf  = pTokBuf.size();//pToken;
          usTagColPos = TokStatus.usStartColPos;
-         memcpy( pToken, &NewToken, sizeof(TOKENENTRY) );
-         pToken->sAddInfo = pTag[NewToken.sTokenid].BitFlags.AddInfo;
+         memcpy( &Token, &NewToken, sizeof(TOKENENTRY) );
+         Token.sAddInfo = pTag[NewToken.sTokenid].BitFlags.AddInfo;
          if ( pTagAddInfo )
          {
-           pToken->ClassId = pTagAddInfo[NewToken.sTokenid].ClassId;
-           pToken->usOrgId = pTagAddInfo[NewToken.sTokenid].usFixedTagId;
+           Token.ClassId = pTagAddInfo[NewToken.sTokenid].ClassId;
+           Token.usOrgId = pTagAddInfo[NewToken.sTokenid].usFixedTagId;
          } /* endif */
-         pToken++;
-         usTokens--;
+
+         //pToken++;
+         pTokBuf.push_back(Token);
+         Token.reset();
+         //usTokens--;
        } /* endif */
 
        /**********************************************************/
@@ -664,20 +671,23 @@ BOOL TATagTokenizeW
              // } /* endif */
            } /* endif */
 
-           if ( fFound && usTokens )
+           if ( fFound)// && usTokens )
            {
-             memcpy( pToken, &NewToken, sizeof(TOKENENTRY) );
-             pToken->sAddInfo = pAttr[NewToken.sTokenid-sTags].BitFlags.AddInfo;
+             memcpy( &Token, &NewToken, sizeof(TOKENENTRY) );
+             Token.sAddInfo = pAttr[NewToken.sTokenid-sTags].BitFlags.AddInfo;
 
              if ( pTagAddInfo )
              {
-               pToken->ClassId = pTagAddInfo[NewToken.sTokenid].ClassId;
-               pToken->usOrgId = pTagAddInfo[NewToken.sTokenid].usFixedTagId;
+               Token.ClassId = pTagAddInfo[NewToken.sTokenid].ClassId;
+               Token.usOrgId = pTagAddInfo[NewToken.sTokenid].usFixedTagId;
              } /* endif */
-             pToken++;
-             usTokens--;
+             //pToken++;
+
+             pTokBuf.push_back(Token);
+             Token.reset();
+             //usTokens--;
            } /* endif */
-         } while ( fFound && usTokens ); /* enddo */
+         } while ( fFound ); //&& usTokens ); /* enddo */
        } /* endif */
      }
      else
@@ -690,12 +700,15 @@ BOOL TATagTokenizeW
          /***********************************************************/
          /* Add remaining data as TEXT token                        */
          /***********************************************************/
-         pToken->sTokenid = TEXT_TOKEN;      // text data
-         pToken->pDataStringW = pszDataStart; // set start of data
-         pToken->iLength = (USHORT)UTF16strlenCHAR(pszDataStart);
-         pszData = pszDataStart + pToken->iLength;
-         usTokens--;
-         pToken++;
+         Token.sTokenid = TEXT_TOKEN;      // text data
+         Token.pDataStringW = pszDataStart; // set start of data
+         Token.iLength = (USHORT)UTF16strlenCHAR(pszDataStart);
+         pszData = pszDataStart + Token.iLength;
+
+         pTokBuf.push_back(Token);
+         Token.reset();
+         //usTokens--;
+         //pToken++;
        }
        else
        {
@@ -715,11 +728,13 @@ BOOL TATagTokenizeW
      // nothing was processed due to errors (memory allocation?)
      *ppRest = pszInput;
    }
-   else if ( !usTokens ||              // end of token table reached
+   else if ( //!usTokens ||              // end of token table reached
              !fComplete )              // or not last block of data  ???
    {
+    
+     TOKENENTRY* pLastToken = pTokBuf.size()>0? & pTokBuf[pTokBuf.size()-1] : nullptr;
      // at least two tokens in buffer ....
-     if ( (pToken != pTokBuf) && ( pToken != (pTokBuf+1)) )   // if tokens in buffer
+     if ( pTokBuf.size()>2)//(pToken != pTokBuf.data()) && ( pToken != (pTokBuf.data()+1)) )   // if tokens in buffer
      {
         /**************************************************************/
         /* There are tokens in the buffer, let's see how we have to   */
@@ -730,19 +745,20 @@ BOOL TATagTokenizeW
         // processing in the next tokenization block (unless this tag
         // is the first token in the token buffer or the remaining data
         // is longer than twice the max segment size )
-        int iRemainLength = UTF16strlenCHAR(pToken[-1].pDataStringW + pToken[-1].iLength);
-        if ( ( (pLastTag != pTokBuf) &&                    // more than one tag in buffer
-               (iRemainLength < (2*MAX_SEGMENT_SIZE)) ) || // rest is smaller than 2 segments
-             (usTokens == 0) )                             // token buffer overflow
+        int iRemainLength = UTF16strlenCHAR(pLastToken->pDataStringW + pLastToken->iLength);
+        if ( ( (iLastTagPosInBuf != pTokBuf.size()-1) &&                    // more than one tag in buffer
+               (iRemainLength < (2*MAX_SEGMENT_SIZE)) ) //|| // rest is smaller than 2 segments
+             //(usTokens == 0) 
+             )                             // token buffer overflow
         {
-          pToken = pLastTag;
+          Token = pTokBuf[iLastTagPosInBuf];
           TokStatus.usColPos = usTagColPos;
-          *ppRest = pToken->pDataStringW;
+          *ppRest = Token.pDataStringW;
         }
-        else
+        else if(pLastToken)
         {
           // continue right behind the last recognized token
-          *ppRest = pToken[-1].pDataStringW + pToken[-1].iLength;
+          *ppRest = pLastToken->pDataStringW + pLastToken->iLength;
           if ( (*pszData == EOS) && (*ppRest >= pszData) )
           {
             // no more data to follow, segment has been processed completely
@@ -761,7 +777,7 @@ BOOL TATagTokenizeW
         PSZ_W pszAreaStart = NULL;
         pszEnd = pszData;
         pszData--;
-        if ( pToken == pTokBuf )
+        if ( pTokBuf.empty() )
         { 
            // no token in buffer
            pszAreaStart = pszInput;     // set start of data
@@ -769,7 +785,7 @@ BOOL TATagTokenizeW
         else
         {
            // one token in buffer
-           pszAreaStart = pToken[-1].pDataStringW + pToken[-1].iLength;
+           pszAreaStart = pLastToken->pDataStringW + pLastToken->iLength;
         } /* endif */            
 
         while ( pszData > pszAreaStart )
@@ -792,12 +808,14 @@ BOOL TATagTokenizeW
         {
             *ppRest = pszData;         // set pRest to last linefeed
         } /* endif */
-        pToken->sTokenid    = TEXT_TOKEN;   // text data
-        pToken->pDataStringW = pszAreaStart;     // set start of data
-        pToken->iLength    = (USHORT)(*ppRest - pszAreaStart);
+        Token.sTokenid    = TEXT_TOKEN;   // text data
+        Token.pDataStringW = pszAreaStart;     // set start of data
+        Token.iLength    = (USHORT)(*ppRest - pszAreaStart);
         
-        usTokens--;
-        pToken++;
+        //usTokens--;
+        //pToken++;
+        pTokBuf.push_back(Token);
+        Token.reset();
       } /* endif */
    }
    else
@@ -808,12 +826,23 @@ BOOL TATagTokenizeW
    // add end-of-list token
    if ( fOK )
    {
-     memset( pToken, 0, sizeof(TOKENENTRY) );
-     pToken->iLength = 0;
-     pToken->sTokenid = ENDOFLIST;
+     Token.reset();
+     Token.iLength = 0;
+     Token.sTokenid = ENDOFLIST;
+     pTokBuf.push_back(Token);
+     Token.reset();
 
      *pusColPos = TokStatus.usColPos;
    } /* endif */
+
+   //#define DEBUG_PRINT_TOKENS
+   //#ifdef DEBUG_PRINT_TOKENS
+   for(auto& tok: pTokBuf){
+    T5LOG(T5DEVELOP) << "pTokBuf[" <<  &tok - pTokBuf.data() <<"]: ClassId=" << tok.ClassId << "; iLength=" << tok.iLength << "; pDataStringW=" << (tok.pDataStringW? EncodingHelper::convertToUTF8(tok.pDataStringW): "" )
+            << "; sAddInfo=" << tok.sAddInfo << "; sTokenid=" << tok.sTokenid << "; usOrgId=" << tok.usOrgId;
+   }
+
+   //#endif
 
    /*******************************************************************/
    /* cleanup                                                         */
@@ -2197,7 +2226,7 @@ USHORT TACreateProtectTableW
   PSZ_W            pszSegment,         // ptr to text of segment being processed
   PVOID            pVoidTable,         // ptr to tag table
   USHORT           usColPos,           // column position of first char in segment
-  PTOKENENTRY      pTokBuffer,         // buffer used temporarly for tokens
+  std::vector<TOKENENTRY>&      pTokBuffer,         // buffer used temporarly for tokens
   USHORT           usTokBufferSize,    // size of token buffer in bytes
   PSTARTSTOP       *ppStartStop,       // ptr to caller's start/stop table ptr
   PFN              pvUserExit,          // ptr to user exit function
@@ -2218,7 +2247,7 @@ USHORT TACreateProtectTableWEx
   PSZ_W            pszSegment,         // ptr to text of segment being processed
   PVOID            pVoidTable,         // ptr to tag table
   USHORT           usColPos,           // column position of first char in segment
-  PTOKENENTRY      pTokBuffer,         // buffer used temporarly for tokens
+  std::vector<TOKENENTRY>&       pTokBuffer,         // buffer used temporarly for tokens
   USHORT           usTokBufferSize,    // size of token buffer in bytes
   PSTARTSTOP       *ppStartStop,       // ptr to caller's start/stop table ptr
   PFN              pvUserExit,          // ptr to user exit function
@@ -2249,7 +2278,7 @@ USHORT TACreateProtectTableWEx
   BOOL             fTRNoteFound = 0;   // true if TRNOTE found in curr segment
   BOOL             fTRTag= FALSE;      // true if inside of a trnote
   CHAR             chAsciiSeg[MAX_SEGMENT_SIZE];
-  PTOKENENTRY      pAttrTokBuffer = NULL;  // used temp.for translatable attributetokens
+  std::vector<TOKENENTRY>      pAttrTokBuffer;  // used temp.for translatable attributetokens
   LONG             lAttrSize = 0L;
   PTOKENENTRY      pNextTok;             // ptr for next token in token list
 
@@ -2260,7 +2289,7 @@ USHORT TACreateProtectTableWEx
 
   if ( (pszSegment == NULL)    ||
        (pTagTable  == NULL)    ||
-       (pTokBuffer == NULL)    ||
+       //(pTokBuffer == NULL)    ||
        (usTokBufferSize == 0)  ||
        (ppStartStop == NULL) )
   {
@@ -2323,8 +2352,7 @@ USHORT TACreateProtectTableWEx
                        TRUE,
                        &pRest,
                        &usColPos,
-                       pTokBuffer,
-                       (USHORT)(usTokBufferSize / sizeof(TOKENENTRY)) );
+                       pTokBuffer);
         usRC = ( pRest == NULL ) ? NO_ERROR : EQFRS_AREA_TOO_SMALL;
       } /* endif */
 
@@ -2333,7 +2361,7 @@ USHORT TACreateProtectTableWEx
       /********************************************************************/
       if ( usRC == NO_ERROR )
       {
-        pTok        = pTokBuffer;
+        pTok        = pTokBuffer.data();
 
         while ( pTok->sTokenid != ENDOFLIST )
         {
@@ -2388,7 +2416,7 @@ USHORT TACreateProtectTableWEx
         ulTableUsed = 0;
       } /* endif */
 
-      TATagAddWSpace(pszSegment, pTokBuffer, sNumTags);
+      TATagAddWSpace(pszSegment, pTokBuffer.data(), sNumTags);
 
       /********************************************************************/
       /* Fill start/stop table                                            */
@@ -2396,7 +2424,7 @@ USHORT TACreateProtectTableWEx
       if ( usRC == NO_ERROR )
       {
         pCurrent = pStartStop;
-        pTok     = pTokBuffer;
+        pTok     = pTokBuffer.data();
         while ( (pTok->sTokenid != ENDOFLIST) && (usRC == NO_ERROR))
         {
           /****************************************************************/
@@ -2426,14 +2454,8 @@ USHORT TACreateProtectTableWEx
             /**************************************************************/
             while ( pTok->iLength && (usRC == NO_ERROR) )
 			{ // P016238: check whether quoted text contains protected parts!
-			  if (!pAttrTokBuffer)
-			  {
-				lAttrSize = MAX_ATTR_TOKENS * sizeof(TOKENENTRY);
-				if (!UtlAlloc((PVOID *) &pAttrTokBuffer, 0L, lAttrSize, NOMSG) )
-				{
-				   LOG_AND_SET_RC(usRC, T5WARNING, ERROR_NOT_ENOUGH_MEMORY);
-				} /* endif */
-			  } /* endif */
+        pAttrTokBuffer.reserve(MAX_ATTR_TOKENS);
+			 
 			  if ( usRC == NO_ERROR)
 			  {
 				usRC = TAProtectedPartsInQuotedText( pTok,
@@ -2549,7 +2571,7 @@ USHORT TACreateProtectTableWEx
       if ( usRC == NO_ERROR )
       {
         pAct = pCurrent = pStartStop;
-        pTok = pTokBuffer;
+        pTok = pTokBuffer.data();
         pNextTok = pTok + 1;
         if ( (pAct->usType == TAGPROT_CHAR) && TA_IS_TAG(pTok->sTokenid, sNumTags))
         {
@@ -2708,11 +2730,6 @@ USHORT TACreateProtectTableWEx
     } /* endif */
   } /* endif */
 
-  if ( pAttrTokBuffer )
-  {
-     UtlAlloc( (PVOID *)&pAttrTokBuffer, 0L, 0L, NOMSG );
-  } /* endif */
-
   /********************************************************************/
   /* Return start/stop list to caller or cleanup                      */
   /********************************************************************/
@@ -2836,7 +2853,7 @@ USHORT  TAProtectedPartsInQuotedText
   int           iAttrStartOffset,
   PSTARTSTOP    * ppStartStop,
   PSTARTSTOP    * ppCurrent,
-  PTOKENENTRY     pAttrTokBuffer,
+  std::vector<TOKENENTRY>&     pAttrTokBuffer,
   PLOADEDTABLE    pTagTable,
   PULONG          pulTableAlloc,
   PULONG          pulTableUsed,
@@ -2880,8 +2897,7 @@ USHORT  TAProtectedPartsInQuotedText
                         TRUE,
                         &pRest,
                         pusColPos,
-                        pAttrTokBuffer,
-                        (USHORT)lAttrSize );
+                        pAttrTokBuffer );
         if(pRest == nullptr){
           LOG_AND_SET_RC(usRC, T5INFO, NO_ERROR);
         }else{
@@ -2891,7 +2907,7 @@ USHORT  TAProtectedPartsInQuotedText
 
       if ( usRC == NO_ERROR )
       {
-          pAttrTok        = pAttrTokBuffer;
+          pAttrTok        = pAttrTokBuffer.data();
           while ( (pAttrTok->sTokenid != ENDOFLIST) && (usRC == NO_ERROR))
           {
             pCurrent->usStart = (USHORT)(pAttrTok->pDataStringW - pAttrStart
@@ -2933,212 +2949,6 @@ USHORT  TAProtectedPartsInQuotedText
 }
 
 
-
-USHORT TACreateProtectTable
-(
-  PSZ              pszSegment,        // ptr to text of segment being processed
-  PVOID            pVoidTable,         // ptr to tag table
-  USHORT           usColPos,           // column position of first char in segment
-  PTOKENENTRY      pTokBuffer,         // buffer used temporarly for tokens
-  USHORT           usTokBufferSize,    // size of token buffer in bytes
-  PSTARTSTOP       *ppStartStop,       // ptr to caller's start/stop table ptr
-  PFN              pvUserExit,          // ptr to user exit function
-  ULONG            ulCP
-)
-{
-  USHORT usRC = 0;
-     PSZ_W        pszInputW = &chInputW[0];
-
-   ASCII2Unicode( pszSegment, pszInputW, ulCP );
-
-   usRC = TACreateProtectTableW( pszInputW, pVoidTable, usColPos, pTokBuffer, usTokBufferSize,
-                                ppStartStop, pvUserExit, NULL, ulCP );
-
-   // attention:
-   // for DBCS code pages the returned offsets and lengths do not match the actual
-   // position in the source data and have to be re-adjusted
-
-  return usRC;
-}
-
-USHORT TAPrepProtectTable
-(
-  PVOID            pVoidTable,         // ptr to tag table (PLOADEDTABLE)
-  HMODULE          *phModule,          // address of user exit module handle
-  PFN              *ppfnUserExit,      // address of ptr to user exit function
-  PFN              *ppfnCheckSegExit,  // address of ptr to segment check func
-  PFN              *ppfnWYSIWYGExit,   // address of ptr to show transl.  func
-  PFN              *ppfnTocGotoExit    // address of ptr to TOC  func
-)
-{
-  return( TALoadEditUserExit( pVoidTable, "", phModule, ppfnUserExit, ppfnCheckSegExit,
-                              ppfnWYSIWYGExit, ppfnTocGotoExit, NULL, NULL,
-                              NULL, NULL, NULL, NULL, NULL, NULL ) );
-
-} /* end of function TAPrepProtectTable */
-
-USHORT TALoadEditUserExit
-(
-  PVOID            pVoidTable,         // ptr to tag table (PLOADEDTABLE)
-  PSZ              pszTableName,       // name of tag table (w/o path and ext.)
-  HMODULE          *phModule,          // address of user exit module handle
-  PFN              *ppfnUserExit,      // address of ptr to user exit function
-  PFN              *ppfnCheckSegExit,  // address of ptr to segment check func
-  PFN              *ppfnWYSIWYGExit,   // address of ptr to show transl.  func
-  PFN              *ppfnTocGotoExit,   // address of ptr to TOC  func
-  PFN              *ppfnGetSegContext, // address of ptr to EQFGETSEGCONTEXT function
-  PFN              *ppfnUpdateContext, // address of ptr to EQFUPDATECONTEXT function
-  PFN              *ppfnFormatContext, // address of ptr to EQFFORMATCONTEXT function
-  PFN              *ppfnCompareContext, // address of ptr to EQFCOMPARECONTEXT function
-  PFN              *ppfnUserExitW,     // unicode user exit to create start-stop-tbl
-  PFN              *ppfnCheckSegExitW,  // unicode user exit to check segment
-  PFN              *ppfnCheckSegExExitW,// unicode user exit to check segment Ex
-  PFN              *ppfnCheckSegType   // user exit to check segment type
-)
-{
-  PTAGTABLE        pTagTable;          // pointer to tag table
-  USHORT           usRC = NO_ERROR;    // function return code
-
-  /********************************************************************/
-  /* initialize user's data fields                                    */
-  /********************************************************************/
-  *phModule = NULLHANDLE;
-  if ( ppfnUserExit ) *ppfnUserExit = NULL;
-  if ( ppfnCheckSegExit ) *ppfnCheckSegExit = NULL;
-  if ( ppfnWYSIWYGExit ) *ppfnWYSIWYGExit = NULL;
-  if ( ppfnTocGotoExit ) *ppfnTocGotoExit = NULL;
-  if ( ppfnGetSegContext ) *ppfnGetSegContext  = NULL;
-  if ( ppfnUpdateContext ) *ppfnUpdateContext  = NULL;
-  if ( ppfnFormatContext ) *ppfnFormatContext  = NULL;
-  if ( ppfnCompareContext ) *ppfnCompareContext  = NULL;
-  if ( ppfnUserExitW ) *ppfnUserExitW = NULL;
-  if ( ppfnCheckSegExitW ) *ppfnCheckSegExitW = NULL;
-  if ( ppfnCheckSegExExitW ) *ppfnCheckSegExExitW = NULL;
-  if ( ppfnCheckSegType ) *ppfnCheckSegType = NULL;
-
-
-  /********************************************************************/
-  /* Address tag table                                                */
-  /********************************************************************/
-  pTagTable = ((PLOADEDTABLE)pVoidTable)->pTagTable;
-
-  /********************************************************************/
-  /* Load user exit if tag table has one                              */
-  /********************************************************************/
-  if ( pTagTable->szSegmentExit[0] != EOS )
-  {
-    CHAR  szExit[MAX_LONGFILESPEC];        // buffer for library name
-    CHAR  *ptr ;
-
-//  strcpy( szExit, pTagTable->szSegmentExit );
-//  strcat( szExit, EXT_OF_DLL );
-//  if ( MUGetUserExitFileName( pTagTable->szSegmentExit, NULL, szExit, sizeof(szExit) ) )
-    if ( MUGetUserExitFileName( pszTableName, NULL, szExit, sizeof(szExit) ) )
-    {
-      ptr = strrchr( szExit, '\\' ) ;
-      if ( ptr ) 
-         strcpy( ++ptr, pTagTable->szSegmentExit ) ;
-
-      usRC = DosLoadModule( NULL, 0, szExit, phModule );
-     
-      if ( usRC == NO_ERROR )
-      {
-        if ( ppfnUserExit )
-        {
-     
-          usRC = DosGetProcAddr( *phModule, EQFPROTTABLE_EXIT, (PFN*)ppfnUserExit);
-          if ( usRC != NO_ERROR )
-          {
-            *ppfnUserExit = NULL;
-          } /* endif */
-        }
-        /****************************************************************/
-        /* try to load SegmentCheckExit function                        */
-        /****************************************************************/
-        if ( ppfnCheckSegExit )
-        {
-          usRC = DosGetProcAddr( *phModule, EQFCHECKSEG_EXIT,
-                                  (PFN*)ppfnCheckSegExit);
-          if ( usRC != NO_ERROR )
-          {
-            *ppfnCheckSegExit = NULL;
-          } /* endif */
-        }
-        /****************************************************************/
-        /* try to load ShowTransl  Exit function                        */
-        /****************************************************************/
-        if ( ppfnWYSIWYGExit )
-        {
-          usRC = DosGetProcAddr( *phModule, EQFSHOWTRANS_EXIT,
-                                (PFN*)ppfnWYSIWYGExit);
-          if ( usRC != NO_ERROR )
-          {
-            *ppfnWYSIWYGExit = NULL;
-          } /* endif */
-        }
-        /****************************************************************/
-        /* try to load CheckSegType  Exit function                        */
-        /****************************************************************/
-        if ( ppfnCheckSegType )
-        {
-          *ppfnCheckSegType = NULL;
-          DosGetProcAddr( *phModule, EQFCHECKSEGTYPE_EXIT, (PFN*)ppfnCheckSegType);
-        }
-        /****************************************************************/
-        /* try to load TOC user    Exit function                        */
-        /****************************************************************/
-        if ( ppfnTocGotoExit )
-        {
-          usRC = DosGetProcAddr( *phModule, EQFTOCGOTO_EXIT,
-                                  (PFN*)ppfnTocGotoExit);
-          if ( usRC != NO_ERROR )
-          {
-            *ppfnTocGotoExit = NULL;
-          } /* endif */
-        }
-        // try to load context related user exit functions
-        if ( ppfnGetSegContext )
-        {
-          usRC = DosGetProcAddr( *phModule, EQFGETSEGCONTEXT_EXIT, (PFN*)ppfnGetSegContext );
-          if ( usRC != NO_ERROR ) *ppfnGetSegContext = NULL;
-        }
-        if ( ppfnUpdateContext )
-        {
-          usRC = DosGetProcAddr( *phModule, EQFUPDATECONTEXT_EXIT, (PFN*)ppfnUpdateContext );
-          if ( usRC != NO_ERROR ) *ppfnUpdateContext = NULL;
-        }
-        if ( ppfnCompareContext )
-        {
-          usRC = DosGetProcAddr( *phModule, EQFCOMPARECONTEXT_EXIT, (PFN*)ppfnCompareContext );
-          if ( usRC != NO_ERROR ) *ppfnCompareContext = NULL;
-        }
-        if ( ppfnFormatContext )
-        {
-          usRC = DosGetProcAddr( *phModule, EQFFORMATCONTEXT_EXIT, (PFN*)ppfnFormatContext );
-          if ( usRC != NO_ERROR ) *ppfnFormatContext = NULL;
-        }
-        if ( ppfnUserExitW )
-        {
-           usRC = DosGetProcAddr( *phModule, EQFPROTTABLEW_EXIT, (PFN*)ppfnUserExitW);
-           if ( usRC != NO_ERROR )  *ppfnUserExitW = NULL;
-        }
-        if ( ppfnCheckSegExitW )
-        {
-          usRC = DosGetProcAddr( *phModule, EQFCHECKSEGW_EXIT, (PFN*)ppfnCheckSegExitW);
-          if ( usRC != NO_ERROR )     *ppfnCheckSegExitW = NULL;
-        }
-        if ( ppfnCheckSegExExitW )
-        {
-          usRC = DosGetProcAddr( *phModule, EQFCHECKSEGEXW_EXIT, (PFN*)ppfnCheckSegExExitW);
-          if ( usRC != NO_ERROR )     *ppfnCheckSegExExitW = NULL;
-        }
-     
-      } /* endif */
-    }
-  } /* endif */
-
-  return( NO_ERROR );
-} /* end of function TAPrepProtectTable */
 
 
 USHORT TAEndProtectTable

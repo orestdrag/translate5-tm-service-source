@@ -19,10 +19,6 @@ class PluginListener;
 */
 struct LoadedPluginDLL
 {
-  #ifdef TO_BE_REMOVED
-  HMODULE hMod;                        // DLL module handle
-  #endif
-
   char strDll[MAX_PATH];               // Add for P402792, dll path
   std::vector<OtmPlugin*> vPluginList; // list of plugins contained in DLL
 };
@@ -134,7 +130,7 @@ int m_iNextCommandID;
 PluginManagerImpl(const PluginManager&) {};
 
 /*! \brief Assignment-operator is private */
-PluginManagerImpl& operator=(const PluginManagerImpl&) {};
+PluginManagerImpl& operator=(const PluginManagerImpl&) { return *this; };
 
 /*! \brief A set containing all registered plugins. */
 PLUGINSET* pluginSet;
